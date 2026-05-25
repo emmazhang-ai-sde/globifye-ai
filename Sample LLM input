@@ -1,0 +1,164 @@
+{
+	{
+		segment_id: 0,
+		speaker: "sales",
+		content_raw: "Hi, thanks for calling today.",
+		sentence_start_time: 1
+	},
+	{
+		segment_id: 1,
+		speaker: "sales",
+		content_raw: "I’m really looking forward to hearing more about your business goals.",
+		sentence_start_time: 4
+	},
+	{
+		segment_id: 2,
+		speaker: "customer",
+		content_raw: "Yeah, absolutely, thanks for making the time.",
+		sentence_start_time: 8
+	},
+	{
+		segment_id: 3,
+		speaker: "customer",
+		content_raw: "We’re looking for a partner to help modernize our inventory management system.",
+		sentence_start_time: 12
+	},
+	{
+		segment_id: 4,
+		speaker: "sales",
+		content_raw: "Got it, that’s actually something we help companies with pretty often.",
+		sentence_start_time: 18
+	},
+	{
+		segment_id: 5,
+		speaker: "sales",
+		content_raw: "We’ve helped several businesses reduce delays and improve tracking accuracy.",
+		sentence_start_time: 23
+	},
+	{
+		segment_id: 6,
+		speaker: "customer",
+		content_raw: "Okay, that sounds promising.",
+		sentence_start_time: 29
+	},
+	{
+		segment_id: 7,
+		speaker: "customer",
+		content_raw: "Our biggest concern is honestly the timeline.",
+		sentence_start_time: 32
+	},
+	{
+		segment_id: 8,
+		speaker: "customer",
+		content_raw: "We need something operational before the holiday season starts.",
+		sentence_start_time: 36
+	},
+	{
+		segment_id: 9,
+		speaker: "sales",
+		content_raw: "Yeah, that timeline should definitely be manageable.",
+		sentence_start_time: 41
+	},
+	{
+		segment_id: 10,
+		speaker: "sales",
+		content_raw: "Based on the scope you described, we could do a phased rollout within about three months.",
+		sentence_start_time: 45
+	},
+	{
+		segment_id: 11,
+		speaker: "customer",
+		content_raw: "I mean, three months sounds reasonable.",
+		sentence_start_time: 52
+	},
+	{
+		segment_id: 12,
+		speaker: "customer",
+		content_raw: "We’ve just had vendors miss deadlines before, so we’re a little cautious.",
+		sentence_start_time: 56
+	},
+	{
+		segment_id: 13,
+		speaker: "sales",
+		content_raw: "Totally understandable.",
+		sentence_start_time: 62
+	},
+	{
+		segment_id: 14,
+		speaker: "sales",
+		content_raw: "We usually handle that by scheduling weekly milestone reviews and regular progress updates.",
+		sentence_start_time: 65
+	},
+	{
+		segment_id: 15,
+		speaker: "customer",
+		content_raw: "Okay, yeah, that would help a lot.",
+		sentence_start_time: 72
+	},
+	{
+		segment_id: 16,
+		speaker: "customer",
+		content_raw: "The other thing we’re worried about is cost.",
+		sentence_start_time: 76
+	},
+	{
+		segment_id: 17,
+		speaker: "customer",
+		content_raw: "Our budget is definitely tighter this year.",
+		sentence_start_time: 80
+	},
+	{
+		segment_id: 18,
+		speaker: "sales",
+		content_raw: "Sure, and honestly we can be flexible there.",
+		sentence_start_time: 85
+	},
+	{
+		segment_id: 19,
+		speaker: "sales",
+		content_raw: "We can structure the implementation in stages so you only pay for the features you need immediately.",
+		sentence_start_time: 89
+	},
+	{
+		segment_id: 20,
+		speaker: "customer",
+		content_raw: "Would that still include employee training and support?",
+		sentence_start_time: 96
+	},
+	{
+		segment_id: 21,
+		speaker: "sales",
+		content_raw: "Yeah, onboarding and six months of support would still be included.",
+		sentence_start_time: 100
+	},
+	{
+		segment_id: 22,
+		speaker: "customer",
+		content_raw: "Alright, that definitely makes the proposal more appealing.",
+		sentence_start_time: 106
+	},
+	{
+		segment_id: 23,
+		speaker: "sales",
+		content_raw: "Great, I’m glad to hear that.",
+		sentence_start_time: 111
+	},
+	{
+		segment_id: 24,
+		speaker: "sales",
+		content_raw: "I can send over a detailed timeline and revised pricing plan later today.",
+		sentence_start_time: 114
+	},
+	{
+		segment_id: 25,
+		speaker: "customer",
+		content_raw: "Perfect, we’ll review it with the leadership team.",
+		sentence_start_time: 120
+	},
+	{
+		segment_id: 26,
+		speaker: "sales",
+		content_raw: "Sounds good, and thanks again for your time today.",
+		sentence_start_time: 124
+	}
+}
