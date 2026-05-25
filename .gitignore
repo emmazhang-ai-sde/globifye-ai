@@ -1,0 +1,6 @@
+# Ignore MacOS system files
+.DS_Store
+
+# Personal notes
+shuyang/
+
