@@ -150,104 +150,9 @@ npm install @deepgram/sdk
 
 ---
 
-## 3. Open-Source Options (GitHub)
+## 3. Open-Source Options (GitHub) 
 
-> For scenarios where self-hosting is preferred to reduce API dependency or long-term costs.
-
----
-
-### 🥇 faster-whisper
-**GitHub:** [github.com/SYSTRAN/faster-whisper](https://github.com/SYSTRAN/faster-whisper) ⭐ ~15k
-
-A highly efficient reimplementation of OpenAI Whisper using CTranslate2 as the backend.
-
-| Property | Details |
-|----------|---------|
-| GPU usage | 4× lower than original Whisper |
-| CPU performance | 8× faster than original, can run CPU-only |
-| Accuracy | Near-identical to original (supports large-v3) |
-| Real-time streaming | ⚠️ Not natively supported (requires manual chunking) |
-| Speaker Diarization | ❌ None — requires pyannote |
-
-**Best for:** Post-call batch transcription / Phase 2 analysis. Not suitable for Phase 1 real-time streaming.
-
----
-
-### 🥇 whisper.cpp
-**GitHub:** [github.com/ggerganov/whisper.cpp](https://github.com/ggerganov/whisper.cpp) ⭐ ~38k
-
-A C++ port of Whisper designed to run without a GPU.
-
-| Property | Details |
-|----------|---------|
-| GPU requirement | **None at all** (runs on CPU) |
-| Apple Silicon | Metal acceleration supported |
-| Real-time streaming | ✅ Stream example included |
-| Streaming latency | ~500–800ms (higher than Deepgram) |
-| Speaker Diarization | ❌ None — requires pyannote |
-| Ops overhead | Requires self-managed server |
-
-**Best for:** Cost-sensitive scenarios willing to take on ops overhead, or environments where cloud APIs are not an option.
-
----
-
-### 🥇 Vosk
-**GitHub:** [github.com/alphacep/vosk-api](https://github.com/alphacep/vosk-api) ⭐ ~8k
-
-An extremely lightweight offline STT supporting multiple languages.
-
-| Property | Details |
-|----------|---------|
-| Runtime | CPU-only, fully offline |
-| Real-time streaming | ✅ Native WebSocket server mode |
-| Latency | <200ms |
-| English WER | ~8–12% (weaker than Deepgram) |
-| Speaker Diarization | ❌ None |
-
-**Best for:** Edge device deployment / fully private on-premise deployment / privacy-critical environments.
-
----
-
-### 🥇 pyannote.audio (Speaker Diarization specialist)
-**GitHub:** [github.com/pyannote/pyannote-audio](https://github.com/pyannote/pyannote-audio) ⭐ ~6k
-
-The best open-source Speaker Diarization solution available.
-
-| Property | Details |
-|----------|---------|
-| Function | Speaker Diarization only (no transcription) |
-| Commonly paired with | whisper.cpp / faster-whisper |
-| GPU | Recommended (CPU works but is slow) |
-
-**Use case:** Add Speaker Diarization when self-hosting a Whisper-based solution.
-
----
-
-### 🥇 Distil-Whisper
-**GitHub:** [github.com/huggingface/distil-whisper](https://github.com/huggingface/distil-whisper) ⭐ ~4k
-
-A knowledge-distilled version of Whisper large-v2, maintained by HuggingFace.
-
-| Property | Details |
-|----------|---------|
-| Speed improvement | 6× faster than original |
-| GPU memory | 50% reduction |
-| Accuracy gap | <1% WER difference |
-| Real-time streaming | ⚠️ Requires custom implementation |
-
-**Best for:** High-accuracy batch transcription when GPU budget is limited.
-
----
-
-### Open-Source Comparison Summary
-
-| Option | Real-time Streaming | GPU Required | Accuracy | Diarization | Ops Cost |
-|--------|--------------------|----|----------|-------------|----------|
-| faster-whisper | ⚠️ Custom only | Low (CPU ok) | High | ❌ | Medium |
-| **whisper.cpp** | ✅ Stream example | **Zero** | High | ❌ | Medium |
-| Vosk | ✅ Native | Zero | Medium | ❌ | Low |
-| pyannote.audio | — | Recommended | — | ✅ Specialist | Medium |
-| Distil-Whisper | ⚠️ Custom only | Low | High | ❌ | Medium |
+> ⚠️ We are currently focused on commercial API solutions. Open-source self-hosting options are not being evaluated at this stage.
 
 ---
 
@@ -538,24 +443,6 @@ High-WER services cause the most problems in:
 - Overlapping speech
 - Background noise
 
-#### Quiz 🎯
-
-> **Reference:** "The client rejected our proposal last week" (7 words)
->
-> **Hypothesis:** "The client rejected proposal last week" ("our" was dropped)
->
-> **Calculate the WER.**
-
-**Answer:**
-```
-S = 0 (no substitutions)
-D = 1 ("our" was deleted)
-I = 0 (no insertions)
-N = 7
-
-WER = (0 + 1 + 0) / 7 ≈ 14.3%
-```
-
 ---
 
 ### Concept 4: Partial Results vs Final Results
@@ -662,23 +549,6 @@ The LLM only needs Final Results for analysis — storing Partials adds nothing.
   "duration": 2.3
 }
 ```
-
-#### Quiz 🎯
-
-> **In GlobiFYE's pipeline, which statement is correct?**
->
-> **A.** Both Partial and Final Results should be written to the database to preserve full history
->
-> **B.** Only Final Results are written to the database; Partial Results are only used for live caption display in the UI ✅
->
-> **C.** Partial Results are more accurate than Final Results because they are real-time
->
-> **D.** The frontend only starts showing captions once a Final Result is received
-
-**Answer: B**
-- A is wrong: storing Partials creates massive redundancy — one sentence would produce many duplicate records
-- C is wrong: Partial Results have less context and lower accuracy
-- D is wrong: captions start appearing on the first Partial Result — that is the entire point of real-time display
 
 ---
 
@@ -810,26 +680,6 @@ Why:
 | Google Chirp 3 | 300–600ms | Expensive and slow |
 | Azure Standard | 300–500ms | Same issue |
 | whisper.cpp (self-hosted) | ~500–800ms | Depends on hardware |
-
----
-
-#### Quiz 🎯
-
-> **Scenario:** The PM says "users are complaining that captions feel slow — the text always seems to trail speech by about one second."
->
-> Is this a **real-time streaming** problem or a **streaming latency** problem? How would you investigate?
-
-**Answer:**
-
-This is a **streaming latency** problem (not a real-time streaming problem).
-- The system is already in real-time streaming mode (captions do follow speech — they're just slow)
-- The issue is latency being too high (~1000ms, above the acceptable threshold)
-
-**Investigation directions:**
-1. **Network latency:** Check ping from client to Deepgram servers; consider switching to a closer Deepgram region
-2. **Chunk size:** If chunks are set to 500ms, reducing to 100–200ms will lower latency
-3. **STT service itself:** Consider switching to AssemblyAI (~150ms latency), though at higher cost
-4. **Frontend rendering bottleneck:** Check whether unnecessary throttling is applied to `setState` calls after Partial Results are received
 
 ---
 
