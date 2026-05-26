@@ -1,18 +1,66 @@
-# Step 4 — Deepgram Integration *(batch mode first, streaming later)*
+# Step 4 — Deepgram Integration (batch mode first, streaming later)
 
 *Part of [AI Pipeline MVP Outline](ai-pipeline-mvp-outline.md)*
 
 ---
 
-This step gets Deepgram working end-to-end: account setup → API key → `lib/deepgram.ts` → test script → verified output. Streaming (WebSocket) comes in Step 10 — batch mode is enough to validate the full pipeline for the demo.
+#### Batch Mode vs. Streaming Mode
+
+- Use **batch** to validate the full pipeline end-to-end (audio → transcript → DB → LLM → output), then
+- Add the **WebSocket** layer in **Step 10** once the demo is complete.
+
+These two modes are two completely different APIs in Deepgram — different protocol, different SDK method, different use case.
+
+**Batch Mode — What You Are Doing Now (Steps 4–9)**
+
+```
+Local audio file → HTTP POST → Deepgram → wait → complete transcript returned
+```
+
+The SDK call is:
+```typescript
+deepgram.listen.v1.media.transcribeFile({ path: filePath }, { ... })
+```
+
+The Deepgram Console's Developer Tool also uses this mode — you upload a file, it processes it and returns the result. It is the same REST API under the hood.
+
+**Streaming Mode — To Be Added Later (Step 10)**
+
+```
+Microphone → 100–200ms audio chunks → persistent WebSocket → Deepgram → real-time partial/final results
+```
+
+The SDK call is a completely different method:
+```typescript
+deepgram.listen.v1.connect({ model: 'nova-3', ... })  // opens a WebSocket connection
+```
+
+**Side-by-Side Comparison**
+
+| Feature | Batch | Streaming |
+|---|---|---|
+| Protocol | HTTP REST | WebSocket |
+| Input | Complete audio file | Live audio chunks (100–200ms) |
+| Output | Full transcript returned once | Partial + final results pushed continuously |
+| Pipeline stage | MVP demo (Steps 4–9) | Real-time captions after demo (Step 10) |
+
+---
+
+This step gets Deepgram working end-to-end: 
+```
+account setup 
+→ API key 
+→ `lib/deepgram.ts` 
+→ test script 
+→ verified output. 
+```
 
 ---
 
 #### 4.1 Sign up for Deepgram and get free credits
 
 1. Go to [https://deepgram.com](https://deepgram.com) and sign up
-2. Deepgram offers free credits on new accounts
-3. After sign-up, you'll land on the Deepgram Console dashboard
+2. Deepgram offers \$200.00 free credits on new accounts
 
 > ⚠️ Deepgram charges per audio-hour. Free credits cover testing, but don't run large audio files repeatedly once you're past validation.
 
@@ -23,12 +71,19 @@ This step gets Deepgram working end-to-end: account setup → API key → `lib/d
 1. In the Deepgram Console, click **"API Keys"** in the left sidebar
 2. Click **"Create a New API Key"**
 3. Give it a name (e.g. `globifye-mvp`) and set permissions to **Member**
-4. Copy the key — it is only shown once
-
-Add it to `.env.local`:
+4. Copy the key (**it is only shown once**), and add it to `.env.local`:
 
 ```env
 DEEPGRAM_API_KEY = your-deepgram-api-key-here
+```
+
+Developer tools:
+```bash
+curl -X POST \
+  -H "Authorization: Token YOUR_SECRET" \
+  -H 'content-type: application/json' \
+  -d '{"url": "https://static.deepgram.com/examples/Bueller-Life-moves-pretty-fast.wav"}' \
+  "https://api.deepgram.com/v1/listen?model=nova-2&smart_format=true"
 ```
 
 ---
@@ -37,12 +92,7 @@ DEEPGRAM_API_KEY = your-deepgram-api-key-here
 
 You need a test `.mp3` or `.wav` file of a two-person conversation to validate speaker diarization. 
 
-Place the file in the project root as `sample-audio.mp3`:
-
-```bash
-# Confirm the file is there
-ls -lh sample-audio.mp3
-```
+Place the file in the project root as `sample-audio.mp3`
 
 > ⚠️ Add `sample-audio.mp3` to `.gitignore` — don't commit audio files to the repo.
 
@@ -50,95 +100,18 @@ ls -lh sample-audio.mp3
 
 #### 4.4 Populate `lib/deepgram.ts`
 
-Open `lib/deepgram.ts` and add:
-
-```typescript
-import { createClient } from '@deepgram/sdk'
-import * as fs from 'fs'
-
-const deepgram = createClient(process.env.DEEPGRAM_API_KEY!)
-
-export type DeepgramUtterance = {
-  speaker: number          // 0, 1, 2... — Deepgram's speaker index
-  transcript: string       // raw text, filler words intact
-  start: number            // utterance start time in seconds
-  end: number              // utterance end time in seconds
-}
-
-/**
- * Transcribes a local audio file using Deepgram batch (pre-recorded) API.
- * Returns utterances — sentence-level segments with speaker labels and timestamps.
- *
- * Why utterances and not words?
- *   - utterances=true groups words into sentence-level chunks per speaker
- *   - Each utterance maps to one row in the transcript table
- *   - Word-level timestamps are not needed for this pipeline
- */
-export async function transcribeFile(filePath: string): Promise<DeepgramUtterance[]> {
-  const audioBuffer = fs.readFileSync(filePath)
-
-  const { result, error } = await deepgram.listen.prerecorded.transcribeFile(
-    audioBuffer,
-    {
-      model: 'nova-3',       // best accuracy for English
-      diarize: true,         // required: identifies and labels speakers
-      punctuate: true,       // adds sentence-ending punctuation
-      utterances: true,      // required: groups words into speaker-labeled segments
-      smart_format: true,    // formats numbers, currencies, dates (useful for sales calls)
-      // filler_words: false  // default — filler words (um, uh) are kept in output
-                              // we strip them ourselves in Step 5 to produce content_clean
-    }
-  )
-
-  if (error) throw new Error(`Deepgram transcription failed: ${error.message}`)
-
-  const utterances = result?.results?.utterances
-  if (!utterances || utterances.length === 0) {
-    throw new Error(
-      'Deepgram returned no utterances. Verify diarize=true and utterances=true are set, and that the audio file has audible speech.'
-    )
-  }
-
-  return utterances.map(u => ({
-    speaker: u.speaker ?? 0,
-    transcript: u.transcript,
-    start: u.start,
-    end: u.end,
-  }))
-}
-```
-
 ---
 
 #### 4.5 Test the batch transcription
 
-Create `scripts/test-deepgram.ts`:
+Create `scripts/test-deepgram.ts`
 
-```typescript
-import { transcribeFile } from '../lib/deepgram'
-
-const AUDIO_FILE = './sample-audio.mp3'
-
-transcribeFile(AUDIO_FILE)
-  .then(utterances => {
-    console.log(`✅ Transcription complete — ${utterances.length} utterances\n`)
-    utterances.forEach(u => {
-      console.log(`[${u.start.toFixed(1)}s] Speaker ${u.speaker}: ${u.transcript}`)
-    })
-  })
-  .catch(err => console.error('❌ Deepgram error:', err.message))
-```
-
-Run it:
-
-```bash
-npx ts-node --esm scripts/test-deepgram.ts
-```
+Run it: ```npx ts-node --esm scripts/test-deepgram.ts```
 
 Expected output (abbreviated):
 
 ```
-✅ Transcription complete — 24 utterances
+✅ Transcription complete — 233 utterances
 
 [0.0s] Speaker 0: Hi, thanks for calling GlobiFYE. How can I help you today?
 [3.2s] Speaker 1: Yeah, um, I was looking at your pricing page and I had a few questions.
@@ -146,6 +119,25 @@ Expected output (abbreviated):
 [8.5s] Speaker 1: So the thing is, uh, we're a pretty small team and the enterprise tier feels like a lot.
 ...
 ```
+
+> 📝 **What is an Utterance?**
+>
+> An utterance is one continuous segment of speech from a single speaker. Deepgram automatically splits the full audio by speaker and pauses — each resulting segment is called an utterance.
+>
+> Example:
+> ```
+> [0.0s]  Speaker 0: Hi, thanks for calling. How can I help you?
+> [3.2s]  Speaker 1: Yeah, I had a few questions about pricing.
+> [6.8s]  Speaker 0: Of course, happy to walk you through it.
+> ```
+> There are 3 utterances above. Each utterance contains:
+> - **Who spoke** (`speaker`)
+> - **What was said** (`transcript`)
+> - **When it started** (`start`)
+> - **When it ended** (`end`)
+>
+> **Why utterances and not words?**
+> Deepgram can also return word-level timestamps, but that level of detail is not needed here. Each utterance maps to one row in the `transcript` table — the granularity is just right: a complete sentence with a speaker label and a timestamp.
 
 ---
 
