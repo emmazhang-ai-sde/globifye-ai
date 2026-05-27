@@ -1,3 +1,4 @@
+I'm testing your text analysis abilities. Consider the following input:
 {
 	{
 		segment_id: 0,
@@ -161,4 +162,31 @@
 		content_raw: "Sounds good, and thanks again for your time today.",
 		sentence_start_time: 124
 	}
+}
+
+Analyze this conversation and output the following structure, notably a summary, timestamped key topics, customer objections, and things the sales representative did well:
+{
+  "summary": "...",
+  "key_topics": [
+    { "name": "...", "start_time": 0.0 }
+  ],
+  "analysis": {
+    "objections": [
+      {
+        "timestamp": 142,
+        "speaker": "customer",
+        "exact_quote": "...",
+        "reason": "...",
+        "suggestion": "..."
+      }
+    ],
+    "what_went_well": [
+      {
+        "timestamp": 60,
+        "speaker": "sales",
+        "exact_quote": "...",
+        "reason": "..."
+      }
+    ]
+  }
 }
