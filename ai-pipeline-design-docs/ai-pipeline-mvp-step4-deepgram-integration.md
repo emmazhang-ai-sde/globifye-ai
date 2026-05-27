@@ -164,6 +164,37 @@ Expected output (abbreviated):
 
 ---
 
-> ✅ If you see multiple speakers, sentence-level segments, and filler words in the output, **Step 4 is complete.**
+---
 
-→ Next: Step 5 — Transcript Parsing & DB Write *(file coming soon)*
+#### 4.8 Verify the saved output files
+
+After the script finishes, confirm that two files were created in `sample-transcripts/`:
+
+**`sample-transcripts/sample-audio-1.json`** — open it and check:
+- It is a JSON array where each object has `speaker`, `transcript`, `start`, and `end`
+- The array length matches the utterance count printed in the terminal
+- Speaker values are integers (`0`, `1`, etc.)
+
+```json
+[
+  {
+    "speaker": 0,
+    "transcript": "Hi, thanks for calling GlobiFYE. How can I help you today?",
+    "start": 0.0,
+    "end": 2.1
+  },
+  ...
+]
+```
+
+**`sample-transcripts/sample-audio-1.md`** — open it and check:
+- Each line is a readable utterance in the format `**[0.0s] Speaker 0:** ...`
+- The conversation flows in chronological order
+
+> This JSON file is the direct input for Step 5 — no Deepgram API call needed there.
+
+---
+
+> ✅ If you see multiple speakers, sentence-level segments, filler words in the terminal output, and both files saved in `sample-transcripts/`, **Step 4 is complete.**
+
+→ Next: [Step 5 — Transcript Parsing & DB Write](ai-pipeline-mvp-step5-transcript-parsing-db-write.md)
