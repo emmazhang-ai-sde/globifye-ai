@@ -1,0 +1,203 @@
+I'm testing your text analysis abilities. Consider the following input:
+{
+	{
+		segment_id: 0,
+		speaker: "sales",
+		content_raw: "Hey, thanks again for taking the time to meet with me today.",
+		sentence_start_time: 1
+	},
+	{
+		segment_id: 1,
+		speaker: "customer",
+		content_raw: "Yeah, of course, I’ve been looking forward to hearing more about what your team offers.",
+		sentence_start_time: 5
+	},
+	{
+		segment_id: 2,
+		speaker: "sales",
+		content_raw: "Absolutely, and from what you mentioned earlier it sounds like your company is growing pretty quickly right now.",
+		sentence_start_time: 11
+	},
+	{
+		segment_id: 3,
+		speaker: "customer",
+		content_raw: "Yeah, things have picked up a lot over the last year.",
+		sentence_start_time: 17
+	},
+	{
+		segment_id: 4,
+		speaker: "customer",
+		content_raw: "Honestly, our internal systems are starting to feel a little stretched.",
+		sentence_start_time: 21
+	},
+	{
+		segment_id: 5,
+		speaker: "sales",
+		content_raw: "That actually lines up with what we see from a lot of companies at this stage.",
+		sentence_start_time: 27
+	},
+	{
+		segment_id: 6,
+		speaker: "sales",
+		content_raw: "Our platform is mainly designed to reduce manual work and centralize communication between teams.",
+		sentence_start_time: 32
+	},
+	{
+		segment_id: 7,
+		speaker: "customer",
+		content_raw: "Okay, yeah, that would definitely help our operations team.",
+		sentence_start_time: 39
+	},
+	{
+		segment_id: 8,
+		speaker: "customer",
+		content_raw: "Right now people are kind of juggling spreadsheets and emails all day.",
+		sentence_start_time: 44
+	},
+	{
+		segment_id: 9,
+		speaker: "sales",
+		content_raw: "Yeah, that usually becomes hard to manage once teams start scaling.",
+		sentence_start_time: 50
+	},
+	{
+		segment_id: 10,
+		speaker: "sales",
+		content_raw: "We could probably automate a good portion of that workflow for you.",
+		sentence_start_time: 55
+	},
+	{
+		segment_id: 11,
+		speaker: "customer",
+		content_raw: "I mean, that sounds good in theory.",
+		sentence_start_time: 61
+	},
+	{
+		segment_id: 12,
+		speaker: "customer",
+		content_raw: "I’ll probably have to run all of this by management before we move forward though.",
+		sentence_start_time: 65
+	},
+	{
+		segment_id: 13,
+		speaker: "sales",
+		content_raw: "Oh, absolutely, and we can help prepare materials for those internal discussions if needed.",
+		sentence_start_time: 72
+	},
+	{
+		segment_id: 14,
+		speaker: "customer",
+		content_raw: "That could actually be useful because they’ll probably ask about implementation risks.",
+		sentence_start_time: 78
+	},
+	{
+		segment_id: 15,
+		speaker: "sales",
+		content_raw: "Sure, and honestly we try to minimize disruption by rolling things out gradually.",
+		sentence_start_time: 84
+	},
+	{
+		segment_id: 16,
+		speaker: "sales",
+		content_raw: "Most clients start with one department before expanding company-wide.",
+		sentence_start_time: 90
+	},
+	{
+		segment_id: 17,
+		speaker: "customer",
+		content_raw: "Yeah, I think leadership would probably be more comfortable with that approach.",
+		sentence_start_time: 95
+	},
+	{
+		segment_id: 18,
+		speaker: "customer",
+		content_raw: "There’s also some concern internally about onboarding time for employees.",
+		sentence_start_time: 101
+	},
+	{
+		segment_id: 19,
+		speaker: "sales",
+		content_raw: "That makes sense because change management is usually the biggest hurdle.",
+		sentence_start_time: 107
+	},
+	{
+		segment_id: 20,
+		speaker: "sales",
+		content_raw: "We normally include live training sessions and recorded walkthroughs for staff.",
+		sentence_start_time: 112
+	},
+	{
+		segment_id: 21,
+		speaker: "customer",
+		content_raw: "Okay, that would probably ease some concerns on our side.",
+		sentence_start_time: 118
+	},
+	{
+		segment_id: 22,
+		speaker: "customer",
+		content_raw: "I guess the other thing is we’re already committed to a few large expenses this quarter.",
+		sentence_start_time: 123
+	},
+	{
+		segment_id: 23,
+		speaker: "sales",
+		content_raw: "Right, so timing and budgeting are both pretty important right now.",
+		sentence_start_time: 130
+	},
+	{
+		segment_id: 24,
+		speaker: "sales",
+		content_raw: "We do offer phased pricing options so companies can spread implementation costs out over time.",
+		sentence_start_time: 135
+	},
+	{
+		segment_id: 25,
+		speaker: "customer",
+		content_raw: "Yeah, that might make this conversation easier internally.",
+		sentence_start_time: 142
+	},
+	{
+		segment_id: 26,
+		speaker: "sales",
+		content_raw: "No problem, and I can also put together a more detailed proposal with different rollout options.",
+		sentence_start_time: 147
+	},
+	{
+		segment_id: 27,
+		speaker: "customer",
+		content_raw: "Alright, yeah, send that over and I’ll review it with the team this week.",
+		sentence_start_time: 154
+	},
+	{
+		segment_id: 28,
+		speaker: "sales",
+		content_raw: "Perfect, and feel free to reach out if any additional questions come up in the meantime.",
+		sentence_start_time: 160
+	}
+}
+Analyze this conversation and output the following structure purely in JSON format, including a summary (1-3 sentences), timestamped key topics (generalize to 3-5 topics), customer objections/concerns, and things the sales representative did well (2-4 things):
+{
+  "summary": "...",
+  "key_topics": [
+    { "name": "...", "start_time": 13 }
+  ],
+  "analysis": {
+    "objections": [
+      {
+        "timestamp": 142,
+        "speaker": "customer",
+        "exact_quote": "...",
+        "reason": "...",
+        "suggestion": "..."
+      }
+    ],
+    "what_went_well": [
+      {
+        "timestamp": 60,
+        "speaker": "sales",
+        "exact_quote": "...",
+        "reason": "..."
+      }
+    ]
+  }
+}
