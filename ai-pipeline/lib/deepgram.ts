@@ -47,3 +47,23 @@ export async function transcribeFile(filePath: string): Promise<DeepgramUtteranc
     end: u.end ?? 0,
   }))
 }
+
+// ---------------------------------------------------------------------------
+// 5.3 Add filler word stripping to lib/deepgram.ts
+// ---------------------------------------------------------------------------
+
+// Matches filler words as whole words only, including any trailing comma and space.
+// content_raw keeps these intact (sent to LLM — signals hesitation).
+// content_clean strips them (displayed in UI).
+// Note: only predictable, unambiguous fillers are listed here (um, uh, hmm).
+// Context-dependent words (like, basically, right, actually) are intentionally
+// excluded — regex cannot distinguish filler use from meaningful use.
+// Production upgrade: let the Step 7 LLM correction pass own content_clean instead.
+const FILLER_PATTERN = /\b(um+|uh+|hmm+|mhm|uh-huh)\b[,]?\s*/gi
+
+export function stripFillerWords(text: string): string {
+  return text
+    .replace(FILLER_PATTERN, '')
+    .replace(/\s{2,}/g, ' ')   // collapse any double spaces left behind
+    .trim()
+}

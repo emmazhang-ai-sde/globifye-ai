@@ -12,12 +12,12 @@ Two versions of the text are produced per DB row: `content_raw` (filler words ke
 
 ## What you will do in this step
 
-1. **5.2** — Understand the data transformation (what changes on the way to the DB)
-2. **5.3** — Add `stripFillerWords()` to `lib/deepgram.ts`
-3. **5.4** — Add `createRecording()` and `writeTranscript()` to `lib/supabase.ts`
-4. **5.5** — Create and run `scripts/test-transcript.ts` (reads JSON → writes to DB)
-5. **5.6** — Verify the rows in Supabase
-6. **5.7** — Common errors and fixes
+**5.2** — Understand the data transformation (what changes on the way to the DB)
+**5.3** — Add `stripFillerWords()` to `lib/deepgram.ts`
+**5.4** — Add `createRecording()` and `writeTranscript()` to `lib/supabase.ts`
+**5.5** — Create and run `scripts/test-transcript.ts` (reads JSON → writes to DB)
+**5.6** — Verify the rows in Supabase
+**5.7** — Common errors and fixes
 
 ---
 
@@ -46,6 +46,32 @@ Two transformations happen:
 
 #### 5.3 Add filler word stripping to `lib/deepgram.ts`
 
+**Why regex, and what are its limits?**
+
+The current pattern handles the **predictable** fillers well: `um`, `uh`, `hmm`, and their elongated variants (`umm`, `uhh`). These are safe to remove by pattern because they are almost never meaningful.
+
+The problem is the **context-dependent** ones:
+
+| Word | Filler use | Meaningful use |
+|---|---|---|
+| `like` | "it's like, really expensive" | "I like this product" |
+| `basically` | "so basically, yeah" | "it basically works the same way" |
+| `right` | "right, right, right" | "that's the right approach" |
+| `actually` | "actually, um, so..." | "that actually saves us time" |
+| `I mean` | filler transition | genuinely clarifying a point |
+
+Regex can't distinguish these — it would either over-remove (breaking meaning) or under-remove (leaving fillers in).
+
+**Why not use an LLM to strip fillers instead?**
+
+Using an LLM would genuinely solve the context problem, but there is a pipeline timing issue: `content_clean` is written to the DB in Step 5, before the LLM runs in Step 7. Calling an LLM per utterance at Step 5 would mean one extra LLM call per utterance (a 30-minute call could have 200+ utterances), added latency before any transcript rows are saved, and extra cost on every transcription.
+
+**There is a path that avoids this tradeoff.** The Step 6 LLM prompt already includes a "Step 0 — second-pass correction" that fixes homophones, jargon, and company names across the full transcript. The corrected text from that pass could be written back as `content_clean` — one LLM call, full context, no per-utterance overhead. The tradeoff: `content_clean` would not exist until after the post-call analysis button is clicked, so the UI would fall back to the regex-cleaned version during a live call.
+
+**Decision for now:** Keep the regex for the MVP. The common fillers (`um`, `uh`, `hmm`) cover most of what appears in a controlled sample audio, and `content_clean` is only for UI display — it does not need to be perfect. The LLM correction path is the production upgrade.
+
+---
+
 Open `lib/deepgram.ts`. At the bottom of the file, **after** the `transcribeFile` function, add:
 
 ```typescript
@@ -56,6 +82,10 @@ Open `lib/deepgram.ts`. At the bottom of the file, **after** the `transcribeFile
 // Matches filler words as whole words only, including any trailing comma and space.
 // content_raw keeps these intact (sent to LLM — signals hesitation).
 // content_clean strips them (displayed in UI).
+// Note: only predictable, unambiguous fillers are listed here (um, uh, hmm).
+// Context-dependent words (like, basically, right, actually) are intentionally
+// excluded — regex cannot distinguish filler use from meaningful use.
+// Production upgrade: let the Step 7 LLM correction pass own content_clean instead.
 const FILLER_PATTERN = /\b(um+|uh+|hmm+|mhm|uh-huh|like|you know)\b[,]?\s*/gi
 
 export function stripFillerWords(text: string): string {
@@ -67,8 +97,6 @@ export function stripFillerWords(text: string): string {
 ```
 
 Save the file.
-
-> **Why `like` is in the list:** In sales calls, `like` almost always appears as a filler ("it's like, really expensive"). If you ever need to preserve it, remove `like` from the pattern.
 
 ---
 
@@ -136,66 +164,18 @@ export async function writeTranscript(
 
 Save the file.
 
-> **Why `createRecording` must come first:** The `transcript` table has a foreign key (`recording_id`) pointing to the `recordings` table. If you try to insert transcript rows before the recording row exists, Supabase will reject the insert with a foreign key constraint error.
+> **Why `createRecording` must come first:** 
+> The `transcript` table has a foreign key (`recording_id`) pointing to the `recordings` table. If you try to insert transcript rows before the recording row exists, Supabase will reject the insert with a foreign key constraint error.
 
 ---
 
 #### 5.5 Create and run the test script
 
-**Step 1 — Create the file**
+**Step 1 — Create** `scripts/test-transcript.ts`
+**Step 2 — Run it** ```npx tsx --env-file=.env.local scripts/test-transcript.ts```
 
-Create a new file at `scripts/test-transcript.ts` and paste in:
-
-```typescript
-import dotenv from 'dotenv'
-dotenv.config({ path: '.env.local' })
-
-import fs from 'fs'
-import { DeepgramUtterance } from '../lib/deepgram'
-import { createRecording, writeTranscript } from '../lib/supabase'
-
-// Points to the JSON saved by scripts/test-deepgram.ts in Step 4
-// No Deepgram API call needed — utterances are already on disk
-const JSON_FILE = './sample-transcripts/sample-audio-1.json'
-
-async function run() {
-  // 1. Load utterances from saved JSON
-  console.log('📂 Loading utterances from saved JSON...')
-  const utterances: DeepgramUtterance[] = JSON.parse(fs.readFileSync(JSON_FILE, 'utf-8'))
-  console.log(`✅ Loaded ${utterances.length} utterances from ${JSON_FILE}`)
-
-  // 2. Create a recordings row first (required — transcript has FK to recordings)
-  console.log('\n📝 Creating recording row...')
-  const recordingId = await createRecording({
-    rep: 'Test Rep',
-    client: 'Test Client',
-    source: 'mvp-test',
-  })
-  console.log(`✅ Recording row created: ${recordingId}`)
-
-  // 3. Write all transcript rows in one batch insert
-  console.log('\n💾 Writing transcript rows to Supabase...')
-  await writeTranscript(recordingId, utterances)
-  console.log(`✅ ${utterances.length} transcript rows written`)
-
-  // 4. Preview first 3 rows
-  console.log('\nPreview (first 3 utterances):')
-  utterances.slice(0, 3).forEach(u => {
-    console.log(`  [${u.start.toFixed(1)}s] Speaker ${u.speaker}: ${u.transcript}`)
-  })
-
-  // Copy this UUID — needed for Step 7 (LLM call fetches transcript by recording_id)
-  console.log(`\n📋 recording_id for Steps 7+: ${recordingId}`)
-}
-
-run().catch(err => console.error('❌', err.message))
-```
-
-**Step 2 — Run it**
-
-```bash
-npx ts-node --esm scripts/test-transcript.ts
-```
+> **Why `--env-file` and not `dotenv.config()`?** 
+> `lib/supabase.ts` creates the Supabase client at module load time. With `tsx`, ES module imports are hoisted — so Supabase initializes before `dotenv.config()` runs and sees an empty `NEXT_PUBLIC_SUPABASE_URL`. Passing `--env-file` loads the variables before any module initializes, which fixes the timing issue.
 
 **Step 3 — Check the output**
 
@@ -205,21 +185,27 @@ Expected output:
 📂 Loading utterances from saved JSON...
 ✅ Loaded 24 utterances from ./sample-transcripts/sample-audio-1.json
 
+Filler stripping preview (first 3 utterances):
+  raw:   Hi, thanks for calling GlobiFYE. How can I help you today?
+  clean: Hi, thanks for calling GlobiFYE. How can I help you today?
+
+  raw:   Yeah, um, I was looking at your pricing page and I had a few questions.
+  clean: Yeah, I was looking at your pricing page and I had a few questions.
+
+  raw:   Of course, happy to walk you through it.
+  clean: Of course, happy to walk you through it.
+
 📝 Creating recording row...
 ✅ Recording row created: a1b2c3d4-e5f6-...
 
 💾 Writing transcript rows to Supabase...
 ✅ 24 transcript rows written
 
-Preview (first 3 utterances):
-  [0.0s] Speaker 0: Hi, thanks for calling GlobiFYE. How can I help you today?
-  [3.2s] Speaker 1: Yeah, um, I was looking at your pricing page and I had a few questions.
-  [6.8s] Speaker 0: Of course, happy to walk you through it.
-
+💾 recording_id saved → ./sample-transcripts/recording-ids.json
 📋 recording_id for Steps 7+: a1b2c3d4-e5f6-...
 ```
 
-> **Copy the `recording_id`** printed at the end and save it somewhere — you will paste it into the Step 7 test script.
+> In the filler stripping preview, lines with `um`, `uh`, or `hmm` should show them removed in the `clean` version. If `raw` and `clean` are identical for every line, `stripFillerWords` is not being applied — check that the import in `lib/supabase.ts` is correct.
 
 ---
 
@@ -230,6 +216,8 @@ Preview (first 3 utterances):
 1. Open your Supabase project → **Table Editor** → select `recordings`
 2. You should see a new row at the top
 3. Click on it and confirm the `call_metadata` column contains `{ "rep": "Test Rep", "client": "Test Client", "source": "mvp-test" }`
+
+![table](../ai-pipeline-design-docs/step5-5.6-recording-table.png)
 
 **Check the `transcript` table:**
 
@@ -245,6 +233,8 @@ Preview (first 3 utterances):
 | `content_clean` | Same text with filler words removed — should read more naturally |
 | `sentence_start_sec` | Numbers that increase from row to row, matching the audio timeline |
 
+![table](../ai-pipeline-design-docs/step5-5.6-transcript-table.png)
+
 ---
 
 #### 5.7 Common errors and fixes
@@ -253,6 +243,7 @@ Preview (first 3 utterances):
 |---|---|---|
 | `ENOENT: no such file or directory, open './sample-transcripts/sample-audio-1.json'` | Step 4 test script was not run, or file is in a different path | Run `scripts/test-deepgram.ts` first; confirm the file exists at `sample-transcripts/sample-audio-1.json` |
 | `Transcript write failed: violates foreign key constraint` | `writeTranscript` called before `createRecording` | Always call `createRecording` first and pass the returned `id` to `writeTranscript` |
+| `supabaseUrl is required` | `.env.local` loaded after Supabase client initializes | Use `npx tsx --env-file=.env.local` instead of plain `npx tsx` |
 | `Failed to create recording row: ...` | Supabase keys missing or wrong | Check `SUPABASE_SERVICE_ROLE_KEY` and `NEXT_PUBLIC_SUPABASE_URL` in `.env.local` |
 | `content_clean` is identical to `content_raw` | Filler words in audio don't match the regex | The `FILLER_PATTERN` uses the `i` flag — check if words like `"Like"` or `"Um"` appear at the sentence start |
 | `speaker` column shows `"Speaker undefined"` | `diarize: true` was not set in Step 4 | Check `lib/deepgram.ts` — confirm `diarize: true` is in the options |
@@ -261,4 +252,6 @@ Preview (first 3 utterances):
 
 ---
 
-> ✅ If the `transcript` table has rows with distinct speakers, `content_raw` containing filler words, and `content_clean` without them, **Step 5 is complete.** Move on to [Step 6 — LLM Analysis Prompt](ai-pipeline-mvp-outline.md#step-6--phase-2-llm-analysis-prompt).
+> ✅ If the `transcript` table has rows with distinct speakers, `content_raw` containing filler words, and `content_clean` without them, **Step 5 is complete.** 
+
+→ Next: [Step 6 — LLM Analysis Prompt](ai-pipeline-mvp-outline.md#step-6--phase-2-llm-analysis-prompt).
