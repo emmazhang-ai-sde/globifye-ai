@@ -44,7 +44,7 @@ next-env.d.ts
 .env.local
 
 # sample audio files
-/sample-audio
+/sample-audio/**
 
 # generated transcripts (may contain sensitive call content)
-/sample-transcripts
+/sample-transcripts/**
