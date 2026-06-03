@@ -81,11 +81,7 @@ For the Monday demo: **audio file in → transcript stored → analysis out**. A
 
 ### Step 10 — Real-time WebSocket Layer *(post-demo, if time)*
 
-- Vercel endpoint: `GET /api/deepgram-token` — generates short-lived Deepgram token
-- Browser JS: opens `wss://api.deepgram.com` WebSocket using that token
-- Sends 100–200ms audio chunks from microphone
-- Receives partial results → update UI captions (no DB write)
-- Receives final results → write to `transcript` table (micro-batch)
+→ See [ai-pipeline-mvp-step10-websocket-layer.md](ai-pipeline-mvp-step10-websocket-layer.md)
 
 ---
 

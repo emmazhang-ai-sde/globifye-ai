@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react' // 10.2 added useRef — needed to hold WebSocket and MediaRecorder across renders
 
 // ---------------------------------------------------------------------------
 // Types
@@ -63,6 +63,15 @@ export default function Home() {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // 10.2 — refs hold the live WebSocket and MediaRecorder instances.
+  // useRef instead of useState because changing them should NOT trigger a re-render.
+  const wsRef = useRef<WebSocket | null>(null)
+  const recorderRef = useRef<MediaRecorder | null>(null)
+
+  // 10.2 — new state for live transcription mode
+  const [isLive, setIsLive] = useState(false)          // true while mic is streaming
+  const [liveCaption, setLiveCaption] = useState('')    // partial (in-progress) transcript shown in the caption box
+
   const step = !utterances.length ? 1 : !analysis ? 2 : 3
 
   async function handleTranscribe() {
@@ -109,6 +118,84 @@ export default function Home() {
 
     setAnalysis(data)
     setIsAnalyzing(false)
+  }
+
+  // 10.2 — startLive: fetches a short-lived token, then opens the WebSocket to Deepgram.
+  // Steps 10.3 / 10.4 / 10.5 are wired up inside here (mic capture, captions, DB write).
+  async function startLive() {
+    if (!recordingId) {
+      setError('Run a batch transcription first to get a recording ID before starting live mode.')
+      return
+    }
+    setError(null)
+
+    // 10.2 step 1 — ask our own server for a short-lived Deepgram token
+    const { key } = await fetch('/api/deepgram-token').then(r => r.json())
+
+    // 10.2 step 2 — open the WebSocket using that token as the subprotocol
+    const ws = new WebSocket(
+      `wss://api.deepgram.com/v1/listen` +
+      `?model=nova-3&language=en-US&diarize=true&interim_results=true&punctuate=true`,
+      ['token', key]
+    )
+
+    wsRef.current = ws
+    setIsLive(true)
+
+    // 10.3 — once the WebSocket is ready, start the microphone
+    ws.addEventListener('open', async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
+      recorderRef.current = recorder
+
+      // 10.3 — send each 150ms audio chunk as a binary frame to Deepgram
+      recorder.addEventListener('dataavailable', (e) => {
+        if (ws.readyState === WebSocket.OPEN && e.data.size > 0) ws.send(e.data)
+      })
+
+      recorder.start(150)
+    })
+
+    // 10.4 / 10.5 — handle messages from Deepgram
+    ws.addEventListener('message', async (event) => {
+      const msg = JSON.parse(event.data as string)
+      const transcript = msg.channel?.alternatives?.[0]?.transcript ?? ''
+      if (!transcript) return
+
+      if (!msg.is_final) {
+        // 10.4 — partial result: update the live caption display only, no DB write
+        setLiveCaption(transcript)
+        return
+      }
+
+      // 10.5 — final result: clear caption and write the utterance to Supabase
+      setLiveCaption('')
+      const words = msg.channel.alternatives[0].words ?? []
+      await fetch('/api/transcribe/live', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recording_id: recordingId,
+          speaker: words[0]?.speaker ?? 0,
+          content_raw: transcript,
+          sentence_start_sec: words[0]?.start ?? 0,
+        }),
+      })
+    })
+
+    // 10.2 — clean up if the WebSocket errors or closes unexpectedly
+    ws.addEventListener('error', () => { setError('WebSocket error — check the console'); stopLive() })
+    ws.addEventListener('close', () => setIsLive(false))
+  }
+
+  // 10.2 — stopLive: stops the mic recorder and closes the WebSocket
+  function stopLive() {
+    recorderRef.current?.stop()
+    wsRef.current?.close()
+    recorderRef.current = null
+    wsRef.current = null
+    setIsLive(false)
+    setLiveCaption('')
   }
 
   // ---------------------------------------------------------------------------
@@ -243,6 +330,39 @@ export default function Home() {
                 {isAnalyzing ? 'Analyzing — calling LLM…' : 'Analyze Call'}
               </button>
             </div>
+          </div>
+        )}
+
+        {/* 10.2 — Live transcription card (shown once a recordingId exists) */}
+        {recordingId && (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">
+              Live Transcription
+            </h2>
+            <div className="flex gap-3">
+              {/* 10.2 — Start button: disabled if already live or no recordingId */}
+              <button
+                onClick={startLive}
+                disabled={isLive}
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-purple-600 hover:bg-purple-700 text-white disabled:bg-slate-100 disabled:text-slate-400 transition-colors"
+              >
+                Start Live Transcription
+              </button>
+              {/* 10.2 — Stop button: disabled when not live */}
+              <button
+                onClick={stopLive}
+                disabled={!isLive}
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-slate-600 hover:bg-slate-700 text-white disabled:bg-slate-100 disabled:text-slate-400 transition-colors"
+              >
+                Stop
+              </button>
+            </div>
+            {/* 10.4 — live caption box: only visible while streaming */}
+            {isLive && (
+              <div className="mt-4 p-4 bg-slate-900 text-green-400 rounded-lg font-mono text-sm min-h-12">
+                {liveCaption || <span className="opacity-40">Listening…</span>}
+              </div>
+            )}
           </div>
         )}
 

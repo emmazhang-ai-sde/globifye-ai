@@ -358,3 +358,87 @@ Go to `http://localhost:3000` in the browser.
 > ✅ When all four result sections render after clicking Analyze, **Step 9 is complete** and the end-to-end pipeline is working in the browser.
 
 → Next: Step 10 — Real-time WebSocket Layer *(post-demo)*
+
+---
+
+## Resuming after closing your terminal
+
+If you completed Step 9 and later closed the terminal or the browser, here is how to get back to the running app.
+
+**1 — Open a new terminal and navigate to the project:**
+
+```bash
+cd ~/GlobiFYE/ai-pipeline
+```
+
+**2 — Start the dev server:**
+
+```bash
+npm run dev
+```
+
+You should see output like:
+
+```
+▲ Next.js 14.x.x
+- Local: http://localhost:3000
+```
+
+**3 — Open the app in the browser:**
+
+Go to `http://localhost:3000`.
+
+The page you built in Step 9 will load. You can upload an audio file and run the full pipeline again from the browser — no other commands are needed.
+
+> If port 3000 is already in use, Next.js will automatically try 3001, 3002, etc. Check the terminal output for the actual URL.
+
+---
+
+## Resetting data for a fresh demo run
+
+Use this when you want to clear all previous test data from Supabase and run the pipeline from a clean state.
+
+### Table relationships
+
+The three tables are linked by foreign keys with cascade delete:
+
+```
+recordings
+    ├── transcript   (recording_id → recordings.id  ON DELETE CASCADE)
+    └── analysis     (recording_id → recordings.id  ON DELETE CASCADE)
+```
+
+Deleting a row in `recordings` automatically deletes all linked rows in `transcript` and `analysis`. Truncating `recordings` clears all three tables at once.
+
+### Before clearing — verify what's there
+
+Run this in **Supabase Dashboard → SQL Editor** to confirm you're only deleting your own test data (important if teammates share the same Supabase project):
+
+```sql
+SELECT COUNT(*) FROM recordings;
+```
+
+### Clear all data
+
+```sql
+TRUNCATE TABLE recordings CASCADE;
+```
+
+This empties `recordings`, `transcript`, and `analysis` in one command. It is **not reversible** — there is no undo.
+
+### After clearing — run a fresh demo
+
+1. Go to `http://localhost:3000` (start `npm run dev` first if the server is not running)
+2. Upload an audio file and click **Start Transcription**
+3. Once the transcript appears, click **Analyze Call**
+4. All four result sections should populate — the new data is now the only data in the database
+
+### Verify the data was written
+
+After the demo run, you can confirm the data landed correctly:
+
+```sql
+SELECT id, created_at FROM recordings ORDER BY created_at DESC LIMIT 5;
+SELECT recording_id, speaker, content_clean FROM transcript LIMIT 10;
+SELECT recording_id, summary FROM analysis LIMIT 5;
+```
