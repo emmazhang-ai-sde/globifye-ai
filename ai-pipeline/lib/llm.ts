@@ -28,7 +28,8 @@ const AnalysisSchema = z.object({
   key_topics: z.array(
     z.object({
       name: z.string().describe('Topic name'),
-      start_time: z.number().describe('Timestamp in seconds from the transcript'),
+      start_time: z.number().describe('Start timestamp in seconds — use the [Xs] label of the first relevant line'),
+      end_time: z.number().describe('End timestamp in seconds — use the [Xs] label of the last relevant line for this topic'),
     })
   ),
   analysis: z.object({
