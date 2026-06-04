@@ -217,7 +217,7 @@ Filler stripping preview (first 3 utterances):
 2. You should see a new row at the top
 3. Click on it and confirm the `call_metadata` column contains `{ "rep": "Test Rep", "client": "Test Client", "source": "mvp-test" }`
 
-![table](../ai-pipeline-design-docs/step5-5.6-recording-table.png)
+![table](step5-5.6-recording-table.png)
 
 **Check the `transcript` table:**
 
@@ -233,7 +233,7 @@ Filler stripping preview (first 3 utterances):
 | `content_clean` | Same text with filler words removed — should read more naturally |
 | `sentence_start_sec` | Numbers that increase from row to row, matching the audio timeline |
 
-![table](../ai-pipeline-design-docs/step5-5.6-transcript-table.png)
+![table](step5-5.6-transcript-table.png)
 
 ---
 
