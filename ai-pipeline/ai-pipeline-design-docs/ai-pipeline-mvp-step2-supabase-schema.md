@@ -61,14 +61,29 @@ Open `supabase/migrations/001_schema.sql` and paste in the following:
 CREATE TABLE IF NOT EXISTS recordings (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   customer_id     TEXT,            -- customer identifier for cross-call history retrieval
-  call_metadata   JSONB,           -- e.g. { "rep": "Alice", "client": "Acme Corp" }
+  call_metadata   JSONB,           -- placeholder for call-level context (see note below)
   audio_url       TEXT,            -- cloud storage URL (S3/GCS) — raw audio is never stored in DB
   duration        NUMERIC,         -- total call duration in seconds, updated when call ends
   created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE INDEX IF NOT EXISTS recordings_customer_id_idx ON recordings(customer_id);
+```
 
+> **`call_metadata` — placeholder field**
+>
+> `call_metadata` is a JSONB placeholder for call-level context that we can't fully define yet. Likely candidates include:
+>
+> | Field | Example |
+> |---|---|
+> | `caller_phone` | `"+13125550101"` |
+> | `callee_phone` | `"+17085550199"` |
+> | `customer_name` | `"Acme Corp"` |
+> | `sip_session_id` | `"abc-123-xyz"` |
+>
+> The exact fields depend on what the SIP integration exposes at call start. This will be finalized once the backend team (Abraham/Kim) settles on a SIP provider. Until then, `call_metadata` is intentionally left as a flexible JSONB field rather than hard-coded columns.
+
+```sql
 -- =====================
 -- Table 2: transcript
 -- =====================

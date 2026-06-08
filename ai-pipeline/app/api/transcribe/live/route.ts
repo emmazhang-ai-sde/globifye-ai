@@ -7,7 +7,7 @@ const supabase = createClient(
 );
 
 export async function POST(req: NextRequest) {
-  const { recording_id, speaker, content_raw, sentence_start_sec } = await req.json();
+  const { recording_id, speaker, content_raw, sentence_start_sec, sequence_index} = await req.json(); // line 10: add sequence_index to destructure
 
   if (!recording_id || content_raw === undefined) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
     content_raw,
     content_clean: content_raw.trim(),
     sentence_start_sec,
+    sequence_index, // add this
   });
 
   if (error) {

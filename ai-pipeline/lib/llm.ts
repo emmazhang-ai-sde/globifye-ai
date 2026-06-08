@@ -4,7 +4,7 @@ import { ChatGroq } from '@langchain/groq'
 // import { ChatOpenAI } from '@langchain/openai'
 
 import { z } from 'zod'
-import { supabaseAdmin } from './supabase'
+import { supabaseAdmin, writeTopics, writeGpuJob } from './supabase'
 
 // ---------------------------------------------------------------------------
 // LLM client — demo uses Groq (free tier, no credit card)
@@ -106,30 +106,24 @@ export async function analyzeTranscript(recordingId: string) {
 
   const transcriptText = buildTranscriptText(rows)
 
-  // includeRaw: true preserves the raw LLM response for the raw_llm_output DB field
-  const structuredModel = model.withStructuredOutput(AnalysisSchema, { includeRaw: true })
-
-  const { raw, parsed } = await structuredModel.invoke([
+  // 11.5.2: remove includeRaw, return only parsed:
+  const structuredModel = model.withStructuredOutput(AnalysisSchema)
+  const parsed = await structuredModel.invoke([
     { role: 'system', content: SYSTEM_PROMPT },
     { role: 'user', content: `Analyze the following sales call transcript:\n\n${transcriptText}` },
   ])
+  return { parsed }
 
-  const rawOutput = typeof raw.content === 'string'
-    ? raw.content
-    : JSON.stringify(raw.content)
-
-  return { parsed, rawOutput }
 }
 
 // ---------------------------------------------------------------------------
 // DB write
 // ---------------------------------------------------------------------------
 
+// Step 11.5.3 remove raw_llm_output, add writeTopics + writeGpuJob:
 export async function writeAnalysis(recordingId: string) {
-  const { parsed, rawOutput } = await analyzeTranscript(recordingId)
+  const { parsed } = await analyzeTranscript(recordingId)
 
-  // LLM returns: analysis.objections + analysis.what_went_well
-  // DB columns:  objection_analysis + what_went_well
   const { data, error } = await supabaseAdmin
     .from('analysis')
     .insert({
@@ -138,11 +132,23 @@ export async function writeAnalysis(recordingId: string) {
       key_topics:         parsed.key_topics,
       objection_analysis: parsed.analysis.objections,
       what_went_well:     parsed.analysis.what_went_well,
-      raw_llm_output:     rawOutput,
     })
     .select()
     .single()
 
   if (error) throw new Error(`DB insert failed: ${error.message}`)
+
+  await writeTopics(
+    parsed.key_topics.map((t, i) => ({
+      recording_id:   recordingId,
+      analysis_id:    data.id,
+      name:           t.name,
+      start_time:     t.start_time,
+      sequence_index: i,
+    }))
+  )
+
+  writeGpuJob({ recording_id: recordingId, job_type: 'analysis', status: 'completed' })
+
   return data
 }
