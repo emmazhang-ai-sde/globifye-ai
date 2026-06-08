@@ -1,11 +1,18 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import Link from 'next/link'
+import { useState } from 'react'
 
 // =====================================================================
-// Types
+// Types — match what /api/transcribe and /api/analyze return
 // =====================================================================
+
+type Utterance = {
+  speaker: string             // "Speaker 0"
+  transcript: string          // content_clean from API
+  content_raw: string
+  start: number               // sentence_start_sec
+  end: number
+}
 
 type Analysis = {
   id: string
@@ -42,143 +49,49 @@ function formatTime(seconds: number): string {
 // =====================================================================
 
 export default function Home() {
-  // ---- Refs (persist across renders, don't trigger re-renders) ----
-  const wsRef = useRef<WebSocket | null>(null)
-  const recorderRef = useRef<MediaRecorder | null>(null)
-
-  // ---- State ----
+  const [file, setFile] = useState<File | null>(null)
   const [recordingId, setRecordingId] = useState<string | null>(null)
-  const [isLive, setIsLive] = useState(false)
-  const [liveCaption, setLiveCaption] = useState('')
-  const [sessionComplete, setSessionComplete] = useState(false)
+  const [utterances, setUtterances] = useState<Utterance[]>([])
   const [analysis, setAnalysis] = useState<Analysis | null>(null)
+  const [isTranscribing, setIsTranscribing] = useState(false)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // ------------------------------------------------------------------
-  // Start live transcription
+  // Handlers
   // ------------------------------------------------------------------
-  async function startLive() {
+
+  async function handleTranscribe() {
+    if (!file) return
+    setIsTranscribing(true)
     setError(null)
+    setUtterances([])
     setAnalysis(null)
-    setSessionComplete(false)
 
     try {
-      // 1. Create a new recording row in Supabase
-      const createRes = await fetch('/api/recordings/create', {
+      const formData = new FormData()
+      formData.append('audio', file)
+
+      const res = await fetch('/api/transcribe', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ call_metadata: { source: 'live-mic' } }),
+        body: formData,
       })
-      const createData = await createRes.json()
+      const data = await res.json()
 
-      if (!createRes.ok || !createData.recording_id) {
-        setError(createData.error ?? 'Failed to create recording session')
+      if (!res.ok) {
+        setError(data.error ?? 'Transcription failed')
         return
       }
 
-      // ⚠️ Capture in a LOCAL variable, not just state.
-      // React state updates are async — the WS message handler closes over
-      // this value, and state wouldn't be updated yet when messages arrive.
-      const liveRecordingId = createData.recording_id
-      setRecordingId(liveRecordingId)
-
-      // 2. Get a short-lived Deepgram token from our server
-      const tokenRes = await fetch('/api/deepgram-token')
-      const tokenData = await tokenRes.json()
-
-      if (!tokenRes.ok || !tokenData.key) {
-        setError(tokenData.error ?? 'Failed to get Deepgram token')
-        return
-      }
-
-      // 3. Open the WebSocket to Deepgram
-      const ws = new WebSocket(
-        `wss://api.deepgram.com/v1/listen` +
-        `?model=nova-3&language=en-US&diarize=true&interim_results=true&punctuate=true`,
-        ['token', tokenData.key],
-      )
-      wsRef.current = ws
-      setIsLive(true)
-
-      // 4. When the WS is ready, start the microphone
-      ws.addEventListener('open', async () => {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-          const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
-          recorderRef.current = recorder
-
-          recorder.addEventListener('dataavailable', (e) => {
-            if (ws.readyState === WebSocket.OPEN && e.data.size > 0) {
-              ws.send(e.data)
-            }
-          })
-
-          recorder.start(150) // fire 'dataavailable' every 150ms
-        } catch (err) {
-          setError(`Microphone error: ${(err as Error).message}`)
-          stopLive()
-        }
-      })
-
-      // 5. Handle messages from Deepgram
-      ws.addEventListener('message', async (event) => {
-        const msg = JSON.parse(event.data as string)
-        const transcript = msg.channel?.alternatives?.[0]?.transcript ?? ''
-        if (!transcript) return
-
-        if (!msg.is_final) {
-          // Partial result — just update live caption, no DB write
-          setLiveCaption(transcript)
-          return
-        }
-
-        // Final result — clear caption and write to DB
-        setLiveCaption('')
-        const words = msg.channel.alternatives[0].words ?? []
-
-        await fetch('/api/transcribe/live', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            recording_id: liveRecordingId, // ⚠️ local var, not state
-            speaker: `Speaker ${words[0]?.speaker ?? 0}`,
-            content_raw: transcript,
-            sentence_start_sec: words[0]?.start ?? 0,
-          }),
-        })
-      })
-
-      ws.addEventListener('error', () => {
-        setError('WebSocket error — check the browser console')
-        stopLive()
-      })
-
-      ws.addEventListener('close', () => {
-        setIsLive(false)
-      })
+      setRecordingId(data.recording_id)
+      setUtterances(data.utterances)
     } catch (err) {
       setError((err as Error).message)
-      setIsLive(false)
+    } finally {
+      setIsTranscribing(false)
     }
   }
 
-  // ------------------------------------------------------------------
-  // Stop live transcription
-  // ------------------------------------------------------------------
-  function stopLive() {
-    recorderRef.current?.stop()
-    wsRef.current?.close()
-    recorderRef.current = null
-    wsRef.current = null
-    setIsLive(false)
-    setLiveCaption('')
-    setSessionComplete(true)
-  }
-
-  // ------------------------------------------------------------------
-  // Trigger LLM analysis on the recorded transcript
-  // ------------------------------------------------------------------
   async function handleAnalyze() {
     if (!recordingId) return
     setIsAnalyzing(true)
@@ -208,53 +121,32 @@ export default function Home() {
   // ------------------------------------------------------------------
   // Render
   // ------------------------------------------------------------------
+
   return (
     <main className="max-w-4xl mx-auto p-8 font-sans">
-      <div className="flex justify-between items-center mb-2">
-        <h1 className="text-2xl font-bold">Sales Call Pipeline — Live</h1>
-        <Link
-          href="/batch"
-          className="text-sm text-blue-600 hover:underline"
-        >
-          Switch to file upload →
-        </Link>
-      </div>
+      <h1 className="text-2xl font-bold mb-2">Sales Call Pipeline</h1>
       <p className="text-sm text-gray-500 mb-8">
-        Record a live sales call → transcribe in real time → click Analyze for coaching insights.
+        Upload a sales call recording → get a transcript → analyze for objections and coaching insights.
       </p>
 
-      {/* ============ Live transcription card ============ */}
-      <section className="mb-8 border rounded p-6 bg-white">
-        <div className="flex gap-3 mb-4">
-          {!isLive ? (
-            <button
-              onClick={startLive}
-              disabled={isAnalyzing}
-              className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
-            >
-              Start Live Transcription
-            </button>
-          ) : (
-            <button
-              onClick={stopLive}
-              className="px-4 py-2 bg-red-600 text-white rounded"
-            >
-              Stop
-            </button>
-          )}
-        </div>
-
-        {/* Live caption box — only visible while streaming */}
-        {isLive && (
-          <div className="mt-4 p-4 bg-slate-900 text-green-400 rounded font-mono text-sm min-h-12">
-            {liveCaption || <span className="opacity-40">Listening…</span>}
-          </div>
-        )}
-
-        {/* Session complete message */}
-        {sessionComplete && !isLive && (
-          <p className="mt-4 text-sm text-gray-600">
-            ✓ Session recorded. Click <strong>Analyze Call</strong> below to see coaching insights.
+      {/* ============ Upload ============ */}
+      <section className="mb-8">
+        <input
+          type="file"
+          accept="audio/*"
+          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          className="block mb-4 text-sm"
+        />
+        <button
+          onClick={handleTranscribe}
+          disabled={!file || isTranscribing}
+          className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+        >
+          {isTranscribing ? 'Transcribing…' : 'Start Transcription'}
+        </button>
+        {file && !isTranscribing && (
+          <p className="mt-2 text-xs text-gray-500">
+            Selected: {file.name} ({(file.size / 1024 / 1024).toFixed(1)} MB)
           </p>
         )}
       </section>
@@ -266,20 +158,31 @@ export default function Home() {
         </div>
       )}
 
-      {/* ============ Analyze button ============ */}
-      {sessionComplete && !analysis && (
+      {/* ============ Transcript ============ */}
+      {utterances.length > 0 && (
         <section className="mb-8">
+          <h2 className="text-xl font-semibold mb-3">Transcript</h2>
+          <div className="border rounded p-4 max-h-80 overflow-y-auto space-y-2 bg-gray-50">
+            {utterances.map((u, i) => (
+              <div key={i} className="text-sm">
+                <span className="font-medium text-gray-500 mr-2">
+                  {u.speaker} [{formatTime(u.start)}]
+                </span>
+                {u.transcript}
+              </div>
+            ))}
+          </div>
           <button
             onClick={handleAnalyze}
             disabled={isAnalyzing}
-            className="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50"
+            className="mt-4 px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50"
           >
             {isAnalyzing ? 'Analyzing…' : 'Analyze Call'}
           </button>
         </section>
       )}
 
-      {/* ============ Analysis results ============ */}
+      {/* ============ Analysis ============ */}
       {analysis && (
         <section className="space-y-8">
           {/* Summary */}
@@ -363,3 +266,4 @@ export default function Home() {
     </main>
   )
 }
+
