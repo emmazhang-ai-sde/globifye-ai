@@ -111,3 +111,18 @@ export function utterancesToTranscriptRows(
     sentence_start_sec: u.sentence_start_sec,
   }))
 }
+
+
+import { insertTranscriptRows } from './supabase'
+
+/**
+ * High-level convenience: convert utterances + write them to the transcript
+ * table in one call. Used by /api/transcribe.
+ */
+export async function writeTranscriptForRecording(
+  recordingId: string,
+  utterances: ParsedUtterance[],
+) {
+  const rows = utterancesToTranscriptRows(utterances, recordingId)
+  return insertTranscriptRows(rows)
+}
