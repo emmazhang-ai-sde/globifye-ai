@@ -2,7 +2,17 @@
 
 ---
 
-## 1. SIP (Session Initiation Protocol)
+## 1. Reference Products
+
+| Product | What it is |
+|---|---|
+| **OmniDim** (`omnidim.io`) | Autonomous voice AI agent platform — AI makes/receives real phone calls, handles objections, books appointments, no human in the loop |
+| **Sim.ai** (`sim.ai`) | Multi-step agent orchestration — visual workflow builder, tool-use, multi-model LLM routing |
+| **GitReverse** (`gitreverse.com`) | Dev utility — converts a GitHub repo into an AI-readable prompt to accelerate development |
+
+---
+
+## 2. SIP (Session Initiation Protocol)
 
 ### What is SIP?
 
@@ -53,7 +63,7 @@ We never write SIP code. We receive audio and events from Abraham's layer; we se
 
 ---
 
-## 2. AirLLM — Self-Hosted LLM Option
+## 3. AirLLM — Self-Hosted LLM Option
 
 **GitHub:** https://github.com/lyogavin/airllm  
 **Recommended by:** Danish Parray (June 9, 2026)

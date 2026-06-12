@@ -1,5 +1,5 @@
 # AI Agent for the GlobiFYE Sales Call Pipeline
-**Author:** Shuyang Zhang (AI Intern) — drafted for PM review by Danish Parray  
+**Author:** AI Zhang (AI Intern) — drafted for PM review by Danish Parray  
 **Date:** 2026-06-08  
 **Status:** Draft — open questions flagged throughout; needs Danish's input before implementation
 
@@ -19,10 +19,7 @@ This is a fundamentally different model from the current MVP:
 | Response generation | N/A (human talks) | LLM → TTS → back through SIP |
 | Post-call analysis | Single LLM call, button-triggered | Multi-step agent loop, automatic |
 
-**Reference products:**
-- **OmniDim** (`omnidim.io`) — Autonomous voice AI agent platform: AI makes/receives real phone calls, handles objections, books appointments, no human in the loop
-- **Sim.ai** (`sim.ai`) — Multi-step agent orchestration: visual workflow builder, tool-use, multi-model LLM routing
-- **GitReverse** (`gitreverse.com`) — Dev utility: converts a GitHub repo into an AI-readable prompt to accelerate development
+See [`technical-reference.md`](./technical-reference.md) for reference products and background on key technologies.
 
 ---
 
@@ -47,8 +44,8 @@ Owned by: Abraham & Kim
 - Call records (SIP session ID, start/end time, status)
 - Call queue / scheduling (which prospects to call, when)
 
-### Our System (AI Pipeline — Shuyang)
-Owned by: Shuyang + AI team
+### Our System (AI Pipeline — AI)
+Owned by: AI + AI
 
 **Responsibility:** Everything to do with understanding and acting on what was said.
 
@@ -69,25 +66,25 @@ Owned by: Shuyang + AI team
 ## 3. Full System Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    ABRAHAM'S SYSTEM (SIP Layer)                  │
+┌───────────────────────────────────────────────────────────────────┐
+│                    ABRAHAM'S SYSTEM (SIP Layer)                   │
 │                                                                   │
-│  Call trigger — 3 modes (classified by account type):            │
-│  ① Auto-dialer      [Sales / outbound] → dials contact list      │
+│  Call trigger — 3 modes (classified by account type):             │
+│  ① Auto-dialer      [Sales / outbound] → dials contact list       │
 │  ② Human transfer   [any account]      → rep hands off live call  │
-│  ③ Inbound receiver [Support / inbound]← prospect calls in       │
-│        │                                                         │
-│  SIP Server ↔ Prospect's Phone (via DID)                        │
-│        │               │                                         │
-│  Abraham's DB     Audio Stream (RTP/WebSocket)                   │
-│  - contact info        │                                         │
-│  - call queue          │                                         │
-│  - session state       │                                         │
-└────────────────────────┼────────────────────────────────────────┘
+│  ③ Inbound receiver [Support / inbound]← prospect calls in        │
+│        │                                                          │
+│  SIP Server ↔ Prospect's Phone (via DID)                          │
+│        │               │                                          │
+│  Abraham's DB     Audio Stream (RTP/WebSocket)                    │
+│  - contact info        │                                          │
+│  - call queue          │                                          │
+│  - session state       │                                          │
+└────────────────────────┼──────────────────────────────────────────┘
                          │  audio in/out
-┌────────────────────────┼────────────────────────────────────────┐
+┌────────────────────────┼─────────────────────────────────────────┐
 │                    OUR SYSTEM (AI Pipeline)                      │
-│                                                                   │
+│                                                                  │
 │  User-defined objective ──┐                                      │
 │  (goal / tone / persona)  │                                      │
 │  set from frontend        ▼                                      │
@@ -96,34 +93,32 @@ Owned by: Shuyang + AI team
 │                 │  Orchestrator       │                          │
 │                 │  (real-time loop    │                          │
 │                 │   or voicemail drop)│                          │
-│                 └──────┬──────┬───────┘                         │
+│                 └──────┬──────┬───────┘                          │
 │                        │      │                                  │
-│    ┌───────────────┐   │  ┌───▼────────────────────┐            │
-│    │  STT Layer    │◄──┘  │  LLM Response Engine   │            │
-│    │  (Deepgram    │      │  (TBD: AirLLM / Mistral│            │
-│    │   Nova-3)     │      │   / Qwen — via LangChain│           │
-│    └──────┬────────┘      └────────┬───────────────┘            │
+│    ┌───────────────┐   │  ┌───▼─────────────────────┐            │
+│    │  STT Layer    │◄──┘  │  LLM Response Engine    │            │
+│    │  (Deepgram    │      │  (Groq — current        │            │
+│    │   Nova-2)     │      │   OpenAI API — planned) │            │
+│    └──────┬────────┘      └────────┬────────────────┘            │
 │           │                        │                             │
-│    ┌──────▼───────┐    ┌───────────▼──┐                         │
+│    ┌──────▼───────┐    ┌───────────▼──┐                          │
 │    │  Transcript  │    │  TTS Layer   │ → audio back to SIP      │
-│    │  DB Write    │    │  (TBD: ElevenLabs / Azure / Deepgram)  │
-│    └──────────────┘    └──────────────┘                         │
-│                                                                   │
+│    │  DB Write    │    │  (ElevenLabs eleven_turbo_v2_5)         │
+│    └──────────────┘    └──────────────┘                          │
+│                                                                  │
 │    ┌──────────────────────────────────────┐                      │
 │    │        Post-Call Agent Loop          │                      │
 │    │  transcript → analysis               │                      │
 │    │  → Apollo + HubSpot CRM update       │                      │
 │    └──────────────────────────────────────┘                      │
-│                                                                   │
+│                                                                  │
 │    Supabase DB: recordings | transcript | analysis               │
-└─────────────────────────────────────────────────────────────────┘
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 **Note on voicemail mode (③ variant):** When the AI drops a voicemail rather than holding a live conversation, the Orchestrator skips the real-time STT → LLM loop and instead plays a short user-scripted TTS message through the SIP layer. No transcript is generated; a minimal call record is written to the DB.
 
----
-
-## 4. Real-Time Agent Loop (During the Call)
+### 3.1 Real-Time Agent Loop (During the Call)
 
 This is the core of what makes the AI an autonomous caller. It runs continuously while the call is active.
 
@@ -144,9 +139,7 @@ WHILE call is active:
 
 **Latency target:** The full loop (step 1 → step 8) should complete in **under 1.5 seconds** to feel like a natural conversation. This is aggressive — see Open Questions #4.
 
----
-
-## 5. Post-Call Agent Loop (After the Call)
+### 3.2 Post-Call Agent Loop (After the Call)
 
 Runs automatically when the call ends (triggered by Abraham's SIP layer signaling call termination). Replaces the current button-triggered single LLM call.
 
@@ -168,62 +161,30 @@ Runs automatically when the call ends (triggered by Abraham's SIP layer signalin
 
 ---
 
-## 6. AI Agent Architecture Options
+## 4. AI Agent Architecture Options
 
-*Amy — preparing comparative tests for the options below.*
+See [`ai-agent-architecture-design-doc.md`](./ai-agent-architecture-design-doc.md) for the full comparison.
 
-There are two fundamentally different ways to build the real-time call loop. This decision affects latency, cost, control, and how much we can reuse the existing Deepgram setup.
+Two options were evaluated:
 
-### Option A: STT + LLM + TTS Pipeline (modular)
+| | Option A — Modular Pipeline | Option B — Speech-to-Speech |
+|---|---|---|
+| **Approach** | STT + LLM + TTS as separate components | OpenAI Realtime API, end-to-end |
+| **Status** | **Selected** | Not chosen |
 
-```
-Prospect speaks
-  → Deepgram Nova-3 (STT, streaming)
-  → Partial transcript fed to LLM while prospect is still talking
-  → LLM generates response
-  → TTS converts to audio
-  → Audio sent back via SIP
-```
+**Selected stack (Option A):**
 
-**Key advantage (Amy's insight):** Because Deepgram streams partial results in real-time, we can start feeding the in-progress transcript to the LLM *before the prospect finishes speaking*. This hides a large chunk of the latency — the LLM is already thinking while the person is still talking.
-
-| Pros | Cons |
+| Layer | Provider |
 |---|---|
-| Reuses existing Deepgram integration | Three components in series — latency compounds |
-| Full control over each layer | More moving parts to maintain |
-| Transcript available in DB for analysis | TTS adds another ~200–400ms |
-| Can swap LLM or TTS independently | Requires careful streaming orchestration |
+| STT | Deepgram Nova-2 |
+| LLM | Groq (current) → OpenAI API (planned) |
+| TTS | ElevenLabs `eleven_turbo_v2_5` |
 
-### Option B: Speech-to-Speech (single model)
-
-```
-Prospect speaks
-  → OpenAI Realtime API (audio in → audio out, end-to-end)
-  → Audio sent back via SIP
-```
-
-**Example:** OpenAI Realtime API handles STT + reasoning + TTS as one unified model call.
-
-| Pros | Cons |
-|---|---|
-| Lowest possible latency (no pipeline overhead) | Full OpenAI vendor lock-in |
-| Simplest architecture | More expensive per minute |
-| No orchestration needed | Less control over voice/style/behavior |
-| | Transcript harder to extract for DB writes |
-
-### Recommendation (pending Amy's tests)
-
-Start with **Option A** for the following reasons:
-- We already have Deepgram live STT working — reuse is low-risk
-- Transcript in DB is required for our analysis pipeline; Option B makes this harder
-- Amy's streaming-to-LLM approach can bring latency close to Option B's level
-- We can always swap the LLM (Groq → Claude) without touching STT or TTS
-
-**Decision gate:** Amy's test results will confirm whether Option A latency is acceptable. If end-to-end response time exceeds ~2.5s in testing, revisit Option B.
+**Decision gate:** If Amy's end-to-end latency tests exceed ~2.5s, revisit Option B.
 
 ---
 
-## 7. Tool Belt
+## 5. Tool Belt
 
 | Tool | Used when | Integration |
 |---|---|---|
@@ -236,7 +197,7 @@ Start with **Option A** for the following reasons:
 
 ---
 
-## 8. Interface Between Abraham's System and Ours
+## 6. Interface Between Abraham's System and Ours
 
 This is the most critical integration point and needs to be agreed on with Abraham.
 
@@ -260,7 +221,7 @@ This is the most critical integration point and needs to be agreed on with Abrah
 
 ---
 
-## 9. Integration with the Existing AI Pipeline
+## 7. Integration with the Existing AI Pipeline
 
 | Existing piece | Change required |
 |---|---|
@@ -270,14 +231,14 @@ This is the most critical integration point and needs to be agreed on with Abrah
 | `app/api/analyze` | Replace with post-call agent loop (auto-triggered, not button-triggered) |
 | `lib/llm.ts` | Add response-generation prompt (what should AI say next) + keep analysis prompt |
 | `lib/supabase.ts` | Add `linkSipSession` to store Abraham's session ID in `recordings` |
-| New: `lib/tts.ts` | TTS integration (e.g., ElevenLabs, Azure, or Deepgram TTS) |
+| New: `lib/tts.ts` | TTS integration — ElevenLabs `eleven_turbo_v2_5` |
 | New: `lib/agent.ts` | Real-time agent loop + post-call agent loop |
 
 The `/batch` route stays unchanged for testing.
 
 ---
 
-## 10. Open Questions
+## 8. Open Questions
 
 ### For Amy (architecture — tests in progress):
 
@@ -320,7 +281,7 @@ The `/batch` route stays unchanged for testing.
 
    Hold the line at 1.5s. Do not accept 2–3s as a fallback.
 
-7. **TTS voice:** More research still needed. ElevenLabs mentioned as the working example. Danish wants the AI team to do deeper TTS provider research. Options: ElevenLabs (highest quality), Azure Neural TTS, Deepgram Aura (lowest latency).
+7. **TTS voice:** ✅ **Decided — ElevenLabs `eleven_turbo_v2_5`.** Research 1 script run; Deepgram Aura measured at 76ms median TTFB. ElevenLabs selected for voice quality. See [`ai-agent-research-plan.md`](./ai-agent-research-plan.md) for full results.
 
 8. **CRM target**
 
@@ -347,108 +308,36 @@ The `/batch` route stays unchanged for testing.
 
 ---
 
-## 11. AI Team Research Plan
+## 9. AI Team Research Plan
 
-The product decisions from Section 10 are settled. What remains open is the **technology stack** for the real-time call loop. The research below must be completed before any implementation begins. The output of each item is a concrete recommendation with evidence — not a general survey.
+See [`ai-agent-research-plan.md`](./ai-agent-research-plan.md) for the full research plan with step-by-step instructions, test scripts, and results tables.
 
----
-
-### Research 1: Integrated Voice Agent vs. Standalone LLM + TTS
-
-**The question:** Should the real-time call loop use an end-to-end speech-to-speech model (e.g., OpenAI Realtime, Qwen real-time), or a modular pipeline of standalone LLM + TTS (e.g., AirLLM/Mistral via LangChain + ElevenLabs)?
-
-**Why it matters:** Danish's lean is toward standalone LLM + TTS because the same LLM can serve both the calling agent and AI email responses (LangChain + SMTP). An integrated model can't easily be repurposed that way. But this needs to be validated against real latency numbers before we commit.
-
-**What to evaluate:**
-
-| Dimension | Integrated voice (e.g., OpenAI Realtime) | Standalone LLM + TTS (e.g., Mistral + ElevenLabs) |
-|---|---|---|
-| End-to-end latency | Benchmark with a test call loop | Benchmark each leg: STT → LLM → TTS |
-| Cost per minute | Check API pricing | Cost of self-hosting LLM + TTS API cost |
-| Flexibility | Can it serve the email use case too? | Can the same LangChain setup handle SMTP? |
-| Transcript availability | How easy to extract for DB writes? | Native — Deepgram gives text directly |
-| Vendor lock-in | High | Low — each layer swappable independently |
-
-**Decision criterion:** If standalone LLM + TTS can hit **≤1.5s end-to-end** in a realistic test loop, it is the preferred choice. If it consistently exceeds 2s, revisit the integrated option.
-
----
-
-### Research 2: TTS Provider
-
-**The question:** Which TTS provider should handle voice output? This is the least understood part of the stack and has the most direct impact on how human the AI sounds and whether we clear the 1.5s latency target.
-
-**What to evaluate:**
-
-| Provider | Latency (first audio byte) | Voice quality | Cost | Notes |
-|---|---|---|---|---|
-| **ElevenLabs** | ~300–500ms | Highest | ~$0.30/1k chars | Best naturalness; Danish's working example |
-| **Azure Neural TTS** | ~200–300ms | High | ~$16/1M chars | Low-latency streaming; enterprise-grade |
-| **Deepgram Aura** | ~100–200ms | Good | Lowest | Same vendor as STT — simplifies integration |
-| **OpenAI TTS** | ~300–400ms | High | ~$15/1M chars | Familiar API; ties us further to OpenAI |
-
-**Testing methodology:** Run each provider on a representative set of short sales responses (1–3 sentences). Measure time-to-first-audio-byte and total generation time. Factor TTS latency into the overall 1.5s budget breakdown from Research 3.
-
-**Decision criterion:** Choose the provider that fits within roughly **300ms** of the latency budget while delivering voice quality that doesn't immediately read as AI to a listener.
-
----
-
-### Research 3: End-to-End Latency Budget
-
-**The question:** Can we realistically hit 1.5s total response time (prospect stops speaking → AI starts speaking) with the standalone LLM + TTS approach?
-
-**Break down the budget across legs:**
+**Sequence (do not run in parallel):**
 
 ```
-Prospect stops speaking
-  → Deepgram detects speech_final        ~100–300ms   (STT finalization)
-  → LLM receives transcript, generates   ~300–800ms   (LLM inference)
-  → TTS converts text to first audio     ~100–500ms   (TTS generation)
-  → Audio reaches prospect via SIP       ~50–150ms    (network)
-                                  Total: ~550ms–1750ms
+Research 1: Pick TTS provider           → fixes the TTS layer
+Research 2: Pick LLM                    → fixes the LLM layer  (uses TTS result)
+Research 3: Final architecture shootout → standalone (R1+R2) vs. integrated
+Research 4: Multi-use verification      → confirm same LLM handles email too
 ```
 
-The key lever is **partial transcript streaming**: Deepgram streams partial results while the prospect is still talking. If we begin feeding the in-progress transcript to the LLM before speech_final is emitted, we can hide most of the LLM latency inside the prospect's own speaking time.
-
-**What to deliver:** A measured latency breakdown (in ms) for a test conversation under each candidate stack (e.g., Mistral + ElevenLabs, Qwen + Azure Neural), confirming or ruling out each option against the 1.5s hard limit.
+**Current status:** Research 1 script written (`scripts/research1-tts-test.ts`). Deepgram Aura results collected (76ms median TTFB). ElevenLabs and Azure keys needed to complete the comparison.
 
 ---
 
-### Research 4: Multi-Use LLM Architecture (Calls + Email)
-
-**The question:** Can the same LLM and LangChain setup serve both the calling agent and AI email responses? This is the core reason Danish prefers standalone LLM + TTS over an integrated voice model.
-
-**What to prototype:**
-
-```
-Shared LLM (e.g., Mistral via LangChain)
-  ├── Calling mode:  LangChain → LLM → TTS → SIP
-  └── Email mode:   LangChain → LLM → SMTP (draft or send)
-```
-
-Both modes share the same model and the same user-defined objective field from the frontend. The only difference is the output channel.
-
-**Questions to answer:**
-- Does LangChain's abstraction make the two output channels straightforward to wire up, or does each require a separate chain?
-- Does the same model perform well for both short conversational responses (calls) and structured written responses (emails)?
-- Does a single server instance handle both modes, or does inference complexity double?
-
-**Decision criterion:** If the same LangChain + LLM setup handles both modes with minimal extra code, it confirms the standalone architecture as the right long-term choice and eliminates any reason to consider an integrated voice model.
-
----
-
-## 12. Suggested Phasing
+## 10. Suggested Phasing
 
 | Phase | Scope | Who | Effort |
 |---|---|---|---|
-| **Phase A** | Align with Abraham on audio interface + event contract. Define shared session ID. | Shuyang + Abraham | ~2–3 days alignment |
-| **Phase B** | Post-call agent loop (server-side, auto-triggered on call-end). No real-time response yet. | Shuyang | ~1 week |
-| **Phase C** | Real-time agent loop: STT → LLM → TTS response during call. Basic conversation flow. | Shuyang | ~1.5–2 weeks |
-| **Phase D** | CRM tool integration (read prospect history, write call notes). | Shuyang | ~1 week |
-| **Phase E** | Monitoring dashboard UI (live call viewer, post-call analysis display). | Shuyang + Frontend | ~1 week |
+| **Phase A** | Align with Abraham on audio interface + event contract. Define shared session ID. | AI + Abraham | ~2–3 days alignment |
+| **Phase B** | Post-call agent loop (server-side, auto-triggered on call-end). No real-time response yet. | AI | ~1 week |
+| **Phase C** | Real-time agent loop: STT → LLM → TTS response during call. Basic conversation flow. | AI | ~1.5–2 weeks |
+| **Phase D** | CRM tool integration (read prospect history, write call notes). | AI | ~1 week |
+| **Phase E** | Monitoring dashboard UI (live call viewer, post-call analysis display). | AI + Frontend | ~1 week |
 
 ---
 
-## 13. Out of Scope (for Now)
+## 11. Out of Scope (for Now)
 
 - Multi-language support — not needed for current customer base
 - Building on Sim.ai's platform directly — we build our own orchestrator
@@ -456,6 +345,6 @@ Both modes share the same model and the same user-defined objective field from t
 
 ---
 
-## 14. Technical Reference
+## 12. Technical Reference
 
 See [`technical-reference.md`](./technical-reference.md) for background on the key technologies referenced in this document: SIP/RTP, and AirLLM.
