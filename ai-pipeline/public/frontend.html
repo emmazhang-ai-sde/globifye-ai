@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DialForge | AI VoIP for High-Velocity Teams</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&amp;family=DM+Sans:wght@400;500;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Scripts -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+        :root {
+            --fire-glow: rgba(255, 77, 28, 0.15);
+            --glass-bg: rgba(14, 15, 27, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            background-color: #07080F;
+            color: #e3e1ec;
+            overflow-x: hidden;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .liquid-glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .fire-gradient {
+            background: linear-gradient(135deg, #FF4D1C 0%, #FF8A00 100%);
+        }
+
+        .fire-text {
+            background: linear-gradient(135deg, #FF4D1C 0%, #FF8A00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .fire-glow-hover:hover {
+            box-shadow: 0 0 20px var(--fire-glow);
+            transform: translateY(-2px);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #FF4D1C; }
+
+        .active-dialer-pulse {
+            animation: pulse-border 2s infinite ease-in-out;
+            border: 2px solid #FF4D1C;
+        }
+
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(255, 77, 28, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 77, 28, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 77, 28, 0); }
+        }
+
+        .kanban-column { min-height: 500px; }
+        
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        .hidden-section { display: none !important; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ffb4a2",
+                        "primary-container": "#ff562a",
+                        "on-primary": "#611200",
+                        "secondary": "#7cffa3",
+                        "surface": "#12131a",
+                        "surface-container": "#1e1f27",
+                        "surface-container-low": "#1a1b23",
+                        "on-surface": "#e3e1ec",
+                        "on-surface-variant": "#e5beb4",
+                        "outline": "#ac8980",
+                    },
+                    spacing: {
+                        "sm": "8px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "xl": "48px",
+                    },
+                    fontFamily: {
+                        "display": ["Syne", "sans-serif"],
+                        "body": ["DM Sans", "sans-serif"],
+                        "mono": ["JetBrains Mono", "monospace"],
+                    },
+                    fontSize: {
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "headline-md": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-body selection:bg-primary-container/30">
+<!-- ATMOSPHERIC BACKGROUND BLOBS -->
+<div class="fixed inset-0 overflow-hidden -z-10 pointer-events-none">
+<div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-primary-container/10 blur-[120px] rounded-full"></div>
+<div class="absolute top-[40%] -right-[5%] w-[30%] h-[50%] bg-secondary/5 blur-[100px] rounded-full"></div>
+<div class="absolute -bottom-[10%] left-[20%] w-[50%] h-[30%] bg-primary/5 blur-[120px] rounded-full"></div>
+</div>
+<!-- LANDING PAGE LAYER -->
+<div class="relative z-10" id="landing-layer">
+<!-- Navigation -->
+<nav class="flex items-center justify-between px-lg h-20 fixed top-0 w-full bg-surface/60 backdrop-blur-xl border-b border-white/5 z-50">
+<div class="flex items-center gap-2">
+<span class="font-display text-headline-md font-extrabold text-primary tracking-tighter">DialForge</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Features</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Solutions</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors" href="#">Pricing</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="px-6 py-2 rounded-full border border-white/10 text-on-surface hover:bg-white/5 transition-all" onclick="app.showLogin()">Sign In</button>
+<button class="px-6 py-2 rounded-full fire-gradient text-on-primary font-bold shadow-lg shadow-primary-container/20 active:scale-95 transition-all" onclick="app.startOnboarding()">Get Started</button>
+</div>
+</nav>
+<!-- Hero Section -->
+<section class="pt-40 pb-20 px-lg text-center max-w-5xl mx-auto">
+<span class="px-4 py-1 rounded-full bg-primary-container/10 border border-primary-container/20 text-primary text-sm font-bold tracking-widest uppercase mb-6 inline-block">AI-Powered VoIP for Sales</span>
+<h1 class="font-display text-display-lg md:text-6xl mb-8 leading-tight">
+                Close More Deals with <span class="fire-text">Intelligent Voice</span>
+</h1>
+<p class="text-body-md text-on-surface-variant max-w-2xl mx-auto mb-12">
+                DialForge combines professional-grade telephony with real-time AI coaching, sentiment analysis, and seamless CRM integrations to turn every conversation into a conversion.
+            </p>
+<div class="flex flex-col md:flex-row items-center justify-center gap-6">
+<button class="px-10 py-4 rounded-full fire-gradient text-on-primary font-bold text-lg hover:scale-105 active:scale-95 transition-all" onclick="app.startOnboarding()">Launch Dialer Now</button>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary">verified</span>
+<span>No credit card required</span>
+</div>
+</div>
+<!-- Hero Image Mockup -->
+<div class="mt-20 relative group">
+<div class="absolute inset-0 bg-primary-container/20 blur-[100px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+<div class="liquid-glass rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+<img alt="DialForge Dashboard Preview" class="w-full opacity-90 group-hover:opacity-100 transition-opacity" data-alt="A sophisticated dark-mode enterprise software dashboard displayed on a sleek ultra-wide monitor in a high-tech office. The UI features vibrant orange data visualizations, glassmorphic card elements with deep blurs, and a complex grid of VoIP metrics. Soft ambient orange lighting reflects off the screen, creating a high-velocity, professional sales environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHSdTMRkUATodzCKyr4Mw3KwNOkiWRIzv89JNESccP3hgGQ-SYjAt3JCTsI3WNU-ndY9XXkRKEXy9irTIgY5jZO2t2wWl0kgMmgCaU3aTYaINiGxC4KGgw3Nq0tSmVHCGkmEbx8OPNlVDkp8gNJveohWVRxbYIhJxNxz0uWlR03yv-rNzI1aLZF3WSBkp5Aczrt2ss0IDQl3ek83ByOjPcbwpDl2ro3ELDjApHbWxXis_-9dTBWaneuVaza8I6QZs4Qu1Ce7nqciw"/>
+</div>
+</div>
+</section>
+<!-- Features Bento Grid -->
+<section class="py-20 px-lg max-w-7xl mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="md:col-span-2 liquid-glass p-10 rounded-3xl group hover:border-primary/30 transition-all">
+<span class="material-symbols-outlined text-4xl text-primary mb-6">psychology</span>
+<h3 class="font-display text-3xl mb-4">Real-time AI Coaching</h3>
+<p class="text-on-surface-variant text-lg">Receive live suggestions, battle cards, and objection handling tips while you're still on the call. Never miss a beat again.</p>
+</div>
+<div class="liquid-glass p-10 rounded-3xl group hover:border-secondary/30 transition-all">
+<span class="material-symbols-outlined text-4xl text-secondary mb-6">bolt</span>
+<h3 class="font-display text-3xl mb-4">Power Dialer</h3>
+<p class="text-on-surface-variant">Automate your outreach with 0ms lag and intelligent lead prioritization.</p>
+</div>
+<div class="liquid-glass p-10 rounded-3xl hover:border-primary/30 transition-all">
+<span class="material-symbols-outlined text-4xl text-primary mb-6">analytics</span>
+<h3 class="font-display text-3xl mb-4">Sentiment Map</h3>
+<p class="text-on-surface-variant">Advanced analytics that track the emotional trajectory of every conversation.</p>
+</div>
+<div class="md:col-span-2 liquid-glass p-10 rounded-3xl hover:border-secondary/30 transition-all">
+<div class="flex flex-col md:flex-row gap-10 items-center">
+<div class="flex-1">
+<span class="material-symbols-outlined text-4xl text-secondary mb-6">sync</span>
+<h3 class="font-display text-3xl mb-4">Deep Integrations</h3>
+<p class="text-on-surface-variant">Sync perfectly with Salesforce, HubSpot, Zendesk, and 40+ other platforms instantly.</p>
+</div>
+<div class="grid grid-cols-4 gap-4 opacity-50">
+<img alt="Salesforce" class="w-12 h-12 rounded-lg grayscale hover:grayscale-0 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQIq_jPgKaSy8kFOLmy6I1VV93TQGQnmsnclcT4RLreA_JbjZ2GwarTYGi3oXM59N9-uLPYWFgzWmaT5vKKA8ydj5g0pY75IBuHgrwQu6Pst50IQAzPzD3oMSgWvygFlWG8OihWHY_9rgHK_WNRNru7EJXHZ8HOKpEvffULSqzyZY0GaXN3MVyXbd99Us7a8A1SRQTMeMO5aMv2gGaka8eKdJcFkCeyoW-0vJ3_w_Ke6JMjiwD2PjsUpq7R1nHHskU_mrWgo98nDQ"/>
+<img alt="Hubspot" class="w-12 h-12 rounded-lg grayscale hover:grayscale-0 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_KT7yjgTbolyZkAqy7krYQk5Uo3t4OoDRqijm6EzuHNH0pd1a8hhMZIOPIRZQ3_puJu9yL1CLB-W0hSxbXioxHjD9BHaMsSDwSgsNZwh9pA-0E1zWq8BGkt2hXAcBh4Y-lQXHb-i7N6RfzfSZNApW5R_XbPsmEOnqml-tteUbKan1hm5tbMOiaRUby9IfFDDch3wM_ZU9IRySqoGqOjKcB1FGgobZsTn1o0gUGcBG6gPJxA2t9WTRy5H_MLcGYiX1U8Xwyjbb_OA"/>
+<img alt="Zendesk" class="w-12 h-12 rounded-lg grayscale hover:grayscale-0 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPJAKtssqkid_7TCBST1R7tjkY-yyGcAU2jnx_24ZCQazW_BFwtzGQ4kdRWyU4euuRg99xa9FO8nVO6dlyhcN-bZ1EVaMu-vTPHXNMdn5p9eafdGUWLq_V7WJ7tr1NCI1IiXpn0fbTjcCGO2oyAle6jNQ0v_XpZscBj8d1iV0Q77bt5_khANUClYIT5F16RPDmTqrdXMOfDM_t_ufB-snsTBVwTwya9GAy0ueH5Guq_WodX7_H5mLpG-NToFSZjGFGvjudrXAs5-s"/>
+<img alt="Pipedrive" class="w-12 h-12 rounded-lg grayscale hover:grayscale-0 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBh-DCUkW1kmopbklW5yahbNrwjZqSD0Xic-Y5Frcoh_9FtIUSwzAIWIUx3bI7-H9SJavOpCqEjknCIvN6MEfLBixMZZvPYav4X5_Qb906Vvug1NEN5Eeu1tiFFujz2k9NENlOuKiqn-LFKx-P39h46kXXYKLDji4IggbjlDOzIho4q9O_AZBJ7hyb3nHyck_1L6EBVqLZua_GbDgs8HO99nlV6A2B_N2jyRMxxqQRsO4dNgus3nnBp4_dI1KVfoqpqAH4bys0mbI0"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- ONBOARDING WIZARD LAYER -->
+<div class="fixed inset-0 z-[100] bg-surface flex items-center justify-center hidden-section" id="onboarding-layer">
+<div class="w-full max-w-2xl px-lg">
+<div class="liquid-glass p-10 rounded-3xl border-primary/20" id="onboarding-steps">
+<!-- Steps will be injected by JS -->
+<div class="step-container"></div>
+<div class="flex justify-between mt-10">
+<button class="px-6 py-2 text-on-surface-variant hover:text-on-surface" id="onb-prev">Back</button>
+<button class="px-8 py-2 fire-gradient rounded-full text-on-primary font-bold" id="onb-next">Next</button>
+</div>
+</div>
+</div>
+</div>
+<!-- MAIN APP SHELL LAYER -->
+<div class="hidden-section flex min-h-screen bg-background" id="app-layer">
+<!-- Sidebar -->
+<aside class="w-[280px] fixed left-0 top-0 h-full bg-surface-container/60 backdrop-blur-xl border-r border-white/10 flex flex-col py-md px-sm z-50">
+<div class="px-md mb-xl flex items-center gap-3">
+<div class="w-10 h-10 fire-gradient rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary">call</span>
+</div>
+<div>
+<h2 class="font-display text-headline-sm leading-none text-primary">DialForge</h2>
+<p class="text-[10px] font-mono uppercase tracking-widest text-on-surface-variant mt-1">Enterprise AI VoIP</p>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-1 overflow-y-auto">
+<button class="nav-item flex items-center gap-3 px-md py-3 rounded-lg text-primary bg-primary-container/10 transition-all" data-screen="dashboard">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-mono text-sm">Dashboard</span>
+</button>
+<button class="nav-item flex items-center gap-3 px-md py-3 rounded-lg text-on-surface-variant hover:bg-white/5 transition-all" data-screen="dialer">
+<span class="material-symbols-outlined">dialpad</span>
+<span class="font-mono text-sm">Power Dialer</span>
+</button>
+<button class="nav-item flex items-center gap-3 px-md py-3 rounded-lg text-on-surface-variant hover:bg-white/5 transition-all" data-screen="pipeline">
+<span class="material-symbols-outlined">reorder</span>
+<span class="font-mono text-sm">Pipeline</span>
+</button>
+<button class="nav-item flex items-center gap-3 px-md py-3 rounded-lg text-on-surface-variant hover:bg-white/5 transition-all" data-screen="history">
+<span class="material-symbols-outlined">history</span>
+<span class="font-mono text-sm">History</span>
+</button>
+<button class="nav-item flex items-center gap-3 px-md py-3 rounded-lg text-on-surface-variant hover:bg-white/5 transition-all" data-screen="contacts">
+<span class="material-symbols-outlined">contacts</span>
+<span class="font-mono text-sm">Contacts</span>
+</button>
+<div class="h-px bg-white/5 my-4 mx-md"></div>
+<button class="nav-item flex items-center gap-3 px-md py-3 rounded-lg text-on-surface-variant hover:bg-white/5 transition-all" data-screen="coaching">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-mono text-sm">AI Coaching</span>
+</button>
+<button class="nav-item flex items-center gap-3 px-md py-3 rounded-lg text-on-surface-variant hover:bg-white/5 transition-all" data-screen="integrations">
+<span class="material-symbols-outlined">alt_route</span>
+<span class="font-mono text-sm">Integrations</span>
+</button>
+<button class="nav-item flex items-center gap-3 px-md py-3 rounded-lg text-on-surface-variant hover:bg-white/5 transition-all" data-screen="team">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-mono text-sm">Team</span>
+</button>
+<button class="nav-item flex items-center gap-3 px-md py-3 rounded-lg text-on-surface-variant hover:bg-white/5 transition-all" data-screen="settings">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-mono text-sm">Settings</span>
+</button>
+</nav>
+<div class="mt-auto px-md pt-4">
+<div class="p-4 rounded-2xl bg-white/5 border border-white/5 mb-4">
+<div class="flex justify-between text-xs font-mono mb-2">
+<span class="text-on-surface-variant">Usage</span>
+<span class="text-primary" id="usage-val">452 / 1000m</span>
+</div>
+<div class="h-1 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full fire-gradient" id="usage-bar" style="width: 45.2%"></div>
+</div>
+</div>
+<button class="w-full py-2 rounded-full fire-gradient text-on-primary text-sm font-bold active:scale-95 transition-all" onclick="app.showUpgrade()">Upgrade</button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 ml-[280px] flex flex-col">
+<!-- Top Bar -->
+<header class="h-16 flex items-center justify-between px-lg bg-surface/60 backdrop-blur-xl border-b border-white/5 sticky top-0 z-40">
+<div class="flex items-center gap-4">
+<div class="relative">
+<input class="bg-surface-container border-none rounded-full px-10 py-2 text-sm w-80 focus:ring-1 focus:ring-primary/50 text-on-surface" placeholder="Global search..." type="text"/>
+<span class="material-symbols-outlined absolute left-3 top-2 text-on-surface-variant text-xl">search</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="px-4 py-1.5 rounded-full border border-primary/30 text-primary text-xs font-bold hover:bg-primary/5 transition-all" onclick="app.testCall()">
+                        Incoming Call Test
+                    </button>
+<div class="h-8 w-px bg-white/10"></div>
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 relative">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<div class="flex items-center gap-3 pl-4 border-l border-white/10">
+<img alt="Avatar" class="w-8 h-8 rounded-full border border-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgJvxfO7LslYIk6UawmOcJboFznHt1IJSDD317Kk42qzUXGkfPBrTV49SEaHZD3gWnS0JklnNzSGow1NiptLW6vOt5tzvI-IpP2iemuXz3MqETtv-WHCHSxy2gyUQfA4mmsHJJMymQOQowiYmEi7NaFqFSbIRCKIDQp2ygMwhMDrLakGpeT4hINlT8X0pgBoHBcfDjk6KYyxO_kelM3NwdSY-F3jMkohGxZ2yRfXH9eNjBjBhlb7fsgQ8Md6EssDKWrDLyEsYr_hU"/>
+<div class="hidden lg:block">
+<p class="text-xs font-bold" id="user-display-name">Alex Carter</p>
+<p class="text-[10px] text-on-surface-variant uppercase font-mono">Senior Lead</p>
+</div>
+</div>
+</div>
+</header>
+<!-- Screen Container -->
+<div class="p-lg flex-1 overflow-y-auto" id="screen-viewport">
+<!-- Screens will be rendered here -->
+</div>
+</main>
+<!-- CRM Side Panel (Contextual) -->
+<aside class="w-[320px] bg-surface-container-low border-l border-white/5 p-lg hidden-section" id="crm-panel">
+<div class="flex items-center justify-between mb-8">
+<h3 class="font-display text-xl">Customer Context</h3>
+<button class="material-symbols-outlined text-on-surface-variant" onclick="ui.toggleCRM()">close</button>
+</div>
+<div id="crm-content"></div>
+</aside>
+</div>
+<!-- CALL OVERLAY (Dialer) -->
+<div class="fixed bottom-8 right-8 z-[200] w-[400px] hidden-section" id="call-overlay">
+<div class="liquid-glass rounded-3xl p-6 active-dialer-pulse">
+<div class="flex justify-between items-start mb-6">
+<div class="flex gap-4">
+<div class="w-14 h-14 rounded-2xl overflow-hidden border-2 border-primary">
+<img alt="Caller" class="w-full h-full object-cover" id="caller-img" src=""/>
+</div>
+<div>
+<h4 class="font-display text-xl leading-tight" id="caller-name">Incoming...</h4>
+<p class="text-on-surface-variant text-sm font-mono" id="caller-company">Unknown Company</p>
+</div>
+</div>
+<div class="px-3 py-1 bg-secondary/10 text-secondary text-[10px] font-mono rounded-full flex items-center gap-1">
+<span class="w-1.5 h-1.5 bg-secondary rounded-full animate-pulse"></span>
+                    LIVE AI
+                </div>
+</div>
+<!-- Call Stats/AI -->
+<div class="bg-black/20 rounded-2xl p-4 mb-6">
+<div class="text-sm italic text-primary/80 mb-2" id="ai-coaching">"Wait for the lead to finish their sentence before pitching..."</div>
+<div class="flex justify-between font-mono text-xs text-on-surface-variant">
+<span id="call-timer">00:00</span>
+<span id="call-sentiment">Sentiment: Neutral</span>
+</div>
+</div>
+<!-- Controls -->
+<div class="flex justify-center gap-4">
+<button class="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5"><span class="material-symbols-outlined">mic_off</span></button>
+<button class="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5"><span class="material-symbols-outlined">pause</span></button>
+<button class="w-12 h-12 rounded-full bg-error-container text-error flex items-center justify-center hover:scale-110 transition-all" id="end-call-btn"><span class="material-symbols-outlined">call_end</span></button>
+<button class="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5"><span class="material-symbols-outlined">forward</span></button>
+</div>
+</div>
+</div>
+<!-- TOAST NOTIFICATIONS -->
+<div class="fixed top-20 right-8 z-[300] flex flex-col gap-2" id="toast-container"></div>
+<script>
+        // --- DATA & STATE ---
+        const DEFAULT_STATE = {
+            user: { name: 'Alex Carter', role: 'Sales Lead', persona: 'sales', onboarding: false },
+            usage: { minutes: 452, limit: 1000 },
+            contacts: [
+                { id: 1, name: 'Sarah Jenkins', company: 'Global Tech', phone: '+1 (555) 0123', status: 'Hot', img: 'https://i.pravatar.cc/150?u=1' },
+                { id: 2, name: 'Michael Chen', company: 'Innovate AI', phone: '+1 (555) 4567', status: 'Warm', img: 'https://i.pravatar.cc/150?u=2' },
+                { id: 3, name: 'Emma Watson', company: 'Design Co', phone: '+1 (555) 8901', status: 'Cold', img: 'https://i.pravatar.cc/150?u=3' },
+                { id: 4, name: 'David Miller', company: 'Apex Systems', phone: '+1 (555) 2345', status: 'Lead', img: 'https://i.pravatar.cc/150?u=4' },
+                { id: 5, name: 'Julia Roberts', company: 'Star Agency', phone: '+1 (555) 6789', status: 'Hot', img: 'https://i.pravatar.cc/150?u=5' }
+            ],
+            deals: [
+                { id: 1, title: 'Enterprise License', val: '$45,000', stage: 'negotiation', contact: 'Sarah Jenkins' },
+                { id: 2, title: 'Pro Plan Upsell', val: '$12,000', stage: 'discovery', contact: 'Michael Chen' },
+                { id: 3, title: 'Renewal 2024', val: '$5,000', stage: 'qualified', contact: 'David Miller' }
+            ],
+            history: [
+                { id: 101, contact: 'Sarah Jenkins', type: 'outbound', duration: '12:45', date: '2023-10-24 14:20', sentiment: 'positive' },
+                { id: 102, contact: 'Michael Chen', type: 'inbound', duration: '04:12', date: '2023-10-24 11:05', sentiment: 'neutral' }
+            ],
+            integrations: [
+                { name: 'Salesforce', active: true, icon: 'salesforce.com' },
+                { name: 'Slack', active: true, icon: 'slack.com' },
+                { name: 'Hubspot', active: false, icon: 'hubspot.com' },
+                { name: 'Zendesk', active: false, icon: 'zendesk.com' }
+            ],
+            activeCall: null
+        };
+
+        let state = JSON.parse(localStorage.getItem('df_d8_state')) || DEFAULT_STATE;
+
+        const saveState = () => localStorage.setItem('df_d8_state', JSON.stringify(state));
+
+        // --- UI & CORE APP LOGIC ---
+        const app = {
+            currentScreen: 'dashboard',
+            onboardingStep: 0,
+
+            init() {
+                if (state.user.onboarding) {
+                    this.showApp();
+                } else {
+                    document.getElementById('landing-layer').classList.remove('hidden-section');
+                }
+                this.bindNav();
+                this.renderUsage();
+            },
+
+            showLogin() {
+                this.startOnboarding(); // Simulating direct flow for demo
+            },
+
+            startOnboarding() {
+                document.getElementById('landing-layer').classList.add('hidden-section');
+                document.getElementById('onboarding-layer').classList.remove('hidden-section');
+                this.renderOnboarding();
+            },
+
+            renderOnboarding() {
+                const steps = [
+                    { t: 'Welcome to DialForge', d: 'What defines your workflow?', type: 'persona' },
+                    { t: 'Pick Your Number', d: 'Select an AI-ready virtual number.', type: 'phone' },
+                    { t: 'Audio Setup', d: 'Test your mic and speakers for crystal clear quality.', type: 'audio' },
+                    { t: 'CRM Sync', d: 'Connect your tools in one click.', type: 'sync' },
+                    { t: 'Permissions', d: 'Invite your team and set roles.', type: 'team' },
+                    { t: 'All Set!', d: 'Ready to launch your first AI-coached call?', type: 'done' }
+                ];
+                
+                const container = document.querySelector('.step-container');
+                const step = steps[this.onboardingStep];
+                
+                container.innerHTML = `
+                    <div class="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <p class="text-primary font-mono text-xs mb-2">Step ${this.onboardingStep + 1} of 6</p>
+                        <h2 class="font-display text-4xl mb-4">${step.t}</h2>
+                        <p class="text-on-surface-variant text-lg mb-8">${step.d}</p>
+                        ${this.getOnboardingContent(step.type)}
+                    </div>
+                `;
+
+                document.getElementById('onb-next').onclick = () => {
+                    if (this.onboardingStep < 5) {
+                        this.onboardingStep++;
+                        this.renderOnboarding();
+                    } else {
+                        state.user.onboarding = true;
+                        saveState();
+                        this.showApp();
+                    }
+                };
+            },
+
+            getOnboardingContent(type) {
+                switch(type) {
+                    case 'persona': return `
+                        <div class="grid grid-cols-3 gap-4">
+                            <button class="p-6 rounded-2xl bg-white/5 border border-white/10 text-left hover:border-primary/50">
+                                <span class="material-symbols-outlined text-primary mb-2">person</span>
+                                <p class="font-bold">Sales</p>
+                            </button>
+                            <button class="p-6 rounded-2xl bg-white/5 border border-white/10 text-left hover:border-primary/50">
+                                <span class="material-symbols-outlined text-secondary mb-2">support_agent</span>
+                                <p class="font-bold">Support</p>
+                            </button>
+                            <button class="p-6 rounded-2xl bg-white/5 border border-white/10 text-left hover:border-primary/50">
+                                <span class="material-symbols-outlined text-blue-400 mb-2">rocket_launch</span>
+                                <p class="font-bold">Solo Pro</p>
+                            </button>
+                        </div>
+                    `;
+                    default: return `<div class="h-32 flex items-center justify-center bg-white/5 rounded-2xl border border-dashed border-white/20">Modular UI Component</div>`;
+                }
+            },
+
+            showApp() {
+                document.getElementById('onboarding-layer').classList.add('hidden-section');
+                document.getElementById('landing-layer').classList.add('hidden-section');
+                document.getElementById('app-layer').classList.remove('hidden-section');
+                this.renderScreen('dashboard');
+            },
+
+            bindNav() {
+                document.querySelectorAll('.nav-item').forEach(btn => {
+                    btn.onclick = () => {
+                        const screen = btn.getAttribute('data-screen');
+                        this.renderScreen(screen);
+                        
+                        document.querySelectorAll('.nav-item').forEach(b => {
+                            b.classList.remove('bg-primary-container/10', 'text-primary');
+                            b.classList.add('text-on-surface-variant');
+                        });
+                        btn.classList.add('bg-primary-container/10', 'text-primary');
+                        btn.classList.remove('text-on-surface-variant');
+                    };
+                });
+            },
+
+            renderScreen(screen) {
+                this.currentScreen = screen;
+                const container = document.getElementById('screen-viewport');
+                container.innerHTML = '';
+
+                switch(screen) {
+                    case 'dashboard': this.screens.dashboard(container); break;
+                    case 'dialer': this.screens.dialer(container); break;
+                    case 'pipeline': this.screens.pipeline(container); break;
+                    case 'history': this.screens.history(container); break;
+                    case 'contacts': this.screens.contacts(container); break;
+                    case 'integrations': this.screens.integrations(container); break;
+                    case 'coaching': this.screens.coaching(container); break;
+                    case 'team': this.screens.team(container); break;
+                    case 'settings': this.screens.settings(container); break;
+                }
+            },
+
+            renderUsage() {
+                const percent = (state.usage.minutes / state.usage.limit) * 100;
+                document.getElementById('usage-val').innerText = `${state.usage.minutes} / ${state.usage.limit}m`;
+                document.getElementById('usage-bar').style.width = `${percent}%`;
+            },
+
+            testCall() {
+                // Read the dialer input if on the dialer screen
+                const dialerInput = document.getElementById('dialer-input');
+                const number = dialerInput ? dialerInput.value.trim() : '';
+                if (number && number !== '+1 (555) 000-0000') {
+                    window.location.href = '/live-call.html?' + new URLSearchParams({ phone: number }).toString();
+                } else {
+                    const randomContact = state.contacts[Math.floor(Math.random() * state.contacts.length)];
+                    this.triggerCall(randomContact);
+                }
+            },
+
+            triggerCall(contact) {
+                // Navigate to live-call.html with contact info as URL params
+                const params = new URLSearchParams({
+                    name:    contact.name    || '',
+                    phone:   contact.phone   || '',
+                    company: contact.company || ''
+                });
+                window.location.href = '/live-call.html?' + params.toString();
+            },
+
+            notify(msg) {
+                const toast = document.createElement('div');
+                toast.className = 'liquid-glass px-6 py-3 rounded-xl border-secondary/30 text-secondary font-bold animate-in slide-in-from-right-10 flex items-center gap-2 shadow-xl';
+                toast.innerHTML = `<span class="material-symbols-outlined">check_circle</span> ${msg}`;
+                document.getElementById('toast-container').appendChild(toast);
+                setTimeout(() => toast.remove(), 4000);
+            },
+
+            screens: {
+                dashboard(container) {
+                    container.innerHTML = `
+                        <div class="animate-in fade-in duration-700">
+                            <h2 class="font-display text-4xl mb-8">Executive Overview</h2>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+                                <div class="liquid-glass p-6 rounded-2xl">
+                                    <p class="text-xs font-mono text-on-surface-variant uppercase mb-2">Total Call Volume</p>
+                                    <p class="text-3xl font-display text-primary">2,482</p>
+                                    <p class="text-[10px] text-secondary mt-2">+12% from last week</p>
+                                </div>
+                                <div class="liquid-glass p-6 rounded-2xl">
+                                    <p class="text-xs font-mono text-on-surface-variant uppercase mb-2">Avg. Sentiment</p>
+                                    <p class="text-3xl font-display text-secondary">84%</p>
+                                    <p class="text-[10px] text-secondary mt-2">Optimistic trajectory</p>
+                                </div>
+                                <div class="liquid-glass p-6 rounded-2xl">
+                                    <p class="text-xs font-mono text-on-surface-variant uppercase mb-2">Deals Influenced</p>
+                                    <p class="text-3xl font-display text-primary">$1.2M</p>
+                                    <p class="text-[10px] text-on-surface-variant mt-2">Q4 Target: $2.0M</p>
+                                </div>
+                                <div class="liquid-glass p-6 rounded-2xl">
+                                    <p class="text-xs font-mono text-on-surface-variant uppercase mb-2">Missed Opportunities</p>
+                                    <p class="text-3xl font-display text-error">12</p>
+                                    <p class="text-[10px] text-error mt-2">Follow up required</p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <div class="lg:col-span-2 liquid-glass p-8 rounded-3xl">
+                                    <div class="flex justify-between items-center mb-8">
+                                        <h3 class="font-display text-2xl">Velocity Trends</h3>
+                                        <div class="flex gap-2">
+                                            <button class="px-3 py-1 bg-primary/10 text-primary text-xs rounded-full">Day</button>
+                                            <button class="px-3 py-1 text-on-surface-variant text-xs rounded-full">Week</button>
+                                        </div>
+                                    </div>
+                                    <div class="h-[300px] flex items-end gap-2 px-4">
+                                        ${Array.from({length: 24}).map((_, i) => `
+                                            <div class="flex-1 fire-gradient rounded-t-sm opacity-${Math.floor(Math.random()*60)+20}" style="height: ${Math.random()*100}%"></div>
+                                        `).join('')}
+                                    </div>
+                                    <div class="flex justify-between mt-4 font-mono text-[10px] text-on-surface-variant">
+                                        <span>08:00 AM</span>
+                                        <span>12:00 PM</span>
+                                        <span>04:00 PM</span>
+                                        <span>08:00 PM</span>
+                                    </div>
+                                </div>
+
+                                <div class="liquid-glass p-8 rounded-3xl">
+                                    <h3 class="font-display text-2xl mb-6">Upcoming Tasks</h3>
+                                    <div class="flex flex-col gap-4">
+                                        <div class="p-4 rounded-xl bg-white/5 border-l-4 border-primary">
+                                            <p class="text-sm font-bold">Follow up with Sarah Jenkins</p>
+                                            <p class="text-xs text-on-surface-variant mt-1">Negotiation stage - Send contract</p>
+                                        </div>
+                                        <div class="p-4 rounded-xl bg-white/5 border-l-4 border-secondary">
+                                            <p class="text-sm font-bold">Inbound Queue: Tech Corp</p>
+                                            <p class="text-xs text-on-surface-variant mt-1">Needs solution architect sync</p>
+                                        </div>
+                                        <div class="p-4 rounded-xl bg-white/5 border-l-4 border-on-surface-variant">
+                                            <p class="text-sm font-bold">Quarterly Business Review</p>
+                                            <p class="text-xs text-on-surface-variant mt-1">Review call sentiment maps</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                },
+
+                dialer(container) {
+                    container.innerHTML = `
+                        <div class="max-w-4xl mx-auto">
+                            <h2 class="font-display text-4xl mb-8">Power Dialer</h2>
+                            <div class="liquid-glass p-10 rounded-3xl text-center mb-10">
+                                <div class="mb-8">
+                                    <input type="text" value="+1 (555) 000-0000" class="bg-transparent border-none text-5xl font-display text-center w-full focus:ring-0 text-on-surface" id="dialer-input">
+                                    <p class="text-on-surface-variant font-mono mt-4 uppercase tracking-widest">Enter number or select from queue</p>
+                                </div>
+                                <div class="grid grid-cols-3 gap-6 max-w-sm mx-auto mb-10">
+                                    ${[1,2,3,4,5,6,7,8,9,'*',0,'#'].map(n => `
+                                        <button class="w-20 h-20 rounded-full bg-white/5 border border-white/10 text-3xl font-display hover:bg-primary/20 transition-all active:scale-95" onclick="document.getElementById('dialer-input').value += '${n}'">${n}</button>
+                                    `).join('')}
+                                </div>
+                                <button onclick="app.testCall()" class="w-24 h-24 rounded-full fire-gradient shadow-2xl shadow-primary-container/40 flex items-center justify-center hover:scale-105 transition-all mx-auto">
+                                    <span class="material-symbols-outlined text-4xl text-on-primary" style="font-variation-settings: 'FILL' 1">call</span>
+                                </button>
+                            </div>
+
+                            <div class="liquid-glass p-6 rounded-2xl">
+                                <h3 class="font-mono text-sm text-on-surface-variant mb-6 flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary">playlist_play</span>
+                                    ACTIVE QUEUE (4)
+                                </h3>
+                                <div class="space-y-2">
+                                    ${state.contacts.slice(0, 4).map(c => `
+                                        <div class="flex items-center justify-between p-3 rounded-xl hover:bg-white/5 group transition-all">
+                                            <div class="flex items-center gap-4">
+                                                <img src="${c.img}" class="w-10 h-10 rounded-lg">
+                                                <div>
+                                                    <p class="text-sm font-bold">${c.name}</p>
+                                                    <p class="text-xs text-on-surface-variant">${c.company}</p>
+                                                </div>
+                                            </div>
+                                            <button onclick="app.triggerCall(${JSON.stringify(c).replace(/"/g, '&quot;')})" class="px-4 py-1.5 rounded-full border border-primary/20 text-xs font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">Call Now</button>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                },
+
+                pipeline(container) {
+                    const stages = ['lead', 'qualified', 'discovery', 'negotiation'];
+                    container.innerHTML = `
+                        <div class="h-full flex flex-col">
+                            <div class="flex justify-between items-center mb-8">
+                                <h2 class="font-display text-4xl">CRM Pipeline</h2>
+                                <button class="px-6 py-2 fire-gradient rounded-full text-on-primary font-bold">+ New Deal</button>
+                            </div>
+                            <div class="flex gap-6 overflow-x-auto pb-6 flex-1">
+                                ${stages.map(stage => `
+                                    <div class="min-w-[300px] flex-1 flex flex-col gap-4">
+                                        <div class="flex items-center justify-between px-2">
+                                            <h4 class="font-mono text-xs uppercase tracking-widest text-on-surface-variant">${stage}</h4>
+                                            <span class="px-2 py-0.5 rounded bg-white/5 text-[10px] text-on-surface-variant">${state.deals.filter(d => d.stage === stage).length}</span>
+                                        </div>
+                                        <div class="kanban-column flex flex-col gap-4 p-2 bg-white/5 rounded-2xl border border-white/5">
+                                            ${state.deals.filter(d => d.stage === stage).map(deal => `
+                                                <div class="liquid-glass p-4 rounded-xl cursor-move hover:border-primary/50 transition-all">
+                                                    <p class="text-sm font-bold mb-1">${deal.title}</p>
+                                                    <p class="text-xs text-on-surface-variant mb-3">${deal.contact}</p>
+                                                    <div class="flex justify-between items-center">
+                                                        <span class="text-xs font-mono text-primary">${deal.val}</span>
+                                                        <span class="material-symbols-outlined text-sm text-on-surface-variant">more_horiz</span>
+                                                    </div>
+                                                </div>
+                                            `).join('')}
+                                            <button class="w-full py-2 rounded-xl border border-dashed border-white/10 text-on-surface-variant text-xs hover:bg-white/5">+ Add</button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                },
+
+                history(container) {
+                    container.innerHTML = `
+                        <div>
+                            <h2 class="font-display text-4xl mb-8">Call History</h2>
+                            <div class="liquid-glass rounded-3xl overflow-hidden">
+                                <table class="w-full text-left">
+                                    <thead class="bg-white/5 font-mono text-xs text-on-surface-variant">
+                                        <tr>
+                                            <th class="p-6">Contact</th>
+                                            <th class="p-6">Type</th>
+                                            <th class="p-6">Duration</th>
+                                            <th class="p-6">Sentiment</th>
+                                            <th class="p-6">Date</th>
+                                            <th class="p-6">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-white/5">
+                                        ${state.history.map(h => `
+                                            <tr class="hover:bg-white/5 transition-colors">
+                                                <td class="p-6 font-bold text-sm">${h.contact}</td>
+                                                <td class="p-6 uppercase text-[10px] font-mono tracking-tighter">
+                                                    <span class="${h.type === 'inbound' ? 'text-blue-400' : 'text-primary'} flex items-center gap-1">
+                                                        <span class="material-symbols-outlined text-sm">${h.type === 'inbound' ? 'call_received' : 'call_made'}</span>
+                                                        ${h.type}
+                                                    </span>
+                                                </td>
+                                                <td class="p-6 font-mono text-xs">${h.duration}</td>
+                                                <td class="p-6">
+                                                    <span class="px-3 py-1 rounded-full text-[10px] font-mono ${h.sentiment === 'positive' ? 'bg-secondary/10 text-secondary' : 'bg-white/10 text-on-surface-variant'}">
+                                                        ${h.sentiment}
+                                                    </span>
+                                                </td>
+                                                <td class="p-6 text-xs text-on-surface-variant">${h.date}</td>
+                                                <td class="p-6">
+                                                    <button class="material-symbols-outlined text-on-surface-variant hover:text-primary">play_circle</button>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                },
+
+                contacts(container) {
+                    container.innerHTML = `
+                        <div>
+                            <div class="flex justify-between items-center mb-8">
+                                <h2 class="font-display text-4xl">Contacts</h2>
+                                <button class="px-6 py-2 fire-gradient rounded-full text-on-primary font-bold">+ Add Contact</button>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                ${state.contacts.map(c => `
+                                    <div class="liquid-glass p-6 rounded-2xl group relative overflow-hidden">
+                                        <div class="flex gap-4 items-center mb-6">
+                                            <img src="${c.img}" class="w-16 h-16 rounded-2xl object-cover ring-2 ring-primary/20">
+                                            <div>
+                                                <h4 class="font-display text-xl">${c.name}</h4>
+                                                <p class="text-on-surface-variant text-sm">${c.company}</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-col gap-2 mb-6">
+                                            <div class="flex items-center gap-2 text-xs font-mono text-on-surface-variant">
+                                                <span class="material-symbols-outlined text-sm">phone</span>
+                                                ${c.phone}
+                                            </div>
+                                            <div class="flex items-center gap-2 text-xs font-mono text-on-surface-variant">
+                                                <span class="material-symbols-outlined text-sm">label</span>
+                                                Status: <span class="text-primary">${c.status}</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button onclick="app.triggerCall(${JSON.stringify(c).replace(/"/g, '&quot;')})" class="flex-1 py-2 rounded-xl bg-primary-container/20 text-primary font-bold text-xs hover:bg-primary-container/40 transition-all">Call Now</button>
+                                            <button class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all"><span class="material-symbols-outlined text-on-surface-variant">edit</span></button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                },
+
+                integrations(container) {
+                    container.innerHTML = `
+                        <div>
+                            <h2 class="font-display text-4xl mb-8">Ecosystem Hub</h2>
+                            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                                ${state.integrations.map(i => `
+                                    <div class="liquid-glass p-6 rounded-3xl text-center group transition-all hover:scale-105 ${i.active ? 'border-primary/40' : 'opacity-60'}">
+                                        <div class="w-16 h-16 mx-auto mb-4 bg-white rounded-2xl p-3 flex items-center justify-center">
+                                            <img src="https://logo.clearbit.com/${i.icon}" class="max-w-full max-h-full">
+                                        </div>
+                                        <p class="font-bold text-sm mb-4">${i.name}</p>
+                                        <button class="w-full py-1 rounded-full text-[10px] font-mono border ${i.active ? 'bg-primary-container text-on-primary border-primary' : 'border-white/20 text-on-surface-variant'}">
+                                            ${i.active ? 'ACTIVE' : 'CONNECT'}
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                },
+
+                coaching(container) {
+                    container.innerHTML = `
+                        <div class="max-w-5xl mx-auto">
+                            <h2 class="font-display text-4xl mb-8">AI Coaching Lab</h2>
+                            <div class="liquid-glass p-8 rounded-3xl mb-10">
+                                <div class="flex justify-between items-center mb-10">
+                                    <div>
+                                        <p class="text-xs font-mono text-on-surface-variant uppercase mb-1">Recent Analysis</p>
+                                        <h3 class="font-display text-2xl">Call #102: Michael Chen</h3>
+                                    </div>
+                                    <div class="flex gap-4">
+                                        <div class="text-center">
+                                            <p class="text-[10px] font-mono text-on-surface-variant">LISTENING</p>
+                                            <p class="text-xl font-display text-secondary">62%</p>
+                                        </div>
+                                        <div class="text-center border-l border-white/10 pl-4">
+                                            <p class="text-[10px] font-mono text-on-surface-variant">SENTIMENT</p>
+                                            <p class="text-xl font-display text-primary">Positive</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="relative h-40 w-full mb-8 bg-black/20 rounded-2xl overflow-hidden flex items-center px-4 gap-1" id="waveform">
+                                    ${Array.from({length: 80}).map(() => `
+                                        <div class="flex-1 bg-primary/40 rounded-full" style="height: ${20 + Math.random()*60}%"></div>
+                                    `).join('')}
+                                    <div class="absolute inset-y-0 left-[40%] w-0.5 bg-primary shadow-[0_0_10px_#FF4D1C]"></div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div>
+                                        <h4 class="font-mono text-xs text-secondary uppercase mb-4 flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-sm">trending_up</span> Wins
+                                        </h4>
+                                        <ul class="space-y-3 text-sm">
+                                            <li class="flex gap-2"><span class="text-secondary">✓</span> Mastered the value-based discovery phase.</li>
+                                            <li class="flex gap-2"><span class="text-secondary">✓</span> Handled price objection using the "Lace" method.</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-mono text-xs text-primary uppercase mb-4 flex items-center gap-2">
+                                            <span class="material-symbols-outlined text-sm">bolt</span> Coaching Tips
+                                        </h4>
+                                        <ul class="space-y-3 text-sm">
+                                            <li class="flex gap-2"><span class="text-primary">!</span> Slightly too fast talking during the close.</li>
+                                            <li class="flex gap-2"><span class="text-primary">!</span> Missed opportunity to mention API integration.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                },
+
+                team(container) {
+                    container.innerHTML = `
+                        <div>
+                            <div class="flex justify-between items-center mb-8">
+                                <h2 class="font-display text-4xl">Team & Roles</h2>
+                                <button class="px-6 py-2 fire-gradient rounded-full text-on-primary font-bold">Invite Member</button>
+                            </div>
+                            <div class="liquid-glass rounded-3xl overflow-hidden">
+                                <table class="w-full text-left">
+                                    <thead class="bg-white/5 font-mono text-xs text-on-surface-variant">
+                                        <tr>
+                                            <th class="p-6">Member</th>
+                                            <th class="p-6">Role</th>
+                                            <th class="p-6">Permissions</th>
+                                            <th class="p-6">Status</th>
+                                            <th class="p-6"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-white/5">
+                                        ${['Alex Carter', 'Jane Doe', 'Mike Smith', 'Sarah Blue'].map(name => `
+                                            <tr>
+                                                <td class="p-6 flex items-center gap-3">
+                                                    <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">${name[0]}</div>
+                                                    <p class="font-bold text-sm">${name}</p>
+                                                </td>
+                                                <td class="p-6"><span class="px-3 py-1 rounded-full bg-white/5 text-xs">Sales Agent</span></td>
+                                                <td class="p-6">
+                                                    <div class="flex gap-2">
+                                                        <span class="w-2 h-2 rounded-full bg-secondary" title="Call Access"></span>
+                                                        <span class="w-2 h-2 rounded-full bg-primary" title="Record Access"></span>
+                                                        <span class="w-2 h-2 rounded-full bg-white/20" title="Admin Access"></span>
+                                                    </div>
+                                                </td>
+                                                <td class="p-6"><span class="text-secondary text-xs flex items-center gap-1"><span class="w-1.5 h-1.5 bg-secondary rounded-full"></span> Online</span></td>
+                                                <td class="p-6"><button class="material-symbols-outlined text-on-surface-variant">settings</button></td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                },
+
+                settings(container) {
+                    container.innerHTML = `
+                        <div class="max-w-2xl">
+                            <h2 class="font-display text-4xl mb-8">Account Settings</h2>
+                            <div class="space-y-6">
+                                <div class="liquid-glass p-6 rounded-2xl">
+                                    <h4 class="font-bold mb-4">Phone Numbers</h4>
+                                    <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5">
+                                        <div>
+                                            <p class="font-mono">+1 (555) 0192-827</p>
+                                            <p class="text-[10px] text-on-surface-variant uppercase">Primary Sales Line - NY Office</p>
+                                        </div>
+                                        <button class="text-primary text-xs font-bold">Release</button>
+                                    </div>
+                                    <button class="mt-4 text-primary text-xs font-bold">+ Buy New Number</button>
+                                </div>
+                                
+                                <div class="liquid-glass p-6 rounded-2xl">
+                                    <h4 class="font-bold mb-4">AI Preferences</h4>
+                                    <div class="flex items-center justify-between mb-4">
+                                        <p class="text-sm">Real-time Whisper Coaching</p>
+                                        <input type="checkbox" checked class="rounded border-white/20 bg-transparent text-primary focus:ring-primary">
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm">Sentiment Analysis Trigger</p>
+                                        <select class="bg-surface text-xs border-white/10 rounded-lg">
+                                            <option>Continuous</option>
+                                            <option>Trigger Only</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        };
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+    </script>
+</body></html>

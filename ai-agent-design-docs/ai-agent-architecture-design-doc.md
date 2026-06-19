@@ -1,6 +1,6 @@
 # AI Agent Architecture Options
 **Author:** Shuyang Zhang (AI)  
-**Last updated:** 2026-06-12  
+**Last updated:** 2026-06-18  
 
 ---
 
@@ -117,6 +117,50 @@ Modulate.ai is a voice intelligence/moderation platform that fits into the **pos
 | **PII/PHI Redaction** | Strips sensitive data (card numbers, SSNs, health info) from transcripts before DB write | High — if the product moves into regulated industries |
 | **Deepfake Detection** | Flags synthetic voices on inbound calls | Medium — fraud prevention for inbound support calls |
 | **Compliance monitoring (Velma)** | Detects risky behaviors (fraud signals, regulatory violations) across call audio | Medium — enterprise compliance use case |
-| **Speech-to-Text** ($0.03/hr) | Alternative transcription API | Low — `Deepgram Nova-3` is faster and likely cheaper for our use case |
+| **Speech-to-Text** | Alternative transcription API (see pricing breakdown below) | Medium — significantly cheaper than Deepgram for streaming; post-call batch even more so |
 
-**Status:** Not in scope for MVP. Pending clarification from Danish on intended use — Modulate.ai is a post-call compliance tool, not a TTS provider.
+**Status:** Not in scope for MVP. Pending clarification from Danish on intended use — Modulate.ai is a post-call compliance tool, not a dedicated real-time STT provider.
+
+---
+
+## STT Pricing Comparison: Deepgram vs. Modulate.ai
+
+*Prices as of June 2026. Both offer free credits on signup: Deepgram $200, Modulate 400 hours.*
+
+### Deepgram
+
+| Mode | Model | Pay-As-You-Go | Growth Plan (annual) |
+|---|---|---|---|
+| **Streaming** | Nova-3 Monolingual | $0.0048/min ($0.288/hr) | $0.0042/min ($0.252/hr) |
+| **Streaming** | Nova-3 Multilingual | $0.0058/min ($0.348/hr) | $0.0050/min ($0.300/hr) |
+| **Streaming** | Flux English | $0.0065/min ($0.390/hr) | $0.0057/min ($0.342/hr) |
+| **Pre-recorded** | Nova-3 Monolingual | $0.0077/hr | $0.0065/hr |
+| **Pre-recorded** | Nova-3 Multilingual | $0.0092/hr | $0.0078/hr |
+| **Pre-recorded** | Flux English | $0.0077/hr | $0.0065/hr |
+
+Add-ons: Speaker Diarization +$0.0020/min, Redaction +$0.0020/min, Keyterm Prompting +$0.0017/min. Smart Formatting included free.  
+Concurrency: REST up to 50 concurrent; WebSocket streaming up to 225.
+
+### Modulate.ai (Velma Transcribe)
+
+| Mode | Model | Price | Notes |
+|---|---|---|---|
+| **Streaming** | Velma Transcribe Streaming | $0.06/hr | Diarization, emotion detection, accent ID, 57 languages included |
+| **Batch** | Velma Transcribe Batch | $0.03/hr | Same features as streaming; multilingual |
+| **Batch** | Velma Transcribe Batch English Fast | $0.025/hr | English-only; up to 200x realtime factor |
+| **Batch** | Velma PII/PHI Redact Batch | $0.05/hr | PII/PHI detection + redaction built in |
+| **Streaming** | Velma PII/PHI Redact Streaming | $0.08/hr | Real-time PII/PHI redaction |
+
+Add-ons: PII/PHI Tagging +$0.02/hr, Deepfake Detection +$0.25/hr.
+
+### Head-to-Head for Our Use Case
+
+| Scenario | Deepgram | Modulate.ai | Winner |
+|---|---|---|---|
+| **Real-time call STT (streaming)** | $0.0048/min = **$0.288/hr** | **$0.06/hr** | Modulate ~4.8× cheaper |
+| **Post-call batch transcription** | $0.0077/hr | $0.03/hr | Deepgram cheaper for batch |
+| **Streaming + diarization** | $0.288 + $0.12 = **$0.408/hr** | **$0.06/hr** (included) | Modulate ~6.8× cheaper |
+| **Streaming + PII redaction** | $0.288 + $0.12 = **$0.408/hr** | **$0.08/hr** | Modulate ~5× cheaper |
+| **Latency (real-time calls)** | ~Lower (purpose-built STT) | Higher (voice intelligence platform) | Deepgram |
+
+**Recommendation:** For our real-time voice AI loop, **Deepgram Nova-3 remains the right choice** — it is purpose-built for low-latency streaming and integrates directly with our existing setup. Modulate.ai's streaming price is lower, but Deepgram's latency advantage matters more in live calls. Modulate.ai becomes compelling only if we add compliance features (PII redaction, deepfake detection) post-call, where the $0.03–$0.05/hr batch rate is a genuine saving over running a second Deepgram pass.

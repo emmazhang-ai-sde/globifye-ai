@@ -157,7 +157,7 @@ ALTER TABLE recordings RENAME COLUMN duration TO duration_seconds;
 > Note: if the `organizations`, `users`, and `contacts` tables don't exist yet in your dev Supabase, create them first (even as empty stubs) so the FK constraints don't fail.
 
 ```sql
- -- 1. organizations (users 和 contacts 都依赖它，先建)
+ -- 1. organizations (both users and contacts depend on it, create first)
   CREATE TABLE IF NOT EXISTS organizations (
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     name text,
@@ -438,7 +438,29 @@ No changes needed. `raw_llm_output` was never part of the Zod schema — it was 
 
 ---
 
-### Step 11.7 — End-to-End Test
+### Step 11.7 — Schema Verification Script
+
+Before doing the E2E test, run the schema verification script to confirm all migrations applied correctly:
+
+```bash
+cd ai-pipeline
+npx tsx scripts/verify-step11-schema.ts
+```
+
+Script location: [`ai-pipeline/scripts/verify-step11-schema.ts`](../ai-pipeline/scripts/verify-step11-schema.ts)
+
+Expected output: **25/25 checks passed**. The script verifies:
+- `recordings` — new columns present, `call_metadata` and `duration` removed
+- `transcript` — `sequence_index` added
+- `analysis` — `raw_llm_output` removed
+- `topics` table exists with all columns
+- `gpu_jobs` table exists with all columns
+
+If any checks fail, re-run the corresponding SQL block from Step 11.1 before continuing.
+
+---
+
+### Step 11.8 — End-to-End Test
 
 1. Run `npm run dev`, open the live UI
 2. Start a session, speak a few sentences, stop

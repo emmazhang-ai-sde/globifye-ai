@@ -677,4 +677,4 @@ The analysis results (Summary, Key Topics, Objection Analysis, What Went Well) s
 
 > ✅ When spoken words appear in the caption box in real time, new rows show up in Supabase after each pause, and the Analyze Call button produces results after stopping — **Step 10 is complete** and the full real-time pipeline is working.
 
-← Previous: [Step 9 — Basic UI](ai-pipeline-mvp-step9-basic-ui.md)
+← Previous: [Step 9 — Basic UI](ai-pipeline-mvp-step9-basic-ui-milestone1.md)

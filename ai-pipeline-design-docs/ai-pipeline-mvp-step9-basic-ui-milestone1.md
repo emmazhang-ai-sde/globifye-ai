@@ -1,6 +1,9 @@
-# Step 9 — Basic UI (Next.js page)
+# Step 9 — Basic UI (Next.js page) `[Milestone 1]`
 
 *Part of [AI Pipeline MVP Outline](ai-pipeline-mvp-outline.md)*
+
+> **Milestone 1 — Pipeline End-to-End**
+> After this step the full pipeline runs: mic → Deepgram → transcript DB → LLM → analysis DB → UI. Everything after this is polish and production-readiness.
 
 ---
 

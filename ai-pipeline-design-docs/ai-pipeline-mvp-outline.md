@@ -73,15 +73,37 @@ For the Monday demo: **audio file in → transcript stored → analysis out**. A
 
 ---
 
-### Step 9 — Basic UI *(Next.js page)*
+### Step 9 — Basic UI *(Next.js page)* `[Milestone 1 — Pipeline End-to-End]`
 
-→ See [ai-pipeline-mvp-step9-basic-ui.md](ai-pipeline-mvp-step9-basic-ui.md)
+→ See [ai-pipeline-mvp-step9-basic-ui-milestone1.md](ai-pipeline-mvp-step9-basic-ui-milestone1.md)
+
+> After Step 9 the full pipeline runs end-to-end on a basic internal UI. Steps 10–11 harden the schema and real-time layer; Step 12 swaps in the production UI.
 
 ---
 
 ### Step 10 — Real-time WebSocket Layer *(post-demo, if time)*
 
 → See [ai-pipeline-mvp-step10-websocket-layer.md](ai-pipeline-mvp-step10-websocket-layer.md)
+
+---
+
+### Step 11 — Schema Migration (explicit FK columns)
+
+→ See [ai-pipeline-mvp-step11-schema-migration.md](ai-pipeline-mvp-step11-schema-migration.md)
+
+---
+
+### Step 12 — Frontend UI Integration `[Milestone 2 — Production UI + Agent Runway]`
+
+→ See [ai-pipeline-mvp-step12-frontend-ui-milestone2.md](ai-pipeline-mvp-step12-frontend-ui-milestone2.md)
+
+> After Step 12 the pipeline runs on the frontend team's production-quality UI (Stitch + liveTranscription). Steps 13+ build the real-time agent loop on top of this foundation.
+
+---
+
+### Step 13 — Real-Time Agent Loop: STT → LLM → TTS
+
+→ See [ai-pipeline-mvp-step13-agent-loop.md](ai-pipeline-mvp-step13-agent-loop.md)
 
 ---
 

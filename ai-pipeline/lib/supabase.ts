@@ -20,7 +20,6 @@ export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
 // ---------------------------------------------------------------------------
 
 
-
 export async function createRecording(params: {
   organization_id?: string
   recorded_by?: string
@@ -41,6 +40,7 @@ export async function createRecording(params: {
   if (error) throw new Error(`Failed to create recording row: ${error.message}`)
   return data.id
 }
+
 
 
 // ---------------------------------------------------------------------------
@@ -103,3 +103,6 @@ export async function writeGpuJob(params: {
   await supabaseAdmin.from('gpu_jobs').insert(params)
   // fire-and-forget — intentionally no error throw
 }
+
+
+
