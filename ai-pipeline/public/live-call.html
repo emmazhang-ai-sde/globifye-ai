@@ -274,7 +274,7 @@
 <span class="material-symbols-outlined text-white text-sm" style="font-variation-settings: 'FILL' 1;">model_training</span>
 </div>
 <div>
-<p class="text-xs font-bold text-primary uppercase tracking-tighter">AI Coach Suggestion</p>
+<p class="text-xs font-bold text-primary uppercase tracking-tighter" id="ai-coach-label">AI Coach Suggestion</p>
 <p class="text-sm text-on-surface mt-1 italic fade-transition" id="ai-coach-text">"Emphasize the ROI over specific technical features now."</p>
 </div>
 </div>
@@ -322,6 +322,10 @@
 </button>
 <button class="w-12 h-12 rounded-full glass-level-1 flex items-center justify-center btn-active-error spring-pop" id="btn-record">
 <span class="material-symbols-outlined">fiber_manual_record</span>
+</button>
+<button id="btn-agent-mode" class="px-4 h-12 rounded-full glass-level-1 flex items-center gap-2 text-on-surface-variant hover:text-primary transition-all spring-pop text-xs font-bold" onclick="toggleAgentMode()">
+<span class="material-symbols-outlined text-sm">smart_toy</span>
+<span id="agent-mode-label">Agent</span>
 </button>
 <div class="w-px h-8 bg-white/10 mx-2"></div>
 <button class="px-8 h-12 rounded-full bg-error text-on-error font-bold flex items-center gap-2 hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-error/20" id="btn-end-call" onclick="handleEndCall()">
@@ -555,6 +559,11 @@
     let uttStartSec = 0;
     let seqIdx      = 0;
 
+    // Agent loop state
+    let agentMode           = false;
+    let conversationHistory = [];
+    let currentAudio        = null;
+
     // ====================================================================
     // 7. On page load: populate contact info + auto-start
     // ====================================================================
@@ -662,6 +671,39 @@
                         sequence_index: seqIdx++
                     })
                 });
+
+                // Agent loop — fires only when Agent Mode is ON
+                if (agentMode) {
+                    document.getElementById('ai-coach-text').textContent = 'Thinking...';
+                    try {
+                        const agentRes = await fetch('/api/agent/respond', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ utterance: full, history: conversationHistory }),
+                        });
+                        if (agentRes.ok) {
+                            const agentText = decodeURIComponent(agentRes.headers.get('X-Agent-Response-Text') || '');
+                            conversationHistory = [
+                                ...conversationHistory,
+                                { role: 'user', content: full },
+                                { role: 'assistant', content: agentText },
+                            ];
+                            document.getElementById('ai-coach-text').textContent = `"${agentText}"`;
+                            if (currentAudio) { currentAudio.pause(); URL.revokeObjectURL(currentAudio.src); }
+                            const blob = await agentRes.blob();
+                            const url = URL.createObjectURL(blob);
+                            currentAudio = new Audio(url);
+                            currentAudio.onended = () => URL.revokeObjectURL(url);
+                            currentAudio.play();
+                        } else {
+                            const err = await agentRes.json().catch(() => ({}));
+                            document.getElementById('ai-coach-text').textContent = err.error || 'Agent error';
+                        }
+                    } catch (err) {
+                        document.getElementById('ai-coach-text').textContent = 'Agent error — check console';
+                        console.error('Agent loop error:', err);
+                    }
+                }
             });
 
             wsConn.addEventListener('error', () => showError('WebSocket connection error — check console'));
@@ -673,7 +715,28 @@
     }
 
     // ====================================================================
-    // 9. DOM helpers (our addition)
+    // 9. Agent Mode toggle (our addition)
+    // ====================================================================
+    function toggleAgentMode() {
+        agentMode = !agentMode;
+        const btn   = document.getElementById('btn-agent-mode');
+        const label = document.getElementById('agent-mode-label');
+        const coachLabel = document.getElementById('ai-coach-label');
+        if (agentMode) {
+            btn.classList.add('btn-active');
+            label.textContent = 'Agent ON';
+            coachLabel.textContent = 'AI Agent';
+            document.getElementById('ai-coach-text').textContent = 'Agent mode enabled — listening...';
+        } else {
+            btn.classList.remove('btn-active');
+            label.textContent = 'Agent';
+            coachLabel.textContent = 'AI Coach Suggestion';
+            document.getElementById('ai-coach-text').textContent = '"Emphasize the ROI over specific technical features now."';
+        }
+    }
+
+    // ====================================================================
+    // 10. DOM helpers (our addition)
     // ====================================================================
     function addTranscriptLine(text, speaker, startSec) {
         const container = document.getElementById('transcript-container');
@@ -717,13 +780,16 @@
     }
 
     // ====================================================================
-    // 10. handleEndCall — stops recording, shows Analyze button (our addition)
+    // 11. handleEndCall — stops recording, shows Analyze button (our addition)
     //     Replaces the original version that did location.reload()
     // ====================================================================
     function handleEndCall() {
         // Stop mic + WebSocket
         if (mediaRec) { mediaRec.stop(); mediaRec = null; }
         if (wsConn)   { wsConn.close();  wsConn   = null; }
+        // Stop any playing agent audio
+        if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+        conversationHistory = [];
         setCaption('');
         setTranscriptStatus('ENDED');
         document.getElementById('call-status-badge').textContent = 'ENDED';
@@ -762,7 +828,7 @@
     }
 
     // ====================================================================
-    // 11. Analyze Call (our addition)
+    // 12. Analyze Call (our addition)
     // ====================================================================
     async function handleAnalyze() {
         if (!recordingId) return;
