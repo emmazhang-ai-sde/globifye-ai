@@ -24,15 +24,25 @@ import type {
 // recordings helpers
 // =====================
 
-export async function createRecording(data: NewRecording): Promise<Recording> {
-  const { data: row, error } = await supabaseAdmin
+export async function createRecording(params: {
+  organization_id?: string
+  recorded_by?: string
+  contact_id?: string
+  did_number?: string
+  caller_number?: string
+  audio_url?: string
+  status?: string
+  duration_seconds?: number
+  sip_provider?: string
+} = {}): Promise<string> {
+  const { data, error } = await supabaseAdmin
     .from('recordings')
-    .insert(data)
-    .select()
+    .insert(params)
+    .select('id')
     .single()
 
-  if (error) throw new Error(`createRecording failed: ${error.message}`)
-  return row as Recording
+  if (error) throw new Error(`Failed to create recording row: ${error.message}`)
+  return data.id
 }
 
 export async function updateRecordingDuration(
@@ -41,7 +51,7 @@ export async function updateRecordingDuration(
 ): Promise<void> {
   const { error } = await supabaseAdmin
     .from('recordings')
-    .update({ duration })
+    .update({ duration_seconds: duration })   // ← was `duration`
     .eq('id', recordingId)
 
   if (error) throw new Error(`updateRecordingDuration failed: ${error.message}`)
@@ -102,4 +112,51 @@ export async function getAnalysisForRecording(
 
   if (error) throw new Error(`getAnalysisForRecording failed: ${error.message}`)
   return data as Analysis | null
+}
+
+import type { ParsedUtterance } from './deepgram'
+import { utterancesToTranscriptRows } from './deepgram'
+
+/**
+ * Convenience: takes parsed utterances + a recording_id, writes them all to
+ * the transcript table. Used by the API route in Step 8.
+ */
+export async function writeTranscript(
+  recordingId: string,
+  utterances: ParsedUtterance[],
+): Promise<TranscriptRow[]> {
+  const rows = utterancesToTranscriptRows(utterances, recordingId)
+  return insertTranscriptRows(rows)
+}
+
+// ============================================================
+// topics helpers (Step 11)
+// ============================================================
+
+export async function writeTopics(
+  topics: {
+    recording_id: string
+    analysis_id: string
+    name: string
+    start_time: number
+    sequence_index: number
+  }[],
+): Promise<void> {
+  if (topics.length === 0) return
+  const { error } = await supabaseAdmin.from('topics').insert(topics)
+  if (error) throw new Error(`Topics write failed: ${error.message}`)
+}
+
+// ============================================================
+// gpu_jobs helpers (Step 11) — fire-and-forget
+// ============================================================
+
+export async function writeGpuJob(params: {
+  organization_id?: string
+  recording_id: string
+  job_type: string
+  status: string
+}): Promise<void> {
+  await supabaseAdmin.from('gpu_jobs').insert(params)
+  // Intentionally no error throw — gpu_jobs failures must not block the pipeline
 }

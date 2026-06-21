@@ -43,10 +43,16 @@ function formatTime(seconds: number): string {
 
 export default function Home() {
   // ---- Refs (persist across renders, don't trigger re-renders) ----
+  const sequenceIndexRef = useRef(0)
   const wsRef = useRef<WebSocket | null>(null)
   const recorderRef = useRef<MediaRecorder | null>(null)
 
   // ---- State ----
+  const [agentMode, setAgentMode] = useState(false)
+  const conversationHistoryRef = useRef<{ role: 'user' | 'assistant'; content: string }[]>([])
+  const [agentStatus, setAgentStatus] = useState<'idle' | 'thinking' | 'speaking'>('idle')
+  const audioContextRef = useRef<AudioContext | null>(null)
+  const sourceNodeRef = useRef<AudioBufferSourceNode | null>(null)
   const [recordingId, setRecordingId] = useState<string | null>(null)
   const [isLive, setIsLive] = useState(false)
   const [liveCaption, setLiveCaption] = useState('')
@@ -59,16 +65,26 @@ export default function Home() {
   // Start live transcription
   // ------------------------------------------------------------------
   async function startLive() {
+    // Create AudioContext during user click — this permanently unlocks autoplay
+    // for this page session. Must be created here (user gesture), not later.
+    try {
+      audioContextRef.current = new AudioContext()
+      await audioContextRef.current.resume()
+    } catch {
+      // Non-fatal — audio may not work but transcription still will
+    }
+
     setError(null)
     setAnalysis(null)
     setSessionComplete(false)
+    sequenceIndexRef.current = 0
+    conversationHistoryRef.current = []
 
     try {
-      // 1. Create a new recording row in Supabase
       const createRes = await fetch('/api/recordings/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ call_metadata: { source: 'live-mic' } }),
+        body: JSON.stringify({ status: 'in-progress' }),
       })
       const createData = await createRes.json()
 
@@ -77,13 +93,9 @@ export default function Home() {
         return
       }
 
-      // ⚠️ Capture in a LOCAL variable, not just state.
-      // React state updates are async — the WS message handler closes over
-      // this value, and state wouldn't be updated yet when messages arrive.
       const liveRecordingId = createData.recording_id
       setRecordingId(liveRecordingId)
 
-      // 2. Get a short-lived Deepgram token from our server
       const tokenRes = await fetch('/api/deepgram-token')
       const tokenData = await tokenRes.json()
 
@@ -92,7 +104,6 @@ export default function Home() {
         return
       }
 
-      // 3. Open the WebSocket to Deepgram
       const ws = new WebSocket(
         `wss://api.deepgram.com/v1/listen` +
         `?model=nova-3&language=en-US&diarize=true&interim_results=true&punctuate=true`,
@@ -101,11 +112,12 @@ export default function Home() {
       wsRef.current = ws
       setIsLive(true)
 
-      // 4. When the WS is ready, start the microphone
       ws.addEventListener('open', async () => {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-          const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
+          const mimeType = ['audio/webm', 'audio/mp4', 'audio/ogg', 'audio/wav'].find(
+            type => MediaRecorder.isTypeSupported(type))
+          const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : {})
           recorderRef.current = recorder
 
           recorder.addEventListener('dataavailable', (e) => {
@@ -114,26 +126,23 @@ export default function Home() {
             }
           })
 
-          recorder.start(150) // fire 'dataavailable' every 150ms
+          recorder.start(150)
         } catch (err) {
           setError(`Microphone error: ${(err as Error).message}`)
           stopLive()
         }
       })
 
-      // 5. Handle messages from Deepgram
       ws.addEventListener('message', async (event) => {
         const msg = JSON.parse(event.data as string)
         const transcript = msg.channel?.alternatives?.[0]?.transcript ?? ''
         if (!transcript) return
 
         if (!msg.is_final) {
-          // Partial result — just update live caption, no DB write
           setLiveCaption(transcript)
           return
         }
 
-        // Final result — clear caption and write to DB
         setLiveCaption('')
         const words = msg.channel.alternatives[0].words ?? []
 
@@ -141,12 +150,65 @@ export default function Home() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            recording_id: liveRecordingId, // ⚠️ local var, not state
+            recording_id: liveRecordingId,
             speaker: `Speaker ${words[0]?.speaker ?? 0}`,
             content_raw: transcript,
             sentence_start_sec: words[0]?.start ?? 0,
+            sequence_index: sequenceIndexRef.current++,
           }),
         })
+
+        if (agentMode) {
+          setAgentStatus('thinking')
+          try {
+            const res = await fetch('/api/agent/respond', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                utterance: transcript,
+                history: conversationHistoryRef.current,
+              }),
+            })
+
+            if (!res.ok) throw new Error(`Agent respond failed: ${res.status}`)
+
+            const agentText = decodeURIComponent(
+              res.headers.get('X-Agent-Response-Text') ?? '',
+            )
+
+            conversationHistoryRef.current = [
+              ...conversationHistoryRef.current,
+              { role: 'user', content: transcript },
+              { role: 'assistant', content: agentText },
+            ]
+
+            // Stop any currently playing audio
+            if (sourceNodeRef.current) {
+              sourceNodeRef.current.onended = null
+              sourceNodeRef.current.stop()
+              sourceNodeRef.current = null
+            }
+
+            // Decode and play via the persistent AudioContext (no autoplay block)
+            const arrayBuffer = await res.arrayBuffer()
+            const audioBuffer = await audioContextRef.current!.decodeAudioData(arrayBuffer)
+
+            const source = audioContextRef.current!.createBufferSource()
+            source.buffer = audioBuffer
+            source.connect(audioContextRef.current!.destination)
+            source.onended = () => {
+              setAgentStatus('idle')
+              sourceNodeRef.current = null
+            }
+            sourceNodeRef.current = source
+
+            setAgentStatus('speaking')
+            source.start(0)
+          } catch (err) {
+            console.error('Agent error:', err)
+            setAgentStatus('idle')
+          }
+        }
       })
 
       ws.addEventListener('error', () => {
@@ -162,22 +224,25 @@ export default function Home() {
       setIsLive(false)
     }
   }
-
   // ------------------------------------------------------------------
   // Stop live transcription
   // ------------------------------------------------------------------
   function stopLive() {
     recorderRef.current?.stop()
     wsRef.current?.close()
+    sourceNodeRef.current?.stop()
+    audioContextRef.current?.close()
     recorderRef.current = null
     wsRef.current = null
+    sourceNodeRef.current = null
+    audioContextRef.current = null
     setIsLive(false)
     setLiveCaption('')
     setSessionComplete(true)
   }
 
   // ------------------------------------------------------------------
-  // Trigger LLM analysis on the recorded transcript
+  // Trigger LLM analysis
   // ------------------------------------------------------------------
   async function handleAnalyze() {
     if (!recordingId) return
@@ -209,157 +274,266 @@ export default function Home() {
   // Render
   // ------------------------------------------------------------------
   return (
-    <main className="max-w-4xl mx-auto p-8 font-sans">
-      <div className="flex justify-between items-center mb-2">
-        <h1 className="text-2xl font-bold">Sales Call Pipeline — Live</h1>
-        <Link
-          href="/batch"
-          className="text-sm text-blue-600 hover:underline"
-        >
-          Switch to file upload →
-        </Link>
-      </div>
-      <p className="text-sm text-gray-500 mb-8">
-        Record a live sales call → transcribe in real time → click Analyze for coaching insights.
-      </p>
+    <main className="min-h-screen bg-surface relative overflow-hidden">
+      {/* Ambient Glows */}
+      <div className="ambient-glow bg-red-600 top-0 left-0"></div>
+      <div className="ambient-glow bg-green-500 bottom-0 right-0" style={{ animationDelay: '-5s' }}></div>
 
-      {/* ============ Live transcription card ============ */}
-      <section className="mb-8 border rounded p-6 bg-white">
-        <div className="flex gap-3 mb-4">
-          {!isLive ? (
-            <button
-              onClick={startLive}
-              disabled={isAnalyzing}
-              className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+      {/* Content */}
+      <div className="relative z-10">
+        {/* Header */}
+        <header className="border-b border-white/5 backdrop-blur-xl sticky top-0 z-40">
+          <div className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-2xl text-red-500">call</span>
+              <h1 className="headline-lg text-white">GlobiFYE Sales Pipeline</h1>
+            </div>
+            <Link
+              href="/batch"
+              className="text-sm text-gray-400 hover:text-white transition-colors flex items-center gap-2"
             >
-              Start Live Transcription
-            </button>
-          ) : (
-            <button
-              onClick={stopLive}
-              className="px-4 py-2 bg-red-600 text-white rounded"
-            >
-              Stop
-            </button>
+              <span className="material-symbols-outlined text-lg">upload_file</span>
+              Batch Upload
+            </Link>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <div className="max-w-6xl mx-auto px-6 py-12">
+          {/* Hero Section */}
+          <div className="mb-12">
+            <h2 className="text-4xl font-bold text-white mb-2">
+              Record a Live Call
+            </h2>
+            <p className="text-on-surface-variant">
+              Capture every word with real-time transcription and AI coaching insights.
+            </p>
+          </div>
+
+          {/* Grid Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Panel - Live Transcription */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Live Status Card */}
+              <div className="liquid-glass rounded-2xl p-8">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className={`w-3 h-3 rounded-full transition-all ${isLive ? 'bg-red-500 pulse-live' : 'bg-gray-600'
+                    }`}></div>
+                  <span className="text-sm font-mono text-gray-400">
+                    {isLive ? 'RECORDING' : 'READY'}
+                  </span>
+                </div>
+
+                {/* Live Caption Box */}
+                {isLive && (
+                  <div className="mb-6 p-4 bg-surface/50 rounded-lg border border-green-500/20">
+                    <p className="text-green-400 font-mono text-sm min-h-8">
+                      {liveCaption || <span className="text-gray-600">Listening…</span>}
+                    </p>
+                  </div>
+                )}
+
+                {/* Control Buttons */}
+                <div className="flex gap-3">
+                  {!isLive ? (
+                    <button
+                      onClick={startLive}
+                      disabled={isAnalyzing}
+                      className="btn-primary flex-1"
+                    >
+                      <span className="material-symbols-outlined mr-2">mic</span>
+                      Start Recording
+                    </button>
+                  ) : (
+                    <button
+                      onClick={stopLive}
+                      className="flex-1 px-6 py-3 rounded-lg bg-red-600 text-white font-bold hover:bg-red-700 active:scale-95 transition-all"
+                    >
+                      <span className="material-symbols-outlined mr-2">stop_circle</span>
+                      Stop Recording
+                    </button>
+                  )}
+                </div>
+
+                {/* Session Complete Message */}
+                {sessionComplete && !isLive && (
+                  <div className="mt-6 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+                    <p className="text-green-300 text-sm">
+                      ✓ Session recorded successfully
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Agent Mode Card */}
+              {!isLive && (
+                <div className="glass-level-1 rounded-2xl p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="material-symbols-outlined text-2xl text-orange-400">smart_toy</span>
+                      <div>
+                        <h3 className="font-semibold text-white">AI Agent Assistant</h3>
+                        <p className="text-xs text-gray-400">Real-time voice responses</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setAgentMode((v) => !v)}
+                      className={`px-4 py-2 rounded-lg transition-all ${agentMode
+                        ? 'bg-orange-500/20 text-orange-300 border border-orange-500/30'
+                        : 'bg-white/5 text-gray-400 border border-white/10'
+                        }`}
+                    >
+                      {agentMode ? 'ON' : 'OFF'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Agent Status */}
+              {agentMode && isLive && agentStatus !== 'idle' && (
+                <div className={`glass-level-1 rounded-2xl p-4 flex items-center gap-3 ${agentStatus === 'thinking' ? 'border-blue-500/30' : 'border-green-500/30'
+                  }`}>
+                  <span className="material-symbols-outlined text-lg animate-spin text-blue-400">
+                    {agentStatus === 'thinking' ? 'psychology' : 'volume_2'}
+                  </span>
+                  <span className="text-sm text-gray-300">
+                    {agentStatus === 'thinking' ? 'Agent thinking…' : 'Agent speaking…'}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Sidebar - Actions */}
+            <div className="space-y-4">
+              {/* Analyze Button */}
+              {sessionComplete && !analysis && (
+                <button
+                  onClick={handleAnalyze}
+                  disabled={isAnalyzing}
+                  className="w-full btn-primary justify-center"
+                >
+                  <span className="material-symbols-outlined mr-2">analytics</span>
+                  {isAnalyzing ? 'Analyzing…' : 'Analyze Call'}
+                </button>
+              )}
+
+              {/* Error Alert */}
+              {error && (
+                <div className="glass-level-1 rounded-lg p-4 border border-red-500/30">
+                  <div className="flex gap-3">
+                    <span className="material-symbols-outlined text-red-400 shrink-0">error</span>
+                    <p className="text-sm text-red-300">{error}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Quick Stats */}
+              {isLive && (
+                <div className="glass-level-1 rounded-lg p-4">
+                  <div className="text-xs text-gray-500 mb-3">SESSION INFO</div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Status</span>
+                      <span className="text-green-400">Active</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Recording ID</span>
+                      <span className="text-gray-300 text-xs font-mono">{recordingId?.slice(0, 8)}…</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Analysis Results Section */}
+          {analysis && (
+            <div className="mt-12 space-y-6">
+              <h3 className="headline-lg text-white">Analysis Results</h3>
+
+              {/* Summary */}
+              <div className="liquid-glass rounded-2xl p-8">
+                <h4 className="font-semibold text-white mb-4 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-lg">summarize</span>
+                  Summary
+                </h4>
+                <p className="text-on-surface-variant leading-relaxed">{analysis.summary}</p>
+              </div>
+
+              {/* Key Topics */}
+              <div className="liquid-glass rounded-2xl p-8">
+                <h4 className="font-semibold text-white mb-4 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-lg">bookmark</span>
+                  Key Topics
+                </h4>
+                {analysis.key_topics.length === 0 ? (
+                  <p className="text-gray-400">No topics identified.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {analysis.key_topics.map((t, i) => (
+                      <div key={i} className="flex items-center gap-4">
+                        <span className="text-gray-500 font-mono text-sm w-12">{formatTime(t.start_time)}</span>
+                        <span className="text-white">{t.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Objections */}
+              {analysis.objection_analysis.length > 0 && (
+                <div className="liquid-glass rounded-2xl p-8">
+                  <h4 className="font-semibold text-white mb-4 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-lg text-red-400">warning</span>
+                    Objections
+                  </h4>
+                  <div className="space-y-4">
+                    {analysis.objection_analysis.map((o, i) => (
+                      <div key={i} className="bg-red-500/5 border border-red-500/20 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-mono text-gray-400">{o.speaker}</span>
+                          <span className="text-xs text-gray-500">{formatTime(o.timestamp)}</span>
+                        </div>
+                        <blockquote className="italic text-on-surface-variant text-sm mb-3 border-l-2 border-red-500/30 pl-3">
+                          &ldquo;{o.exact_quote}&rdquo;
+                        </blockquote>
+                        <div className="text-sm space-y-1">
+                          <p><span className="text-gray-400">Why: </span>{o.reason}</p>
+                          <p><span className="text-gray-400">Suggestion: </span>{o.suggestion}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* What Went Well */}
+              {analysis.what_went_well.length > 0 && (
+                <div className="liquid-glass rounded-2xl p-8">
+                  <h4 className="font-semibold text-white mb-4 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-lg text-green-400">check_circle</span>
+                    What Went Well
+                  </h4>
+                  <div className="space-y-4">
+                    {analysis.what_went_well.map((w, i) => (
+                      <div key={i} className="bg-green-500/5 border border-green-500/20 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-mono text-gray-400">{w.speaker}</span>
+                          <span className="text-xs text-gray-500">{formatTime(w.timestamp)}</span>
+                        </div>
+                        <blockquote className="italic text-on-surface-variant text-sm mb-3 border-l-2 border-green-500/30 pl-3">
+                          &ldquo;{w.exact_quote}&rdquo;
+                        </blockquote>
+                        <p className="text-sm"><span className="text-gray-400">Why: </span>{w.reason}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </div>
-
-        {/* Live caption box — only visible while streaming */}
-        {isLive && (
-          <div className="mt-4 p-4 bg-slate-900 text-green-400 rounded font-mono text-sm min-h-12">
-            {liveCaption || <span className="opacity-40">Listening…</span>}
-          </div>
-        )}
-
-        {/* Session complete message */}
-        {sessionComplete && !isLive && (
-          <p className="mt-4 text-sm text-gray-600">
-            ✓ Session recorded. Click <strong>Analyze Call</strong> below to see coaching insights.
-          </p>
-        )}
-      </section>
-
-      {/* ============ Error ============ */}
-      {error && (
-        <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
-          {error}
-        </div>
-      )}
-
-      {/* ============ Analyze button ============ */}
-      {sessionComplete && !analysis && (
-        <section className="mb-8">
-          <button
-            onClick={handleAnalyze}
-            disabled={isAnalyzing}
-            className="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50"
-          >
-            {isAnalyzing ? 'Analyzing…' : 'Analyze Call'}
-          </button>
-        </section>
-      )}
-
-      {/* ============ Analysis results ============ */}
-      {analysis && (
-        <section className="space-y-8">
-          {/* Summary */}
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Summary</h2>
-            <p className="text-gray-700 text-sm leading-relaxed">{analysis.summary}</p>
-          </div>
-
-          {/* Key Topics */}
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Key Topics</h2>
-            {analysis.key_topics.length === 0 ? (
-              <p className="text-gray-400 text-sm">No key topics identified.</p>
-            ) : (
-              <ul className="space-y-1">
-                {analysis.key_topics.map((t, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm">
-                    <span className="text-gray-400 font-mono w-12">{formatTime(t.start_time)}</span>
-                    <span>{t.name}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          {/* Objections */}
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Objection Analysis</h2>
-            {analysis.objection_analysis.length === 0 ? (
-              <p className="text-gray-400 text-sm">No objections detected.</p>
-            ) : (
-              <div className="space-y-4">
-                {analysis.objection_analysis.map((o, i) => (
-                  <div key={i} className="border rounded p-4 bg-red-50">
-                    <div className="text-xs text-gray-500 mb-2">
-                      {o.speaker} · {formatTime(o.timestamp)}
-                    </div>
-                    <blockquote className="italic text-sm text-gray-700 mb-2 border-l-2 border-red-400 pl-3">
-                      &ldquo;{o.exact_quote}&rdquo;
-                    </blockquote>
-                    <p className="text-sm">
-                      <span className="font-medium">Why: </span>
-                      {o.reason}
-                    </p>
-                    <p className="text-sm mt-1">
-                      <span className="font-medium">Suggestion: </span>
-                      {o.suggestion}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* What Went Well */}
-          <div>
-            <h2 className="text-xl font-semibold mb-2">What Went Well</h2>
-            {analysis.what_went_well.length === 0 ? (
-              <p className="text-gray-400 text-sm">Nothing notable detected.</p>
-            ) : (
-              <div className="space-y-4">
-                {analysis.what_went_well.map((w, i) => (
-                  <div key={i} className="border rounded p-4 bg-green-50">
-                    <div className="text-xs text-gray-500 mb-2">
-                      {w.speaker} · {formatTime(w.timestamp)}
-                    </div>
-                    <blockquote className="italic text-sm text-gray-700 mb-2 border-l-2 border-green-400 pl-3">
-                      &ldquo;{w.exact_quote}&rdquo;
-                    </blockquote>
-                    <p className="text-sm">
-                      <span className="font-medium">Why: </span>
-                      {w.reason}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-      )}
+      </div>
     </main>
   )
 }

@@ -109,6 +109,7 @@ export function utterancesToTranscriptRows(
     content_raw: u.content_raw,
     content_clean: u.content_clean,
     sentence_start_sec: u.sentence_start_sec,
+    sequence_index: null, 
   }))
 }
 

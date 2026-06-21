@@ -4,7 +4,7 @@ import { ChatGroq } from '@langchain/groq'
 //   import { ChatOpenAI } from '@langchain/openai'
 
 import { z } from 'zod'
-import { supabaseAdmin } from './supabase'
+import { supabaseAdmin, writeTopics, writeGpuJob } from './supabase'
 
 // ============================================================
 // 1. LLM client
@@ -165,10 +165,9 @@ export async function analyzeTranscript(recordingId: string) {
 // ============================================================
 
 export async function writeAnalysis(recordingId: string) {
-  const { parsed, rawOutput } = await analyzeTranscript(recordingId)
+  const { parsed } = await analyzeTranscript(recordingId)
 
-  // Note the field-name mapping: LLM nests inside `analysis`,
-  // DB has flat columns `objection_analysis` and `what_went_well`.
+  // 1. Insert the analysis row (no more raw_llm_output)
   const { data, error } = await supabaseAdmin
     .from('analysis')
     .insert({
@@ -177,12 +176,29 @@ export async function writeAnalysis(recordingId: string) {
       key_topics: parsed.key_topics,
       objection_analysis: parsed.analysis.objections,
       what_went_well: parsed.analysis.what_went_well,
-      raw_llm_output:
-        typeof rawOutput === 'string' ? rawOutput : JSON.stringify(rawOutput),
     })
     .select()
     .single()
 
-  if (error) throw new Error(`Failed to insert analysis: ${error.message}`)
+  if (error) throw new Error(`DB insert failed: ${error.message}`)
+
+  // 2. Write normalized topics
+  await writeTopics(
+    parsed.key_topics.map((t, i) => ({
+      recording_id: recordingId,
+      analysis_id: data.id,
+      name: t.name,
+      start_time: t.start_time,
+      sequence_index: i,
+    })),
+  )
+
+  // 3. Log the GPU job (fire-and-forget — intentionally no await)
+  writeGpuJob({
+    recording_id: recordingId,
+    job_type: 'analysis',
+    status: 'completed',
+  })
+
   return data
 }

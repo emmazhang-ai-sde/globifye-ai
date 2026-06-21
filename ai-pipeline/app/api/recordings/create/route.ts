@@ -6,13 +6,9 @@ export async function POST(req: Request) {
     // Body is optional — default to empty metadata if no body provided
     const body = await req.json().catch(() => ({}))
 
-    const recording = await createRecording({
-      call_metadata: body.call_metadata ?? {},
-      audio_url: null,
-      duration: null,
-    })
+    const recordingId = await createRecording(body)   // ← was: createRecording(body.call_metadata ?? {})
 
-    return NextResponse.json({ recording_id: recording.id })
+    return NextResponse.json({ recording_id: recordingId})
   } catch (err) {
     return NextResponse.json(
       { error: (err as Error).message },

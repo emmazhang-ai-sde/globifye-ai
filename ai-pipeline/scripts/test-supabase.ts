@@ -3,15 +3,13 @@ import { createRecording, getTranscriptForRecording } from '../lib/supabase'
 
 async function main() {
   console.log('Inserting test recording...')
-  const rec = await createRecording({
-    call_metadata: { rep: 'Test Rep', client: 'Test Client' },
-    audio_url: null,
-    duration: null,
+  const recordingId = await createRecording({
+  status: 'in_progress',
   })
-  console.log('Created:', rec)
+  console.log('Created:', recordingId)
 
   console.log('Fetching transcript (should be empty)...')
-  const rows = await getTranscriptForRecording(rec.id)
+  const rows = await getTranscriptForRecording(recordingId)
   console.log('Transcript rows:', rows)
 }
 

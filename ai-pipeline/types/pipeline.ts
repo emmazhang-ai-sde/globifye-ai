@@ -17,6 +17,7 @@ export interface TranscriptRow {
   content_raw: string | null;          // with filler words
   content_clean: string | null;        // filler words stripped
   sentence_start_sec: number | null;
+  sequence_index: number | null    // ← ADD THIS
   created_at: string;
 }
 

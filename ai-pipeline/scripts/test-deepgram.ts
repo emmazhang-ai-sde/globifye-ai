@@ -25,20 +25,15 @@ async function main() {
   // 2. Create the recording row (parent)
   // ----------------------------------------------------------
   console.log('💾 Creating recording row...')
-  const recording = await createRecording({
-    call_metadata: {
-      source: 'sample-audio-clear.wav',
-      test_run: true,
-    },
-    audio_url: null,        // skipping S3 for MVP
-    duration: null,         // will update once we know it
+  const recordingId = await createRecording({
+  status: 'in_progress',
   })
-  console.log(`   recording.id = ${recording.id}`)
+  console.log(`   recordingId = ${recordingId}`)
 
   // ----------------------------------------------------------
   // 3. Convert utterances → transcript rows, then batch insert
   // ----------------------------------------------------------
-  const rows = utterancesToTranscriptRows(utterances, recording.id)
+  const rows = utterancesToTranscriptRows(utterances, recordingId)
   console.log(`💾 Inserting ${rows.length} transcript rows...`)
   const inserted = await insertTranscriptRows(rows)
   console.log(`✅ Inserted ${inserted.length} transcript rows`)
@@ -48,7 +43,7 @@ async function main() {
   // ----------------------------------------------------------
   const duration = computeDurationFromUtterances(result)
   if (duration !== null) {
-    await updateRecordingDuration(recording.id, duration)
+    await updateRecordingDuration(recordingId, duration)
     console.log(`✅ Updated recording.duration = ${duration.toFixed(1)}s`)
   }
 

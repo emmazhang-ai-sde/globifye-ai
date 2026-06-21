@@ -1,1 +1,211 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@500&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
 @import "tailwindcss";
+
+/* ============================================================ */
+/* Google Fonts */
+/* ============================================================ */
+
+/* ============================================================ */
+/* CSS Variables */
+/* ============================================================ */
+@theme {
+    --color-primary: #ffb4a2;
+    --color-primary-container: #ff562a;
+    --color-secondary: #7cffa3;
+    --color-surface: #12131a;
+    --color-surface-container: #1e1f27;
+    --color-surface-container-low: #1a1b23;
+    --color-surface-container-high: #292932;
+    --color-on-surface: #e3e1ec;
+    --color-on-surface-variant: #e5beb4;
+    --color-outline: #ac8980;
+    --color-error: #ffb4ab;
+
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* ============================================================ */
+/* Base Styles */
+/* ============================================================ */
+html,
+body {
+    background-color: var(--color-surface);
+    color: var(--color-on-surface);
+    font-family: 'DM Sans', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* ============================================================ */
+/* Glass Morphism */
+/* ============================================================ */
+.glass-level-1 {
+    background: rgba(30, 31, 39, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-level-2 {
+    background: rgba(41, 41, 50, 0.8);
+    backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.liquid-glass {
+    background: rgba(30, 31, 39, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* ============================================================ */
+/* Fire Gradient & Effects */
+/* ============================================================ */
+.fire-gradient {
+    background: linear-gradient(135deg, #ff562a 0%, #ff4d1c 100%);
+}
+
+.fire-text {
+    background: linear-gradient(135deg, #ff562a 0%, #ff4d1c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.fire-glow {
+    box-shadow: 0 0 20px rgba(255, 77, 28, 0.4);
+}
+
+.fire-glow-hover:hover {
+    box-shadow: 0 0 20px rgba(255, 77, 28, 0.4);
+    transform: translateY(-2px);
+}
+
+/* ============================================================ */
+/* Animations */
+/* ============================================================ */
+@keyframes pulse-live {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes liquid {
+    0% {
+        transform: translate(-10%, -10%) scale(1);
+        border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+    }
+
+    100% {
+        transform: translate(10%, 10%) scale(1.1);
+        border-radius: 70% 30% 30% 70% / 60% 40% 40% 60%;
+    }
+}
+
+@keyframes spring-pop {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.pulse-live {
+    animation: pulse-live 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.spring-pop {
+    transition: transform 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.spring-pop:hover {
+    transform: scale(1.05);
+}
+
+.ambient-glow {
+    position: fixed;
+    width: 60vw;
+    height: 60vw;
+    filter: blur(100px);
+    border-radius: 100%;
+    z-index: -1;
+    opacity: 0.15;
+    pointer-events: none;
+    animation: liquid 20s infinite alternate;
+}
+
+/* ============================================================ */
+/* Material Icons */
+/* ============================================================ */
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    vertical-align: middle;
+    font-size: inherit;
+}
+
+/* ============================================================ */
+/* Scrollbar */
+/* ============================================================ */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #ff4d1c;
+}
+
+/* ============================================================ */
+/* Component Utilities */
+/* ============================================================ */
+@layer components {
+    .btn-primary {
+        @apply px-6 py-3 rounded-lg text-white font-bold hover:shadow-lg active:scale-95 transition-all;
+        background: linear-gradient(135deg, #ff562a 0%, #ff4d1c 100%);
+        box-shadow: 0 0 20px rgba(255, 77, 28, 0.2);
+    }
+
+    .btn-secondary {
+        @apply px-6 py-3 rounded-lg border border-white/10 text-on-surface hover:bg-white/5 transition-all;
+    }
+
+    .label-mono {
+        @apply text-xs font-mono text-gray-400 uppercase tracking-widest;
+    }
+
+    .headline-lg {
+        @apply text-3xl font-bold;
+        font-family: 'Syne', sans-serif;
+    }
+
+    .headline-md {
+        @apply text-2xl font-semibold;
+        font-family: 'Syne', sans-serif;
+    }
+
+    .body-md {
+        @apply text-base leading-relaxed;
+        font-family: 'DM Sans', sans-serif;
+    }
+}

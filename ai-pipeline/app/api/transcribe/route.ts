@@ -42,30 +42,28 @@ export async function POST(req: Request) {
     // ----------------------------------------------------------------
     // 4. Create recording row (only after Deepgram succeeded)
     // ----------------------------------------------------------------
-    const recording = await createRecording({
-      call_metadata: { filename: file.name },
-      audio_url: null,
-      duration: null,
+    const recordingId = await createRecording({
+      status: 'completed',
     })
 
     // ----------------------------------------------------------------
     // 5. Write transcript rows
     // ----------------------------------------------------------------
-    await writeTranscriptForRecording(recording.id, utterances)
+    await writeTranscriptForRecording(recordingId, utterances)
 
     // ----------------------------------------------------------------
     // 6. Update duration if Deepgram provided it
     // ----------------------------------------------------------------
     const duration = (deepgramResult as any)?.metadata?.duration
     if (typeof duration === 'number') {
-      await updateRecordingDuration(recording.id, duration)
+      await updateRecordingDuration(recordingId, duration)
     }
 
     // ----------------------------------------------------------------
     // 7. Return both the recording_id and utterances (UI uses both)
     // ----------------------------------------------------------------
     return NextResponse.json({
-      recording_id: recording.id,
+      recording_id: recordingId,
       utterances: utterances.map((u, i) => ({
         speaker: u.speaker,
         transcript: u.content_clean,    // UI shows clean version
