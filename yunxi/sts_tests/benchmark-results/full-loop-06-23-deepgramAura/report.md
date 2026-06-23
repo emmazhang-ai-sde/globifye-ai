@@ -1,6 +1,6 @@
 # Full-Loop Test Report (streaming STT)
 
-**Date:** 2026-06-23T21:05:30.166Z
+**Date:** 2026-06-23T21:25:52.117Z
 **Stack:** Deepgram Nova-3 streaming STT → Groq `llama-3.1-8b-instant` → Deepgram Aura 2 TTS
 **Turns:** 5
 **Budget:** 1500ms, from end of caller's speech to AI audio response
@@ -17,31 +17,39 @@ The audio files are streamed to Deepgram at real-time pace, mimicking a live pho
 
 ## Verdict against 1500ms budget
 
-**Loop to first byte:** **✗ FAIL** — 4/5 turns exceeded 1500ms to first audio byte (max 3520ms).
+### Sequential
 
-**Loop full clip ready:** **✗ FAIL** — 5/5 turns exceeded 1500ms for full response (max 6204ms).
+**Loop to first byte:** **✗ FAIL** — 2/5 turns exceeded 1500ms to first audio byte (max 3198ms).
+
+**Loop full clip ready:** **✗ FAIL** — 5/5 turns exceeded 1500ms for full response (max 7332ms).
+
+### Parallel
+
+**Loop to first byte:** **✗ FAIL** — 2/5 turns exceeded 1500ms to first audio byte in parallel (max 3152ms).
+
+**Loop full clip ready:** **✗ FAIL** — 5/5 turns exceeded 1500ms for full parallel response (max 5920ms).
 
 ## Aggregate timings
 
 | Stage | Mean | Min | Max |
 |---|---|---|---|
-| STT endpointing | 1408ms | 770ms | 2633ms |
-| LLM | 323ms | 206ms | 444ms |
-| TTS TTFB (sequential) | 442ms | 348ms | 535ms |
-| TTS total (sequential) | 2799ms | 2248ms | 3219ms |
-| **Sequential loop TTFB** | **2173ms** | **1362ms** | **3520ms** |
-| **Sequential loop total** | **4530ms** | **3223ms** | **6204ms** |
-| **Parallel loop TTFB** | **1853ms** | **1206ms** | **2996ms** |
-| **Parallel loop total** | **4024ms** | **3254ms** | **5364ms** |
+| STT endpointing | 1366ms | 696ms | 2601ms |
+| LLM | 210ms | 173ms | 297ms |
+| TTS TTFB (sequential) | 347ms | 279ms | 413ms |
+| TTS total (sequential) | 3366ms | 2706ms | 4529ms |
+| **Sequential loop TTFB** | **1923ms** | **1272ms** | **3198ms** |
+| **Sequential loop total** | **4942ms** | **3699ms** | **7332ms** |
+| **Parallel loop TTFB** | **1735ms** | **1064ms** | **3152ms** |
+| **Parallel loop total** | **4257ms** | **3288ms** | **5920ms** |
 ## Per-turn breakdown
 
 | # | STT endpoint | LLM (ttft, chars) | TTS TTFB | TTS total | **Seq TTFB** | **Seq total** | **Par TTFB** | **Par total** | Sentences |
 |---|---|---|---|---|---|---|---|---|---|
-| 1 | 770ms | 206ms (ttft 144ms, 98c) | 387ms | 2248ms | ✓ **1362ms** | ✗ **3223ms** | ✓ **1206ms** | ✗ **3254ms** | 1 |
-| 2 | 959ms | 352ms (ttft 273ms, 88c) | 514ms | 3047ms | ✗ **1824ms** | ✗ **4358ms** | ✓ **1458ms** | ✗ **3521ms** | 1 |
-| 3 | 1818ms | 260ms (ttft 222ms, 104c) | 348ms | 2912ms | ✗ **2426ms** | ✗ **4989ms** | ✗ **2201ms** | ✗ **4312ms** | 1 |
-| 4 | 861ms | 444ms (ttft 444ms, 81c) | 428ms | 2571ms | ✗ **1733ms** | ✗ **3876ms** | ✓ **1404ms** | ✗ **3669ms** | 1 |
-| 5 | 2633ms | 352ms (ttft 297ms, 92c) | 535ms | 3219ms | ✗ **3520ms** | ✗ **6204ms** | ✗ **2996ms** | ✗ **5364ms** | 1 |
+| 1 | 696ms | 297ms (ttft 161ms, 103c) | 279ms | 2706ms | ✓ **1272ms** | ✗ **3699ms** | ✓ **1064ms** | ✗ **3288ms** | 1 |
+| 2 | 891ms | 173ms (ttft 132ms, 93c) | 294ms | 3044ms | ✓ **1358ms** | ✗ **4109ms** | ✓ **1172ms** | ✗ **3937ms** | 1 |
+| 3 | 1841ms | 181ms (ttft 153ms, 95c) | 413ms | 2801ms | ✗ **2435ms** | ✗ **4823ms** | ✗ **2153ms** | ✗ **4402ms** | 1 |
+| 4 | 798ms | 198ms (ttft 147ms, 120c) | 357ms | 3749ms | ✓ **1353ms** | ✗ **4745ms** | ✓ **1132ms** | ✗ **3738ms** | 1 |
+| 5 | 2601ms | 202ms (ttft 161ms, 151c) | 395ms | 4529ms | ✗ **3198ms** | ✗ **7332ms** | ✗ **3152ms** | ✗ **5920ms** | 2 |
 
 
 See `transcripts.md` for the full conversation and `audio/turn-N-response.mp3` for the agent's spoken replies.
