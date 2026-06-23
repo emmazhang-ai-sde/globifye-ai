@@ -494,6 +494,8 @@ async function main() {
     loop:           agg(turns.map((t) => t.loopMs)),
     turnsTtfbWithinBudget: turns.filter((t) => t.loopTtfbMs <= LATENCY_BUDGET_MS).length,
     turnsLoopWithinBudget: turns.filter((t) => t.loopMs <= LATENCY_BUDGET_MS).length,
+    parallelLoopTtfb: agg(turns.map((t) => t.parallelTtfbMs)),
+    parallelLoop:     agg(turns.map((t) => t.parallelTotalMs)),
   }
 
   const ttfbPass = summary.loopTtfb.max <= LATENCY_BUDGET_MS
@@ -529,21 +531,26 @@ async function main() {
 
 function buildReport(s: any, turns: TurnResult[], ttfbPass: boolean, loopPass: boolean): string {
   let perTurn =
-    '| # | STT endpoint | LLM (ttft, chars) | TTS TTFB | TTS total | **Loop TTFB** | **Loop total** |\n'
+  '| # | STT endpoint | LLM (ttft, chars) | TTS TTFB | TTS total | **Seq TTFB** | **Seq total** | **Par TTFB** | **Par total** | Sentences |\n'
+perTurn +=
+  '|---|---|---|---|---|---|---|---|---|---|\n'
+for (const t of turns) {
+  const seqTtfbOk  = t.loopTtfbMs      <= s.budgetMs ? '✓' : '✗'
+  const seqLoopOk  = t.loopMs          <= s.budgetMs ? '✓' : '✗'
+  const parTtfbOk  = t.parallelTtfbMs  <= s.budgetMs ? '✓' : '✗'
+  const parLoopOk  = t.parallelTotalMs <= s.budgetMs ? '✓' : '✗'
   perTurn +=
-    '|---|---|---|---|---|---|---|\n'
-  for (const t of turns) {
-    const ttfbOk = t.loopTtfbMs <= s.budgetMs ? '✓' : '✗'
-    const loopOk = t.loopMs <= s.budgetMs ? '✓' : '✗'
-    perTurn +=
-      `| ${t.turn} ` +
-      `| ${t.sttEndpointingMs.toFixed(0)}ms ` +
-      `| ${t.llmMs.toFixed(0)}ms (ttft ${t.llmTtftMs.toFixed(0)}ms, ${t.llmChars}c) ` +
-      `| ${t.ttsTtfbMs.toFixed(0)}ms ` +
-      `| ${t.ttsMs.toFixed(0)}ms ` +
-      `| ${ttfbOk} **${t.loopTtfbMs.toFixed(0)}ms** ` +
-      `| ${loopOk} **${t.loopMs.toFixed(0)}ms** |\n`
-  }
+    `| ${t.turn} ` +
+    `| ${t.sttEndpointingMs.toFixed(0)}ms ` +
+    `| ${t.llmMs.toFixed(0)}ms (ttft ${t.llmTtftMs.toFixed(0)}ms, ${t.llmChars}c) ` +
+    `| ${t.ttsTtfbMs.toFixed(0)}ms ` +
+    `| ${t.ttsMs.toFixed(0)}ms ` +
+    `| ${seqTtfbOk} **${t.loopTtfbMs.toFixed(0)}ms** ` +
+    `| ${seqLoopOk} **${t.loopMs.toFixed(0)}ms** ` +
+    `| ${parTtfbOk} **${t.parallelTtfbMs.toFixed(0)}ms** ` +
+    `| ${parLoopOk} **${t.parallelTotalMs.toFixed(0)}ms** ` +
+    `| ${t.parallelSentences} |\n`
+}
 
   const ttfbVerdict = ttfbPass
     ? `**✓ PASS** — every turn's time-to-first-audio came in under ${s.budgetMs}ms (max ${s.loopTtfb.max.toFixed(0)}ms).`
@@ -582,11 +589,12 @@ The audio files are streamed to Deepgram at real-time pace, mimicking a live pho
 |---|---|---|---|
 | STT endpointing | ${s.sttEndpointing.mean.toFixed(0)}ms | ${s.sttEndpointing.min.toFixed(0)}ms | ${s.sttEndpointing.max.toFixed(0)}ms |
 | LLM | ${s.llm.mean.toFixed(0)}ms | ${s.llm.min.toFixed(0)}ms | ${s.llm.max.toFixed(0)}ms |
-| TTS TTFB | ${s.ttsTtfb.mean.toFixed(0)}ms | ${s.ttsTtfb.min.toFixed(0)}ms | ${s.ttsTtfb.max.toFixed(0)}ms |
-| TTS total | ${s.tts.mean.toFixed(0)}ms | ${s.tts.min.toFixed(0)}ms | ${s.tts.max.toFixed(0)}ms |
-| **Loop to first byte** | **${s.loopTtfb.mean.toFixed(0)}ms** | **${s.loopTtfb.min.toFixed(0)}ms** | **${s.loopTtfb.max.toFixed(0)}ms** |
-| **Loop full clip ready** | **${s.loop.mean.toFixed(0)}ms** | **${s.loop.min.toFixed(0)}ms** | **${s.loop.max.toFixed(0)}ms** |
-
+| TTS TTFB (sequential) | ${s.ttsTtfb.mean.toFixed(0)}ms | ${s.ttsTtfb.min.toFixed(0)}ms | ${s.ttsTtfb.max.toFixed(0)}ms |
+| TTS total (sequential) | ${s.tts.mean.toFixed(0)}ms | ${s.tts.min.toFixed(0)}ms | ${s.tts.max.toFixed(0)}ms |
+| **Sequential loop TTFB** | **${s.loopTtfb.mean.toFixed(0)}ms** | **${s.loopTtfb.min.toFixed(0)}ms** | **${s.loopTtfb.max.toFixed(0)}ms** |
+| **Sequential loop total** | **${s.loop.mean.toFixed(0)}ms** | **${s.loop.min.toFixed(0)}ms** | **${s.loop.max.toFixed(0)}ms** |
+| **Parallel loop TTFB** | **${s.parallelLoopTtfb.mean.toFixed(0)}ms** | **${s.parallelLoopTtfb.min.toFixed(0)}ms** | **${s.parallelLoopTtfb.max.toFixed(0)}ms** |
+| **Parallel loop total** | **${s.parallelLoop.mean.toFixed(0)}ms** | **${s.parallelLoop.min.toFixed(0)}ms** | **${s.parallelLoop.max.toFixed(0)}ms** |
 ## Per-turn breakdown
 
 ${perTurn}

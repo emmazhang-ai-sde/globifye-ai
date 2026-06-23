@@ -1,6 +1,6 @@
 # Full-Loop Test Report (streaming STT)
 
-**Date:** 2026-06-23T20:28:47.857Z
+**Date:** 2026-06-23T21:05:30.166Z
 **Stack:** Deepgram Nova-3 streaming STT → Groq `llama-3.1-8b-instant` → Deepgram Aura 2 TTS
 **Turns:** 5
 **Budget:** 1500ms, from end of caller's speech to AI audio response
@@ -17,30 +17,31 @@ The audio files are streamed to Deepgram at real-time pace, mimicking a live pho
 
 ## Verdict against 1500ms budget
 
-**Loop to first byte:** **✗ FAIL** — 5/5 turns exceeded 1500ms to first audio byte (max 3266ms).
+**Loop to first byte:** **✗ FAIL** — 4/5 turns exceeded 1500ms to first audio byte (max 3520ms).
 
-**Loop full clip ready:** **✗ FAIL** — 5/5 turns exceeded 1500ms for full response (max 6055ms).
+**Loop full clip ready:** **✗ FAIL** — 5/5 turns exceeded 1500ms for full response (max 6204ms).
 
 ## Aggregate timings
 
 | Stage | Mean | Min | Max |
 |---|---|---|---|
-| STT endpointing | 1414ms | 804ms | 2658ms |
-| LLM | 245ms | 174ms | 436ms |
-| TTS TTFB | 428ms | 342ms | 525ms |
-| TTS total | 2815ms | 2382ms | 3209ms |
-| **Loop to first byte** | **2088ms** | **1579ms** | **3266ms** |
-| **Loop full clip ready** | **4475ms** | **3623ms** | **6055ms** |
-
+| STT endpointing | 1408ms | 770ms | 2633ms |
+| LLM | 323ms | 206ms | 444ms |
+| TTS TTFB (sequential) | 442ms | 348ms | 535ms |
+| TTS total (sequential) | 2799ms | 2248ms | 3219ms |
+| **Sequential loop TTFB** | **2173ms** | **1362ms** | **3520ms** |
+| **Sequential loop total** | **4530ms** | **3223ms** | **6204ms** |
+| **Parallel loop TTFB** | **1853ms** | **1206ms** | **2996ms** |
+| **Parallel loop total** | **4024ms** | **3254ms** | **5364ms** |
 ## Per-turn breakdown
 
-| # | STT endpoint | LLM (ttft, chars) | TTS TTFB | TTS total | **Loop TTFB** | **Loop total** |
-|---|---|---|---|---|---|---|
-| 1 | 804ms | 436ms (ttft 314ms, 114c) | 342ms | 2382ms | ✗ **1583ms** | ✗ **3623ms** |
-| 2 | 953ms | 187ms (ttft 136ms, 104c) | 449ms | 2771ms | ✗ **1589ms** | ✗ **3911ms** |
-| 3 | 1843ms | 174ms (ttft 142ms, 90c) | 405ms | 2533ms | ✗ **2422ms** | ✗ **4550ms** |
-| 4 | 813ms | 241ms (ttft 141ms, 92c) | 525ms | 3180ms | ✗ **1579ms** | ✗ **4234ms** |
-| 5 | 2658ms | 188ms (ttft 147ms, 119c) | 420ms | 3209ms | ✗ **3266ms** | ✗ **6055ms** |
+| # | STT endpoint | LLM (ttft, chars) | TTS TTFB | TTS total | **Seq TTFB** | **Seq total** | **Par TTFB** | **Par total** | Sentences |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | 770ms | 206ms (ttft 144ms, 98c) | 387ms | 2248ms | ✓ **1362ms** | ✗ **3223ms** | ✓ **1206ms** | ✗ **3254ms** | 1 |
+| 2 | 959ms | 352ms (ttft 273ms, 88c) | 514ms | 3047ms | ✗ **1824ms** | ✗ **4358ms** | ✓ **1458ms** | ✗ **3521ms** | 1 |
+| 3 | 1818ms | 260ms (ttft 222ms, 104c) | 348ms | 2912ms | ✗ **2426ms** | ✗ **4989ms** | ✗ **2201ms** | ✗ **4312ms** | 1 |
+| 4 | 861ms | 444ms (ttft 444ms, 81c) | 428ms | 2571ms | ✗ **1733ms** | ✗ **3876ms** | ✓ **1404ms** | ✗ **3669ms** | 1 |
+| 5 | 2633ms | 352ms (ttft 297ms, 92c) | 535ms | 3219ms | ✗ **3520ms** | ✗ **6204ms** | ✗ **2996ms** | ✗ **5364ms** | 1 |
 
 
 See `transcripts.md` for the full conversation and `audio/turn-N-response.mp3` for the agent's spoken replies.
