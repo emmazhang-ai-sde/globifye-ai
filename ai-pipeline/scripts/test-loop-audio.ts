@@ -450,6 +450,19 @@ async function main() {
     writeFileSync(join(audioDir, `turn-${n}-sequential.mp3`), tts.bytes)
     writeFileSync(join(audioDir, `turn-${n}-parallel.mp3`), parallel.bytes)
 
+    transcriptLog.push(`## Turn ${n}`)
+    transcriptLog.push(``)
+    transcriptLog.push(`**Caller:** ${stt.transcript}`)
+    transcriptLog.push(``)
+    transcriptLog.push(`**Agent (sequential):** ${llm.text}`)
+    transcriptLog.push(``)
+    transcriptLog.push(`**Agent (parallel):** ${parallel.text}`)
+    transcriptLog.push(``)
+    transcriptLog.push(`*STT endpointing: ${ms(stt.endpointingMs)} | LLM: ${ms(llm.totalMs)} | Seq loop: ${ms(loopMs)} | Par loop: ${ms(parallelTotalMs)}*`)
+    transcriptLog.push(``)
+    transcriptLog.push(`---`)
+    transcriptLog.push(``)
+
     turns.push({
       turn: n,
       audioFile: audioFile.split('/').pop()!,
@@ -469,6 +482,9 @@ async function main() {
       parallelTotalMs,
       parallelSentences: parallel.sentences,
     })
+
+    history.push({ role: 'user', content: stt.transcript })
+    history.push({ role: 'assistant', content: llm.text })
   }
 
   if (turns.length === 0) {
@@ -496,10 +512,14 @@ async function main() {
     turnsLoopWithinBudget: turns.filter((t) => t.loopMs <= LATENCY_BUDGET_MS).length,
     parallelLoopTtfb: agg(turns.map((t) => t.parallelTtfbMs)),
     parallelLoop:     agg(turns.map((t) => t.parallelTotalMs)),
+    parallelTurnsTtfbWithinBudget: turns.filter((t) => t.parallelTtfbMs <= LATENCY_BUDGET_MS).length,
+    parallelTurnsLoopWithinBudget: turns.filter((t) => t.parallelTotalMs <= LATENCY_BUDGET_MS).length,
   }
 
   const ttfbPass = summary.loopTtfb.max <= LATENCY_BUDGET_MS
   const loopPass = summary.loop.max <= LATENCY_BUDGET_MS
+  const parTtfbPass = summary.parallelLoopTtfb.max <= LATENCY_BUDGET_MS
+  const parLoopPass = summary.parallelLoop.max <= LATENCY_BUDGET_MS
 
   console.log('\n' + '='.repeat(70))
   console.log('SUMMARY')
@@ -512,10 +532,14 @@ async function main() {
   console.log(`Loop full clip ready  mean ${ms(summary.loop.mean)}    max ${ms(summary.loop.max)}`)
   console.log(
     `\nBudget ${LATENCY_BUDGET_MS}ms:` +
-      `\n  Loop to first byte:   ${ttfbPass ? '✓ PASS' : '✗ FAIL'} ` +
+      `\n  Sequential TTFB:      ${ttfbPass ? '✓ PASS' : '✗ FAIL'} ` +
       `(${summary.turnsTtfbWithinBudget}/${summary.turnCount} within, max ${ms(summary.loopTtfb.max)})` +
-      `\n  Loop full clip ready: ${loopPass ? '✓ PASS' : '✗ FAIL'} ` +
-      `(${summary.turnsLoopWithinBudget}/${summary.turnCount} within, max ${ms(summary.loop.max)})`,
+      `\n  Sequential full clip: ${loopPass ? '✓ PASS' : '✗ FAIL'} ` +
+      `(${summary.turnsLoopWithinBudget}/${summary.turnCount} within, max ${ms(summary.loop.max)})` +
+      `\n  Parallel TTFB:        ${parTtfbPass ? '✓ PASS' : '✗ FAIL'} ` +
+      `(${summary.parallelTurnsTtfbWithinBudget}/${summary.turnCount} within, max ${ms(summary.parallelLoopTtfb.max)})` +
+      `\n  Parallel full clip:   ${parLoopPass ? '✓ PASS' : '✗ FAIL'} ` +
+      `(${summary.parallelTurnsLoopWithinBudget}/${summary.turnCount} within, max ${ms(summary.parallelLoop.max)})`,
   )
 
   writeFileSync(join(outDir, 'data.json'), JSON.stringify({ summary, turns }, null, 2))
@@ -552,6 +576,9 @@ for (const t of turns) {
     `| ${t.parallelSentences} |\n`
 }
 
+  const parTtfbPass = s.parallelLoopTtfb.max <= s.budgetMs
+  const parLoopPass = s.parallelLoop.max <= s.budgetMs
+
   const ttfbVerdict = ttfbPass
     ? `**✓ PASS** — every turn's time-to-first-audio came in under ${s.budgetMs}ms (max ${s.loopTtfb.max.toFixed(0)}ms).`
     : `**✗ FAIL** — ${s.turnCount - s.turnsTtfbWithinBudget}/${s.turnCount} turns exceeded ${s.budgetMs}ms to first audio byte (max ${s.loopTtfb.max.toFixed(0)}ms).`
@@ -559,6 +586,14 @@ for (const t of turns) {
   const loopVerdict = loopPass
     ? `**✓ PASS** — every turn's full audio response was ready under ${s.budgetMs}ms (max ${s.loop.max.toFixed(0)}ms).`
     : `**✗ FAIL** — ${s.turnCount - s.turnsLoopWithinBudget}/${s.turnCount} turns exceeded ${s.budgetMs}ms for full response (max ${s.loop.max.toFixed(0)}ms).`
+
+  const parTtfbVerdict = parTtfbPass
+    ? `**✓ PASS** — every turn's parallel time-to-first-audio came in under ${s.budgetMs}ms (max ${s.parallelLoopTtfb.max.toFixed(0)}ms).`
+    : `**✗ FAIL** — ${s.turnCount - s.parallelTurnsTtfbWithinBudget}/${s.turnCount} turns exceeded ${s.budgetMs}ms to first audio byte in parallel (max ${s.parallelLoopTtfb.max.toFixed(0)}ms).`
+
+  const parLoopVerdict = parLoopPass
+    ? `**✓ PASS** — every turn's full parallel audio response was ready under ${s.budgetMs}ms (max ${s.parallelLoop.max.toFixed(0)}ms).`
+    : `**✗ FAIL** — ${s.turnCount - s.parallelTurnsLoopWithinBudget}/${s.turnCount} turns exceeded ${s.budgetMs}ms for full parallel response (max ${s.parallelLoop.max.toFixed(0)}ms).`
 
   return `# Full-Loop Test Report (streaming STT)
 
@@ -579,9 +614,17 @@ The audio files are streamed to Deepgram at real-time pace, mimicking a live pho
 
 ## Verdict against ${s.budgetMs}ms budget
 
+### Sequential
+
 **Loop to first byte:** ${ttfbVerdict}
 
 **Loop full clip ready:** ${loopVerdict}
+
+### Parallel
+
+**Loop to first byte:** ${parTtfbVerdict}
+
+**Loop full clip ready:** ${parLoopVerdict}
 
 ## Aggregate timings
 
