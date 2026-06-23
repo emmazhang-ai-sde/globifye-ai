@@ -1,0 +1,116 @@
+{
+  "summary": {
+    "startedAt": "2026-06-23T19:36:14.088Z",
+    "turnCount": 5,
+    "budgetMs": 1500,
+    "stt": {
+      "mean": 1848.660424399998,
+      "max": 3255.1754309999997,
+      "min": 806.0782679999975
+    },
+    "llm": {
+      "mean": 306.62149780000254,
+      "max": 471.0500030000112,
+      "min": 238.5595119999998
+    },
+    "tts": {
+      "mean": 16563.9647214,
+      "max": 20770.60736899999,
+      "min": 11524.689027
+    },
+    "budget": {
+      "mean": 16870.5862192,
+      "max": 21241.657372,
+      "min": 11792.476345000003
+    },
+    "fullLoop": {
+      "mean": 18719.2466436,
+      "max": 22900.241217999996,
+      "min": 12598.554613
+    },
+    "rtfMean": 1.1077952479345252,
+    "allWavValid": true
+  },
+  "turns": [
+    {
+      "turn": 1,
+      "audioFile": "test-audio-1.wav",
+      "sttTranscript": "Hello there. I've been looking at the product from your company, and I'm not entirely sure about the, like, detailed information. Can you tell me more about your product?",
+      "sttMs": 3255.1754309999997,
+      "llmText": "We'd be happy to help clarify things for you. Can you tell me a bit more about what drew you to our product in the first place? Was it a specific feature or something else?",
+      "llmTtftMs": 144.54218500000025,
+      "llmMs": 238.5595119999998,
+      "ttsMs": 12161.309548,
+      "audioDurationSec": 9.875,
+      "rtf": 1.2315250175189871,
+      "budgetMs": 12399.869059999999,
+      "endToEndMs": 15655.044490999999,
+      "wavValid": true,
+      "responseWavBytes": 948044
+    },
+    {
+      "turn": 2,
+      "audioFile": "test-audio-2.wav",
+      "sttTranscript": "Well, I think I need something highly reliable can it handle heavy everyday use? And how is it different from other products on the market?",
+      "sttMs": 1824.8554700000022,
+      "llmText": "Our product is built with high-quality components and designed to withstand heavy use. What sets us apart is our unique counseling service, GlobiFYE, which provides personalized support to help you get the most out of your investment and address any challenges you might face.",
+      "llmTtftMs": 181.4112180000011,
+      "llmMs": 279.8281129999996,
+      "ttsMs": 19116.043686,
+      "audioDurationSec": 17.9,
+      "rtf": 1.0679354014525142,
+      "budgetMs": 19395.871799,
+      "endToEndMs": 21220.727269000003,
+      "wavValid": true,
+      "responseWavBytes": 1718444
+    },
+    {
+      "turn": 3,
+      "audioFile": "test-audio-3.wav",
+      "sttTranscript": "Okay, well, does it require a lot of maintenance?",
+      "sttMs": 806.0782679999975,
+      "llmText": "Our product is designed to be low-maintenance, and with our GlobiFYE service, you'll have access to expert guidance to help you troubleshoot any issues that might arise.",
+      "llmTtftMs": 158.94642000000022,
+      "llmMs": 267.7873180000024,
+      "ttsMs": 11524.689027,
+      "audioDurationSec": 10.825,
+      "rtf": 1.0646363997228638,
+      "budgetMs": 11792.476345000003,
+      "endToEndMs": 12598.554613,
+      "wavValid": true,
+      "responseWavBytes": 1039244
+    },
+    {
+      "turn": 4,
+      "audioFile": "test-audio-4.wav",
+      "sttTranscript": "Okay, well, there any discounts or, coupons that I can use to buy this product?",
+      "sttMs": 1698.6091069999966,
+      "llmText": "We do have a promotion available right now, and I can offer you a special discount that'll bring the price down. However, I'd love to discuss the value of our GlobiFYE service and how it can benefit you in the long run before we talk numbers. Can you tell me a little bit more about your budget for this?",
+      "llmTtftMs": 156.2814819999985,
+      "llmMs": 275.8825429999997,
+      "ttsMs": 19247.173977,
+      "audioDurationSec": 18.4,
+      "rtf": 1.0460420639673913,
+      "budgetMs": 19523.05652,
+      "endToEndMs": 21221.665626999995,
+      "wavValid": true,
+      "responseWavBytes": 1766444
+    },
+    {
+      "turn": 5,
+      "audioFile": "test-audio-5.wav",
+      "sttTranscript": "Okay, well, I don't know, I've heard mixed things about these kind of services, so, let me think about it.",
+      "sttMs": 1658.583845999994,
+      "llmText": "I completely understand, it's natural to have some questions and concerns. Can I schedule a follow-up call to answer any additional questions you may have and give you a better sense of how our GlobiFYE service can support you, and we can discuss the details of the product and pricing then?",
+      "llmTtftMs": 336.58117800000764,
+      "llmMs": 471.0500030000112,
+      "ttsMs": 20770.60736899999,
+      "audioDurationSec": 18.4,
+      "rtf": 1.1288373570108692,
+      "budgetMs": 21241.657372,
+      "endToEndMs": 22900.241217999996,
+      "wavValid": true,
+      "responseWavBytes": 1766444
+    }
+  ]
+}
