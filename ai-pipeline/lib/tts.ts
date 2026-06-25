@@ -1,83 +1,72 @@
-// import { ElevenLabsClient } from 'elevenlabs'
+// Step 13.2 — ElevenLabs TTS (eleven_turbo_v2_5, ~300-400ms TTFB)
+// Uses direct REST fetch — no SDK dependency needed.
+// Voice: set ELEVENLABS_VOICE_ID in .env.local. Default = Rachel (21m00Tcm4TlvDq8ikWAM).
 
-// const elevenlabs = new ElevenLabsClient({
-//   apiKey: process.env.ELEVENLABS_API_KEY!,
-// })
+const DEFAULT_VOICE = '21m00Tcm4TlvDq8ikWAM'
 
-// const VOICE_ID = process.env.ELEVENLABS_VOICE_ID ?? '21m00Tcm4TlvDq8ikWAM'
+export async function synthesizeSpeech(text: string): Promise<Buffer> {
+  const voiceId = process.env.ELEVENLABS_VOICE_ID || DEFAULT_VOICE
+
+  const res = await fetch(
+    `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+    {
+      method: 'POST',
+      headers: {
+        'xi-api-key': process.env.ELEVENLABS_API_KEY!,
+        'Content-Type': 'application/json',
+        Accept: 'audio/mpeg',
+      },
+      body: JSON.stringify({
+        text,
+        model_id: 'eleven_turbo_v2_5',
+        voice_settings: {
+          stability: 0.5,
+          similarity_boost: 0.75,
+        },
+      }),
+    }
+  )
+
+  if (!res.ok) {
+    const errText = await res.text()
+    throw new Error(`ElevenLabs TTS error ${res.status}: ${errText}`)
+  }
+
+  return Buffer.from(await res.arrayBuffer())
+}
+
+// const DG_KEY = process.env.DEEPGRAM_API_KEY
+// if (!DG_KEY) {
+//   throw new Error('DEEPGRAM_API_KEY is not set')
+// }
+
+// // Aura 2 model. `aura-2-asteria-en` is the professional female voice that
+// // matched the demo persona earlier. Swap via env var if you want a different
+// // voice (e.g. aura-2-luna-en, aura-2-orion-en).
+// const MODEL = process.env.DEEPGRAM_TTS_MODEL || 'aura-2-asteria-en'
 
 // export async function textToSpeechStream(
 //   text: string,
 // ): Promise<ReadableStream<Uint8Array>> {
-//   // Use convert() instead of stream() — returns a Node.js Readable
-//   const audioStream = await elevenlabs.textToSpeech.convert(VOICE_ID, {
-//     text,
-//     model_id: 'eleven_turbo_v2_5',
-//     voice_settings: {
-//       stability: 0.5,
-//       similarity_boost: 0.75,
+//   const url =
+//     `https://api.deepgram.com/v1/speak` +
+//     `?model=${encodeURIComponent(MODEL)}&encoding=mp3`
+
+//   const res = await fetch(url, {
+//     method: 'POST',
+//     headers: {
+//       Authorization: `Token ${DG_KEY}`,
+//       'Content-Type': 'application/json',
 //     },
-//     output_format: 'mp3_44100_128',
+//     body: JSON.stringify({ text }),
 //   })
 
-//   // Convert Node.js Readable → Web ReadableStream
-//   return new ReadableStream<Uint8Array>({
-//     async start(controller) {
-//       for await (const chunk of audioStream) {
-//         controller.enqueue(
-//           chunk instanceof Uint8Array ? chunk : new Uint8Array(chunk),
-//         )
-//       }
-//       controller.close()
-//     },
-//   })
+//   if (!res.ok || !res.body) {
+//     const detail = await res.text().catch(() => '')
+//     throw new Error(`Deepgram TTS failed: ${res.status} ${detail}`)
+//   }
+
+//   // res.body is the streamed audio. First-byte latency is therefore just the
+//   // fetch round-trip + Aura's TTFB — typically ~75–150ms for short replies.
+//   return res.body
 // }
-
-// lib/tts.ts
-//
-// Deepgram Aura 2 TTS via REST API.
-//
-// We use the REST endpoint directly instead of the SDK so the code is immune
-// to SDK version drift — `fetch` + a documented HTTP endpoint just works.
-// The response body IS a ReadableStream<Uint8Array>, so we hand it back as-is;
-// the caller gets the same shape that Kokoro returned, just streamed.
-//
-// Output format is MP3. The browser playback path (decodeAudioData) is
-// format-agnostic, so no change is needed in page.tsx. The route's
-// Content-Type header should be 'audio/mpeg' (not 'audio/wav').
-
-const DG_KEY = process.env.DEEPGRAM_API_KEY
-if (!DG_KEY) {
-  throw new Error('DEEPGRAM_API_KEY is not set')
-}
-
-// Aura 2 model. `aura-2-asteria-en` is the professional female voice that
-// matched the demo persona earlier. Swap via env var if you want a different
-// voice (e.g. aura-2-luna-en, aura-2-orion-en).
-const MODEL = process.env.DEEPGRAM_TTS_MODEL || 'aura-2-asteria-en'
-
-export async function textToSpeechStream(
-  text: string,
-): Promise<ReadableStream<Uint8Array>> {
-  const url =
-    `https://api.deepgram.com/v1/speak` +
-    `?model=${encodeURIComponent(MODEL)}&encoding=mp3`
-
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Token ${DG_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ text }),
-  })
-
-  if (!res.ok || !res.body) {
-    const detail = await res.text().catch(() => '')
-    throw new Error(`Deepgram TTS failed: ${res.status} ${detail}`)
-  }
-
-  // res.body is the streamed audio. First-byte latency is therefore just the
-  // fetch round-trip + Aura's TTFB — typically ~75–150ms for short replies.
-  return res.body
-}

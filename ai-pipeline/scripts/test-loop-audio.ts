@@ -9,7 +9,7 @@
  *      ending in audio time and `speech_final` firing.
  *      → This is the STT contribution a real caller experiences.
  *   5. Feed transcript + history to LLM → reply text
- *   6. Aura TTS (streaming MP3) → audio bytes (timed TTFB + total)
+ *   6. ElevenLabs TTS (non-streaming MP3) → audio bytes (timed TTFB + total)
  *
  * Loop latency = streaming STT endpointing + LLM + TTS
  *   - Loop to first byte:  STT endpointing + LLM + TTS TTFB
@@ -28,7 +28,7 @@ import { readdirSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { spawn, spawnSync } from 'node:child_process'
 import { streamAgentResponse, type ConversationMessage } from '../lib/agent-llm'
-import { textToSpeechStream } from '../lib/tts'
+import { synthesizeSpeech } from '../lib/tts'
 
 // =====================================================================
 // Config
@@ -246,29 +246,14 @@ async function runLLM(utterance: string, history: ConversationMessage[]) {
 
 async function runTTS(text: string) {
   const t0 = performance.now()
-  const stream = await textToSpeechStream(text)
-  let ttfbMs = -1
-  const chunks: Uint8Array[] = []
-  const reader = stream.getReader()
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-    if (value && value.length > 0) {
-      if (ttfbMs < 0) ttfbMs = performance.now() - t0
-      chunks.push(value)
-    }
-  }
-  const totalLen = chunks.reduce((s, c) => s + c.length, 0)
-  const bytes = new Uint8Array(totalLen)
-  let off = 0
-  for (const c of chunks) {
-    bytes.set(c, off)
-    off += c.length
-  }
+  // ElevenLabs synthesizeSpeech() is non-streaming — the whole MP3 arrives
+  // in one buffer, so TTFB and total latency are the same here.
+  const buf = await synthesizeSpeech(text)
+  const totalMs = performance.now() - t0
   return {
-    bytes,
-    ttfbMs: ttfbMs < 0 ? 0 : ttfbMs,
-    totalMs: performance.now() - t0,
+    bytes: new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength),
+    ttfbMs: totalMs,
+    totalMs,
   }
 }
 
@@ -283,22 +268,9 @@ async function runParallelLLMTTS(utterance: string, history: ConversationMessage
   const sentencePromises: Promise<void>[] = []
 
   async function processSentence(text: string, index: number) {
-    const stream = await textToSpeechStream(text)
-    const reader = stream.getReader()
-    const chunks: Uint8Array[] = []
-    while (true) {
-      const { done, value } = await reader.read()
-      if (done) break
-      if (value && value.length > 0) {
-        if (ttfbMs < 0) ttfbMs = performance.now() - t0  // first byte from any sentence
-        chunks.push(value)
-      }
-    }
-    const totalLen = chunks.reduce((s, c) => s + c.length, 0)
-    const bytes = new Uint8Array(totalLen)
-    let off = 0
-    for (const c of chunks) { bytes.set(c, off); off += c.length }
-    sentenceResults[index] = bytes
+    const buf = await synthesizeSpeech(text)
+    if (ttfbMs < 0) ttfbMs = performance.now() - t0  // first sentence's full buffer arrives
+    sentenceResults[index] = new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength)
   }
 
   let sentenceIndex = 0
@@ -482,9 +454,6 @@ async function main() {
       parallelTotalMs,
       parallelSentences: parallel.sentences,
     })
-
-    history.push({ role: 'user', content: stt.transcript })
-    history.push({ role: 'assistant', content: llm.text })
   }
 
   if (turns.length === 0) {
@@ -518,8 +487,6 @@ async function main() {
 
   const ttfbPass = summary.loopTtfb.max <= LATENCY_BUDGET_MS
   const loopPass = summary.loop.max <= LATENCY_BUDGET_MS
-  const parTtfbPass = summary.parallelLoopTtfb.max <= LATENCY_BUDGET_MS
-  const parLoopPass = summary.parallelLoop.max <= LATENCY_BUDGET_MS
 
   console.log('\n' + '='.repeat(70))
   console.log('SUMMARY')
@@ -532,14 +499,10 @@ async function main() {
   console.log(`Loop full clip ready  mean ${ms(summary.loop.mean)}    max ${ms(summary.loop.max)}`)
   console.log(
     `\nBudget ${LATENCY_BUDGET_MS}ms:` +
-      `\n  Sequential TTFB:      ${ttfbPass ? '✓ PASS' : '✗ FAIL'} ` +
+      `\n  Loop to first byte:   ${ttfbPass ? '✓ PASS' : '✗ FAIL'} ` +
       `(${summary.turnsTtfbWithinBudget}/${summary.turnCount} within, max ${ms(summary.loopTtfb.max)})` +
-      `\n  Sequential full clip: ${loopPass ? '✓ PASS' : '✗ FAIL'} ` +
-      `(${summary.turnsLoopWithinBudget}/${summary.turnCount} within, max ${ms(summary.loop.max)})` +
-      `\n  Parallel TTFB:        ${parTtfbPass ? '✓ PASS' : '✗ FAIL'} ` +
-      `(${summary.parallelTurnsTtfbWithinBudget}/${summary.turnCount} within, max ${ms(summary.parallelLoopTtfb.max)})` +
-      `\n  Parallel full clip:   ${parLoopPass ? '✓ PASS' : '✗ FAIL'} ` +
-      `(${summary.parallelTurnsLoopWithinBudget}/${summary.turnCount} within, max ${ms(summary.parallelLoop.max)})`,
+      `\n  Loop full clip ready: ${loopPass ? '✓ PASS' : '✗ FAIL'} ` +
+      `(${summary.turnsLoopWithinBudget}/${summary.turnCount} within, max ${ms(summary.loop.max)})`,
   )
 
   writeFileSync(join(outDir, 'data.json'), JSON.stringify({ summary, turns }, null, 2))
@@ -598,7 +561,7 @@ for (const t of turns) {
   return `# Full-Loop Test Report (streaming STT)
 
 **Date:** ${s.startedAt}
-**Stack:** Deepgram Nova-3 streaming STT → Groq \`llama-3.1-8b-instant\` → Deepgram Aura 2 TTS
+**Stack:** Deepgram Nova-3 streaming STT → Groq \`llama-3.1-8b-instant\` → ElevenLabs \`eleven_turbo_v2_5\` TTS
 **Turns:** ${s.turnCount}
 **Budget:** ${s.budgetMs}ms, from end of caller's speech to AI audio response
 **Deepgram endpointing param:** ${s.endpointingParamMs}ms

@@ -1,0 +1,1 @@
+app/api/agent/respond/route.ts(3,10): error TS2305: Module '"@/lib/tts"' has no exported member 'textToSpeechStream'.

@@ -1,0 +1,149 @@
+{
+  "summary": {
+    "startedAt": "2026-06-25T19:51:49.944Z",
+    "turnCount": 5,
+    "budgetMs": 1500,
+    "endpointingParamMs": 300,
+    "sttEndpointing": {
+      "mean": 1398.782461,
+      "max": 2682.0139020000024,
+      "min": 717.4648909999996
+    },
+    "llm": {
+      "mean": 321.87171279999893,
+      "max": 663.0898750000015,
+      "min": 213.39621799999804
+    },
+    "ttsTtfb": {
+      "mean": 773.8340752000001,
+      "max": 1551.6485779999985,
+      "min": 490.638688
+    },
+    "tts": {
+      "mean": 773.8340752000001,
+      "max": 1551.6485779999985,
+      "min": 490.638688
+    },
+    "loopTtfb": {
+      "mean": 2494.488248999999,
+      "max": 3499.438244000001,
+      "min": 1435.3304799999996
+    },
+    "loop": {
+      "mean": 2494.488248999999,
+      "max": 3499.438244000001,
+      "min": 1435.3304799999996
+    },
+    "turnsTtfbWithinBudget": 1,
+    "turnsLoopWithinBudget": 1,
+    "parallelLoopTtfb": {
+      "mean": 1885.7569668000003,
+      "max": 3193.9263700000047,
+      "min": 1177.3692339999998
+    },
+    "parallelLoop": {
+      "mean": 1885.7865988000005,
+      "max": 3193.9464460000054,
+      "min": 1177.4251269999995
+    },
+    "parallelTurnsTtfbWithinBudget": 3,
+    "parallelTurnsLoopWithinBudget": 3
+  },
+  "turns": [
+    {
+      "turn": 1,
+      "audioFile": "test-audio-1.wav",
+      "audioDurationMs": 14117.75,
+      "sttTranscript": "Hello there. I've been looking at the product",
+      "sttEndpointingMs": 717.4648909999996,
+      "llmText": "We've helped many businesses find the right fit for their needs, can you tell me more about yours?",
+      "llmChars": 98,
+      "llmTtftMs": 188.1212089999999,
+      "llmMs": 227.226901,
+      "ttsTtfbMs": 490.638688,
+      "ttsMs": 490.638688,
+      "loopTtfbMs": 1435.3304799999996,
+      "loopMs": 1435.3304799999996,
+      "responseBytes": 85725,
+      "parallelTtfbMs": 1177.3692339999998,
+      "parallelTotalMs": 1177.4251269999995,
+      "parallelSentences": 1
+    },
+    {
+      "turn": 2,
+      "audioFile": "test-audio-2.wav",
+      "audioDurationMs": 14489.25,
+      "sttTranscript": "Well, I think I need something highly reliable",
+      "sttEndpointingMs": 978.5812970000006,
+      "llmText": "Our GlobiFYE counseling service is built on a foundation of proven, reliable strategies.",
+      "llmChars": 88,
+      "llmTtftMs": 239.46714500000053,
+      "llmMs": 285.9992230000007,
+      "ttsTtfbMs": 1551.6485779999985,
+      "ttsMs": 1551.6485779999985,
+      "loopTtfbMs": 2816.229098,
+      "loopMs": 2816.229098,
+      "responseBytes": 87815,
+      "parallelTtfbMs": 1428.6557920000014,
+      "parallelTotalMs": 1428.6779240000014,
+      "parallelSentences": 1
+    },
+    {
+      "turn": 3,
+      "audioFile": "test-audio-3.wav",
+      "audioDurationMs": 6130.0625,
+      "sttTranscript": "Okay. Well, does it require a lot of maintenance?",
+      "sttEndpointingMs": 1813.8133069999985,
+      "llmText": "Our solution is designed to be user-friendly and requires minimal maintenance.",
+      "llmChars": 78,
+      "llmTtftMs": 181.29560499999934,
+      "llmMs": 213.39621799999804,
+      "ttsTtfbMs": 732.1219270000001,
+      "ttsMs": 732.1219270000001,
+      "loopTtfbMs": 2759.3314519999967,
+      "loopMs": 2759.3314519999967,
+      "responseBytes": 78202,
+      "parallelTtfbMs": 2391.1037559999986,
+      "parallelTotalMs": 2391.134302999997,
+      "parallelSentences": 1
+    },
+    {
+      "turn": 4,
+      "audioFile": "test-audio-4.wav",
+      "audioDurationMs": 10031,
+      "sttTranscript": "Okay. Well, are there any discounts?",
+      "sttEndpointingMs": 802.0389079999986,
+      "llmText": "We do offer a 10% discount for first-time clients, which would be applied to the total package price.",
+      "llmChars": 101,
+      "llmTtftMs": 332.41451600000073,
+      "llmMs": 663.0898750000015,
+      "ttsTtfbMs": 496.98318799999834,
+      "ttsMs": 496.98318799999834,
+      "loopTtfbMs": 1962.1119709999984,
+      "loopMs": 1962.1119709999984,
+      "responseBytes": 97010,
+      "parallelTtfbMs": 1237.7296819999974,
+      "parallelTotalMs": 1237.749194,
+      "parallelSentences": 1
+    },
+    {
+      "turn": 5,
+      "audioFile": "test-audio-5.wav",
+      "audioDurationMs": 11331.375,
+      "sttTranscript": "Okay. Well, I don't know. I've heard mixed things about these kind of services, so, let me think about it.",
+      "sttEndpointingMs": 2682.0139020000024,
+      "llmText": "We've helped many entrepreneurs like yourself achieve clarity and direction with our counseling service.",
+      "llmChars": 104,
+      "llmTtftMs": 180.74832199999946,
+      "llmMs": 219.64634699999442,
+      "ttsTtfbMs": 597.777995000004,
+      "ttsMs": 597.777995000004,
+      "loopTtfbMs": 3499.438244000001,
+      "loopMs": 3499.438244000001,
+      "responseBytes": 92413,
+      "parallelTtfbMs": 3193.9263700000047,
+      "parallelTotalMs": 3193.9464460000054,
+      "parallelSentences": 1
+    }
+  ]
+}
