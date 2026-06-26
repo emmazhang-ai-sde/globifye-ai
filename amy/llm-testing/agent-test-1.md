@@ -44,7 +44,7 @@ Noticeably slower, expected because Kokoro is entirely free. TTS ignores "/" and
 - Speaking lag (response done to first TTS): avg **2530** [1873 ms, 3187 ms]
 - Total lag: avg **3206.5** [2578 ms, 3835 ms]
 
-**Note:** the massive latency may also be due to lack of streaming; my previous code for Elevenlabs was streaming with the HTTP API, not their WebSocket API (which could be faster), and the LLM output isn't streaming yet either. When I switched to Kokoro, I did not check to see if the STT was still streaming. But either way, Kokoro is too slow to be worth it.
+**Note:** the massive latency may also be due to lack of streaming; my previous code for Elevenlabs was streaming with the HTTP API, not their WebSocket API (which could be faster), and the LLM output isn't streaming yet either. When I switched to Kokoro, I did not check to see if the TTS was still streaming. But either way, Kokoro is too slow to be worth it.
 
 # Test 4:
 ## Pipeline: 
