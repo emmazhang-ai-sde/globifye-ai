@@ -21,7 +21,7 @@ Smooth, with quick responses (perhaps a little too quick, if the speaker talks s
 - TTS: (Elevenlabs) Eleven Turbo 2.5
 
 ## Performance:
-Smooth, TTS is surprisingly incremental (almost seems like the audio is being typed out, impressive). However, noticed some issues with Elevenlabs TTS - most notably, reading decimal numbers (LLM reads the decimal point as a period and ends the sentence) and hyphenated words (slightly unnatural pause). Try Modulate's TTS next.
+Smooth, TTS is surprisingly incremental (almost seems like the audio is being typed out, impressive). However, noticed some issues with Elevenlabs TTS - most notably, reading decimal numbers (LLM reads the decimal point as a period and ends the sentence) and hyphenated words (slightly unnatural pause).
 
 - Reaction time (end of speaker to first token): avg **248** [288 ms, 180 ms, 274 ms, 250 ms]
 - Thinking time (first token to full response done): avg **338.5** [256 ms, 417 ms, 393 ms, 288 ms]
@@ -29,3 +29,18 @@ Smooth, TTS is surprisingly incremental (almost seems like the audio is being ty
 - Total lag: avg **912.5** [1066 ms, 1020 ms, 823 ms, 741 ms]
 
 **Note:** increase in latency is due to inconsistency in the performance of the LLMs and slight differences in the test questions, likely not a reflection of the performance of the LLMs.
+
+# Test 3:
+## Pipeline: 
+- STT: Modulate.ai
+- LLM: (Groq) GPT OSS 120b
+- TTS: Kokoro
+
+## Performance:
+Noticeably slower, expected because Kokoro is entirely free. TTS ignores "/" and "$" and has unnatural lag.
+
+- Reaction time (end of speaker to first token): avg **323.5** [333 ms, 314 ms]
+- Thinking time (first token to full response done): avg **353** [372 ms, 334 ms]
+- Speaking lag (response done to first TTS): avg **2530** [1873 ms, 3187 ms]
+- Total lag: avg **3206.5** [2578 ms, 3835 ms]
+
