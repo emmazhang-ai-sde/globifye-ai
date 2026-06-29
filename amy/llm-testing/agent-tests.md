@@ -73,7 +73,22 @@ Decent performance, slightly robotic, but noticeable lag. Compare with Deepgram 
 
 - Reaction time (end of speaker to first token): avg **225.5** [261 ms, 190 ms]
 - Thinking time (first token to full response done): avg **196.5** [192 ms, 201 ms]
-- Speaking lag (response done to first TTS): avg **~864.5** [643 ms, 1086 ms] 
+- Speaking lag (response done to first TTS): avg **864.5** [643 ms, 1086 ms] 
 - Total lag: avg **1286.5** [1096 ms, 1477 ms] 
 
 **Note:** This is with the HTTP API.
+
+# Test 6:
+## Pipeline: 
+- STT: Modulate.ai
+- LLM: (Groq) GPT OSS 120b
+- TTS: Deepgram Aura
+
+## Performance:
+Natural and high quality. Noticed some STT issues - Modulate occasionally get confused on when the sentence ends (waits ~1 sec, not reflected in timestamps) and transcribes in a different language if audio is unclear. Looking into solutions.
+
+- Reaction time (end of speaker to first token): avg **217.3** [191 ms, 242 ms, 219 ms]
+- Thinking time (first token to full response done): avg **283.3** [315 ms, 186 ms, 349 ms]
+- Speaking lag (response done to first TTS): avg **280.7** [306 ms, 281 ms, 255 ms] 
+- Total lag: avg **781.3** [812 ms, 709 ms, 823 ms] 
+
