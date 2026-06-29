@@ -61,3 +61,19 @@ Most natural speech. Performance is good overall. A few slightly unnatural pause
 - Total lag: avg **~861** [~896 ms, ~879 ms, ~932 ms, ~737 ms] (using 250 ms as speaking lag for all)
 
 **Note:** This is with the WebSocket API.
+
+# Test 5:
+## Pipeline: 
+- STT: Modulate.ai
+- LLM: (Groq) GPT OSS 120b
+- TTS: OpenAI TTS 1
+
+## Performance:
+Decent performance, slightly robotic, but noticeable lag. Compare with Deepgram Aura to verify that latency is not a code issue.
+
+- Reaction time (end of speaker to first token): avg **225.5** [261 ms, 190 ms]
+- Thinking time (first token to full response done): avg **196.5** [192 ms, 201 ms]
+- Speaking lag (response done to first TTS): avg **~864.5** [643 ms, 1086 ms] 
+- Total lag: avg **1286.5** [1096 ms, 1477 ms] 
+
+**Note:** This is with the HTTP API.
