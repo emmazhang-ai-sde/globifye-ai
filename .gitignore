@@ -5,3 +5,6 @@
 shuyang/
 
 GlobiFYE/.claude/settings.local.json
+
+# Ignore virtual environment directories
+venv/
