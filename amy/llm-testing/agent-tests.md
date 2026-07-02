@@ -82,7 +82,7 @@ Decent performance, slightly robotic, but noticeable lag. Compare with Deepgram 
 ## Pipeline: 
 - STT: Modulate.ai
 - LLM: (Groq) GPT OSS 120b
-- TTS: Deepgram Aura
+- TTS: Deepgram Aura 2
 
 ## Performance:
 Natural and high quality. Noticed some STT issues - Modulate occasionally get confused on when the sentence ends (waits ~1 sec, not reflected in timestamps) and transcribes in a different language if audio is unclear. Looking into solutions.
@@ -105,3 +105,17 @@ Decent performance, slight lag; previously had issues with TTS adding thinking/i
 - Thinking time (first token to full response done): avg **259.75** [258 ms, 299 ms, 230 ms, 352 ms]
 - Speaking lag (response done to first TTS): avg **838** [1283 ms, 596 ms, 1082 ms, 391 ms] 
 - Total lag: avg **1385** [1816 ms, 1177 ms, 1530 ms, 1017 ms] 
+
+# Test 8:
+## Pipeline: 
+- STT: Modulate.ai
+- LLM: (Groq) GPT OSS 120b
+- TTS: xAI Grok TTS v1
+
+## Performance:
+Natural, good performance. This model has roughly the same price as OpenAI TTS 1 and Deepgram Aura 1.
+
+- Reaction time (end of speaker to first token): avg **250** [217 ms, 276 ms, 316 ms, 191 ms]
+- Thinking time (first token to full response done): avg **317** [305 ms, 431 ms, 282 ms, 250 ms]
+- Speaking lag (response done to first TTS): avg **469.75** [461 ms, 372 ms, 590 ms, 456 ms] 
+- Total lag: avg **1036.75** [983 ms, 1079 ms, 1188 ms, 897 ms]
