@@ -119,3 +119,17 @@ Natural, good performance. This model has roughly the same price as OpenAI TTS 1
 - Thinking time (first token to full response done): avg **317** [305 ms, 431 ms, 282 ms, 250 ms]
 - Speaking lag (response done to first TTS): avg **469.75** [461 ms, 372 ms, 590 ms, 456 ms] 
 - Total lag: avg **1036.75** [983 ms, 1079 ms, 1188 ms, 897 ms]
+
+# Test 9:
+## Pipeline: 
+- STT: Modulate.ai
+- LLM: (Groq) GPT OSS 120b
+- TTS: Deepgram Aura 1
+
+## Performance:
+Decent, quality varies depending on the voice model. Sounds a bit robotic, and the latency doesn't feel much better than the other good candidates.
+
+- Reaction time (end of speaker to first token): avg **315** [193 ms, 486 ms, 266 ms]
+- Thinking time (first token to full response done): avg **390.7** [326 ms, 381 ms, 465 ms]
+- Speaking lag (response done to first TTS): avg **383.3** [431 ms, 280 ms, 439 ms] 
+- Total lag: avg **1089** [950 ms, 1147 ms, 1170 ms]
