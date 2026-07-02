@@ -92,3 +92,16 @@ Natural and high quality. Noticed some STT issues - Modulate occasionally get co
 - Speaking lag (response done to first TTS): avg **280.7** [306 ms, 281 ms, 255 ms] 
 - Total lag: avg **781.3** [812 ms, 709 ms, 823 ms] 
 
+# Test 7:
+## Pipeline: 
+- STT: Modulate.ai
+- LLM: (Groq) GPT OSS 120b
+- TTS: OpenAI TTS (GPT Realtime 2)
+
+## Performance:
+Decent performance, slight lag; previously had issues with TTS adding thinking/instruction acknowledgement. However, the realtime model is actually much more expensive than Deepgram, which defeats the purpose of using it (I did not realize this at first). Full testing results anyways for reference.
+
+- Reaction time (end of speaker to first token): avg **263** [278 ms, 282 ms, 218 ms, 274 ms]
+- Thinking time (first token to full response done): avg **259.75** [258 ms, 299 ms, 230 ms, 352 ms]
+- Speaking lag (response done to first TTS): avg **838** [1283 ms, 596 ms, 1082 ms, 391 ms] 
+- Total lag: avg **1385** [1816 ms, 1177 ms, 1530 ms, 1017 ms] 
