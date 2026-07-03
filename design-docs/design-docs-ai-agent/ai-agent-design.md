@@ -348,3 +348,29 @@ Research 4: Multi-use verification      → confirm same LLM handles email too
 ## 12. Technical Reference
 
 See [`technical-reference.md`](./technical-reference.md) for background on the key technologies referenced in this document: SIP/RTP, and AirLLM.
+
+---
+
+## 13. External Platform Landscape (CRM / Support / Automation / Telephony)
+
+**Not owned by SIP (Abraham) or the real-time AI agent loop directly** — this is the broader external-platform ecosystem the API team (Dharshini + Ethan) has been testing, plus DID which sits under Backend (Abraham). Captured here because it's the context behind the `lookup_crm_prospect` / `write_crm_notes` tools in Section 5, and because Danish has referenced this stack with other sub-teams (API sync-up, 6/30 meeting) without it landing cleanly under any one team's doc.
+
+| Tool | Category | What it does |
+|---|---|---|
+| **HubSpot** | CRM | Central store for customer/prospect records — contact info, deal stage, marketing emails, communication history. The "customer info backend." |
+| **Apollo.io** | Lead generation | Finds prospects and company contact info, used for outbound email/call outreach and sales follow-up. |
+| **Zendesk** | Customer support | Turns inbound emails/chat/calls/issues into tickets that support reps track and resolve. |
+| **Zapier** | Automation glue | Connects the other platforms — triggers an action in one app when a condition fires in another (e.g., Apollo finds a new contact → auto-added to HubSpot → Slack notification sent). |
+| **DID** (Direct Inward Dialing) | Telephony capability, not a vendor | A phone number (or block of numbers) routed straight to a company/department/employee so calls land directly, without going through a central switchboard. Owned by Abraham's SIP/telephony research, not a CRM/support tool. |
+
+**How they chain together end-to-end:**
+
+```
+Apollo (find prospects)
+   → HubSpot (manage/track the relationship)
+      → DID (place/receive the call)
+         → Zendesk (handle any resulting support issue)
+            → Zapier (wires all of the above together automatically)
+```
+
+**Relation to this doc's Tool Belt (Section 5):** Apollo + HubSpot are already the agent's two CRM tools (`lookup_crm_prospect`, `write_crm_notes` — Section 5, Q8). Zendesk and Zapier are not currently in the agent's tool belt — they belong to the API team's integration surface — but are recorded here so the full platform picture (lead-gen → CRM → telephony → support → automation) is documented in one place rather than split across SIP notes and AI notes.
