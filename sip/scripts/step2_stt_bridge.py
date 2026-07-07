@@ -11,9 +11,14 @@ header, and is queued for the same Modulate streaming connection Amy's
 original script already used. Everything downstream of that queue --
 Modulate, Groq, Deepgram Aura TTS -- is untouched from agent-test6.py.
 
+API keys (DEEPGRAM_KEY/GROQ_KEY/MODULATE_KEY) load from
+ai-pipeline/.env.local at startup instead of being hardcoded -- see
+_load_env_local() below.
+
 Original attribution: Amy, amy/llm-testing/agent-test6.py.
 """
 
+import os
 import queue
 import threading
 import sounddevice as sd
@@ -36,10 +41,44 @@ _START = time.time()
 def _ms():
     return int((time.time() - _START) * 1000)
 
+# --- STEP 2 CHANGE: load API keys from ai-pipeline/.env.local instead of
+# hardcoding them (agent-test6.py had them as blank string literals). Small
+# zero-dependency parser -- avoids adding python-dotenv to the venv. Path is
+# resolved relative to this file so it works regardless of the cwd. ---
+def _load_env_local():
+    env_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "..", "..", "ai-pipeline", ".env.local",
+    )
+    env = {}
+    try:
+        with open(env_path) as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, _, value = line.partition("=")
+                env[key.strip()] = value.strip().strip('"').strip("'")
+    except FileNotFoundError:
+        print(f"WARNING: {env_path} not found -- API keys will be empty")
+    return env
+
+
+_env = _load_env_local()
+
 # api keys
-DEEPGRAM_KEY = ""
-GROQ_KEY = ""
-MODULATE_KEY = ""
+DEEPGRAM_KEY = _env.get("DEEPGRAM_API_KEY", "")
+GROQ_KEY = _env.get("GROQ_API_KEY", "")
+MODULATE_KEY = _env.get("MODULATE_API_KEY", "")
+
+# fail loud if a required key is missing, rather than hitting a confusing
+# 4003 (Modulate auth reject) or 401 deep inside a worker thread
+_missing = [n for n, v in
+            (("DEEPGRAM_API_KEY", DEEPGRAM_KEY),
+             ("GROQ_API_KEY", GROQ_KEY),
+             ("MODULATE_API_KEY", MODULATE_KEY)) if not v]
+if _missing:
+    print("WARNING: missing keys in .env.local:", ", ".join(_missing))
 
 # setup parameters
 RATE = 16000
@@ -218,6 +257,10 @@ def tts_worker():
 
 # STT worker - Modulate.ai
 def modulate_worker():
+    # General streaming endpoint — matches what Amy validated in agent-test6.py
+    # (her accuracy/latency testing was all on this endpoint). The English-only
+    # `velma-2-stt-streaming-english-v2` is a later optimization to A/B test
+    # once the loop is proven; don't diverge from Amy's tested config for the MVP.
     url = (
         f"wss://platform.modulate.ai/api/velma-2-stt-streaming"
         f"?api_key={MODULATE_KEY}"
