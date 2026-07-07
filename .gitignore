@@ -8,3 +8,4 @@ GlobiFYE/.claude/settings.local.json
 
 # Ignore virtual environment directories
 venv/
+__pycache__/

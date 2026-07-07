@@ -62,20 +62,29 @@ Full copy of Amy's `agent-test6.py`. Only the audio *source* changed — everyth
 
 **Deliverable:** Speak into the softphone from Step 1 → `step2_stt_bridge.py` prints `STT (partial): ...` / `STT: ...` lines for what was said.
 
-**Status: not yet met.** Modulate auth is confirmed working (checkpoint log below); no call has been placed yet to produce an actual transcript. Next test: dial `1000` from the softphone while the script is running.
+**Status: ✅ MET (2026-07-07).** A live call transcribed cleanly — and because the same script also runs the Groq LLM + Deepgram Aura TTS path, the **full SIP loop closed in one call** (Steps 2, 3, and 4 together): spoken audio → transcript → LLM reply → audio played back into the call, audible on the softphone. See checkpoint log.
 
 ### Checkpoint log
 
-**2026-07-07 — Modulate auth confirmed.** Ran with real keys loading from `.env.local` (no call placed):
-```
-$ venv/bin/python3 -u sip/scripts/step2_stt_bridge.py
-Listening for RTP on UDP 9000
-Connecting to ws://localhost:8088/ari/events?api_key=sip-mvp-user:changeme_use_a_real_secret&app=sip-mvp-app ...
-Connected. Waiting for calls into sip-mvp-app (Ctrl+C to stop)
-^C
-Shutting down...
-```
-No `4003` / `modulate_worker` crash — earlier runs with a blank `MODULATE_KEY` crashed that thread within seconds of "Connected." This run stayed clean until manually stopped, confirming the Modulate websocket authenticates with the real key end-to-end (not just that the key parses out of `.env.local`).
+**2026-07-07 — full loop working.** Spoke *"Hi, this is Emma. I'm calling to inquire about your company's product."* into Linphone → `STT:` printed it verbatim → Groq replied *"Hi Emma, thanks for calling. How can I help you with our product?"* → Aura TTS played back into the call, audible. End-of-sentence to audible reply ≈ 1.8s (~0.9s of it compute); see [`step3.2-sip-loop-latency-analysis-2026-07-07.md`](./step3.2-sip-loop-latency-analysis-2026-07-07.md).
+
+**Getting there took a chain of fixes — every one was a real, distinct bug** (documented so nobody re-walks this path):
+
+| # | Symptom | Root cause | Fix |
+|---|---|---|---|
+| 1 | Cascade of `Call arrived` / 422 error, dozens of orphaned channels | externalMedia channels join the same Stasis app, firing their own `StasisStart` | Track our own externalMedia channel IDs; skip their `StasisStart` (`step2_stt_bridge.py`) |
+| 2 | Zero RTP ever reached the script | `external_host=127.0.0.1` resolves to the *container's* loopback, not the host | `EXTERNAL_MEDIA_HOST = host.docker.internal:9000` |
+| 3 | RTP debug "showed" nothing → wrong conclusions | `docker logs` only captures the console log channel, which defaulted to `notice,warning,error` — all verbose/debug silently dropped | Temporarily widen `logger.conf` console to `verbose,debug` (reverted after; see logger.conf comment) |
+| 4 | Call connects, but no caller audio reaches Asterisk | No NAT handling; Asterisk advertised its unreachable container IP in SDP | `pjsip.conf`: `external_media_address=127.0.0.1` + `rtp_symmetric`/`force_rport`/`rewrite_contact`/`direct_media=no` |
+| 5 | Still no caller audio | Asterisk allocated RTP port 18104, outside Docker's published `10000-10100` | `rtp.conf`: `rtpend=10100` to match the published range |
+| 6 | RTP arrived but no transcript; amplitude pinned at exactly 32768 | Asterisk `slin16` is **big-endian**; Modulate stream is `s16le` (little-endian) → byte-swapped noise | Byte-swap each sample in `rtp_listener` before queuing to Modulate |
+| 7 | First call's audio hit a dead Modulate socket (`ConnectionClosedOK` 1000) | Modulate connection opened once at startup, then idle-timed-out before any call | Connect lazily (block until audio) and reconnect per call (`modulate_worker`) |
+
+**Config changes that are permanent and required** (do NOT revert): `pjsip.conf` NAT block, `rtp.conf` `rtpend=10100`, and the script fixes above. **Diagnostic-only changes were reverted:** `logger.conf` console channel, and `rtp set debug` / `pjsip set logger` (runtime, off).
+
+This table is the quick reference; for the full round-by-round narrative (what was run, the diagnosis, the fix, in order) see [`step3.1-sip-loop-debugging-log-2026-07-07.md`](./step3.1-sip-loop-debugging-log-2026-07-07.md).
+
+> **Earlier checkpoint (same day) — Modulate auth confirmed** before any call: the script came up clean (no `4003`) with real keys from `.env.local`, proving the key authenticated end-to-end. That was the first milestone before the audio-path work above.
 
 ## Running the script (environment notes)
 
