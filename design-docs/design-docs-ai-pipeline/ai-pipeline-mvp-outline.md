@@ -83,7 +83,7 @@ For the Monday demo: **audio file in → transcript stored → analysis out**. A
 
 ### Step 10 — Real-time WebSocket Layer *(post-demo, if time)*
 
-→ See [ai-pipeline-mvp-step10-websocket-layer.md](ai-pipeline-mvp-step10-websocket-layer.md)
+→ See [ai-pipeline-mvp-step10-websocket-layer.md](ai-pipeline-mvp-implementation-steps/ai-pipeline-mvp-step10-websocket-layer.md)
 
 ---
 

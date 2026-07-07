@@ -20,7 +20,7 @@ Sales team management system with real-time call transcription, AI summary, and 
 Microphone Input
     ↓
 Audio Chunks (100–200ms) via persistent WebSocket
-    ├── Raw Audio Chunks ──────────────────────────→ Cloud Storage (S3/GCS)
+    ├── Raw Audio Chunks ──────────────────────────→ Cloud Storage (AWS S3 — see cloud-storage-selection.md)
     └── [Deepgram Nova-3 — STT + Speaker Diarization]
               ├── Partial Results → UI live transcript display (clean version)
               └── Final Results (per sentence, with sentence-level timestamp)
@@ -87,7 +87,7 @@ UI displays:
 
 ┌────────────────┐   ┌────────────────────────────┐
 │ Cloud Storage  │   │ Deepgram Nova-3 (STT)     │
-│ (S3 / GCS)     │   │ + Speaker Diarization      │
+│ (AWS S3)       │   │ + Speaker Diarization      │
 └────────────────┘   └────────────────────────────┘
         │                         │
         │                         ├──────────────┐
@@ -221,7 +221,7 @@ UI Visualization
 
 | Table        | Key Fields                                                                                           | Written When                              |
 | ------------ | ---------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `recordings` | `id`, `call_metadata`, `audio_url` (S3/GCS), `duration`, `created_at`                                | Call starts / ends                        |
+| `recordings` | `id`, `call_metadata`, `audio_url` (AWS S3), `duration`, `created_at`                                | Call starts / ends                        |
 | `transcript` | `recording_id`, `speaker`, `content_raw`, `content_clean`, `sentence_start_sec`                      | Real-time, per final sentence during call |
 | `analysis`   | `recording_id`, `summary`, `key_topics` (JSON), `objection_analysis` (JSON), `what_went_well` (JSON) | After button click                        |
 
@@ -329,7 +329,7 @@ Modern systems do not wait for recording to end before storing. Audio is sliced 
 Microphone → Audio Chunks (100–200ms) → WebSocket → Server → Cloud Storage + DB Metadata
 ```
 
-- Raw audio files are typically written to **cloud storage** (e.g., AWS S3, Google Cloud Storage), not directly into a relational database.
+- Raw audio files are typically written to **cloud storage** — **decided: AWS S3** (see `cloud-storage-selection.md`) — not directly into a relational database.
 - The database stores **metadata** (recording ID, timestamps, speaker info, etc.), not raw audio binaries.
 - The WebSocket connection stays open throughout the call, eliminating per-request handshake overhead that would destroy real-time performance.
 

@@ -9,7 +9,7 @@
 | Step | What it involves | Teammates |
 |---|---|---|
 | [Step 1 — Environment setup](./sip-loop-mvp-step-by-step-guidence/step1-environment-setup.md) | Docker/Asterisk install, ARI config, dialplan, getting a test call to connect | **Shuyang** does the initial setup and fills in the necessary details; **Yunxi & Amy** follow up afterward |
-| Step 2 — Wire call audio into STT | RTP bridge script, feeding audio into the existing Deepgram/Modulate streaming connection | TBD — not assigned yet |
+| [Step 2 — Wire call audio into STT](./sip-loop-mvp-step-by-step-guidence/step2-wire-call-audio-into-stt.md) | RTP bridge script, feeding audio into the existing Modulate streaming connection | **Shuyang** — implementation drafted (`sip/scripts/step2_stt_bridge.py`, based on Amy's `agent-test6.py`), not yet tested against a live call |
 | Step 3 — Wire TTS output back into the call | File-based ARI playback, format conversion, resolving the ElevenLabs-vs-Aura discrepancy flagged in the design doc | TBD — not assigned yet |
 | [Step 4 — End-to-end MVP verification](./sip-loop-mvp-step-by-step-guidence/step4-end-to-end-mvp-verification.md) | Running the full test protocol, logging results, producing the "loop proven" deliverable | Whoever did Steps 2+3, jointly |
 | [Step 5 — Scope guardrails](./sip-loop-mvp-step-by-step-guidence/step5-scope-guardrails.md) | Already written | Shuyang (done) |

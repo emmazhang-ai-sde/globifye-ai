@@ -10,6 +10,15 @@ This step upgrades the pipeline from batch file upload to live microphone stream
 
 > **Architecture note — two modes, two routes:**
 > The batch transcription flow (Steps 1–9) is preserved at `app/batch/page.tsx` (`/batch`) for testing and reference. The main UI (`app/page.tsx`, `/`) now runs live-only. The two modes are completely independent — live transcription creates its own recording row and does not require a prior batch run.
+>
+> **Terminology — "batch" here means a fixed, pre-recorded audio file, not a processing strategy.** "Batch" = Steps 1–9's workflow of uploading a complete, already-recorded audio file and transcribing it in one shot after the fact. "Live/streaming" = Step 10 onward's workflow of transcribing audio in real time while the call is still happening, chunk by chunk over WebSocket. This is not "batch STT strategy vs. streaming STT strategy" terminology (both approaches happen to use Deepgram, just two different API modes) — it's "did the audio already exist as a finished file (batch) vs. is it being produced live during an active call (streaming)."
+
+> **Status update — implementation moved off `app/page.tsx`.**
+> Step 10 (10.1–10.5 below) is fully implemented and working, but not at the location this doc originally assumed. Once the frontend team's more integrated UI took over the main route, `app/page.tsx` became a redirect to `/frontend.html`, and the live-transcription code below was carried over into two places instead:
+> - `app/demo/page.tsx` — React reference implementation (refined beyond this doc: handles Deepgram's `speech_final` vs `is_final` distinction, accumulates multi-chunk utterances, shows a speaker-labeled transcript)
+> - `public/live-call.html` — the version actually wired into the frontend team's call UI, reached via `/live-call.html?phone=...` from `frontend.html`
+>
+> The code samples below still describe the original `app/page.tsx` implementation faithfully — treat them as the reference design, and look at `app/demo/page.tsx` / `public/live-call.html` for the current, deployed version.
 
 ---
 

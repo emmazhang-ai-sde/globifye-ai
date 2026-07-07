@@ -12,10 +12,10 @@ Before building anything new, know what already exists so this step adapts it in
 | File | Pattern | Relevant to SIP? |
 |---|---|---|
 | `ai-pipeline/` live UI (per project architecture) | **Browser → Deepgram WebSocket directly.** The browser holds the persistent connection; Vercel only mints a short-lived token. | **No** — there is no browser in a phone call. This pattern doesn't apply; SIP audio needs a server-side WebSocket connection to Deepgram instead. |
-| `yunxi/sts_tests/test-loop-audio.ts` | **Server-side (Node) → Deepgram WebSocket**, streaming pre-recorded PCM at real-time pace to simulate a live mic. Config: `encoding=linear16`, `sample_rate=16000`, `channels=1`, `interim_results=true`, listens for `speech_final`. | **Yes — this is the closer pattern.** It already proves a Node process can hold a live Deepgram WebSocket connection server-side. The only missing piece is where the PCM comes from (currently a test file; for SIP it needs to come from Asterisk instead). |
-| `amy/llm-testing/sts-test.py` | **Python, PyAudio mic → Deepgram nova-3 → Groq → ElevenLabs**, using raw queues/threads (`RATE=16000`, `paInt16`, `socket.send_media(chunk)`). Matches the "hardcoded Python, queues/threads" pipeline described in the 6/30 meeting. | **Also a valid base** — same idea, just swap `mic_worker()`'s `pyaudio` mic read for a function that reads from Asterisk's audio channel instead. Everything downstream (`socket.send_media(chunk)`) stays the same. |
+| `yunxi/sts_tests/test-loop-audio.ts` | **Server-side (Node) → Deepgram WebSocket**, streaming pre-recorded PCM at real-time pace to simulate a live mic. Config: `encoding=linear16`, `sample_rate=16000`, `channels=1`, `interim_results=true`, listens for `speech_final`. | **A valid pattern**, but Deepgram-as-STT is no longer the confirmed choice (see below). |
+| `amy/llm-testing/agent-test6.py` (supersedes the earlier `sts-test.py` reference) | **Python, PyAudio mic → Modulate (STT) → Groq (LLM) → Deepgram Aura (TTS)**, raw queues/threads. Matches the confirmed production stack (`sip-loop-mvp-design-doc.md` section 3) and the "hardcoded Python, queues/threads" pipeline from the 6/30 meeting. | **This is the base.** Swap `modulate_worker()`'s inline mic read for a function that reads from Asterisk's audio channel instead — everything downstream (Modulate connection, transcript queue, Groq, Deepgram Aura TTS) stays the same. |
 
-**Decision needed before starting:** pick one language track (Python via `sts-test.py`'s pattern, or Node via `test-loop-audio.ts`'s pattern) — don't build a third parallel implementation. Since `ai-pipeline` (the real Next.js app) is TypeScript, and ARI has a solid Node client (`ari-client`), the Node path likely has less glue code overall — but either works for an MVP. Flag this choice with Amy/Yunxi before starting, since they own the pipeline code.
+**Decision:** Python, following `agent-test6.py`'s existing pattern — no third parallel implementation. `sts-test.py` was the original reference in this doc, but it's Deepgram-STT-only and predates the 6/30 stack confirmation (Modulate for STT); `agent-test6.py` is the more recent version of the same script and already matches the confirmed stack, so it's the correct base now.
 
 ## 2. Getting audio out of Asterisk: `externalMedia`
 
@@ -40,47 +40,34 @@ POST /ari/channels/externalMedia
 
 This tells Asterisk: "send this channel's audio as raw RTP to UDP port 9000 on localhost, encoded as `slin16`" (signed linear 16-bit PCM — conveniently, this is close to what Deepgram already expects).
 
-## 3. Bridge script: RTP in → Deepgram WebSocket out
+## 3. Implementation: [`sip/scripts/step2_stt_bridge.py`](../../../../sip/scripts/step2_stt_bridge.py)
 
-Write a small script that:
+This is a full copy of Amy's `amy/llm-testing/agent-test6.py`, with the audio *source* swapped and an ARI control layer added on top — everything downstream of the audio queue (Modulate connection, transcript queue, Groq, Deepgram Aura TTS) is untouched from Amy's original:
 
-1. **Listens on UDP 9000** for incoming RTP packets from the `externalMedia` channel
-2. **Strips the 12-byte RTP header** from each packet, leaving raw PCM audio payload
-3. **Feeds that PCM directly into the existing Deepgram streaming connection pattern** from `test-loop-audio.ts` (Node) or `sts-test.py` (Python) — same `encoding=linear16`, but confirm sample rate: `externalMedia`'s `slin16` format is 16-bit PCM at whatever rate you request (commonly 8kHz for telephony `slin` vs 16kHz for `slin16` — **verify which Asterisk actually sends**, since the existing pipeline is built around `sample_rate=16000`; if Asterisk sends 8kHz, either request `slin16` explicitly in the `externalMedia` call or resample before forwarding, e.g. with `ffmpeg`/`sox` or Python's `audioop`)
+1. **ARI event loop** (mirrors `verify_ari.py`'s `StasisStart`/answer pattern): on a call arriving, answers it, then creates a `mixing` bridge and adds both the caller channel and a new `externalMedia` channel to it — this is what makes Asterisk start forwarding the call's RTP audio.
+2. **`rtp_listener()`** (was `mic_worker()`, dead code in `agent-test6.py` — the PyAudio mic read had actually been inlined into `modulate_worker`'s `send_audio`): listens on UDP 9000 for the `externalMedia` RTP stream, strips the 12-byte RTP header, and puts raw PCM onto `audio_queue`.
+3. **`modulate_worker()`**: unchanged except `send_audio` now does `audio_queue.get()` instead of `mic_stream.read(...)`. Same Modulate streaming connection, same `RATE=16000`/`CHANNELS=1` config.
 
-Minimal Python sketch (adapting `sts-test.py`'s existing `mic_worker` → `socket.send_media()` pattern, just swapping the audio source):
+`externalMedia` is requested with `format=slin16` (16-bit PCM). Confirm the actual sample rate Asterisk sends — `slin16` should be 16kHz to match `RATE=16000` already hardcoded in the Modulate connection; if Asterisk is actually sending 8kHz, either force `slin16` explicitly or resample before queuing (`ffmpeg`/`sox`/`audioop`).
 
-```python
-import socket as udp_socket
+## 4. STT provider note
 
-def asterisk_audio_worker(dg_socket):
-    sock = udp_socket.socket(udp_socket.AF_INET, udp_socket.SOCK_DGRAM)
-    sock.bind(('0.0.0.0', 9000))
-    while True:
-        packet, _ = sock.recvfrom(2048)
-        pcm = packet[12:]  # strip RTP header
-        dg_socket.send_media(pcm)  # same call sts-test.py already makes from mic_worker
-```
-
-This replaces `mic_worker()`'s `mic_stream.read(...)` with `sock.recvfrom(...)` — everything downstream (`deepgram_worker`, `on_transcript`, the transcript queue) stays exactly as it already is in `sts-test.py`.
-
-## 4. Confirm which STT provider is actually being tested here
-
-The 6/30 meeting confirmed **Modulate** as the production STT choice (cheaper + more accurate than Deepgram per Amy's testing), but both existing reference scripts (`sts-test.py`, `test-loop-audio.ts`) are wired to **Deepgram**, not Modulate. For this MVP step, using Deepgram is fine — the goal is proving the *audio routing* works, not re-validating the STT vendor choice. Swapping to Modulate's client library is a separate, later task once the loop itself is proven.
+Unlike the original version of this doc (which pointed at Deepgram-only reference scripts), this step now uses **Modulate** directly, since that's the confirmed production STT choice (6/30 meeting) and `agent-test6.py` already implements it — no separate "swap to Modulate later" step needed.
 
 ---
 
 ## Deliverable for this step
 
-Speak into the softphone from Step 1 → the bridge script's Deepgram connection prints a transcript of what was said.
+Speak into the softphone from Step 1 → `step2_stt_bridge.py`'s Modulate connection prints `STT (partial): ...` / `STT: ...` lines for what was said.
 
 ## Common Pitfalls
 
 | Symptom | Likely cause |
 |---|---|
-| No RTP packets arriving on UDP 9000 | `externalMedia` channel not actually bridged to the call — confirm it's added to the same ARI bridge as the original channel, not just created standalone |
-| Garbled/static transcript | Sample rate mismatch (8kHz vs 16kHz) between what Asterisk sends and what Deepgram is told to expect — this is the most likely first bug |
+| No RTP packets arriving on UDP 9000 | `externalMedia` channel not actually bridged to the call — confirm `bridge_call_to_external_media()` added both channels to the same ARI bridge, not just created the `externalMedia` channel standalone |
+| Garbled/static transcript | Sample rate mismatch (8kHz vs 16kHz) between what Asterisk sends and what Modulate is told to expect (`sample_rate=RATE` in the connection URL) — this is the most likely first bug |
 | Transcript is silent even though audio "looks" like it's flowing | RTP header stripping is off — RTP headers are usually 12 bytes but can be longer with extensions; log raw packet length and content type to confirm |
+| `ModuleNotFoundError: websockets` / `groq` / `deepgram` | `sip/scripts` currently only has `requests` + `websocket-client` installed (used by `verify_ari.py`); `step2_stt_bridge.py` additionally needs `websockets`, `groq`, `deepgram-sdk`, `sounddevice`, `numpy` — install into whichever venv runs this script |
 
 ## Next
 
