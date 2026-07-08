@@ -56,7 +56,7 @@ const SPEAKER_COLORS = [
 
 export default function BatchPage() {
   const [file, setFile] = useState<File | null>(null)
-  const [recordingId, setRecordingId] = useState<string | null>(null)
+  const [recordingId, setRecordingId] = useState<string | number | null>(null)
   const [utterances, setUtterances] = useState<Utterance[]>([])
   const [analysis, setAnalysis] = useState<Analysis | null>(null)
   const [isTranscribing, setIsTranscribing] = useState(false)
@@ -128,7 +128,7 @@ export default function BatchPage() {
         <div className="flex items-center gap-4">
           {recordingId && (
             <span className="text-xs text-slate-400 font-mono">
-              ID: {recordingId.slice(0, 8)}…
+              ID: {String(recordingId).slice(0, 8)}…
             </span>
           )}
           <a href="/" className="text-xs text-slate-400 hover:text-white transition-colors">

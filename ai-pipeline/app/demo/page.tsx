@@ -43,7 +43,7 @@ function formatTime(seconds: number): string {
 // ---------------------------------------------------------------------------
 
 export default function Home() {
-  const [recordingId, setRecordingId] = useState<string | null>(null)
+  const [recordingId, setRecordingId] = useState<string | number | null>(null)
   const [sessionComplete, setSessionComplete] = useState(false)
   const [analysis, setAnalysis] = useState<Analysis | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
@@ -103,7 +103,7 @@ export default function Home() {
     const createRes = await fetch('/api/recordings/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ call_metadata: {} }),
+      body: JSON.stringify({}),
     })
     const createData = await createRes.json()
     if (!createRes.ok || !createData.recording_id) {
@@ -315,7 +315,7 @@ export default function Home() {
             </div>
             {recordingId && (
               <span className="text-xs text-on-surface-variant font-mono hidden xl:block">
-                ID: {recordingId.slice(0, 8)}…
+                ID: {String(recordingId).slice(0, 8)}…
               </span>
             )}
           </div>

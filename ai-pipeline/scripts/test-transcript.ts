@@ -26,12 +26,10 @@ async function run() {
   })
 
   // 3. Create a recordings row first (required — transcript has FK to recordings)
+  // rep/client/source were dropped in Step 11 (not real recordings columns). The FK only
+  // needs the row to exist; an empty insert gives us a valid recording_id to attach to.
   console.log('📝 Creating recording row...')
-  const recordingId = await createRecording({
-    rep: 'Test Rep',
-    client: 'Test Client',
-    source: 'mvp-test',
-  })
+  const recordingId = await createRecording({})
   console.log(`✅ Recording row created: ${recordingId}`)
 
   // 4. Write all transcript rows in one batch insert

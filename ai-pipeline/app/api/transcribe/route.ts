@@ -25,7 +25,10 @@ export async function POST(req: Request) {
     await writeFile(tmpPath, Buffer.from(await file.arrayBuffer()))
 
     const utterances = await transcribeFile(tmpPath)
-    const recordingId = await createRecording({ filename: file.name })
+    // `filename` was dropped in Step 11 (recordings has no such column). No column
+    // exists to store the original filename today, so we don't persist it — audio_url
+    // is for the storage pointer, not the source name. Add a column later if needed.
+    const recordingId = await createRecording({})
     await writeTranscript(recordingId, utterances)
 
     return NextResponse.json({ recording_id: recordingId, utterances })
