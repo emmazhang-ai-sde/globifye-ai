@@ -34,7 +34,7 @@ Step 3 doesn't add a new file. It adds to the same script Step 2 already has run
   Everything else in `play_deepgram` (collecting chunks from `dg.speak.v1.audio.generate(...)`, the timestamp prints) is unchanged from Step 2.
 - **New imports needed for the above:** `wave`, `subprocess`. Both stdlib; no new pip deps.
 
-**Full debugging history:** getting this (and Step 2) working end to end took 16 rounds and 7 bugs: cascading Stasis events, Docker networking, a broken logger config that hid the real problem, missing NAT settings, an RTP port mismatch, an endianness bug, and a dead websocket. See [`step3.1-sip-loop-debugging-log-2026-07-07.md`](./step3.1-sip-loop-debugging-log-2026-07-07.md) for the full round-by-round account (what was run, the diagnosis, the fix).
+**Full debugging history:** getting this (and Step 2) working end to end took 16 rounds and 7 bugs: cascading Stasis events, Docker networking, a broken logger config that hid the real problem, missing NAT settings, an RTP port mismatch, an endianness bug, and a dead websocket. See [`step3.1-sip-loop-debugging-log.md`](./step3.1-sip-loop-debugging-log.md) for the full round-by-round account (what was run, the diagnosis, the fix).
 
 ---
 
@@ -102,7 +102,7 @@ After speaking into the softphone (Step 2 produces a transcript), the pipeline's
 
 ## Latency
 
-Measured on the first working conversations: about **1.8s** on average from the caller finishing a sentence to the reply audio starting in the call (~0.9s compute, ~1.0s file-playback overhead). Full breakdown, per-turn numbers, and caveats in [`step3.2-sip-loop-latency-analysis-2026-07-07.md`](./step3.2-sip-loop-latency-analysis-2026-07-07.md).
+Measured on the first working conversations: about **1.8s** on average from the caller finishing a sentence to the reply audio starting in the call (~0.9s compute, ~1.0s file-playback overhead). Full breakdown, per-turn numbers, and caveats in [`step3.2-sip-loop-latency-analysis.md`](./step3.2-sip-loop-latency-analysis.md).
 
 ## Next
 

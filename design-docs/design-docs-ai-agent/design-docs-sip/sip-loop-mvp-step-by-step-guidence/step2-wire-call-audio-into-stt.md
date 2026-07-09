@@ -66,7 +66,7 @@ Full copy of Amy's `agent-test6.py`. Only the audio *source* changed — everyth
 
 ### Checkpoint log
 
-**2026-07-07 — full loop working.** Spoke *"Hi, this is Emma. I'm calling to inquire about your company's product."* into Linphone → `STT:` printed it verbatim → Groq replied *"Hi Emma, thanks for calling. How can I help you with our product?"* → Aura TTS played back into the call, audible. End-of-sentence to audible reply ≈ 1.8s (~0.9s of it compute); see [`step3.2-sip-loop-latency-analysis-2026-07-07.md`](./step3.2-sip-loop-latency-analysis-2026-07-07.md).
+**2026-07-07 — full loop working.** Spoke *"Hi, this is Emma. I'm calling to inquire about your company's product."* into Linphone → `STT:` printed it verbatim → Groq replied *"Hi Emma, thanks for calling. How can I help you with our product?"* → Aura TTS played back into the call, audible. End-of-sentence to audible reply ≈ 1.8s (~0.9s of it compute); see [`step3.2-sip-loop-latency-analysis.md`](./step3.2-sip-loop-latency-analysis.md).
 
 **Getting there took a chain of fixes — every one was a real, distinct bug** (documented so nobody re-walks this path):
 
@@ -82,7 +82,7 @@ Full copy of Amy's `agent-test6.py`. Only the audio *source* changed — everyth
 
 **Config changes that are permanent and required** (do NOT revert): `pjsip.conf` NAT block, `rtp.conf` `rtpend=10100`, and the script fixes above. **Diagnostic-only changes were reverted:** `logger.conf` console channel, and `rtp set debug` / `pjsip set logger` (runtime, off).
 
-This table is the quick reference; for the full round-by-round narrative (what was run, the diagnosis, the fix, in order) see [`step3.1-sip-loop-debugging-log-2026-07-07.md`](./step3.1-sip-loop-debugging-log-2026-07-07.md).
+This table is the quick reference; for the full round-by-round narrative (what was run, the diagnosis, the fix, in order) see [`step3.1-sip-loop-debugging-log.md`](./step3.1-sip-loop-debugging-log.md).
 
 > **Earlier checkpoint (same day) — Modulate auth confirmed** before any call: the script came up clean (no `4003`) with real keys from `.env.local`, proving the key authenticated end-to-end. That was the first milestone before the audio-path work above.
 

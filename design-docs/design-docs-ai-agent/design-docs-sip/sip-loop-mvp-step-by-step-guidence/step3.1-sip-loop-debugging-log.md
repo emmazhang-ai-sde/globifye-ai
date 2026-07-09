@@ -1,4 +1,6 @@
-# SIP Loop MVP — Debugging Log (2026-07-07)
+# SIP Loop MVP — Debugging Log
+
+**Created:** 2026-07-07
 
 **Related docs:** [Step 2 — Wire call audio into STT](./step2-wire-call-audio-into-stt.md) · [Step 3 — Wire TTS output back into the call](./step3-wire-tts-output-into-call.md)
 
@@ -103,7 +105,7 @@ USER: Hi, this is Emma. ...
 Hi Emma, thanks for calling. How can I help you with our product?
 Successfully copied 28.7kB to asterisk-mvp:.../reply_1.wav
 ```
-Spoken audio → transcript → Groq reply → Aura TTS **audible in the call**. Steps 2, 3, and 4 all proven in a single call. ~1.8s from end-of-speech to audible reply (~0.9s of it compute); see [`step3.2-sip-loop-latency-analysis-2026-07-07.md`](./step3.2-sip-loop-latency-analysis-2026-07-07.md).
+Spoken audio → transcript → Groq reply → Aura TTS **audible in the call**. Steps 2, 3, and 4 all proven in a single call. ~1.8s from end-of-speech to audible reply (~0.9s of it compute); see [`step3.2-sip-loop-latency-analysis.md`](./step3.2-sip-loop-latency-analysis.md).
 
 ## Cleanup after success
 - Turned off `rtp set debug` / `pjsip set logger`; reverted `logger.conf` console channel to `notice,warning,error` (left a comment on how to re-enable).

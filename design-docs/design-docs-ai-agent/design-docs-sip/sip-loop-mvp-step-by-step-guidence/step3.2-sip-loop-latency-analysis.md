@@ -1,6 +1,8 @@
-# Step 3.2: SIP Loop Latency Analysis (2026-07-07)
+# Step 3.2: SIP Loop Latency Analysis
 
-**Related docs:** [Step 3: Wire TTS output back into the call](./step3-wire-tts-output-into-call.md) · [Step 3.1: Debugging log](./step3.1-sip-loop-debugging-log-2026-07-07.md)
+**Created:** 2026-07-07
+
+**Related docs:** [Step 3: Wire TTS output back into the call](./step3-wire-tts-output-into-call.md) · [Step 3.1: Debugging log](./step3.1-sip-loop-debugging-log.md)
 
 **Question answered:** how long, in milliseconds, from the moment the caller stops speaking until the AI voice starts replying in the call.
 

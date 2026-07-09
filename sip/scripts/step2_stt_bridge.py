@@ -27,8 +27,6 @@ import subprocess
 import threading
 import wave
 from deepgram import DeepgramClient
-from deepgram.core.events import EventType
-from deepgram.listen.v1.types import ListenV1Results
 from groq import Groq
 from websockets.sync.client import connect as ws_connect
 import json
@@ -43,6 +41,30 @@ from websocket import create_connection
 _START = time.time()
 def _ms():
     return int((time.time() - _START) * 1000)
+
+
+_log_lock = threading.Lock()
+SHOW_LLM_STREAM = os.environ.get("SHOW_LLM_STREAM") == "1"
+
+
+def log(tag, text="", ms=None, blank_before=0, blank_after=0):
+    """Thread-safe, single-line logger. Every worker must call this instead
+    of print() -- concurrent bare prints (esp. groq_worker's raw token
+    stream) is what caused interleaved garbage like
+    "Yes, I hear you.TTS: Yes, I hear you." (see step3.3 doc). blank_before
+    (int, also accepts True/False) marks the three headline latency
+    checkpoints (STT final, LLM first-token, TTS audio) so a turn's phases
+    are visually separated, and the end-of-call divider. blank_after
+    separates the one-time call-setup block from the STT partial stream
+    that follows it."""
+    stamp = f" +{ms}ms" if ms is not None else ""
+    line = f"[{tag}{stamp}] {text}" if text else f"[{tag}{stamp}]"
+    with _log_lock:
+        for _ in range(int(blank_before)):
+            print()
+        print(line, flush=True)
+        for _ in range(int(blank_after)):
+            print()
 
 
 # --- STEP 2 CHANGE: load API keys from ai-pipeline/.env.local instead of
@@ -147,23 +169,6 @@ audio_queue = queue.Queue()
 
 
 # concurrent workers
-def on_transcript(data):
-    if not isinstance(data, ListenV1Results):
-        return
-
-    sentence = data.channel.alternatives[0].transcript.strip()
-
-    if not sentence:
-        return
-
-    print("STT:", sentence)
-
-    if data.is_final:
-        transcript_queue.put(sentence)
-        x = _ms()
-        print(f"[t0 +{x}ms]")
-
-
 # --- STEP 2 CHANGE: was mic_worker(socket) reading a PyAudio mic_stream
 # (dead code in agent-test6.py -- modulate_worker had its own inline mic read
 # instead of calling this). Repurposed as the RTP ingestion side: listens on
@@ -172,12 +177,12 @@ def on_transcript(data):
 def rtp_listener():
     sock = udp_socket.socket(udp_socket.AF_INET, udp_socket.SOCK_DGRAM)
     sock.bind(("0.0.0.0", UDP_LISTEN_PORT))
-    print(f"Listening for RTP on UDP {UDP_LISTEN_PORT}")
+    log("RTP", f"listening on UDP {UDP_LISTEN_PORT}")
     first = True
     while True:
         packet, _ = sock.recvfrom(2048)
         if first:
-            print(f"First RTP packet received ({len(packet)} bytes)")
+            log("RTP", f"first packet received ({len(packet)} bytes)")
             first = False
         raw = packet[RTP_HEADER_LEN:]
         # --- BUGFIX (2026-07-07): Asterisk externalMedia slin16 is BIG-endian
@@ -198,8 +203,6 @@ def groq_worker():
 
     while True:
         transcript = transcript_queue.get()
-
-        print("USER:", transcript)
 
         conversation_history.append({
             "role": "user",
@@ -223,14 +226,14 @@ def groq_worker():
                 continue
 
             if first_token:
-                b = _ms()
-                print(f"[t1 +{b}ms]")
+                log("LLM first-token", ms=_ms(), blank_before=True)
                 first_token = False
 
             sentence += token
             full_response += token
 
-            print(token, end="", flush=True)
+            if SHOW_LLM_STREAM:
+                print(token, end="", flush=True)
 
             if sentence.endswith(
                 (".", "!", "?")
@@ -241,9 +244,9 @@ def groq_worker():
         if sentence:
             tts_queue.put(sentence)
 
-        a = _ms()
-        print(f"[t2 +{a}ms]")
-        print()
+        if SHOW_LLM_STREAM:
+            print()
+        log("LLM reply", full_response, ms=_ms())
 
         conversation_history.append({
             "role": "assistant",
@@ -267,7 +270,7 @@ def play_deepgram(text):
     global _reply_counter
 
     if current_channel_id is None:
-        print("No active call channel -- skipping playback for:", text)
+        log("TTS", f"no active call channel, skipping playback for: {text}")
         return
 
     os.makedirs(TTS_STAGING_DIR, exist_ok=True)
@@ -282,8 +285,7 @@ def play_deepgram(text):
         container="none",
     ):
         if first:
-            t = _ms()
-            print(f"[t3 +{t}ms]")
+            log("TTS audio", ms=_ms(), blank_before=True)
             first = False
         pcm_chunks.append(chunk)
 
@@ -316,16 +318,13 @@ def play_deepgram(text):
     )
 
     ari_post(f"/channels/{current_channel_id}/play", media=f"sound:custom/{sound_name}")
-
-    z = _ms()
-    print(f"[t4 +{z}ms]")
+    log("TTS played", sound_name, ms=_ms())
 
 # TTS worker - Deepgram Aura
 def tts_worker():
     while True:
         text = tts_queue.get()
-
-        print("TTS:", text)
+        log("TTS gen", text)
         play_deepgram(text)
 
 # STT worker - Modulate.ai
@@ -366,6 +365,10 @@ def _modulate_session(first_chunk):
 
         send_thread = threading.Thread(target=send_audio, daemon=True)
         send_thread.start()
+        # starts True so the first partial of the call also gets its blank
+        # line; reset to True after each STT final so the next utterance's
+        # partial stream starts with a gap too (see step3.3 doc, Decision 8)
+        first_partial_of_utterance = True
         try:
             for message in ws:
                 if isinstance(message, bytes):
@@ -376,15 +379,15 @@ def _modulate_session(first_chunk):
                 if msg_type == "partial_utterance":
                     partial_text = data.get("partial_utterance", {}).get("text", "").strip()
                     if partial_text:
-                        print("STT (partial):", partial_text)
+                        log("STT partial", partial_text, blank_before=first_partial_of_utterance)
+                        first_partial_of_utterance = False
 
                 elif msg_type == "utterance":
                     text = data.get("utterance", {}).get("text", "").strip()
                     if text:
-                        print("STT:", text)
                         transcript_queue.put(text)
-                        x = _ms()
-                        print(f"[t0 +{x}ms]")
+                        log("STT final", text, ms=_ms(), blank_before=True)
+                        first_partial_of_utterance = True
         finally:
             stop.set()
             send_thread.join(timeout=1)
@@ -402,8 +405,7 @@ def modulate_worker():
         try:
             _modulate_session(first_chunk)
         except Exception as e:
-            print(f"[Modulate] session ended ({type(e).__name__}); "
-                  f"will reconnect when the next call starts")
+            log("STT", f"session ended ({type(e).__name__}); reconnecting on next call")
 
 
 # --- STEP 2 ADDITION: ARI control -- answers the call and bridges it with a
@@ -443,10 +445,7 @@ def bridge_call_to_external_media(caller_channel_id):
     )
     _external_media_channel_ids.add(ext_channel["id"])
     ari_post(f"/bridges/{bridge_id}/addChannel", channel=ext_channel["id"])
-    print(
-        f"Bridged caller {caller_channel_id} + externalMedia "
-        f"{ext_channel['id']} into bridge {bridge_id}"
-    )
+    log("CALL", f"bridged {caller_channel_id} + externalMedia {ext_channel['id']} into bridge {bridge_id}")
 
 
 # --- STEP 3 ADDITION: the container's sounds dir may not exist yet --
@@ -462,9 +461,9 @@ def ari_event_loop():
     global current_channel_id
 
     ws_url = f"ws://{ARI_HOST}/ari/events?api_key={ARI_USER}:{ARI_PASSWORD}&app={APP_NAME}"
-    print(f"Connecting to {ws_url} ...")
+    log("ARI", f"connecting to ws://{ARI_HOST}/ari/events?api_key=***:***&app={APP_NAME}")
     ari_ws = create_connection(ws_url)
-    print("Connected. Waiting for calls into", APP_NAME, "(Ctrl+C to stop)")
+    log("ARI", f"connected, waiting for calls into {APP_NAME} (Ctrl+C to stop)")
 
     while True:
         message = ari_ws.recv()
@@ -479,7 +478,7 @@ def ari_event_loop():
                 # call -- already bridged inside bridge_call_to_external_media().
                 continue
 
-            print(f"Call arrived: channel {channel_id}")
+            log("CALL", f"arrived: {channel_id}")
             requests.post(
                 f"http://{ARI_HOST}/ari/channels/{channel_id}/answer",
                 auth=(ARI_USER, ARI_PASSWORD),
@@ -491,7 +490,7 @@ def ari_event_loop():
         elif event_type == "StasisEnd":
             channel_id = event["channel"]["id"]
             if channel_id == current_channel_id:
-                print(f"Call ended: channel {channel_id}")
+                log("CALL", f"ended: {channel_id}", blank_before=2)
                 current_channel_id = None
 
 
