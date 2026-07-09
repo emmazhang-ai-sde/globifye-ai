@@ -1,0 +1,392 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DialForge | Screen Share</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&amp;family=DM+Sans:wght@400;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@100..900&amp;family=Syne:wght@100..900&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#4de082",
+                        "surface-container-lowest": "#0d0e15",
+                        "on-error": "#690005",
+                        "surface-container": "#1e1f27",
+                        "outline": "#a78b7d",
+                        "primary-container": "#ff7a1c",
+                        "on-secondary-fixed-variant": "#852400",
+                        "surface-tint": "#ffb68f",
+                        "error-container": "#93000a",
+                        "tertiary-container": "#05b85f",
+                        "secondary-container": "#ff571a",
+                        "on-background": "#e3e1ec",
+                        "secondary-fixed-dim": "#ffb59e",
+                        "surface-container-highest": "#33343d",
+                        "on-secondary": "#5e1700",
+                        "on-primary-fixed-variant": "#773200",
+                        "primary-fixed": "#ffdbca",
+                        "on-primary-fixed": "#331200",
+                        "primary-fixed-dim": "#ffb68f",
+                        "on-surface-variant": "#e5beb4",
+                        "inverse-surface": "#e3e1ec",
+                        "inverse-primary": "#9c4400",
+                        "background": "#12131a",
+                        "on-primary-container": "#5e2700",
+                        "secondary-fixed": "#ffdbd0",
+                        "on-secondary-container": "#521300",
+                        "on-secondary-fixed": "#3a0b00",
+                        "on-tertiary-container": "#00401d",
+                        "accent-glow": "rgba(255, 77, 0, 0.3)",
+                        "on-tertiary-fixed-variant": "#005227",
+                        "indigo-depth": "#07080F",
+                        "on-tertiary": "#003919",
+                        "fire-gradient-end": "#FF4D00",
+                        "glass-border": "rgba(255, 255, 255, 0.08)",
+                        "primary": "#ffb68f",
+                        "surface-variant": "#33343d",
+                        "on-error-container": "#ffdad6",
+                        "error": "#ffb4ab",
+                        "error-red": "#FF3B30",
+                        "surface-bright": "#383941",
+                        "outline-variant": "#584236",
+                        "tertiary-fixed": "#6dfe9c",
+                        "on-surface": "#e3e1ec",
+                        "fire-gradient-start": "#FF7A1C",
+                        "surface-container-high": "#292932",
+                        "secondary": "#ffb59e",
+                        "on-tertiary-fixed": "#00210c",
+                        "tertiary-fixed-dim": "#4de082",
+                        "surface-container-low": "#1a1b23",
+                        "surface-dim": "#12131a",
+                        "surface": "#12131a",
+                        "inverse-on-surface": "#2f3038",
+                        "on-primary": "#542100",
+                        "fire-gradient": "#FF7A1C",
+                        "fire-accent": "#FFAD1C"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "24px",
+                        "container-padding": "32px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "unit": "4px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Syne"],
+                        "display-lg": ["Syne"],
+                        "body-md": ["DM Sans"],
+                        "label-sm": ["DM Sans"],
+                        "body-lg": ["DM Sans"],
+                        "label-md": ["DM Sans"],
+                        "headline-xl": ["Syne"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.08em", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "headline-xl": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24
+    }
+.liquid-glass {
+    background: rgba(26, 27, 35, 0.6);
+    backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5)
+    }
+.fire-gradient {
+    background: linear-gradient(135deg, #FF7A1C 0%, #FF4D00 100%)
+    }
+.fire-border {
+    border: 2px solid #FF7A1C;
+    box-shadow: 0 0 15px rgba(255, 122, 28, 0.2)
+    }
+.noise-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.03;
+    z-index: 9999;
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuB4rwkhPhXAVvl0ptZvbrsXwDOw1X0-yA5Lo20-HgZ9q_2dsLF3DXFsPgBhz0OYqu7Qw0YiW7KycRg5kCv3I0eFIPbbgIiOMYcf7NHrM5er1XsnAkEsEOqAQGNYIBvgnfuyXiBC3uxq8mQNky57WZRBBKRzkyCQcEii_2AQtVZhsNbuhTHlSs8tdLEvVLbq8lUX4VT4_7zdRvE8OX_tEQ5xYjn2LL2IcoG61b18QoilJiVSFy2Glu6pZAn7egR_tFcj6wJFJky73JU)
+    }
+.glow-pulse:hover {
+    box-shadow: 0 0 25px rgba(255, 122, 28, 0.4);
+    transition: all 0.3s ease
+    }
+.active-glow {
+    filter: drop-shadow(0 0 8px #FF7A1C)
+    }
+    .glass-card {
+    background: rgba(30, 31, 39, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1)
+    }
+.fire-glow {
+    box-shadow: 0 0 50px rgba(255, 122, 28, 0.15)
+    }
+.noise-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.02;
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuAjBgxhjjpbQ1X6hvaeggcEsORm0cusjq8KmhkMIem9paSnZ7_7H4035tguD8hQF_wyJfO0-xi5zinWRn5KCM4dsf9akf-ZEUIsx8r2p38OT_3LwtrA_hw0Bqp7LEHGHhjXR6QSfhiz5U0QWGx-RgUC23zQ_gXBKToAxBg8Gydr2pnyjVJzW_LFuaMzmeu54c7PrLK77yNnBemFzvrQWsOo-ahwjnkRQn0xqS8r25dnS6iz5_tsV9azzSv_REk-2thWjE9T9bosd9s)
+    }
+::-webkit-scrollbar {
+    width: 4px
+    }
+::-webkit-scrollbar-track {
+    background: transparent
+    }
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px
+    }</style>
+</head>
+<body class="bg-indigo-depth text-on-surface font-body-md min-h-screen overflow-hidden select-none">
+<div class="noise-overlay"></div>
+<!-- Background Atmospheric Glows -->
+<div class="fixed top-[-10%] right-[-10%] w-[50%] h-[50%] bg-fire-gradient-start opacity-10 blur-[150px] rounded-full"></div>
+<div class="fixed bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-fire-gradient-end opacity-10 blur-[150px] rounded-full"></div>
+<!-- Sidebar (Shared Components Logic) -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex flex-col items-center py-6 gap-6 glass-card border-r border-white/5 z-40 overflow-y-auto">
+<div class="flex flex-col gap-4 items-center">
+    <a href="Dashbaord.html" class="block">
+        <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="text-[8px] uppercase font-bold">Dashboard</span>
+        </button>
+    </a>
+<button class="group relative flex flex-col items-center gap-1 w-full py-3 bg-primary-container/20 text-fire-accent border-l-4 border-fire-accent shadow-[0_0_20px_rgba(255,122,28,0.2)]">
+    <span class="material-symbols-outlined">call</span>
+    <span class="text-[8px] uppercase font-bold">Call</span>
+</button>
+<a href="supportQueue_x.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">queue</span>
+    <span class="text-[8px] uppercase font-bold">Queue</span>
+  </a>
+  <a href="callCoaching_x.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">graphic_eq</span>
+      <span class="text-[8px] uppercase font-bold">Coaching</span>
+    </button>
+  </a>
+  <a href="powerDialer.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">dialer_sip</span>
+    <span class="text-[8px] uppercase font-bold">Dialer</span>
+  </a>
+  <a href="salesPipeline_x.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">view_kanban</span>
+    <span class="text-[8px] uppercase font-bold">Pipeline</span>
+  </a>
+  <a href="callLogs_x.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">history</span>
+      <span class="text-[8px] uppercase font-bold">History</span>
+    </button>
+  </a>
+  <a href="contacts_x.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">group</span>
+    <span class="text-[8px] uppercase font-bold">Contacts</span>
+  </a>
+  <a href="integrationsHub_y.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">apps</span>
+    <span class="text-[8px] uppercase font-bold">Integrations</span>
+  </a>
+  <a href="myNums_y.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">123</span>
+    <span class="text-[8px] uppercase font-bold">Numbers</span>
+  </a>
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <a href="billingSubscription_y.html" class="flex flex-col items-center gap-1 w-full h-full text-inherit no-underline">
+      <span class="material-symbols-outlined">payments</span>
+      <span class="text-[8px] uppercase font-bold">Billing</span>
+    </a>
+  </button>
+  <a href="teamGovernance_y.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">groups</span>
+      <span class="text-[8px] uppercase font-bold">Team</span>
+    </button>
+  </a>
+</div>
+<div class="flex flex-col items-center gap-4 w-full pb-4">
+  <button class="material-symbols-outlined text-on-surface-variant/60 hover:text-white">help_center</button>
+</div>
+</aside>
+<!-- Top Navigation -->
+<header class="fixed top-0 left-20 right-0 h-16 flex justify-between items-center px-container-padding bg-surface/80 border-b border-glass-border backdrop-blur-[40px] z-10">
+<div class="flex items-center gap-8">
+<h1 class="font-headline-lg text-headline-lg font-bold text-primary">DialForge</h1>
+<nav class="hidden md:flex gap-6">
+<a class="text-primary font-bold border-b-2 border-primary pb-1" href="#">Workspace</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors" href="#">Analytics</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors" href="#">Campaigns</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative w-64">
+<input class="w-full bg-surface-container-low border border-glass-border rounded-lg px-4 py-2 text-label-md focus:ring-1 focus:ring-primary outline-none" placeholder="Search..." type="text">
+<span class="material-symbols-outlined absolute right-3 top-2 text-on-surface-variant text-lg">search</span>
+</div>
+<a href="notifications.html" class="block"><button class="p-2 hover:bg-white/5 rounded-xl transition-colors"><span class="material-symbols-outlined text-gray-400">notifications</span></button></a>
+<a href="settingsGeneral.html" class="block"><button class="p-2 hover:bg-white/5 rounded-xl transition-colors"><span class="material-symbols-outlined text-gray-400">settings</span></button></a>
+<button class="p-2 hover:bg-white/5 rounded-xl transition-colors"><span class="material-symbols-outlined text-gray-400">help</span></button>
+<div class="h-10 w-10 rounded-full overflow-hidden border-2 border-white/10">
+<a href="profile.html" class="block w-full h-full cursor-pointer"><img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs"></a>
+</div>
+</header>
+<!-- Main Content Canvas (The "Blurred Stage") -->
+<main class="ml-20 mt-16 p-stack-lg h-[calc(100vh-64px)] flex items-center justify-center relative overflow-hidden">
+<!-- Call Status Background (Simulated Blur) -->
+<div class="absolute inset-0 flex flex-col items-center justify-center blur-md opacity-40">
+<div class="flex items-center gap-6 mb-8">
+<div class="w-32 h-32 rounded-full border-4 border-tertiary p-1 relative">
+<img alt="Sarah Kim" class="w-full h-full rounded-full object-cover grayscale" data-alt="A close-up portrait of a woman with a friendly but neutral expression, looking directly at the camera as if on a video call. The image is treated with a professional grayscale filter to indicate focus shift in the UI. The background is softly out of focus, suggesting a home office environment. High-contrast lighting highlights the textures of her skin and hair." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYrpy7q7WJFtAS8n4Z_skI6nE5w_MKs-6Mb5e_fN9lkFfyV4ditzvF0E4ZNjSNshLW831ruknn0ALCg2pmleL9dNQdMtfAft0or151ZVZJXfWfROpvNl0YUyScKKUY3noAlNIM0pD7BEHf8U3jFvGHzMSkZ-O3c30-G589WbREjzMEtVmMxEbfHNB0MNHh3SM8goiWqfABsafWZ1VfPf8B_lw2PfFb59TCVwOoDQ85qqNF3xi_ygf7S2xt6u9VO0RaaV5luAWGlWE">
+<div class="absolute -bottom-2 -right-2 bg-tertiary w-6 h-6 rounded-full flex items-center justify-center border-2 border-background">
+<span class="material-symbols-outlined text-background text-xs" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+</div>
+</div>
+<div class="text-left">
+<h2 class="font-headline-xl text-headline-xl text-white mb-2">Sarah Kim</h2>
+<div class="flex items-center gap-3">
+<span class="px-3 py-1 bg-tertiary/20 text-tertiary border border-tertiary/30 rounded-full text-label-sm">SECURE LINE</span>
+<span class="font-label-md text-label-md text-on-surface-variant">04:22</span>
+</div>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="w-12 h-1 bg-tertiary/30 rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-[70%]"></div>
+</div>
+<div class="w-12 h-1 bg-tertiary/30 rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-[45%]"></div>
+</div>
+</div>
+</div>
+<!-- Screen Share Modal -->
+<div class="relative z-30 w-full max-w-4xl animate-in fade-in zoom-in duration-300">
+<div class="liquid-glass rounded-3xl p-10 relative overflow-hidden">
+<!-- Inner Fire Accent Border (Bottom) -->
+<div class="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-fire-gradient-start to-transparent opacity-60"></div>
+<div class="flex justify-between items-start mb-10">
+<div>
+<h3 class="font-headline-xl text-headline-xl text-white mb-2">Share your screen</h3>
+<p class="text-on-surface-variant text-body-lg">Select what you'd like to show to Sarah Kim</p>
+</div>
+<button class="text-on-surface-variant hover:text-white transition-colors p-2 hover:bg-surface-variant/30 rounded-full">
+<a href="activeCall.html"><span class="material-symbols-outlined text-2xl">close</span></a>
+</button>
+</div>
+<!-- Selection Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+<!-- Browser Tab -->
+<div class="group cursor-pointer liquid-glass bg-surface-container-low/50 p-8 rounded-2xl border border-glass-border hover:border-primary/50 transition-all duration-300 flex flex-col items-center text-center">
+<div class="w-16 h-16 rounded-2xl bg-surface-container-highest flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl text-on-surface-variant group-hover:text-primary transition-colors" data-icon="tab">tab</span>
+</div>
+<h4 class="font-headline-lg text-headline-lg mb-3">Browser Tab</h4>
+<p class="text-label-md text-on-surface-variant">Focus on a single tab within Chrome or Edge.</p>
+</div>
+<!-- Window (Active) -->
+<div class="relative group cursor-pointer liquid-glass bg-surface-container p-8 rounded-2xl fire-border transition-all duration-300 flex flex-col items-center text-center">
+<!-- Active Glow Behind Icon -->
+<div class="absolute top-12 w-24 h-24 bg-fire-gradient-start opacity-20 blur-3xl"></div>
+<div class="w-16 h-16 rounded-2xl fire-gradient flex items-center justify-center mb-6 shadow-xl shadow-fire-gradient-start/20 z-10">
+<span class="material-symbols-outlined text-3xl text-white" data-icon="window" style="font-variation-settings: 'FILL' 1;">window</span>
+</div>
+<h4 class="font-headline-lg text-headline-lg mb-3 text-white">Window</h4>
+<p class="text-label-md text-primary font-medium">Show a specific app like Slack, Figma, or VS Code.</p>
+</div>
+<!-- Entire Screen -->
+<div class="group cursor-pointer liquid-glass bg-surface-container-low/50 p-8 rounded-2xl border border-glass-border hover:border-primary/50 transition-all duration-300 flex flex-col items-center text-center">
+<div class="w-16 h-16 rounded-2xl bg-surface-container-highest flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl text-on-surface-variant group-hover:text-primary transition-colors" data-icon="monitor">monitor</span>
+</div>
+<h4 class="font-headline-lg text-headline-lg mb-3">Entire Screen</h4>
+<p class="text-label-md text-on-surface-variant">Share your whole desktop and notifications.</p>
+</div>
+</div>
+<!-- Modal Footer -->
+<div class="flex items-center justify-between border-t border-glass-border pt-8">
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="relative w-6 h-6 border-2 border-glass-border rounded group-hover:border-primary transition-colors flex items-center justify-center">
+<input checked="" class="peer hidden" type="checkbox">
+<span class="material-symbols-outlined text-primary text-xl opacity-0 peer-checked:opacity-100 transition-opacity">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant group-hover:text-on-surface">Share system audio</span>
+</label>
+<div class="flex items-center gap-4">
+<button class="px-8 py-3 rounded-full font-label-md text-on-surface-variant hover:text-white hover:bg-surface-variant/30 transition-all">Cancel</button>
+<button class="px-10 py-3 rounded-full fire-gradient text-white font-bold glow-pulse shadow-lg shadow-fire-gradient-start/30 transition-transform active:scale-95">Start Sharing</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Call Control Bar -->
+<div class="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-4 glass-card rounded-[2.5rem] border border-white/10 shadow-2xl z-30">
+<div class="flex items-center gap-2">
+<button class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent"><span class="material-symbols-outlined">mic</span></button>
+<a href="activeCallCameraConfiguration.html" class="block"><button class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent"><span class="material-symbols-outlined">videocam</span></button></a>
+<button class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 fire-gradient shadow-lg shadow-fire-gradient-start/30 active-glow hover:bg-white/10 transition-all text-gray-300"><span class="material-symbols-outlined">present_to_all</span></button>
+<button class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent"><span class="material-symbols-outlined">pause</span></button>
+<a href="activeCallWarmTransfer.html" class="block"><button class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent"><span class="material-symbols-outlined">forward_to_inbox</span></button></a>
+<button class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent"><span class="material-symbols-outlined">fiber_manual_record</span></button>
+<button class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent"><span class="material-symbols-outlined">voicemail</span></button>
+<button class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent"><span class="material-symbols-outlined">note_add</span></button>
+</div>
+<div class="w-px h-8 bg-white/10 mx-2"></div>
+<button class="px-8 py-3.5 bg-error-red hover:bg-red-600 text-white rounded-full flex items-center gap-3 font-bold transition-all active:scale-95 shadow-[0_0_25px_rgba(255,59,48,0.4)]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">call_end</span>
+<span class="">End Call</span>
+</button>
+</div>
+</main>
+<script>
+        // Micro-interaction for selection cards
+        const cards = document.querySelectorAll('.group.cursor-pointer.liquid-glass');
+        cards.forEach(card => {
+            card.addEventListener('click', () => {
+                cards.forEach(c => {
+                    c.classList.remove('fire-border', 'bg-surface-container');
+                    c.classList.add('bg-surface-container-low/50', 'border-glass-border');
+                    const icon = c.querySelector('.material-symbols-outlined');
+                    if (icon) icon.style.fontVariationSettings = "'FILL' 0";
+                    const h4 = c.querySelector('h4');
+                    if (h4) h4.classList.remove('text-white');
+                });
+                
+                card.classList.add('fire-border', 'bg-surface-container');
+                card.classList.remove('bg-surface-container-low/50', 'border-glass-border');
+                const activeIcon = card.querySelector('.material-symbols-outlined');
+                if (activeIcon) activeIcon.style.fontVariationSettings = "'FILL' 1";
+                const activeH4 = card.querySelector('h4');
+                if (activeH4) activeH4.classList.add('text-white');
+            });
+        });
+    </script>
+
+
+</body></html>

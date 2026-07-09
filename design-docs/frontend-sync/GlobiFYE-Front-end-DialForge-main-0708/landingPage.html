@@ -1,0 +1,428 @@
+<!DOCTYPE html><html class="scroll-smooth" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DialForge - High-Performance Sales Phone</title>
+<meta content="Unleash high-velocity sales with AI-powered coaching, lightning-fast dialing, and deep CRM integration." name="description">
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&amp;family=Syne:wght@400..800&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              orange: '#FF7A1C',
+              dark: '#0A0A0A',
+              card: '#121212',
+              teal: '#14B8A6',
+              purple: '#A855F7'
+            }
+          },
+          fontFamily: {
+            sans: ['DM Sans', 'sans-serif'],
+            display: ['Syne', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-animations">
+    @keyframes glow {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.6; }
+    }
+    .glow-effect {
+      animation: glow 4s ease-in-out infinite;
+    }
+    .glass-morphism {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .text-gradient-orange {
+      background: linear-gradient(135deg, #FFF 40%, #FF7A1C 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .orange-border-gradient {
+      border: 1px solid transparent;
+      background: linear-gradient(to right, #121212, #121212) padding-box,
+                  linear-gradient(to bottom right, #FF7A1C, transparent) border-box;
+    }
+  </style>
+</head>
+<body class="bg-brand-dark text-white font-sans antialiased">
+<!-- BEGIN: Navigation -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-brand-dark/80 backdrop-blur-md border-b border-white/5" data-purpose="main-navigation">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-20">
+<!-- Logo -->
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 bg-brand-orange rounded-md flex items-center justify-center font-bold text-black text-xl">D</div>
+<span class="font-display text-2xl font-extrabold tracking-tighter">DialForge</span>
+</div>
+<!-- Desktop Menu -->
+<div class="hidden md:flex items-center space-x-8 text-sm font-medium text-gray-400">
+<a class="hover:text-brand-orange transition-colors" href="#">Features<br></a>
+<a class="hover:text-brand-orange transition-colors" href="#features">Integrations<br></a>
+<a class="hover:text-brand-orange transition-colors" href="#pricing">Pricing</a>
+</div>
+<!-- Icons -->
+<div class="flex items-center gap-6">
+<button class="text-gray-400 hover:text-white"><span class="material-symbols-outlined">dark_mode</span></button>
+<a href="login.html" class="text-gray-400 hover:text-white text-sm font-medium transition-colors">Login</a>
+<a href="OnboardingStep1.html" class="bg-brand-orange hover:bg-orange-600 text-black text-sm font-bold px-4 py-2 rounded-lg transition-all shadow-[0_0_15px_rgba(255,122,28,0.2)]">Signup</a>
+</div>
+</div>
+</div>
+</nav>
+<!-- END: Navigation -->
+<!-- BEGIN: Hero Section -->
+<header class="relative pt-32 pb-20 overflow-hidden" data-purpose="hero-section">
+<!-- Background Glow -->
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-brand-orange/10 blur-[120px] rounded-full pointer-events-none"></div>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+<!-- Badge -->
+<div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-morphism border border-brand-orange/30 mb-8">
+<span class="w-2 h-2 bg-brand-orange rounded-full glow-effect"></span>
+<span class="text-[10px] font-bold tracking-widest text-brand-orange uppercase">v2.0 Performance Engine Now Live</span>
+</div>
+<!-- Main Headline -->
+<h1 class="font-display text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.05] mb-6">
+        The sales phone <br>
+<span class="text-brand-orange">built to close.</span>
+</h1>
+<p class="max-w-2xl mx-auto text-gray-400 text-lg md:text-xl mb-10 leading-relaxed">
+        Unleash high-velocity sales with AI-powered coaching, lightning-fast dialing, and deep CRM integration. Built for winners.
+      </p>
+<!-- CTA Buttons -->
+<div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
+<a href="OnboardingStep1.html" class="inline-block"><button class="bg-brand-orange hover:bg-orange-600 text-black font-bold py-4 px-8 rounded-lg shadow-[0_0_20px_rgba(255,122,28,0.3)] transition-all flex items-center gap-2">Start Closing Now <span class="">⚡</span></button></a>
+<button class="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold py-4 px-8 rounded-lg transition-all">
+          View Demo
+        </button>
+</div>
+<!-- Dashboard Mockup -->
+<div class="max-w-5xl mx-auto rounded-xl border border-white/10 bg-[#0F0F0F] p-2 shadow-2xl relative">
+<div class="bg-[#1A1A1A] rounded-lg overflow-hidden">
+<!-- Window Controls -->
+<div class="flex items-center gap-1.5 p-4 border-b border-white/5">
+<div class="w-3 h-3 rounded-full bg-red-500/50"></div>
+<div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+<div class="w-3 h-3 rounded-full bg-green-500/50"></div>
+<div class="ml-4 text-[10px] text-gray-500 font-mono tracking-wider">app.dialforge.io/dashboard</div>
+</div>
+<!-- Mockup Content Image -->
+<div class="aspect-[16/8] bg-brand-dark relative overflow-hidden">
+<!-- Simplified Visual Placeholder for the Dashboard in the Screenshot -->
+<img alt="Dashboard Interface" class="w-full h-full object-cover object-top opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq5otW1pSG2ZpTqy5d7YuNdMS5duNCVg8Fu4A2O97b7E3NTxGcuAgcyo5CodiIAtQLHXT6zo-u8EGkGbSySIgd8Xa59KnUIjvD-vz0hhRIEOJvS_EJx8Rcv1SqUvjYRboniMOrJ6qKL_0ZQqc1XBjhB6BufC8D1MErqUdYGvk5xav4h0vhbGQNlNXpQoKjJDMd2_hgjMaOEGwKSgrhzn8W3n3GHXMxgQ7U7_SZZwN_PGCvPidBc1BNZeJerRlcVoM1IDQVLfFQoVs">
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- END: Hero Section -->
+<!-- BEGIN: Features Section -->
+<section class="py-24" data-purpose="features-grid" id="features">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center mb-16">
+<h2 class="font-display text-4xl md:text-5xl font-black mb-4">Precision <span class="text-brand-orange">Engineering.</span></h2>
+<p class="text-gray-400">Built for the high-intensity world of modern sales teams.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Power Dialer -->
+<div class="md:col-span-2 glass-morphism rounded-3xl p-8 border border-white/5 relative overflow-hidden group">
+<div class="w-12 h-12 bg-brand-orange/10 rounded-xl flex items-center justify-center mb-8 border border-brand-orange/20">
+<svg class="w-6 h-6 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<h3 class="font-display text-2xl font-bold mb-3">Power Dialer</h3>
+<p class="text-gray-400 max-w-sm mb-12">Multi-line dialing that intelligently connects the right agent to the right prospect, zero lag, max throughput.</p>
+<div class="flex gap-2">
+<div class="h-1 w-16 bg-brand-orange rounded-full"></div>
+<div class="h-1 w-8 bg-white/20 rounded-full"></div>
+<div class="h-1 w-8 bg-white/20 rounded-full"></div>
+</div>
+</div>
+<!-- AI Coach -->
+<div class="glass-morphism rounded-3xl p-8 border border-white/5 flex flex-col justify-between">
+<div>
+<div class="w-12 h-12 bg-brand-purple/10 rounded-xl flex items-center justify-center mb-8 border border-brand-purple/20">
+<svg class="w-6 h-6 text-brand-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<h3 class="font-display text-2xl font-bold mb-3">AI Coach</h3>
+<p class="text-gray-400">Real-time sentiment analysis and live script suggestions as you speak.</p>
+</div>
+</div>
+<!-- Smart Pipeline -->
+<div class="glass-morphism rounded-3xl p-8 border border-white/5">
+<div class="w-12 h-12 bg-brand-teal/10 rounded-xl flex items-center justify-center mb-8 border border-brand-teal/20">
+<svg class="w-6 h-6 text-brand-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<h3 class="font-display text-2xl font-bold mb-3">Smart Pipeline</h3>
+<p class="text-gray-400">Visual kanban views that sync instantly with Salesforce, HubSpot, and Pipedrive.</p>
+</div>
+<!-- CRM Sync -->
+<div class="md:col-span-2 glass-morphism rounded-3xl p-8 border border-white/5 flex items-center overflow-hidden">
+<div class="flex-1">
+<h3 class="font-display text-2xl font-bold mb-3">Seamless CRM Sync</h3>
+<p class="text-gray-400 mb-8">Auto-log every interaction, transcript, and sentiment analysis directly to your CRM.</p>
+<div class="flex flex-wrap gap-3">
+<span class="px-4 py-2 bg-white/5 rounded-full text-xs font-semibold border border-white/10">Salesforce</span>
+<span class="px-4 py-2 bg-white/5 rounded-full text-xs font-semibold border border-white/10">HubSpot</span>
+<span class="px-4 py-2 bg-white/5 rounded-full text-xs font-semibold border border-white/10">Zoho</span>
+</div>
+</div>
+<div class="hidden lg:block w-1/2 -mr-8 -mb-8">
+<img alt="CRM Visualization" class="rounded-tl-2xl border-t border-l border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsF4he3fYXbpHxHRXu_GOXd-bB2JPnV5ABLMS2iXU2YRQAje_ghAP4LnbRxz5fAFGhwNlLaTZguFm-SPer5P3eMbqUofYEjcVzNeCyg5uq52gwoGUwhcs9F1xRM4dOR3nZ5f0omCuS9uY8cgVhQ-73y8WXJHBIId5mDV1pNXceMYTDqp7q7piqh05PeTvwk8c012cFMVOL12WGFzq06jjyv68qN9QoqZD_FGvco5qXChrG61mJ7nlshKstudet1woJd316OHdskWA">
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Features Section -->
+<!-- BEGIN: Personas Section -->
+<section class="py-24 bg-black/30" data-purpose="persona-cards">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="text-center mb-16">
+<h2 class="font-display text-4xl md:text-5xl font-black mb-4">Built for <span class="text-brand-orange">Every Closer.</span></h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- For Closers -->
+<div class="orange-border-gradient rounded-3xl p-8 flex flex-col h-full bg-[#121212]">
+<div class="flex items-center justify-between mb-6">
+<img alt="Closer Profile" class="w-12 h-12 rounded-full border border-brand-orange/40" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBb4yyWCnwtPOdPlM0sR58Xa9a-FQn45bJCkgGvVPQBI4QmpDRZTW6LJx7uxigiAiu5wkFjiSnlDBpn569c2hPCLumjOP8FGaRiftaldQ_AbnhFymhuUF3nqGJXEe01egXugQjVXrviZRHYPALFMG4PsGmFn6mQyEkGUc_WVBTr8ER4VCUfs6PqSvAFF3wR8dF0XNQ0mZoGFbpEXeZ4KjP5cfIwyDVwQqCm7tsdKueplPmrvzruijtpnkxNq2Y2Pc8VUwRjlYif8NU">
+<span class="text-[10px] font-bold text-brand-orange border border-brand-orange/30 px-3 py-1 rounded-full uppercase tracking-tighter">For Closers</span>
+</div>
+<h3 class="font-display text-2xl font-bold mb-4">High-Velocity Sales</h3>
+<p class="text-gray-400 mb-8 text-sm leading-relaxed">The power-user interface designed for hitting quotas and crushing objections in high-volume environments.</p>
+<ul class="space-y-4 mt-auto">
+<li class="flex items-center gap-3 text-sm text-gray-300">
+<span class="w-5 h-5 flex items-center justify-center rounded-full bg-brand-orange/10 text-brand-orange">✓</span>
+              Multi-line Power Dialer
+            </li>
+<li class="flex items-center gap-3 text-sm text-gray-300">
+<span class="w-5 h-5 flex items-center justify-center rounded-full bg-brand-orange/10 text-brand-orange">✓</span>
+              Real-time Scripting AI
+            </li>
+</ul>
+</div>
+<!-- For Support -->
+<div class="bg-brand-card rounded-3xl p-8 border border-white/5 flex flex-col h-full">
+<div class="flex items-center justify-between mb-6">
+<img alt="Support Profile" class="w-12 h-12 rounded-full border border-brand-teal/40" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKFmPw0xrIwdNg-PD95m5xziBt2tavu30F3Nh-s1HhsM6LYmbsDiXfkR6DNfsAfcXtYZdICYJVBJB9i4Fp6iwMIJIAqYM4fjPZyS3tQQKc9ls7d4HPKwHRaVG8gDIQ379M2LX_NXojg9MmYoxTdpEcZQZQPc-m7IZNA9ToQkb6MAk0iv3CzSvImW0XPQIxUaasDJ_io5F10JCp7AqeKFrrhFHIR01Eedvl5WIdDEdoG31gU1n1Pdk5QaQTCszq5wdfZIohw9Sdc1w">
+<span class="text-[10px] font-bold text-brand-teal border border-brand-teal/30 px-3 py-1 rounded-full uppercase tracking-tighter">For Support</span>
+</div>
+<h3 class="font-display text-2xl font-bold mb-4">Technical Support</h3>
+<p class="text-gray-400 mb-8 text-sm leading-relaxed">Optimized for ticketing resolution, deep knowledge base access, and crystal clear call quality.</p>
+<ul class="space-y-4 mt-auto">
+<li class="flex items-center gap-3 text-sm text-gray-300">
+<span class="w-5 h-5 flex items-center justify-center rounded-full bg-brand-teal/10 text-brand-teal">✓</span>
+              HD Voice Isolation
+            </li>
+<li class="flex items-center gap-3 text-sm text-gray-300">
+<span class="w-5 h-5 flex items-center justify-center rounded-full bg-brand-teal/10 text-brand-teal">✓</span>
+              Ticket Auto-Sync
+            </li>
+</ul>
+</div>
+<!-- For Solos -->
+<div class="bg-brand-card rounded-3xl p-8 border border-white/5 flex flex-col h-full">
+<div class="flex items-center justify-between mb-6">
+<img alt="Solo Profile" class="w-12 h-12 rounded-full border border-brand-purple/40" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAVP0bV8zZsVBClwx07n5znvCwgvI1D_4RgMB7iXR-OImCH3CjF4UpRSMrPdu-BZV1zC-ADqoCNYqDs_hYDISZw6gN8fgAkLGFEhgiTIqD0-D7BYck71MCxjeo5en7armrbvgP257Hlu-lpqg89XAqAuaCij-cZ4sPSNOGdNCADpIuvCKYfXfC1rNwgAkJIUBH0e6EWokUxtXrz8KR-l5v2bVJ7dnXu8np9rU8Envb24vWzrYCL1G1u62QAGKATuL50PhSx6B1m5Ls">
+<span class="text-[10px] font-bold text-brand-purple border border-brand-purple/30 px-3 py-1 rounded-full uppercase tracking-tighter">For Solo</span>
+</div>
+<h3 class="font-display text-2xl font-bold mb-4">Solo Founders</h3>
+<p class="text-gray-400 mb-8 text-sm leading-relaxed">Simplified essentials for one-man armies needing professional presence without the enterprise bloat.</p>
+<ul class="space-y-4 mt-auto">
+<li class="flex items-center gap-3 text-sm text-gray-300">
+<span class="w-5 h-5 flex items-center justify-center rounded-full bg-brand-purple/10 text-brand-purple">✓</span>
+              Visual Voicemail to AI
+            </li>
+<li class="flex items-center gap-3 text-sm text-gray-300">
+<span class="w-5 h-5 flex items-center justify-center rounded-full bg-brand-purple/10 text-brand-purple">✓</span>
+              Universal Mobile App
+            </li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Personas Section -->
+<!-- BEGIN: Pricing Section -->
+<section class="py-24 relative overflow-hidden" data-purpose="pricing-tables" id="pricing">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+<div class="text-center mb-20">
+<h2 class="font-display text-4xl md:text-5xl font-black mb-4 text-gradient-orange">Transparent Pricing.</h2>
+<p class="text-gray-400">No hidden fees. Scale as you grow.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-end">
+<!-- Starter -->
+<div class="bg-brand-card rounded-3xl p-10 border border-white/5 hover:border-white/20 transition-all">
+<div class="mb-12">
+<span class="text-gray-400 text-sm font-bold uppercase tracking-widest">Starter</span>
+<div class="flex items-baseline gap-1 mt-4">
+<span class="text-4xl font-bold">$49</span>
+<span class="text-gray-500 text-sm">/mo per user</span>
+</div>
+</div>
+<ul class="space-y-6 mb-12 text-sm text-gray-300">
+<li class="flex items-center gap-3">
+<span class="text-brand-orange">✓</span> Single line dialer
+            </li>
+<li class="flex items-center gap-3">
+<span class="text-brand-orange">✓</span> Basic call recording
+            </li>
+<li class="flex items-center gap-3">
+<span class="text-brand-orange">✓</span> CRM tagging basics
+            </li>
+</ul>
+<button class="w-full py-4 border border-white/10 rounded-xl font-bold hover:bg-white/5 transition-colors">Get Started</button>
+</div>
+<!-- Pro Performance -->
+<div class="bg-brand-dark rounded-3xl p-10 border-2 border-brand-orange relative shadow-[0_0_40px_rgba(255,122,28,0.1)] -mb-4 md:-mb-8 z-20">
+<div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-brand-orange text-black text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest">Most Popular</div>
+<div class="mb-12">
+<span class="text-brand-orange text-sm font-bold uppercase tracking-widest">Pro Performance</span>
+<div class="flex items-baseline gap-1 mt-4">
+<span class="text-5xl font-bold">$129</span>
+<span class="text-gray-500 text-sm">/mo per user</span>
+</div>
+</div>
+<ul class="space-y-6 mb-12 text-sm text-gray-100">
+<li class="flex items-center gap-3">
+<span class="text-brand-orange">⚡</span> 5-line Power Dialer
+            </li>
+<li class="flex items-center gap-3">
+<span class="text-brand-orange">⚡</span> Live AI Call Coaching
+            </li>
+<li class="flex items-center gap-3">
+<span class="text-brand-orange">⚡</span> Full CRM Integration
+            </li>
+<li class="flex items-center gap-3">
+<span class="text-brand-orange">⚡</span> Advanced Reporting
+            </li>
+</ul>
+<button class="w-full py-4 bg-brand-orange text-black rounded-xl font-black shadow-lg shadow-brand-orange/20 hover:bg-orange-600 transition-colors">Go Pro Now</button>
+</div>
+<!-- Enterprise -->
+<div class="bg-brand-card rounded-3xl p-10 border border-white/5 hover:border-white/20 transition-all">
+<div class="mb-12">
+<span class="text-gray-400 text-sm font-bold uppercase tracking-widest">Enterprise</span>
+<div class="flex items-baseline gap-1 mt-4">
+<span class="text-4xl font-bold">Custom</span>
+</div>
+</div>
+<ul class="space-y-6 mb-12 text-sm text-gray-300">
+<li class="flex items-center gap-3">
+<span class="text-brand-orange">∞</span> Unlimited parallel dialing
+            </li>
+<li class="flex items-center gap-3">
+<span class="text-brand-orange">∞</span> Dedicated success manager
+            </li>
+<li class="flex items-center gap-3">
+<span class="text-brand-orange">∞</span> SLA &amp; Priority Support
+            </li>
+</ul>
+<button class="w-full py-4 border border-white/10 rounded-xl font-bold hover:bg-white/5 transition-colors">Contact Sales</button>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Pricing Section -->
+<!-- BEGIN: CTA Section -->
+<section class="py-24" data-purpose="final-cta">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="orange-border-gradient rounded-[3rem] p-12 md:p-24 text-center relative overflow-hidden bg-[#0A0A0A]">
+<!-- Glow Effect -->
+<div class="absolute -bottom-24 left-1/2 -translate-x-1/2 w-3/4 h-64 bg-brand-orange/20 blur-[100px] rounded-full"></div>
+<h2 class="font-display text-4xl md:text-6xl font-black mb-8 leading-tight">
+          Ready to beat your <br> quarterly record?
+        </h2>
+<p class="text-gray-400 text-lg mb-12 max-w-2xl mx-auto">
+          Join 5,000+ high-growth sales teams using DialForge to dominate their markets.
+        </p>
+<div class="flex flex-col sm:flex-row items-center justify-center gap-6 relative z-10">
+<button class="bg-brand-orange text-black font-black py-4 px-10 rounded-xl hover:bg-orange-600 transition-all">
+            Start 14-Day Free Trial
+          </button>
+<button class="bg-white/5 border border-white/10 text-white font-bold py-4 px-10 rounded-xl hover:bg-white/10 transition-all">
+            Talk to an Expert
+          </button>
+</div>
+</div>
+</div>
+</section>
+<!-- END: CTA Section -->
+<!-- BEGIN: Footer -->
+<footer class="bg-brand-dark pt-24 pb-12 border-t border-white/5" data-purpose="site-footer">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12 mb-20">
+<div class="col-span-2 lg:col-span-2">
+<div class="flex items-center gap-2 mb-6">
+<div class="w-8 h-8 bg-brand-orange rounded-md flex items-center justify-center font-bold text-black text-xl">D</div>
+<span class="font-display text-2xl font-extrabold tracking-tighter">DialForge</span>
+</div>
+<p class="text-gray-500 max-w-xs mb-8 text-sm leading-relaxed">
+            Engineering the future of sales communication. High-velocity tools for high-performance teams.
+          </p>
+<div class="flex gap-4">
+<a class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors border border-white/10" href="#">
+<span class="sr-only">X</span>
+<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"></path></svg>
+</a>
+<a class="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors border border-white/10" href="#">
+<span class="sr-only">LinkedIn</span>
+<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path></svg>
+</a>
+</div>
+</div>
+<div>
+<h4 class="font-bold text-sm mb-6 uppercase tracking-widest text-gray-400">Product</h4>
+<ul class="space-y-4 text-sm text-gray-500">
+<li class=""><a class="hover:text-brand-orange transition-colors" href="#">Power Dialer</a></li>
+<li class=""><a class="hover:text-brand-orange transition-colors" href="#">AI Coaching</a></li>
+<li class=""><a class="hover:text-brand-orange transition-colors" href="#">Pipeline Management</a></li>
+<li class=""><a class="hover:text-brand-orange transition-colors" href="#">Integrations</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-bold text-sm mb-6 uppercase tracking-widest text-gray-400">Company</h4>
+<ul class="space-y-4 text-sm text-gray-500">
+<li class=""><a class="hover:text-brand-orange transition-colors" href="#">About Us</a></li>
+<li class=""><a class="hover:text-brand-orange transition-colors" href="#">Careers</a></li>
+<li class=""><a class="hover:text-brand-orange transition-colors" href="#">Press Kit</a></li>
+<li class=""><a class="hover:text-brand-orange transition-colors" href="#">Blog</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-bold text-sm mb-6 uppercase tracking-widest text-gray-400">Support</h4>
+<ul class="space-y-4 text-sm text-gray-500">
+<li class=""><a class="hover:text-brand-orange transition-colors" href="#">Help Center</a></li>
+<li class=""><a class="hover:text-brand-orange transition-colors" href="#">Community</a></li>
+<li class=""><a class="hover:text-brand-orange transition-colors" href="#">API Docs</a></li>
+<li class=""><a class="hover:text-brand-orange transition-colors" href="#">Status</a></li>
+</ul>
+</div>
+</div>
+<div class="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+<p class="text-xs text-gray-600">© 2024 DIALFORGE SOLAR PVT. ALL RIGHTS RESERVED.</p>
+<div class="flex gap-8 text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+<a class="hover:text-white transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-white transition-colors" href="#">Terms of Service</a>
+<a class="hover:text-white transition-colors" href="#">Security</a>
+</div>
+</div>
+</div>
+</footer>
+<!-- END: Footer -->
+
+
+
+
+
+
+</body></html>

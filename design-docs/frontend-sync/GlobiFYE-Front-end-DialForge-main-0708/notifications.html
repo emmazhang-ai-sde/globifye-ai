@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DialForge - Notifications</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Syne -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            syne: ['Syne', 'sans-serif'],
+          },
+          colors: {
+            brand: '#ff7a1c',
+            surface: '#12131a',
+            'surface-dim': '#0d0e15',
+            'surface-bright': '#383941',
+            'surface-container': '#1a1b23',
+            'accent-purple': '#a855f7',
+            'accent-teal': '#2dd4bf',
+            'accent-gold': '#fbbf24',
+            "on-surface-variant": "#e5beb4"
+          },
+          borderRadius: {
+            'custom': '8px',
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-layout">
+    body {
+      background-color: #0d0e15;
+      color: #ffffff;
+      font-family: 'Syne', sans-serif;
+    }
+    .glass-card {
+      background: rgba(26, 27, 35, 0.6);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .notification-item {
+      transition: all 0.2s ease;
+    }
+    .notification-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .dot-glow {
+      box-shadow: 0 0 10px currentColor;
+    }
+    .header-title {
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      text-transform: capitalize;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+<!-- BEGIN: MainHeader -->
+<header class="sticky top-0 z-50 flex items-center justify-between px-8 py-4 border-b border-white/10 bg-surface/80 backdrop-blur-md">
+<div class="flex items-center gap-2">
+<div class="flex items-center" data-purpose="logo">
+<span class="text-brand text-2xl font-extrabold tracking-tighter italic">DialForge</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<a href="notifications.html" class="block"><button class="material-symbols-outlined text-accent-gold transition-colors">notifications</button></a>
+<a href="settingsGeneral.html" class="block"><button class="material-symbols-outlined text-on-surface-variant hover:text-white transition-colors">settings</button></a>
+</div>
+<button class="text-gray-400 hover:text-white transition-colors">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="h-10 w-10 rounded-full overflow-hidden border border-white/10">
+<a href="profile.html" class="block w-full h-full cursor-pointer"><img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs"></a>
+</div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<main class="max-w-5xl mx-auto px-6 py-12">
+<!-- BEGIN: NotificationsHeader -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+<div class="max-w-2xl">
+<h1 class="header-title text-5xl md:text-6xl mb-4">Notifications</h1>
+<p class="text-gray-400 text-lg leading-relaxed">
+          Stay updated with real-time deal alerts, coaching feedback, and system synchronization.
+        </p>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-6 py-2.5 rounded-full border border-white/20 hover:bg-white/5 transition-all text-sm font-medium">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+          Filter
+        </button>
+<button class="flex items-center gap-2 px-6 py-2.5 rounded-full bg-brand hover:bg-orange-600 transition-all text-white text-sm font-bold shadow-lg shadow-orange-500/20">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+          Mark All as Read
+        </button>
+</div>
+</div>
+<!-- END: NotificationsHeader -->
+<!-- BEGIN: FilterTabs -->
+<div class="flex flex-wrap gap-3 mb-12">
+<button class="px-8 py-2.5 rounded-full bg-brand text-white font-bold transition-all">All</button>
+<button class="px-8 py-2.5 rounded-full bg-surface-container border border-white/10 hover:border-brand/50 text-gray-400 hover:text-white transition-all">Deal Alerts</button>
+<button class="px-8 py-2.5 rounded-full bg-surface-container border border-white/10 hover:border-brand/50 text-gray-400 hover:text-white transition-all">Coaching</button>
+<button class="px-8 py-2.5 rounded-full bg-surface-container border border-white/10 hover:border-brand/50 text-gray-400 hover:text-white transition-all">System</button>
+</div>
+<!-- END: FilterTabs -->
+<!-- BEGIN: RecentNotifications -->
+<section class="mb-12">
+<h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">Recent</h3>
+<div class="space-y-4">
+<!-- Notification: Sarah Kim -->
+<div class="notification-item glass-card rounded-custom p-5 border-l-4 border-l-brand relative">
+<div class="flex items-start gap-4">
+<div class="w-12 h-12 rounded-lg bg-brand/20 flex items-center justify-center text-brand flex-shrink-0">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.99 7.99 0 0120 13a7.989 7.989 0 01-2.343 5.657z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-4 mb-1">
+<h4 class="font-bold text-white truncate text-lg">Sarah Kim moved to Closing</h4>
+<span class="text-xs text-gray-500 whitespace-nowrap">2m ago</span>
+</div>
+<p class="text-gray-400 text-sm">The contract for Enterprise Tier was sent and viewed 3 times. High probability of win.</p>
+</div>
+<div class="w-2.5 h-2.5 rounded-full bg-brand dot-glow mt-2"></div>
+</div>
+</div>
+<!-- Notification: Coaching -->
+<div class="notification-item glass-card rounded-custom p-5 border-l-4 border-l-accent-purple relative">
+<div class="flex items-start gap-4">
+<div class="w-12 h-12 rounded-lg bg-accent-purple/20 flex items-center justify-center text-accent-purple flex-shrink-0">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-4 mb-1">
+<h4 class="font-bold text-white truncate text-lg">New Coaching Insight Available</h4>
+<span class="text-xs text-gray-500 whitespace-nowrap">15m ago</span>
+</div>
+<p class="text-gray-400 text-sm">Your last call with Nexus Corp had a 72% objection handling score. Review recommendations.</p>
+</div>
+<div class="w-2.5 h-2.5 rounded-full bg-accent-purple dot-glow mt-2"></div>
+</div>
+</div>
+<!-- Notification: Performance Sync -->
+<div class="notification-item glass-card rounded-custom p-5 border-l-4 border-l-gray-600 relative">
+<div class="flex items-start gap-4">
+<div class="w-12 h-12 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 flex-shrink-0">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-4 mb-1">
+<h4 class="font-bold text-white truncate text-lg">Weekly Performance Sync Complete</h4>
+<span class="text-xs text-gray-500 whitespace-nowrap">1h ago</span>
+</div>
+<p class="text-gray-400 text-sm">Your dashboard has been updated with the latest regional sales data from Salesforce.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: RecentNotifications -->
+<!-- BEGIN: YesterdayNotifications -->
+<section class="mb-12">
+<h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">Yesterday</h3>
+<div class="space-y-4">
+<!-- Notification: CRM Enrichment -->
+<div class="notification-item glass-card rounded-custom p-5 border-l-4 border-l-accent-teal relative">
+<div class="flex items-start gap-4">
+<div class="w-12 h-12 rounded-lg bg-accent-teal/20 flex items-center justify-center text-accent-teal flex-shrink-0">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-4 mb-1">
+<h4 class="font-bold text-white truncate text-lg">CRM Contact Enrichment</h4>
+<span class="text-xs text-gray-500 whitespace-nowrap">Yesterday</span>
+</div>
+<p class="text-gray-400 text-sm">14 new leads were automatically enriched with LinkedIn profile data and direct-dial numbers.</p>
+</div>
+</div>
+</div>
+<!-- Notification: Milestones -->
+<div class="notification-item glass-card rounded-custom p-5 border-l-4 border-l-accent-gold relative">
+<div class="flex items-start gap-4">
+<div class="w-12 h-12 rounded-lg bg-accent-gold/20 flex items-center justify-center text-accent-gold flex-shrink-0">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.382-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-4 mb-1">
+<h4 class="font-bold text-white truncate text-lg">Pipeline Milestones Reached</h4>
+<span class="text-xs text-gray-500 whitespace-nowrap">Yesterday</span>
+</div>
+<p class="text-gray-400 text-sm">You've hit 120% of your weekly activity target. Keep the momentum going!</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: YesterdayNotifications -->
+<!-- BEGIN: FooterAction -->
+<div class="flex justify-center mt-16">
+<button class="px-12 py-3.5 rounded-full glass-card hover:bg-white/10 transition-all text-sm font-bold text-white border border-white/10">
+        Load Older Notifications
+      </button>
+</div>
+<!-- END: FooterAction -->
+</main>
+</body></html>

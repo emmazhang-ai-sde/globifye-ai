@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DialForge - Camera Configuration</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&amp;family=DM+Sans:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-tint": "#ffb68f",
+                        "surface": "#12131a",
+                        "fire-gradient-end": "#FF4D00",
+                        "tertiary-container": "#05b85f",
+                        "surface-container-highest": "#33343d",
+                        "primary": "#ffb68f",
+                        "outline-variant": "#584236",
+                        "primary-container": "#ff7a1c",
+                        "glass-border": "rgba(255, 255, 255, 0.08)",
+                        "secondary-container": "#ff571a",
+                        "surface-container-lowest": "#0d0e15",
+                        "inverse-on-surface": "#2f3038",
+                        "inverse-primary": "#9c4400",
+                        "on-background": "#e3e1ec",
+                        "secondary": "#ffb59e",
+                        "on-tertiary-container": "#00401d",
+                        "on-secondary": "#5e1700",
+                        "on-tertiary": "#003919",
+                        "background": "#12131a",
+                        "outline": "#a78b7d",
+                        "on-secondary-fixed": "#3a0b00",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "on-surface-variant": "#e5beb4",
+                        "accent-glow": "rgba(255, 77, 0, 0.3)",
+                        "inverse-surface": "#e3e1ec",
+                        "on-secondary-container": "#521300",
+                        "surface-container-high": "#292932",
+                        "surface-container-low": "#1a1b23",
+                        "on-primary": "#542100",
+                        "fire-gradient-start": "#FF7A1C",
+                        "on-primary-fixed-variant": "#773200",
+                        "on-primary-fixed": "#331200",
+                        "on-tertiary-fixed": "#00210c",
+                        "primary-fixed": "#ffdbca",
+                        "surface-dim": "#12131a",
+                        "surface-bright": "#383941",
+                        "on-tertiary-fixed-variant": "#005227",
+                        "surface-container": "#1e1f27",
+                        "tertiary-fixed": "#6dfe9c",
+                        "indigo-depth": "#07080F",
+                        "tertiary": "#4de082",
+                        "on-primary-container": "#5e2700",
+                        "secondary-fixed": "#ffdbd0",
+                        "tertiary-fixed-dim": "#4de082",
+                        "surface-variant": "#33343d",
+                        "on-surface": "#e3e1ec",
+                        "on-error-container": "#ffdad6",
+                        "error-red": "#FF3B30",
+                        "secondary-fixed-dim": "#ffb59e",
+                        "primary-fixed-dim": "#ffb68f",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed-variant": "#852400",
+                        "fire-accent": "#FFAD1C"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "container-padding": "32px",
+                        "stack-md": "16px",
+                        "stack-sm": "8px",
+                        "unit": "4px",
+                        "stack-lg": "24px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["DM Sans"],
+                        "body-lg": ["DM Sans"],
+                        "label-md": ["DM Sans"],
+                        "headline-xl": ["Syne"],
+                        "headline-lg": ["Syne"],
+                        "headline-lg-mobile": ["Syne"],
+                        "body-md": ["DM Sans"],
+                        "display-lg": ["Syne"],
+                        "mono": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.08em", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "headline-xl": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "headline-lg": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "headline-lg-mobile": ["20px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-card {
+      background: rgba(26, 27, 35, 0.78);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+        .fire-gradient {
+            background: linear-gradient(135deg, #FF7A1C 0%, #FF4D00 100%);
+        }
+        .liquid-glass {
+            background: rgba(18, 19, 26, 0.6);
+            backdrop-filter: blur(40px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .specular-highlight {
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            border-left: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .pulse-glow:hover {
+            box-shadow: 0 0 20px rgba(255, 122, 28, 0.4);
+            transform: scale(1.02);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        body {
+            background-color: #12131a;
+            color: #FF7A1C;
+            overflow: hidden;
+        }
+        .fire-glow {
+      box-shadow: 0 0 40px rgba(255, 122, 28, 0.15), 0 0 80px rgba(255, 122, 28, 0.05);
+    }
+    .stat-border-glow {
+      border-top: 2px solid #FF7A1C;
+      box-shadow: inset 0 10px 20px -10px rgba(255, 122, 28, 0.3);
+    }
+    
+        .active-nav-border {
+            border-left: 4px solid #FF7A1C;
+            background: linear-gradient(90deg, rgba(255, 122, 28, 0.1) 0%, transparent 100%);
+        }
+@media (max-width: 600px) {
+            .active-nav-border {
+                border-left: none;
+                border-top: 3px solid #FF7A1C;
+                background: linear-gradient(0deg, rgba(255, 122, 28, 0.1) 0%, transparent 100%);
+            }
+}
+        .active-glow {
+    filter: drop-shadow(0 0 8px #FF7A1C)
+    }
+        .modal-entrance {
+            animation: springIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes springIn {
+            0% { opacity: 0; transform: scale(0.9) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+         @keyframes pulse-glow {
+      0% { box-shadow: 0 0 0 0 rgba(0, 228, 120, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(0, 228, 120, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 228, 120, 0); }
+    }
+    .active-orb {
+      animation: pulse-glow 2s infinite;
+    }
+        .noise-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.02;
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuAjBgxhjjpbQ1X6hvaeggcEsORm0cusjq8KmhkMIem9paSnZ7_7H4035tguD8hQF_wyJfO0-xi5zinWRn5KCM4dsf9akf-ZEUIsx8r2p38OT_3LwtrA_hw0Bqp7LEHGHhjXR6QSfhiz5U0QWGx-RgUC23zQ_gXBKToAxBg8Gydr2pnyjVJzW_LFuaMzmeu54c7PrLK77yNnBemFzvrQWsOo-ahwjnkRQn0xqS8r25dnS6iz5_tsV9azzSv_REk-2thWjE9T9bosd9s)
+    }
+::-webkit-scrollbar {
+    width: 4px
+    }
+::-webkit-scrollbar-track {
+    background: transparent
+    }
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px
+    }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row h-screen w-full overflow-hidden">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 left-0 right-0 h-16 flex items-center justify-between px-container-padding bg-surface/80 backdrop-blur-md border-b border-glass-border z-50">
+<div class="flex items-center gap-stack-md">
+<span class="font-headline-lg text-headline-lg font-bold text-primary">DialForge</span>
+<div class="hidden md:flex ml-stack-lg gap-stack-md">
+<a class="font-label-md text-label-md text-primary font-bold border-b-2 border-primary pb-1" href="#">Dashboard</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Pipeline</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Call Logs</a>
+</div>
+</div>
+<div class="flex items-center gap-stack-lg">
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="bg-surface-container-low border-none rounded-lg pl-10 pr-4 py-2 w-64 text-label-md focus:ring-1 focus:ring-primary/50 text-on-surface placeholder:text-on-surface-variant/50" placeholder="Search data..." type="text"/>
+</div>
+<div class="flex items-center gap-3">
+<a href="notifications.html" class="block"><button class="material-symbols-outlined text-on-surface-variant hover:text-white transition-colors">notifications</button></a>
+<a href="settingsGeneral.html" class="block"><button class="material-symbols-outlined text-on-surface-variant hover:text-white transition-colors">settings</button></a>
+</div>
+<div class="h-10 w-10 rounded-full overflow-hidden border border-white/10">
+<a href="profile.html" class="block w-full h-full cursor-pointer"><img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs"></a>
+</div>
+</div>
+</div>
+</header>
+<!-- Side Navigation -->
+<aside class="hidden sm:flex fixed left-0 top-16 bottom-0 w-20 flex flex-col items-center py-6 gap-6 glass-card border-r border-white/5 z-40 overflow-y-auto transition-all duration-300">
+<div class="flex flex-col gap-4 items-center">
+    <a href="Dashbaord.html" class="block">
+        <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="text-[8px] uppercase font-bold">Dashboard</span>
+        </button>
+    </a>
+<button class="group relative flex flex-col items-center gap-1 w-full py-3 bg-primary-container/20 text-fire-accent border-l-4 border-fire-accent shadow-[0_0_20px_rgba(255,122,28,0.2)]">
+    <span class="material-symbols-outlined">call</span>
+    <span class="text-[8px] uppercase font-bold">Call</span>
+</button>
+<a href="supportQueue_x.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">queue</span>
+    <span class="text-[8px] uppercase font-bold">Queue</span>
+  </a>
+  <a href="callCoaching_x.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">graphic_eq</span>
+      <span class="text-[8px] uppercase font-bold">Coaching</span>
+    </button>
+  </a>
+  <a href="powerDialer.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">dialer_sip</span>
+    <span class="text-[8px] uppercase font-bold">Dialer</span>
+  </a>
+  <a href="salesPipeline_x.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">view_kanban</span>
+    <span class="text-[8px] uppercase font-bold">Pipeline</span>
+  </a>
+  <a href="callLogs_x.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">history</span>
+      <span class="text-[8px] uppercase font-bold">History</span>
+    </button>
+  </a>
+  <a href="contacts_x.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">group</span>
+    <span class="text-[8px] uppercase font-bold">Contacts</span>
+  </a>
+  <a href="integrationsHub_y.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">apps</span>
+    <span class="text-[8px] uppercase font-bold">Integrations</span>
+  </a>
+  <a href="myNums_y.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">123</span>
+    <span class="text-[8px] uppercase font-bold">Numbers</span>
+  </a>
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <a href="billingSubscription_y.html" class="flex flex-col items-center gap-1 w-full h-full text-inherit no-underline">
+      <span class="material-symbols-outlined">payments</span>
+      <span class="text-[8px] uppercase font-bold">Billing</span>
+    </a>
+  </button>
+  <a href="teamGovernance.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">groups</span>
+      <span class="text-[8px] uppercase font-bold">Team</span>
+    </button>
+  </a>
+</div>
+<div class="flex flex-col items-center gap-4 w-full pb-4">
+  <button class="material-symbols-outlined text-on-surface-variant/60 hover:text-white">help_center</button>
+</div>
+</aside>
+<div class="mt-auto px-6 py-stack-lg border-t border-glass-border">
+
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase opacity-50">Theme</span>
+<div class="flex bg-surface-container-high rounded-full p-1">
+<button class="p-1 rounded-full text-primary bg-surface-container-low" id="theme-toggle">
+<span class="material-symbols-outlined text-[18px]">dark_mode</span>
+</button>
+<button class="p-1 rounded-full text-on-surface-variant/50">
+<span class="material-symbols-outlined text-[18px]">light_mode</span>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="main-content sm:ml-20 lg:ml-64 mt-16  sm:h-[calc(100vh-64px)] relative flex items-center justify-center overflow-y-auto pb-20 sm:pb-0">
+<!--- pt-16 pb-12 md:pl-1 px-4 md:pr-8 max-w-[1400px] mx-auto" -->
+<!-- main-content sm:ml-20 lg:ml-4 mt-16 w-full  sm:h-[calc(100vh-64px)] relative flex items-center justify-center overflow-y-auto pb-20 sm:pb-0-->
+    <!-- Atmospheric Background Elements -->
+<div class="absolute top-1/4 -right-1/4 w-[600px] h-[600px] bg-fire-gradient-start opacity-10 rounded-full blur-[120px]"></div>
+<div class="absolute -bottom-1/4 -left-1/4 w-[500px] h-[500px] bg-fire-gradient-end opacity-5 rounded-full blur-[100px]"></div>
+<!-- Backdrop Grayscale Blur for Active Modal Context -->
+<div class="absolute inset-0 z-0 bg-surface/40 backdrop-grayscale-[0.5] backdrop-blur-[2px]"></div>
+<!-- Camera Configuration Modal -->
+<div class="modal-entrance relative z-10 w-full max-w-2xl mx-gutter liquid-glass rounded-xl overflow-hidden specular-highlight">
+<div class="flex items-center justify-between p-stack-lg border-b border-glass-border">
+<div class="flex items-center gap-stack-md">
+<div class="w-2 h-2 rounded-full bg-fire-gradient-start shadow-[0_0_8px_#FF7A1C]"></div>
+<h2 class="font-headline-lg text-headline-lg tracking-tight">Camera Configuration</h2>
+</div>
+<button class="text-on-surface-variant hover:text-white transition-colors">
+<a href="activeCall.html"><span class="material-symbols-outlined">close</span></a>
+</button>
+</div>
+<div class="p-stack-lg space-y-stack-lg">
+<!-- Video Preview Area -->
+<div class="relative aspect-video rounded-lg overflow-hidden border border-glass-border bg-surface-container-lowest">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJY3CV4HEwNBrtENpl6YwHYRZGHUGTijslP6awNQW5IN6t9mf2N5HE2D7bd8J1sk1errWg8f7nwSrIIZggze6sBkXxjR0lVruRBp77DOG6vwEShsd6OaCgGse6pKJBOiWghpMTPF8DZ2ROJ3q32gqQN_N-hP8tJi0iD4zGcqax3vz0CODob8XYK0lfpj5MhrJCtgFitHLhrwYfdAEviAdO3OU38acQdB4VAcPXDA0e1HMtP1Z5V7qDPL1SZq0Gqrp3ic-Ny8Egfoh1"/>
+<!-- Overlay Controls -->
+<div class="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-2 border border-white/10">
+<span class="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_6px_#4ADE80]"></span>
+<span class="font-mono text-[10px] text-white">LIVE PREVIEW</span>
+</div>
+<div class="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+<div class="bg-black/40 backdrop-blur-sm p-2 rounded-lg border border-white/5">
+<span class="font-mono text-[10px] text-on-surface-variant uppercase">HW_ID: </span>
+<span class="font-mono text-[10px] text-primary">CAM_ULTRA_4K_X92</span>
+</div>
+</div>
+</div>
+<!-- Settings Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack-lg">
+<div class="space-y-unit">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase px-1">Hardware Device</label>
+<div class="relative group">
+<select class="w-full bg-surface-container-high border border-glass-border rounded-lg px-4 py-3 text-body-md font-body-md text-on-surface appearance-none focus:ring-1 focus:ring-primary-container outline-none transition-all">
+<option>Logitech MX Brio 4K</option>
+<option>Integrated FaceTime HD</option>
+<option>OBS Virtual Camera</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
+</div>
+</div>
+<div class="space-y-unit">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase px-1">Stream Quality</label>
+<div class="relative group">
+<select class="w-full bg-surface-container-high border border-glass-border rounded-lg px-4 py-3 text-body-md font-body-md text-on-surface appearance-none focus:ring-1 focus:ring-primary-container outline-none transition-all">
+<option>Ultra HD (4K)</option>
+<option selected="">Full HD (1080p)</option>
+<option>HD (720p)</option>
+<option>Standard (480p)</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Toggle Options -->
+<div class="flex items-center justify-between p-stack-md bg-surface-container-low/50 rounded-lg border border-glass-border">
+<div class="flex items-center gap-stack-md">
+<span class="material-symbols-outlined text-tertiary">auto_fix_high</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Auto-Focus &amp; Light Optimization</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Enhance clarity in low-light environments</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+</div>
+<div class="p-stack-lg bg-surface-container-low flex flex-col sm:flex-row gap-stack-md justify-between items-center border-t border-glass-border">
+<button class="w-full sm:w-auto px-stack-lg py-3 rounded-lg border border-glass-border hover:bg-surface-variant transition-all font-label-md text-label-md flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">network_check</span>
+                    Test Connection
+                </button>
+<div class="flex gap-stack-md w-full sm:w-auto">
+<button class="w-full sm:w-auto px-stack-lg py-3 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-white transition-all">
+                        Cancel
+                    </button>
+<button class="w-full sm:w-auto px-8 py-3 rounded-lg fire-gradient text-on-primary font-label-md text-label-md font-bold pulse-glow shadow-lg">
+                        Save Configuration
+                    </button>
+</div>
+</div>
+</div>
+<!-- Ambient Particle Effect (Simulated via SVG) -->
+<div class="absolute inset-0 pointer-events-none opacity-20 overflow-hidden">
+<svg class="w-full h-full">
+<defs>
+<radialgradient cx="50%" cy="50%" id="particleGrad" r="50%">
+<stop offset="0%" stop-color="#FF7A1C" stop-opacity="0.8"></stop>
+<stop offset="100%" stop-color="#FF7A1C" stop-opacity="0"></stop>
+</radialgradient>
+</defs>
+<circle class="particle" cx="10%" cy="20%" fill="url(#particleGrad)" r="2">
+<animate attributename="cy" dur="15s" from="20%" repeatcount="indefinite" to="80%"></animate>
+<animate attributename="opacity" dur="15s" repeatcount="indefinite" values="0;0.5;0"></animate>
+</circle>
+<circle class="particle" cx="80%" cy="10%" fill="url(#particleGrad)" r="3">
+<animate attributename="cy" dur="20s" from="10%" repeatcount="indefinite" to="90%"></animate>
+<animate attributename="opacity" dur="20s" repeatcount="indefinite" values="0;0.3;0"></animate>
+</circle>
+<circle class="particle" cx="45%" cy="50%" fill="url(#particleGrad)" r="2">
+<animate attributename="opacity" dur="8s" repeatcount="indefinite" values="0;0.8;0"></animate>
+</circle>
+</svg>
+</div>
+</main>
+<!-- Bottom Action Bar (Contextual) -->
+<div class="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-4 glass-card rounded-[2.5rem] border border-white/10 shadow-2xl z-30">
+<div class="flex items-center gap-2">
+<button class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent"><span class="material-symbols-outlined">mic</span></button>
+<button class="w-11 h-11 flex items-center justify-center rounded-full fire-gradient bg-white/5 hover:bg-white/10 shadow-fire-gradient-start/30 active-glow transition-all text-gold text-fire-accent"><span class="material-symbols-outlined">videocam</span></button>
+<a href="activeCallScreenSharing.html" class="block"><button class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent"><span class="material-symbols-outlined">present_to_all</span></button></a>
+<button class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent"><span class="material-symbols-outlined">pause</span></button>
+<a href="activeCallWarmTransfer.html" class="block"><button class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent"><span class="material-symbols-outlined">forward_to_inbox</span></button></a>
+<button class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent"><span class="material-symbols-outlined">fiber_manual_record</span></button>
+<button class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent"><span class="material-symbols-outlined">voicemail</span></button>
+<button class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent"><span class="material-symbols-outlined">note_add</span></button>
+</div>
+<div class="w-px h-8 bg-white/10 mx-2"></div>
+<button class="px-8 py-3.5 bg-error-red hover:bg-red-600 text-white rounded-full flex items-center gap-3 font-bold transition-all active:scale-95 shadow-[0_0_25px_rgba(255,59,48,0.4)]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">call_end</span>
+<span class="">End Call</span>
+</button>
+</div>
+<script>
+        // Simple micro-interactions
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle?.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            // Toggle icons visual logic would go here
+        });
+
+        // Add hover parallax effect to the modal
+        const modal = document.querySelector('.liquid-glass');
+        document.addEventListener('mousemove', (e) => {
+            const xAxis = (window.innerWidth / 2 - e.pageX) / 100;
+            const yAxis = (window.innerHeight / 2 - e.pageY) / 100;
+            if(modal) {
+                modal.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+            }
+        });
+    </script>
+</body></html>

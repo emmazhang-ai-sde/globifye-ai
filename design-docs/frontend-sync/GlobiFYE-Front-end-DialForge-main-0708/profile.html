@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DialForge | Marcus Thorne Profile</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&amp;family=DM+Sans:wght@400;500;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+
+<style data-purpose="custom-theme-config">
+    :root {
+      --glass-hi: rgba(255, 255, 255, 0.12);
+      --fire-glow: rgba(255, 122, 28, 0.15);
+      --surface-bg: #12131a;
+    }
+    
+    body {
+      background-color: var(--surface-bg);
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(255, 86, 42, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 90%, rgba(155, 109, 255, 0.05) 0%, transparent 40%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    .glass-card {
+      background: rgba(26, 27, 35, 0.78);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-top: 1px solid var(--glass-hi);
+      border-left: 1px solid var(--glass-hi);
+    }
+
+    .fire-gradient {
+      background: linear-gradient(135deg, #FF7A1C 0%, #FF562A 100%);
+    }
+
+    .text-fire-gradient {
+      background: linear-gradient(135deg, #FFAD1C 0%, #FF7A1C 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .liquid-glow {
+      box-shadow: 0 0 40px var(--fire-glow), 0 0 80px rgba(255, 122, 28, 0.05);
+    }
+
+    .shimmer {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .shimmer::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.05), transparent);
+      transform: rotate(45deg);
+      animation: shimmer-anim 6s infinite linear;
+    }
+
+    @keyframes shimmer-anim {
+      0% { transform: translateX(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) rotate(45deg); }
+    }
+
+    .noise-overlay {
+      position: fixed;
+      inset: 0;
+      background-image: url("https://www.transparenttextures.com/patterns/carbon-fibre.png");
+      opacity: 0.03;
+      pointer-events: none;
+      z-index: 999;
+    }
+        @keyframes pulse-glow {
+      0% { box-shadow: 0 0 0 0 rgba(0, 228, 120, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(0, 228, 120, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 228, 120, 0); }
+    }
+    .active-orb {
+      animation: pulse-glow 2s infinite;
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #33343d; border-radius: 10px; }
+  </style>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface": "#12131a",
+            "surface-container": "#1e1f27",
+            "surface-container-low": "#1a1b23",
+            "surface-container-high": "#292932",
+            "on-surface": "#e3e1ec",
+            "on-surface-variant": "#e5beb4",
+            "primary": "#ffb4a2",
+            "primary-container": "#ff562a",
+            "fire-accent": "#FFAD1C",
+            "fire-gradient-start": "#FF7A1C",
+            "tertiary": "#00e478",
+            "ember-alert": "#FF2200"
+          },
+          fontFamily: {
+            "syne": ["Syne", "sans-serif"],
+            "dm-sans": ["DM Sans", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          },
+          spacing: {
+            "margin-standard": "16px",
+            "gap-20": "20px",
+            "gap-16": "16px",
+            "gap-12": "12px"
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="font-dm-sans text-on-surface">
+<div class="noise-overlay"></div>
+<!-- BEGIN: TopNavigation -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-b border-white/10 flex justify-between items-center px-6 h-16">
+<div class="flex items-center gap-10">
+<h1 class="font-syne text-2xl font-extrabold text-fire-gradient-start tracking-tighter">DialForge</h1>
+<nav class="hidden md:flex gap-6">
+<a class="text-on-surface-variant hover:text-white transition-colors py-2" href="#">Dashboard</a>
+<a class="text-on-surface-variant hover:text-white transition-colors py-2" href="#">Pipeline</a>
+<a class="text-primary font-bold border-b-2 border-primary py-2 px-1" href="#">Profile</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<a href="notifications.html" class="block"><button class="material-symbols-outlined text-on-surface-variant hover:text-white transition-colors">notifications</button></a>
+<a href="settingsGeneral.html" class="block"><button class="material-symbols-outlined text-on-surface-variant hover:text-white transition-colors">settings</button></a>
+<div class="w-10 h-10 rounded-full border-2 border-fire-accent overflow-hidden ring-2 ring-fire-accent/20">
+<img alt="User" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs"/>
+</div>
+</div>
+</header>
+<!-- END: TopNavigation -->
+<!-- BEGIN: LeftSidebar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex flex-col bg-surface-container-low/78 backdrop-blur-xl border-r border-white/5 items-center py-6 gap-8 z-40">
+<div class="flex flex-col items-center gap-4 w-full overflow-y-auto flex-1">
+  <a href="Dashbaord.html" class="block">
+        <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="text-[8px] uppercase font-bold">Dashboard</span>
+        </button>
+    </a>
+  <a href="activeCall.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">call</span>
+    <span class="text-[8px] uppercase font-bold">Call</span>
+  </a>
+  <a href="supportQueue_x.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">queue</span>
+    <span class="text-[8px] uppercase font-bold">Queue</span>
+  </a>
+  <a href="callCoaching_x.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">graphic_eq</span>
+      <span class="text-[8px] uppercase font-bold">Coaching</span>
+    </button>
+  </a>
+  <a href="powerDialer.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">dialer_sip</span>
+    <span class="text-[8px] uppercase font-bold">Dialer</span>
+  </a>
+  <a href="salesPipeline_x.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">view_kanban</span>
+    <span class="text-[8px] uppercase font-bold">Pipeline</span>
+  </a>
+  <a href="callLogs_x.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">history</span>
+      <span class="text-[8px] uppercase font-bold">History</span>
+    </button>
+  </a>
+  <a href="contacts_x.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">group</span>
+    <span class="text-[8px] uppercase font-bold">Contacts</span>
+  </a>
+  <a href="integrationsHub_y.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">apps</span>
+    <span class="text-[8px] uppercase font-bold">Integrations</span>
+  </a>
+  <a href="myNums_y.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">123</span>
+    <span class="text-[8px] uppercase font-bold">Numbers</span>
+  </a>
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <a href="billingSubscription_y.html" class="flex flex-col items-center gap-1 w-full h-full text-inherit no-underline">
+      <span class="material-symbols-outlined">payments</span>
+      <span class="text-[8px] uppercase font-bold">Billing</span>
+    </a>
+  </button>
+  <a href="teamGovernance.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">groups</span>
+      <span class="text-[8px] uppercase font-bold">Team</span>
+    </button>
+  </a>
+</div>
+<div class="flex flex-col items-center gap-4 w-full pb-4">
+  <button class="material-symbols-outlined text-on-surface-variant/60 hover:text-white">help_center</button>
+</div>
+</aside>
+<!-- END: LeftSidebar -->
+<!-- BEGIN: MainContent -->
+<main class="pt-24 pb-12 md:pl-28 px-4 md:pr-8 max-w-[1400px] mx-auto">
+<!-- BEGIN: ProfileHero -->
+<section class="mb-10">
+<div class="glass-card p-8 rounded-3xl flex flex-col md:flex-row items-center md:items-end gap-10 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-80 h-80 bg-fire-accent/5 rounded-full blur-[100px] -mr-40 -mt-40"></div>
+<div class="relative">
+<div class="w-32 h-32 md:w-44 md:h-44 rounded-3xl border-4 border-white/10 overflow-hidden shadow-2xl relative z-10">
+<img alt="Marcus Thorne" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs"/>
+</div>
+<div class="absolute -bottom-2 -right-2 w-10 h-10 bg-tertiary rounded-full border-4 border-surface flex items-center justify-center shadow-lg z-20">
+<span class="material-symbols-outlined text-surface text-lg font-black" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div class="flex-grow text-center md:text-left z-10">
+<div class="flex flex-col md:flex-row md:items-center gap-4 mb-3">
+<h2 class="font-syne text-4xl md:text-5xl font-extrabold text-white leading-tight tracking-tight">Marcus Thorne</h2>
+<span class="w-fit mx-auto md:mx-0 px-4 py-1.5 bg-fire-gradient text-white rounded-full text-[10px] font-bold uppercase tracking-widest shimmer shadow-lg">PRO TIER MEMBER</span>
+</div>
+<p class="text-xl text-on-surface-variant/90 font-medium mb-1">Senior Account Executive • Global Sales</p>
+<p class="font-mono text-sm text-on-surface-variant/60">marcus.thorne@dialforge.ai</p>
+</div>
+<div class="flex gap-4 z-10 w-full md:w-auto">
+<button class="flex-1 md:flex-none px-8 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl font-bold text-sm transition-all active:scale-95">Edit Profile</button>
+<button class="flex-1 md:flex-none px-8 py-3.5 fire-gradient text-white rounded-xl font-bold text-sm shadow-xl liquid-glow transition-all active:scale-95 shimmer">Start New Call</button>
+</div>
+</div>
+</section>
+<!-- END: ProfileHero -->
+<!-- BEGIN: PerformanceDashboard -->
+<section class="mb-10">
+<div class="flex items-center justify-between mb-8">
+<h3 class="font-syne text-2xl font-bold text-white tracking-tight">Monthly Performance</h3>
+<div class="flex gap-3">
+<div class="px-5 py-2 bg-surface-container-high rounded-full text-xs font-bold text-fire-accent border border-fire-accent/20">October 2023</div>
+<button class="material-symbols-outlined bg-white/5 p-2 rounded-xl text-on-surface-variant hover:text-white transition-colors">calendar_month</button>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- KPI: Total Calls -->
+<div class="glass-card p-6 rounded-2xl relative overflow-hidden group">
+<span class="material-symbols-outlined absolute top-4 right-4 text-4xl text-fire-accent opacity-10">call</span>
+<p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest mb-3">Total Calls</p>
+<div class="flex items-baseline gap-3">
+<span class="font-syne text-3xl font-extrabold text-white">1,284</span>
+<span class="font-mono text-xs text-tertiary font-bold">+12.5%</span>
+</div>
+<div class="mt-6 h-1.5 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-fire-gradient w-[78%]"></div>
+</div>
+</div>
+<!-- KPI: Avg AI Score -->
+<div class="glass-card p-6 rounded-2xl border-l-2 border-fire-accent relative overflow-hidden group">
+<span class="material-symbols-outlined absolute top-4 right-4 text-4xl text-fire-accent opacity-10">psychology</span>
+<p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest mb-3">Avg AI Score</p>
+<div class="flex items-baseline gap-3">
+<span class="font-syne text-3xl font-extrabold text-white">94.2</span>
+<span class="font-mono text-xs text-tertiary font-bold">+3.1</span>
+</div>
+<div class="mt-6 h-1.5 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-fire-gradient w-[94%] shadow-[0_0_12px_#FF7A1C]"></div>
+</div>
+</div>
+<!-- KPI: Demos Set -->
+<div class="glass-card p-6 rounded-2xl relative overflow-hidden group">
+<span class="material-symbols-outlined absolute top-4 right-4 text-4xl text-fire-accent opacity-10">event_available</span>
+<p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest mb-3">Demos Set</p>
+<div class="flex items-baseline gap-3">
+<span class="font-syne text-3xl font-extrabold text-white">42</span>
+<span class="font-mono text-xs text-on-surface-variant/40">Target: 50</span>
+</div>
+<div class="mt-6 h-1.5 bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-fire-gradient w-[84%]"></div>
+</div>
+</div>
+<!-- KPI: Revenue Closed -->
+<div class="glass-card p-6 rounded-2xl bg-fire-accent/5 border border-fire-accent/10 relative overflow-hidden group">
+<span class="material-symbols-outlined absolute top-4 right-4 text-4xl text-fire-accent opacity-10">payments</span>
+<p class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest mb-3">Revenue Closed</p>
+<div class="flex items-baseline gap-3">
+<span class="font-syne text-3xl font-extrabold text-fire-accent">$124.5k</span>
+<span class="font-mono text-xs text-tertiary font-bold">+22%</span>
+</div>
+<div class="mt-6 h-1.5 bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-fire-gradient w-[92%] shadow-[0_0_20px_rgba(255,122,28,0.4)]"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: PerformanceDashboard -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- BEGIN: QuotaTracker -->
+<section class="lg:col-span-2 glass-card p-10 rounded-3xl flex flex-col justify-between">
+<div>
+<h4 class="font-syne text-2xl text-white mb-3">Monthly Sales Target</h4>
+<p class="text-on-surface-variant/80 mb-10 leading-relaxed">
+            You are currently at <span class="text-white font-bold">88%</span> of your $150,000 monthly quota. 
+            Only $18k left to hit your bonus tier!
+          </p>
+<div class="relative pt-6 pb-12">
+<div class="flex justify-between font-mono text-[10px] text-on-surface-variant/50 mb-4 tracking-tighter uppercase">
+<span>$0</span>
+<span>$75k (Midpoint)</span>
+<span>$150k</span>
+</div>
+<!-- Progress Bar Container -->
+<div class="h-10 bg-surface-container-high rounded-2xl p-1.5 overflow-visible relative">
+<div class="h-full bg-fire-gradient rounded-xl relative shimmer" style="width: 88%;">
+<!-- End Cap Highlight -->
+<div class="absolute right-0 top-0 h-full w-4 flex items-center justify-center">
+<div class="h-6 w-1.5 bg-white/30 rounded-full"></div>
+</div>
+</div>
+<!-- Indicator Tooltip -->
+<div class="absolute top-[3px] left-[88%] -translate-x-1/2 flex flex-col items-center">
+<div class="w-5 h-5 bg-white rounded-full border-4 border-fire-accent shadow-[0_0_15px_rgba(255,122,28,0.6)] mb-3"></div>
+<div class="bg-fire-accent text-white px-3 py-1.5 rounded-lg text-[11px] font-bold whitespace-nowrap shadow-xl">
+                  Current: $132,000
+                </div>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-6 mt-6 pt-10 border-t border-white/5">
+<div class="text-center">
+<p class="text-[9px] font-bold text-on-surface-variant/50 uppercase tracking-[0.2em] mb-2">Days Remaining</p>
+<p class="font-syne text-2xl font-extrabold text-white">8 Days</p>
+</div>
+<div class="text-center border-x border-white/5">
+<p class="text-[9px] font-bold text-on-surface-variant/50 uppercase tracking-[0.2em] mb-2">Proj. Finish</p>
+<p class="font-syne text-2xl font-extrabold text-white">$158k</p>
+</div>
+<div class="text-center">
+<p class="text-[9px] font-bold text-on-surface-variant/50 uppercase tracking-[0.2em] mb-2">Commission</p>
+<p class="font-syne text-2xl font-extrabold text-tertiary">$12.4k</p>
+</div>
+</div>
+</section>
+<!-- END: QuotaTracker -->
+<!-- BEGIN: SecurityPreferences -->
+<section class="glass-card p-10 rounded-3xl">
+<h4 class="font-syne text-2xl text-white mb-8">Security &amp; Preferences</h4>
+<div class="flex flex-col gap-5">
+<a class="group flex items-center justify-between p-5 bg-white/5 hover:bg-white/[0.08] rounded-2xl transition-all border border-transparent hover:border-white/10" href="#">
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center group-hover:bg-fire-accent/20 group-hover:text-fire-accent transition-all">
+<span class="material-symbols-outlined">lock_reset</span>
+</div>
+<span class="font-bold text-sm text-on-surface group-hover:text-white transition-colors">Change Password</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/30 group-hover:text-white transition-all">chevron_right</span>
+</a>
+<a class="group flex items-center justify-between p-5 bg-white/5 hover:bg-white/[0.08] rounded-2xl transition-all border border-transparent hover:border-white/10" href="#">
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center group-hover:bg-fire-accent/20 group-hover:text-fire-accent transition-all">
+<span class="material-symbols-outlined">vibration</span>
+</div>
+<div class="flex flex-col">
+<span class="font-bold text-sm text-on-surface group-hover:text-white transition-colors">Two-Factor Auth</span>
+<span class="text-[9px] font-bold text-tertiary uppercase tracking-widest mt-0.5">ENABLED</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/30 group-hover:text-white transition-all">chevron_right</span>
+</a>
+<a class="group flex items-center justify-between p-5 bg-white/5 hover:bg-white/[0.08] rounded-2xl transition-all border border-transparent hover:border-white/10" href="notfisetting.html">
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center group-hover:bg-fire-accent/20 group-hover:text-fire-accent transition-all">
+<span class="material-symbols-outlined">notifications_active</span>
+</div>
+<span class="font-bold text-sm text-on-surface group-hover:text-white transition-colors">Notification Preferences</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/30 group-hover:text-white transition-all">chevron_right</span>
+</a>
+<a class="group flex items-center justify-between p-5 bg-white/5 hover:bg-white/[0.08] rounded-2xl transition-all border border-transparent hover:border-white/10" href="landingPage.html">
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center group-hover:bg-ember-alert/20 transition-all">
+<span class="material-symbols-outlined text-ember-alert">logout</span>
+</div>
+<span class="font-bold text-sm text-ember-alert transition-colors">Log Out</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/30 group-hover:text-white transition-all">chevron_right</span>
+</a>
+<div class="mt-6 p-5 border border-ember-alert/20 bg-ember-alert/5 rounded-2xl relative overflow-hidden">
+<div class="flex gap-4 items-center mb-3">
+<span class="material-symbols-outlined text-ember-alert text-xl">info</span>
+<span class="text-[10px] font-black text-ember-alert uppercase tracking-[0.1em]">SUBSCRIPTION STATUS</span>
+</div>
+<p class="text-xs text-on-surface-variant/80 leading-relaxed">
+              Your Pro plan renews on <span class="text-white font-bold">Nov 15th</span>. Automatic payment for card ending in <span class="text-white font-bold">4421</span>.
+            </p>
+</div>
+</div>
+</section>
+<!-- END: SecurityPreferences -->
+</div>
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: MobileFooter -->
+<footer class="md:hidden fixed bottom-0 w-full bg-surface-container-low/90 backdrop-blur-2xl border-t border-white/5 flex justify-around py-4 z-50">
+<div class="flex flex-col items-center text-on-surface-variant/40">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[8px] font-bold uppercase mt-1">Home</span>
+</div>
+<div class="flex flex-col items-center text-on-surface-variant/40">
+<span class="material-symbols-outlined">call</span>
+<span class="text-[8px] font-bold uppercase mt-1">Calls</span>
+</div>
+<div class="flex flex-col items-center text-fire-accent">
+<div class="bg-fire-accent/20 p-2 rounded-xl mb-1">
+<span class="material-symbols-outlined">person</span>
+</div>
+<span class="text-[8px] font-bold uppercase">Profile</span>
+</div>
+<div class="flex flex-col items-center text-on-surface-variant/40">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[8px] font-bold uppercase mt-1">Setup</span>
+</div>
+</footer>
+<!-- END: MobileFooter -->
+<script data-purpose="interactivity">
+    // Subtle Mouse Follow effect for glass cards
+    document.querySelectorAll('.glass-card').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+      });
+    });
+
+    // Verification Pulse effect simulation
+    const statusOrb = document.querySelector('.pulse-glow');
+    if (statusOrb) {
+      setInterval(() => {
+        statusOrb.style.boxShadow = `0 0 ${Math.random() * 15 + 10}px rgba(0, 228, 120, 0.4)`;
+      }, 1500);
+    }
+  </script>
+</body></html>

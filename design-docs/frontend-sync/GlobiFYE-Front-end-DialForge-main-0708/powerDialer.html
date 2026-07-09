@@ -1,0 +1,423 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DialForge - Power Dialer Dashboard</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&amp;family=Syne:wght@700;800&amp;display=swap" rel="stylesheet"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+         screens: {
+          'sm': '600px',
+          'md': '900px',
+          'lg': '1280px',
+        },
+        extend: {
+          colors: {
+            "on-tertiary-fixed-variant": "#005227",
+            "on-primary": "#611200",
+            "on-tertiary": "#003919",
+            "inverse-primary": "#b32a00",
+            "tertiary-fixed-dim": "#00e478",
+            "surface-container": "#1e1f27",
+            "on-primary-fixed": "#3c0800",
+            "gold": "#F5C518",
+            "fire-gradient": "#FF7A1C",
+            "on-tertiary-container": "#003115",
+            "secondary-fixed": "#d6e3ff",
+            "secondary-fixed-dim": "#a8c8ff",
+            "primary-fixed": "#ffdbd2",
+            "fire-accent": "#FFAD1C",
+            "primary-container": "#ff562a",
+            "on-secondary-container": "#002956",
+            "surface-container-low": "#1a1b23",
+            "inverse-surface": "#e3e1ec",
+            "surface": "#12131a",
+            "surface-variant": "#33343d",
+            "error-container": "#93000a",
+            "secondary-container": "#3791ff",
+            "surface-container-high": "#292932",
+            "primary-fixed-dim": "#ffb4a2",
+            "on-secondary-fixed": "#001b3c",
+            "background": "#12131a",
+            "surface-tint": "#ffb4a2",
+            "surface-bright": "#383941",
+            "outline": "#ac8980",
+            "on-primary-container": "#550f00",
+            "ember-alert": "#FF2200",
+            "on-tertiary-fixed": "#00210c",
+            "tertiary": "#00e478",
+            "surface-dim": "#12131a",
+            "tertiary-container": "#00a756",
+            "tertiary-fixed": "#61ff98",
+            "teal-support": "#00D4C8",
+            "outline-variant": "#5c4039",
+            "surface-container-highest": "#33343d",
+            "secondary": "#a8c8ff",
+            "error-red": "#FF3B30",
+            "on-error-container": "#ffdad6",
+            "ai-purple": "#9B6DFF",
+            "on-surface-variant": "#e5beb4",
+            "on-primary-fixed-variant": "#891e00",
+            "primary": "#ffb4a2",
+            "on-secondary": "#003062",
+            "on-error": "#690005",
+            "surface-container-lowest": "#0d0e15",
+            "on-surface": "#e3e1ec",
+            "on-background": "#e3e1ec",
+            "error": "#ffb4ab",
+            "inverse-on-surface": "#2f3038",
+            "on-secondary-fixed-variant": "#00468a"
+          },
+          fontFamily: {
+            "mono-data": ["JetBrains Mono"],
+            "hero-h1": ["Syne"],
+            "button-text": ["DM Sans"],
+            "badge-text": ["DM Sans"],
+            "section-header": ["Syne"],
+            "stat-value": ["Syne"],
+            "body-base": ["DM Sans"],
+            "small-label": ["DM Sans"]
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-animations">
+    @keyframes pulse-ring {
+      0% { transform: scale(.8); opacity: 0.5; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+    .status-pulse {
+      
+      position: relative;
+    }
+    .status-pulse::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    .glass-card {
+      background: rgba(26, 27, 38, 0.6);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .active-card {
+      border: 2px solid #f97316;
+      box-shadow: inset 0 0 15px rgba(249, 115, 22, 0.2);
+    }
+
+    .syne-wide {
+      font-family: 'Syne', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+    .noise-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.02;
+      background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAi48KsLd_faAmlkSed1Fs2W5xDLsDVHxr9CmWtAEB3mVawz4ALG0dLChb5BSfGNK2l9-fmgv6hPMrldZIl3QkfcWvn-k7N3x0y7Dl1jokR_qsFoXGfpioBQwdYp4BacU27-O8AvsAAPLZLEI8BeFeol8JuNA7irpaT0xqX6XjvkDN4m2FxjSK5pKh6tDEYfrUqZgNCp1ovBMB_qP7Q1nCe9J7-lwugakQ22eOnZRfu91aRFmlJQOlvF2H1uNq5Ead_J_7AqBWWjEw');
+    }
+    @keyframes pulse-glow {
+      0% { box-shadow: 0 0 0 0 rgba(0, 228, 120, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(0, 228, 120, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 228, 120, 0); }
+    }
+    .active-orb {
+      animation: pulse-glow 2s infinite;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body-base antialiased overflow-hidden">
+  <div class="noise-overlay"></div>
+<!-- BEGIN: Main Dashboard Layout -->
+
+<div class="flex flex-col sm:flex-row h-screen w-full">
+<!-- BEGIN: Left Sidebar Navigation -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex flex-col bg-surface-container-low/78 backdrop-blur-xl border-r border-white/5 items-center py-6 gap-8 z-40">
+  <!---fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex flex-col bg-surface-container-low/78 backdrop-blur-xl border-r border-white/5 items-center py-6 gap-8 z-40--->
+<div class="flex flex-col items-center gap-1 w-full overflow-y-auto flex-1">
+  <a href="Dashbaord.html" class="block">
+        <button class="group relative flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="text-[8px] uppercase font-bold">Dashboard</span>
+        </button>
+    </a>
+  <a href="activeCall.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">call</span>
+    <span class="text-[8px] uppercase font-bold">Call</span>
+  </a>
+  <a href="supportQueue_x.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">queue</span>
+    <span class="text-[8px] uppercase font-bold">Queue</span>
+  </a>
+  <a href="callCoaching_x.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">graphic_eq</span>
+      <span class="text-[8px] uppercase font-bold">Coaching</span>
+    </button>
+  </a>
+  <button class="group relative flex flex-col items-center gap-1 w-full py-3 bg-primary-container/20 text-fire-accent border-l-4 border-fire-accent shadow-[0_0_20px_rgba(255,122,28,0.2)]">
+    <span class="material-symbols-outlined">dialer_sip</span>
+    <span class="text-[8px] uppercase font-bold">Dialer</span>
+</button>
+  <a href="salesPipeline_x.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">view_kanban</span>
+    <span class="text-[8px] uppercase font-bold">Pipeline</span>
+  </a>
+  <a href="callLogs_x.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">history</span>
+      <span class="text-[8px] uppercase font-bold">History</span>
+    </button>
+  </a>
+  <a href="contacts_x.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">group</span>
+    <span class="text-[8px] uppercase font-bold">Contacts</span>
+  </a>
+  <a href="integrationsHub_y.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">apps</span>
+    <span class="text-[8px] uppercase font-bold">Integrations</span>
+  </a>
+  <a href="myNums_y.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">123</span>
+    <span class="text-[8px] uppercase font-bold">Numbers</span>
+  </a>
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <a href="billingSubscription_y.html" class="flex flex-col items-center gap-1 w-full h-full text-inherit no-underline">
+      <span class="material-symbols-outlined">payments</span>
+      <span class="text-[8px] uppercase font-bold">Billing</span>
+    </a>
+  </button>
+  <a href="teamGovernance_y.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">groups</span>
+      <span class="text-[8px] uppercase font-bold">Team</span>
+    </button>
+  </a>
+</div>
+<div class="flex flex-col items-center gap-4 w-full pb-4">
+  <button class="material-symbols-outlined text-on-surface-variant/60 hover:text-white">help_center</button>
+</div>
+</aside>
+<!-- END: Left Sidebar Navigation -->
+<!-- BEGIN: Main Content Area -->
+<main class="flex-1 flex flex-col bg-brand-dark overflow-hidden relative ml-20">
+<!-- BEGIN: Top Navigation Bar -->
+ 
+<header class="h-16 border-brand-border flex items-center justify-between px-8 z-10">
+  <span class="font-hero-h1 text-2xl font-extrabold text-white">Dial<span class="text-fire-gradient">Forge</span></span>
+<nav class="flex gap-8 text-sm font-medium">
+<a class="text-orange-500 border-b-2 border-orange-500 h-16 flex items-center" href="#">Dialer</a>
+<a class="text-gray-400 hover:text-white h-16 flex items-center" href="#">Analytics</a>
+<a class="text-gray-400 hover:text-white h-16 flex items-center" href="#">Campaigns</a>
+</nav>
+<div class="flex items-center gap-6">
+<div class="relative">
+<input class="bg-[#1a1b26] border-none rounded-lg py-2 pl-4 pr-10 text-sm w-64 focus:ring-1 focus:ring-orange-500/50" placeholder="Search prospects..." type="text">
+<svg class="w-4 h-4 text-gray-500 absolute right-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<div class="flex items-center gap-4 text-gray-400">
+<a href="notifications.html" class="block"><button class="material-symbols-outlined text-on-surface-variant hover:text-white transition-colors">notifications</button></a>
+<a href="settingsGeneral.html" class="block"><button class="material-symbols-outlined text-on-surface-variant hover:text-white transition-colors">settings</button></a><div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center overflow-hidden border border-white/10">
+<a href="profile.html" class="block w-full h-full cursor-pointer"><img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs"></a>
+</div>
+</div>
+</div>
+</header>
+<!-- END: Top Navigation Bar -->
+<!-- BEGIN: Workspace Container -->
+<div class="flex flex-1 overflow-hidden p-6 gap-6">
+<!-- BEGIN: Left Column (Prospect Queue) -->
+<div class="flex-1 flex flex-col gap-6">
+<div class="flex flex-col gap-2">
+<h1 class="text-6xl syne-wide text-white leading-tight">Prospect<br>Queue</h1>
+<div class="flex items-center justify-between">
+<p class="text-gray-400 text-lg">Enterprise Tech Campaign – Stage 1</p>
+<div class="flex gap-2">
+<span class="px-3 py-1 bg-[#1a1b26] border border-brand-border rounded-full text-[10px] uppercase tracking-wider font-bold">High Intent</span>
+<span class="px-3 py-1 bg-[#1a1b26] border border-brand-border rounded-full text-[10px] uppercase tracking-wider font-bold">Follow Up</span>
+</div>
+</div>
+</div>
+<!-- BEGIN: Prospect List -->
+<div class="flex-1 overflow-y-auto pr-2 space-y-4" data-purpose="prospect-list">
+<!-- Card 1: Jordan Peterson (UP NEXT) -->
+<div class="glass-card active-card rounded-2xl p-4 flex items-center gap-4 group cursor-pointer transition-all hover:scale-[1.01]" data-purpose="active-prospect">
+<div class="relative">
+<img alt="Jordan Peterson" class="w-12 h-12 rounded-full border-2 border-orange-500/50" src="https://lh3.googleusercontent.com/aida-public/AB6AXuABYxrItLWMWQGRhejBqyB4saRkf_yBZ2ZmllBo6Ysg2-S2oSxYvi760KIxyNY8UkVgJatC_jWoDXasuG5xklwUniPfZlvlY_o9VQlJuoaMcv8kfw8EeeXZ7nwhTGI51UxHXH901RTCtXU7kx90bT2-0wl5cl1jlYQkv911G64F6axaT2vgJ6lUv6YAG-2T-9SRvrQU9xEei84H7nTvEeiJCtXnVo2WVA4WWD24Z50_FRHD5j__aHZCZyLkd38Jx720VO4uGhO2zos">
+<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[#12131a] status-pulse"></div>
+</div>
+<div class="flex-1">
+<h3 class="font-bold text-white text-lg">Jordan Peterson</h3>
+<p class="text-xs text-gray-500 uppercase tracking-widest">VP OF OPERATIONS @ NEXUS AI</p>
+</div>
+<div class="text-right">
+<p class="text-orange-500 text-[10px] font-bold uppercase tracking-widest mb-1">UP NEXT</p>
+<div class="flex items-center gap-2 text-gray-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span class="text-xs font-medium">EST 1:14 PM</span>
+</div>
+</div>
+</div>
+<!-- Card 2: Sarah Jenkins -->
+<div class="glass-card rounded-2xl p-4 flex items-center gap-4 opacity-70 hover:opacity-100 transition-all cursor-pointer">
+<img alt="Sarah Jenkins" class="w-12 h-12 rounded-full border border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDb8J6ekhKRUbnJdwE1ToiBnu-Qx5dgWZaDArXNOOHf0vEHYjdf7CI5XLiP7KFSfHo6Kbfjg51Euqmw3gxRTVT5XnYDhi0ek81FNarrpf95hCDdPTpV6FCLpIt-5QtqM8tL-oXfF6W4RD1eDPAvqsuc_F2mUp1ddbSzYf6BJmveZzxAiEmv5UELC5Fdph_5QJxtBQEKYKcPL-FtanOdFi8CMdwzasv_Ju7OGb9x0llhx3VCeAbioXNjt3gDXZCsmd42ujLmlqINoSY">
+<div class="flex-1">
+<h3 class="font-bold text-white text-lg">Sarah Jenkins</h3>
+<p class="text-xs text-gray-500 uppercase tracking-widest">HEAD OF IT @ CLOUDSCALE</p>
+</div>
+<div class="text-right text-gray-600">
+<p class="text-xs font-mono">#4 in Queue</p>
+</div>
+</div>
+<!-- Card 3: Michael Chen -->
+<div class="glass-card rounded-2xl p-4 flex items-center gap-4 opacity-70 hover:opacity-100 transition-all cursor-pointer">
+<img alt="Michael Chen" class="w-12 h-12 rounded-full border border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPRjSxnvBCe_AJWzrz1Zq3i2ujna5plFUBoFx-iHymRG_X4_VNwPprvw0E91aqPJVkeTBBKUhg-0a3qGwTQ3I1K_Nuvim30781-cO291wCRWvVsn8nRy5mBY40VMtCP0c7XlpLz28QoAkyvpK0MIyqCboXZB5l8GNqELbNROcwBAehK1_c_IqLoZYMiGy1qMdlAZTQWwsNL1T6gguJsFEEyVL3fE78eHb2MteBlHTGC223EbJkggRNPE-uBej-8czghB4xaGdwJew">
+<div class="flex-1">
+<h3 class="font-bold text-white text-lg">Michael Chen</h3>
+<p class="text-xs text-gray-500 uppercase tracking-widest">DIRECTOR @ QUANTUM DYNAMICS</p>
+</div>
+<div class="text-right text-gray-600">
+<p class="text-xs font-mono">#5 in Queue</p>
+</div>
+</div>
+<!-- Card 4: Elena Rodriguez -->
+<div class="glass-card rounded-2xl p-4 flex items-center gap-4 opacity-70 hover:opacity-100 transition-all cursor-pointer">
+<img alt="Elena Rodriguez" class="w-12 h-12 rounded-full border border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAORW2xSfBqFpnbvnYOw5oyWbLWh96Lb-z9RcY5NUupdyLMhP0yfJ5MmIsSCkhPNYNyo5YwQFj3AacVhkvl57wkbemKA3XBZN9jYt6WWgTn6oEI7c65NCZmndGyb2pQscjXrN2E0PB_PZPPNqEIvspImwcpDuN2fAzWvRHldF9_ccksiQCCCImyLOxjqFgMN_qF_jS35o7B-NYx0xiAMQnHEPcWfRPWqPq3PRahz2A0r9T86Jj1lrmWB50LsC2uKxgTxeERpjaCz-w">
+<div class="flex-1">
+<h3 class="font-bold text-white text-lg">Elena Rodriguez</h3>
+<p class="text-xs text-gray-500 uppercase tracking-widest">OPERATIONS @ SKYNET SYSTEMS</p>
+</div>
+<div class="text-right text-gray-600">
+<p class="text-xs font-mono">#6 in Queue</p>
+</div>
+</div>
+</div>
+<!-- END: Prospect List -->
+<!-- BEGIN: Bottom Stats -->
+<div class="grid grid-cols-3 gap-4 pb-2">
+<div class="p-4 rounded-xl border border-orange-500/30 bg-orange-500/5">
+<p class="text-[10px] uppercase font-bold text-gray-500 mb-1">TOTAL DIALED</p>
+<p class="text-3xl syne-wide text-white">142</p>
+</div>
+<div class="p-4 rounded-xl border border-green-500/30 bg-green-500/5">
+<p class="text-[10px] uppercase font-bold text-gray-500 mb-1">CONNECTED</p>
+<p class="text-3xl syne-wide text-green-400">28</p>
+</div>
+<div class="p-4 rounded-xl border border-purple-500/30 bg-purple-500/5">
+<p class="text-[10px] uppercase font-bold text-gray-500 mb-1">DEMOS SET</p>
+<p class="text-3xl syne-wide text-purple-400">4</p>
+</div>
+</div>
+<!-- END: Bottom Stats -->
+</div>
+<!-- END: Left Column -->
+<!-- BEGIN: Right Column (Call Control & CRM) -->
+<div class="w-[450px] flex flex-col gap-6 overflow-y-auto pr-2">
+<!-- BEGIN: Now Calling Card -->
+<section class="glass-card rounded-[2rem] p-8 border-orange-500/20 relative overflow-hidden flex flex-col items-center">
+<!-- Decorative Border Gradient -->
+<div class="absolute top-0 left-0 w-full h-1 bg-fire-gradient"></div>
+<div class="flex items-center gap-2 mb-8">
+<div class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
+<span class="text-xs font-bold text-orange-500 uppercase tracking-[0.2em]">NOW CALLING</span>
+</div>
+<h2 class="text-6xl syne-wide text-white mb-2 text-center">Alex Rivera</h2>
+<p class="text-gray-400 text-sm mb-12 uppercase tracking-widest">CEO of InnovateX Global</p>
+<div class="bg-[#0a0b10] w-full rounded-2xl py-8 px-6 flex flex-col items-center border border-white/5 mb-8">
+<span class="text-6xl font-syne font-bold text-white tracking-tight">00:16</span>
+<span class="text-[10px] uppercase font-bold text-gray-600 mt-2 tracking-widest">ACTIVE SESSION DURATION</span>
+</div>
+<div class="w-full space-y-4">
+<button class="w-full bg-fire-gradient hover:opacity-90 py-5 rounded-2xl flex items-center justify-center gap-3 font-bold text-white shadow-lg shadow-orange-950/20 transition-all">
+<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"></path></svg>
+                CONNECTED
+              </button>
+<div class="grid grid-cols-2 gap-4">
+<a href="powerDialerVMDrop.html" class="bg-white/5 hover:bg-white/10 py-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border border-white/5 transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>DROP VM</a>
+<button class="bg-red-500/10 hover:bg-red-500/20 text-red-500 py-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border border-red-500/20 transition-colors">
+<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"></path></svg>
+                  HANG UP
+                </button>
+</div>
+</div>
+<div class="mt-8 pt-8 border-t border-white/5 w-full flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-yellow-500/10 rounded-lg">
+<svg class="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<div>
+<p class="text-[10px] text-gray-500 uppercase font-bold tracking-widest">LOCAL PRESENCE ACTIVE</p>
+<p class="text-sm font-medium text-white">Dialing from: (415) 802-XXXX</p>
+</div>
+</div>
+<div class="flex items-center gap-1 text-[10px] text-green-500 font-bold tracking-widest bg-green-500/10 px-2 py-1 rounded">
+<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+                STIR/SHAKEN
+              </div>
+</div>
+</section>
+<!-- END: Now Calling Card -->
+<!-- BEGIN: Context Notes Section -->
+<section class="glass-card rounded-[2rem] p-6 space-y-6">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-orange-500/10 rounded-lg">
+<svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</div>
+<h3 class="font-bold text-lg text-white">Context Notes</h3>
+</div>
+<button class="text-[10px] font-bold text-orange-500 uppercase tracking-widest hover:underline">EDIT CRM</button>
+</div>
+<div class="p-6 bg-[#0a0b10] border border-white/5 rounded-2xl italic text-gray-400 leading-relaxed">
+              "Recently opened email regarding 'Pipeline Acceleration v2'. Clicked link 3 times. Focus on ROI metrics."
+            </div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-[#1a1b26] p-4 rounded-xl border border-white/5">
+<p class="text-[10px] text-gray-500 font-bold uppercase mb-1">Timezone</p>
+<p class="text-sm text-white">PST (San Francisco)</p>
+</div>
+<div class="bg-[#1a1b26] p-4 rounded-xl border border-white/5">
+<p class="text-[10px] text-gray-500 font-bold uppercase mb-1">Industry</p>
+<p class="text-sm text-white">SaaS Enterprise</p>
+</div>
+</div>
+</section>
+<!-- END: Context Notes Section -->
+</div>
+<!-- END: Right Column -->
+</div>
+<!-- END: Workspace Container -->
+</main>
+<!-- END: Main Content Area -->
+</div>
+<!-- END: Main Dashboard Layout -->
+
+
+</body></html>

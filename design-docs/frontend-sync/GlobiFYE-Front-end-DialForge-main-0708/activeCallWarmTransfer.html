@@ -1,0 +1,357 @@
+<!DOCTYPE html><html class="dark" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DialForge | Warm Transfer - Active Call</title>
+<!-- Google Fonts: Syne (Headlines) & DM Sans (Body) -->
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&amp;family=DM+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#ff7a1c",
+            "primary-dark": "#ff4d00",
+            surface: "#12131a",
+            "surface-dim": "#0d0e15",
+            "surface-bright": "#383941",
+            "ai-purple": "#8b5cf6",
+            "on-secondary-fixed-variant": "#852400",
+            "fire-accent": "#FFAD1C",
+            "fire-gradient": "#FF7A1C",
+            "on-surface-variant": "#e5beb4",
+          },
+          fontFamily: {
+            syne: ["Syne", "sans-serif"],
+            dmsans: ["DM Sans", "sans-serif"],
+          },
+          borderRadius: {
+            'eight': '0.5rem',
+          }
+        },
+      },
+    }
+  </script>
+<style data-purpose="layout-animations">
+    body {
+      background-color: #12131a;
+      background-image: 
+        radial-gradient(at 0% 0%, hsla(24,100%,20%,0.15) 0, transparent 50%), 
+        radial-gradient(at 50% 0%, hsla(262,47%,15%,0.2) 0, transparent 50%),
+        radial-gradient(at 100% 100%, hsla(24,100%,10%,0.1) 0, transparent 50%);
+    }
+.glass-card {
+      background: rgba(26, 27, 35, 0.78);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+    .glass-morphism {
+      background: rgba(26, 27, 35, 0.6);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    .fire-gradient {
+      background: linear-gradient(135deg, #ff7a1c 0%, #ff4d00 100%);
+    }
+
+    .text-fire-gradient {
+      background: linear-gradient(135deg, #ff7a1c 0%, #ff4d00 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  .liquid-glass {
+            background: rgba(18, 19, 26, 0.6);
+            backdrop-filter: blur(40px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .active-glow {
+    filter: drop-shadow(0 0 8px #FF7A1C)
+    }
+    @keyframes pulse-soft {
+      0%, 100% { opacity: 0.8; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.05); }
+    }
+    .animate-pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
+
+    .waveform-bar {
+      @apply w-1 bg-green-500 rounded-full;
+      animation: wave 1s ease-in-out infinite;
+    }
+    @keyframes wave {
+      0%, 100% { height: 8px; }
+      50% { height: 24px; }
+    }
+        @keyframes pulse-glow {
+      0% { box-shadow: 0 0 0 0 rgba(0, 228, 120, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(0, 228, 120, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 228, 120, 0); }
+    }
+    .active-orb {
+      animation: pulse-glow 2s infinite;
+    }
+    .noise-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.02;
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuAjBgxhjjpbQ1X6hvaeggcEsORm0cusjq8KmhkMIem9paSnZ7_7H4035tguD8hQF_wyJfO0-xi5zinWRn5KCM4dsf9akf-ZEUIsx8r2p38OT_3LwtrA_hw0Bqp7LEHGHhjXR6QSfhiz5U0QWGx-RgUC23zQ_gXBKToAxBg8Gydr2pnyjVJzW_LFuaMzmeu54c7PrLK77yNnBemFzvrQWsOo-ahwjnkRQn0xqS8r25dnS6iz5_tsV9azzSv_REk-2thWjE9T9bosd9s)
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #33343d; border-radius: 10px; }
+  </style>
+</head>
+<body class="font-dmsans text-white min-h-screen flex flex-col overflow-hidden">
+<!-- BEGIN: TopAppBar -->
+<header class="h-16 flex items-center justify-between px-6 border-b border-white/5 glass-morphism sticky top-0 z-50" style="--mouse-x: 855px; --mouse-y: 8px;">
+<div class="flex items-center gap-10">
+<div class="flex items-center gap-2">
+<span class="font-syne text-2xl font-extrabold tracking-tight text-fire-gradient">DialForge</span>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-primary font-bold border-b-2 border-primary py-5" href="#">Dashboard</a>
+<a class="text-white/60 hover:text-white transition-colors" href="#">Pipeline</a>
+<a class="text-white/60 hover:text-white transition-colors" href="#">Call Logs</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-white/40 text-lg">search</span>
+<input class="bg-white/5 border-none rounded-full pl-10 pr-4 py-1.5 text-sm w-64 focus:ring-1 focus:ring-primary/50 text-white placeholder:text-white/30" placeholder="Search leads..." type="text">
+</div>
+<div class="flex items-center gap-2">
+<a href="notifications.html" class="block"><button class="p-2 hover:bg-white/5 rounded-xl transition-colors"><span class="material-symbols-outlined text-gray-400">notifications</span></button></a>
+<a href="settingsGeneral.html" class="block"><button class="p-2 hover:bg-white/5 rounded-xl transition-colors"><span class="material-symbols-outlined text-gray-400">settings</span></button></a>
+<div class="w-8 h-8 rounded-full border border-primary/30 overflow-hidden ml-2">
+<a href="profile.html" class="block w-full h-full cursor-pointer"><img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs"></a>
+</div>
+</div>
+</div>
+</header>
+<!-- END: TopAppBar -->
+<div class="flex flex-1 overflow-hidden">
+<!-- BEGIN: SideNavBar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex flex-col items-center py-6 gap-6 glass-card border-r border-white/5 z-40 overflow-y-auto">
+<div class="flex flex-col gap-4 items-center">
+    <a href="Dashbaord.html" class="block">
+        <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="text-[8px] uppercase font-bold">Dashboard</span>
+        </button>
+    </a>
+<button class="group relative flex flex-col items-center gap-1 w-full py-3 bg-primary-container/20 text-fire-accent border-l-4 border-fire-accent shadow-[0_0_20px_rgba(255,122,28,0.2)]">
+    <span class="material-symbols-outlined">call</span>
+    <span class="text-[8px] uppercase font-bold">Call</span>
+</button>
+<a href="supportQueue_x.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">queue</span>
+    <span class="text-[8px] uppercase font-bold">Queue</span>
+  </a>
+  <a href="callCoaching_x.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">graphic_eq</span>
+      <span class="text-[8px] uppercase font-bold">Coaching</span>
+    </button>
+  </a>
+  <a href="powerDialer.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">dialer_sip</span>
+    <span class="text-[8px] uppercase font-bold">Dialer</span>
+  </a>
+  <a href="salesPipeline_x.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">view_kanban</span>
+    <span class="text-[8px] uppercase font-bold">Pipeline</span>
+  </a>
+  <a href="callLogs_x.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">history</span>
+      <span class="text-[8px] uppercase font-bold">History</span>
+    </button>
+  </a>
+  <a href="contacts_x.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">group</span>
+    <span class="text-[8px] uppercase font-bold">Contacts</span>
+  </a>
+  <a href="integrationsHub_y.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">apps</span>
+    <span class="text-[8px] uppercase font-bold">Integrations</span>
+  </a>
+  <a href="myNums_y.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">123</span>
+    <span class="text-[8px] uppercase font-bold">Numbers</span>
+  </a>
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <a href="billingSubscription_y.html" class="flex flex-col items-center gap-1 w-full h-full text-inherit no-underline">
+      <span class="material-symbols-outlined">payments</span>
+      <span class="text-[8px] uppercase font-bold">Billing</span>
+    </a>
+  </button>
+  <a href="teamGovernance_y.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">groups</span>
+      <span class="text-[8px] uppercase font-bold">Team</span>
+    </button>
+  </a>
+</div>
+<div class="flex flex-col items-center gap-4 w-full pb-4">
+  <button class="material-symbols-outlined text-on-surface-variant/60 hover:text-white">help_center</button>
+</div>
+</aside>
+<!-- END: SideNavBar -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 relative p-8 flex items-center justify-center overflow-hidden">
+<!-- Ambient Glows -->
+<div class="absolute top-1/2 left-1/4 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] pointer-events-none"></div>
+<div class="absolute top-1/2 right-1/4 -translate-y-1/2 w-[600px] h-[600px] bg-ai-purple/5 rounded-full blur-[120px] pointer-events-none"></div>
+<div class="w-full max-w-7xl grid grid-cols-12 gap-8 h-[720px] relative z-10">
+<!-- LEFT: Customer Panel -->
+<div class="col-span-5 relative group h-full">
+<div class="h-full rounded-3xl overflow-hidden glass-morphism relative border border-white/10" style="--mouse-x: 143px; --mouse-y: 670.7999877929688px;">
+<img alt="Sarah Kim" class="w-full h-full object-cover filter grayscale brightness-[0.4]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPJd2BSSD_kHiscZgNxSLHT98c3JnjK1Fjiix2QjoTkI3V7WblRoZ8KC7lDJBm6ffvwNCKYvnMqsYzUiCItQoz86stuZdM1s_LS4YEAIoaTv-JYv21hbVEjrG5BHOsq1hjOLPgmI1j6qIPwKxRFN1Jc2-daIgTsv_YLxClshwICNdVanApfdCnasj0NM4Dgp1wQ3WHZ4BKRUrmNznB1Iiz8ntPpJNabijWlV73cMj1jfmozujLeUvpgZZwtEGLRqS3PrHIe5iZzEU">
+<!-- Hold Status UI -->
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<div class="w-20 h-20 rounded-full bg-white/5 border border-white/20 flex items-center justify-center mb-6 backdrop-blur-md animate-pulse-soft">
+<span class="material-symbols-outlined text-white text-4xl">pause</span>
+</div>
+<h2 class="font-syne text-3xl font-bold text-white tracking-tight">Sarah Kim</h2>
+<div class="mt-3 px-4 py-1.5 rounded-full bg-white/10 border border-white/10 text-[10px] font-bold uppercase tracking-[0.2em] text-white/80">
+                Customer • On Hold
+              </div>
+</div>
+<!-- Footer Details -->
+<div class="absolute bottom-0 inset-x-0 p-8 bg-gradient-to-t from-black/90 to-transparent">
+<div class="flex justify-between items-end">
+<div>
+<p class="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1">Connection</p>
+<div class="flex items-center gap-2">
+<span class="text-sm font-medium">Secure Line • 04:12</span>
+<span class="material-symbols-outlined text-green-500 text-sm">verified_user</span>
+</div>
+</div>
+<div class="flex gap-1 items-end h-6">
+<div class="w-1 bg-white/20 h-2 rounded-full"></div>
+<div class="w-1 bg-white/20 h-4 rounded-full"></div>
+<div class="w-1 bg-white/20 h-3 rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- CENTER: Transfer Controls -->
+<div class="col-span-2 flex flex-col justify-center items-center z-20">
+<div class="w-full glass-morphism rounded-3xl p-6 border border-primary/20 shadow-[0_0_40px_rgba(255,122,28,0.15)] text-center" style="--mouse-x: 54.33746337890625px; --mouse-y: 11.649993896484375px;">
+<div class="w-14 h-14 fire-gradient rounded-full flex items-center justify-center text-white mx-auto mb-5 shadow-lg animate-pulse">
+<span class="material-symbols-outlined text-3xl">shortcut</span>
+</div>
+<h3 class="font-syne text-xl font-bold mb-2">Warm Transfer</h3>
+<p class="text-white/60 text-xs leading-relaxed mb-8">Initiating secure handover to technical specialist.</p>
+<div class="flex flex-col gap-3">
+<button class="w-full py-3.5 fire-gradient rounded-xl font-bold text-sm shadow-xl hover:scale-[1.02] active:scale-95 transition-all">
+                Complete Transfer
+              </button>
+<button class="w-full py-3.5 bg-white/5 border border-white/10 rounded-xl font-bold text-sm hover:bg-white/10 transition-all">
+                Toggle Conference
+              </button>
+<a href="activeCall.html"><button class="w-full py-3 text-red-400 font-bold text-xs uppercase tracking-widest hover:text-red-300 transition-colors mt-2">
+                Cancel Transfer
+              </button></a>
+</div>
+</div>
+<!-- Decorative Line -->
+<div class="w-px h-16 bg-gradient-to-b from-primary/30 to-transparent mt-4"></div>
+</div>
+<!-- RIGHT: Specialist Panel -->
+<div class="col-span-5 relative h-full">
+<div class="h-full rounded-3xl overflow-hidden glass-morphism relative border-2 border-primary/40 ring-4 ring-primary/5 shadow-[0_0_60px_rgba(255,122,28,0.1)]" style="--mouse-x: 419.67498779296875px; --mouse-y: 443.79998779296875px;">
+<img alt="Marcus J." class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA2-HIh0_M7yWIVuDNVbr-lfcJfmZVn1m-D3SWp1vkBy7rnPpiEARW-5HVhm-4ghamLhBSKRETMwGfBSpZuVkawJDfKGsQpDOlDnd34gfeyYIARq9MUmkRqyk5pbAS0N2yx9DbZv13wd1-wBFKNgKaPVi22CBo90lUZwfVx538nBw0ilHxWgMJf3gGPH_ULa3BfjFUTD49f7v-wzS75j536QAzlO6pb8yPseqCes3fpFIbgVGqamgK_W546s8yvf0Vmg1JUxAvUEEs">
+<!-- Live Badge -->
+<div class="absolute top-6 left-6 px-3 py-1.5 rounded-full bg-red-600/90 flex items-center gap-2 border border-white/20 shadow-lg">
+<span class="w-2 h-2 bg-white rounded-full animate-ping"></span>
+<span class="text-[10px] font-extrabold uppercase tracking-widest">Live: Marcus J.</span>
+</div>
+<!-- Waveform Activity -->
+<div class="absolute top-6 right-6 flex items-end gap-1 px-3 py-2 bg-black/30 backdrop-blur-md rounded-xl border border-white/10">
+<div class="waveform-bar" style="animation-delay: 0.1s"></div>
+<div class="waveform-bar" style="animation-delay: 0.3s"></div>
+<div class="waveform-bar" style="animation-delay: 0.2s"></div>
+<div class="waveform-bar" style="animation-delay: 0.4s"></div>
+</div>
+<!-- Footer Controls -->
+<div class="absolute bottom-0 inset-x-0 p-8 bg-gradient-to-t from-black/90 to-transparent">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="font-syne text-3xl font-bold">Marcus J.</h2>
+<p class="text-white/60 text-sm font-medium">Tier 2 Solutions Architect</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-all">
+<span class="material-symbols-outlined">mic_off</span>
+</button>
+<button class="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-all">
+<span class="material-symbols-outlined">videocam</span>
+</button>
+<button class="w-14 h-14 rounded-full bg-red-600 hover:bg-red-700 flex items-center justify-center shadow-lg transition-all hover:rotate-12">
+<span class="material-symbols-outlined text-3xl">call_end</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- BEGIN: AI Copilot Card -->
+<div class="absolute -bottom-4 right-0 w-80 glass-morphism rounded-2xl p-5 border border-ai-purple/30 shadow-2xl translate-y-[-2rem] group/ai hover:translate-y-[-2.5rem] transition-all duration-300" style="--mouse-x: 61.01251220703125px; --mouse-y: 148.89996337890625px;">
+<div class="flex items-center gap-3 mb-3">
+<div class="w-8 h-8 rounded-lg bg-ai-purple/20 flex items-center justify-center text-ai-purple">
+<span class="material-symbols-outlined text-lg">auto_awesome</span>
+</div>
+<h4 class="font-bold text-xs uppercase tracking-wider text-ai-purple">AI Copilot Recommendation</h4>
+</div>
+<p class="text-xs text-white/80 leading-relaxed mb-4">
+              Sarah is concerned about the API integration timeline. I've briefed Marcus on the specific endpoint issues she's seeing in her dashboard.
+            </p>
+<div class="flex gap-2">
+<button class="flex-1 py-2 bg-ai-purple/20 text-ai-purple text-[10px] font-bold rounded-lg uppercase tracking-widest hover:bg-ai-purple/30 transition-colors">
+                Send Briefing
+              </button>
+<button class="p-2 text-white/40 hover:text-white">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+</div>
+<!-- END: AI Copilot Card -->
+</div>
+</div>
+</main>
+<!-- END: MainContent -->
+</div>
+<script data-purpose="interactions">
+    // Subtle hover effect on panels
+    document.querySelectorAll('.glass-morphism').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+      });
+    });
+
+    // Mock functionality for buttons
+    document.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('mousedown', () => btn.classList.add('scale-95'));
+      btn.addEventListener('mouseup', () => btn.classList.remove('scale-95'));
+    });
+  </script>
+
+
+
+
+</body></html>

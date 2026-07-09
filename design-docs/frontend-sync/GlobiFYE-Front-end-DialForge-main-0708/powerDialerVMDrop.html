@@ -1,0 +1,381 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DialForge · VM Drop Studio</title>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Syne (Brand) & DM Sans (Body) -->
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Syne:wght@700;800&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface": "#12131a",
+            "surface-dim": "#12131a",
+            "surface-bright": "#383941",
+            "surface-container-lowest": "#0d0e15",
+            "surface-container-low": "#1a1b23",
+            "surface-container": "#1e1f27",
+            "surface-container-high": "#292932",
+            "surface-container-highest": "#33343d",
+            "primary": "#ff7a1c",
+            "primary-container": "#ff562a",
+            "fire-accent": "#ff7a1c",
+            "fire-gradient": "#FF7A1C",
+            "teal-support": "#00D4C8",
+            "ai-purple": "#9B6DFF",
+            "on-surface": "#e3e1ec",
+            "on-surface-variant": "#e5beb4",
+          },
+          fontFamily: {
+            "hero": ["Syne", "sans-serif"],
+            "body": ["DM Sans", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"],
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-animations">
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 0.3; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .mic-pulse {
+      animation: pulse-ring 2.5s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+    }
+    .glass-morphic {
+      background: rgba(26, 27, 35, 0.6);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .text-fire-gradient {
+      background: linear-gradient(to right, #ff7a1c, #ffad1c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .fire-glow {
+      box-shadow: 0 0 50px rgba(255, 122, 28, 0.1);
+    }
+    .carbon-texture {
+      background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.02) 1px, transparent 0);
+      background-size: 24px 24px;
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body overflow-hidden h-screen flex flex-col carbon-texture">
+<!-- BEGIN: Top Navigation Bar -->
+<header class="h-16 flex items-center justify-between px-6 border-b border-white/10 z-50 bg-surface/80 backdrop-blur-md">
+<div class="flex items-center gap-10">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 bg-primary rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-xl">temp_preferences_custom</span>
+</div>
+<h1 class="text-2xl font-hero font-extrabold tracking-tighter text-fire-gradient">DialForge</h1>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-sm font-medium text-on-surface-variant hover:text-white transition-colors" href="#">Dashboard</a>
+<a class="text-sm font-bold text-white relative py-5 border-b-2 border-primary" href="#">VM Studio</a>
+<a class="text-sm font-medium text-on-surface-variant hover:text-white transition-colors" href="#">Analytics</a>
+</nav>
+</div>
+<div class="flex items-center gap-4 text-gray-400">
+<a href="notifications.html" class="block"><button class="material-symbols-outlined text-on-surface-variant hover:text-white transition-colors">notifications</button></a>
+<a href="settingsGeneral.html" class="block"><button class="material-symbols-outlined text-on-surface-variant hover:text-white transition-colors">settings</button></a><div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center overflow-hidden border border-white/10">
+<a href="profile.html" class="block w-full h-full cursor-pointer"><img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs"></a>
+</div>
+</div>
+</header>
+<!-- END: Top Navigation Bar -->
+<div class="flex flex-1 overflow-hidden">
+<!-- BEGIN: Sidebar Navigation -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex flex-col bg-surface-container-low/78 backdrop-blur-xl border-r border-white/5 items-center py-6 gap-8 z-40">
+<div class="flex flex-col items-center gap-1 w-full overflow-y-auto flex-1">
+  <a href="Dashbaord.html" class="block">
+        <button class="group relative flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="text-[8px] uppercase font-bold">Dashboard</span>
+        </button>
+    </a>
+  <a href="activeCall.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">call</span>
+    <span class="text-[8px] uppercase font-bold">Call</span>
+  </a>
+  <a href="supportQueue_x.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">queue</span>
+    <span class="text-[8px] uppercase font-bold">Queue</span>
+  </a>
+  <a href="callCoaching_x.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">graphic_eq</span>
+      <span class="text-[8px] uppercase font-bold">Coaching</span>
+    </button>
+  </a>
+  <button class="group relative flex flex-col items-center gap-1 w-full py-3 bg-primary-container/20 text-fire-accent border-l-4 border-fire-accent shadow-[0_0_20px_rgba(255,122,28,0.2)]">
+    <span class="material-symbols-outlined">dialer_sip</span>
+    <span class="text-[8px] uppercase font-bold">Dialer</span>
+</button>
+  <a href="salesPipeline_x.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">view_kanban</span>
+    <span class="text-[8px] uppercase font-bold">Pipeline</span>
+  </a>
+  <a href="callLogs_x.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">history</span>
+      <span class="text-[8px] uppercase font-bold">History</span>
+    </button>
+  </a>
+  <a href="contacts_x.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">group</span>
+    <span class="text-[8px] uppercase font-bold">Contacts</span>
+  </a>
+  <a href="integrationsHub_y.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">apps</span>
+    <span class="text-[8px] uppercase font-bold">Integrations</span>
+  </a>
+  <a href="myNums_y.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">123</span>
+    <span class="text-[8px] uppercase font-bold">Numbers</span>
+  </a>
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <a href="billingSubscription_y.html" class="flex flex-col items-center gap-1 w-full h-full text-inherit no-underline">
+      <span class="material-symbols-outlined">payments</span>
+      <span class="text-[8px] uppercase font-bold">Billing</span>
+    </a>
+  </button>
+  <a href="teamGovernance_y.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">groups</span>
+      <span class="text-[8px] uppercase font-bold">Team</span>
+    </button>
+  </a>
+</div>
+<div class="flex flex-col items-center gap-4 w-full pb-4">
+  <button class="material-symbols-outlined text-on-surface-variant/60 hover:text-white">help_center</button>
+</div>
+</aside>
+<!-- END: Sidebar Navigation -->
+<!-- BEGIN: Main Content Area -->
+<main class="flex-1 flex overflow-hidden grid grid-cols-12 gap-6 relative pl-28">
+<!-- BEGIN: VM Drop Studio Content -->
+<section class="col-span-12 lg:col-span-7 flex flex-col gap-8 h-full">
+<div class="flex items-center justify-between">
+<header>
+<h2 class="text-5xl font-hero font-extrabold tracking-tighter text-white">VM Drop Studio</h2>
+<p class="text-on-surface-variant mt-2 text-lg">Capture high-conversion voicemail messages for your automation flows.</p>
+</header>
+<div class="flex items-center gap-3">
+<div class="w-2.5 h-2.5 bg-primary rounded-full mic-pulse shadow-[0_0_10px_rgba(255,122,28,1)]"></div>
+<span class="text-primary font-mono text-xs font-bold tracking-[0.2em] uppercase">Studio Active</span>
+</div>
+</div>
+<!-- Microphone Recording Interface -->
+<div class="flex-1 glass-morphic rounded-3xl fire-glow p-12 flex flex-col items-center justify-center relative overflow-hidden group">
+<!-- Atmospheric Glows -->
+<div class="absolute -top-40 -left-40 w-96 h-96 bg-primary/10 rounded-full blur-[100px]"></div>
+<div class="absolute -bottom-40 -right-40 w-96 h-96 bg-primary-container/10 rounded-full blur-[100px]"></div>
+<div class="relative z-10 flex flex-col items-center w-full max-w-md">
+<!-- Mic Orb -->
+<div class="w-56 h-56 rounded-full border-4 border-white/5 p-2 transition-all duration-500 cursor-pointer hover:border-primary/30" id="mic-trigger">
+<div class="w-full h-full rounded-full bg-surface-container-lowest flex items-center justify-center border-4 border-primary shadow-[0_0_40px_rgba(255,122,28,0.2)]">
+<span class="material-symbols-outlined text-7xl text-white transition-all" id="mic-icon" style="font-variation-settings: 'FILL' 1">mic</span>
+</div>
+</div>
+<!-- Timer -->
+<div class="mt-10 text-center">
+<div class="font-hero text-7xl font-extrabold tracking-tighter text-white" id="timer-display">00:00:00</div>
+<p class="uppercase tracking-[0.3em] font-bold text-xs text-on-surface-variant mt-4 transition-colors" id="recording-status">Click to Start Recording</p>
+</div>
+<!-- Input Fields -->
+<div class="w-full mt-12 space-y-6">
+<div class="space-y-2">
+<label class="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase ml-1">VM Message Name</label>
+<input class="w-full bg-surface-container-low border border-white/10 rounded-xl px-4 py-4 text-white focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-white/20 transition-all" placeholder="e.g. Q4 Sales Follow-up - Direct" type="text">
+</div>
+<div class="grid grid-cols-2 gap-4">
+<button class="bg-surface-container-high py-4 rounded-xl font-bold text-sm border border-white/5 hover:bg-surface-container-highest transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg">settings_voice</span>
+                  Test Input
+                </button>
+<button class="bg-gradient-to-r from-fire-gradient to-[#FFAD1C] py-4 rounded-xl font-bold text-sm text-white shadow-lg shadow-primary/20 active:scale-95 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg">cloud_upload</span>
+                  Save to Library
+                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Info Cards -->
+<div class="grid grid-cols-2 gap-4 h-32">
+<div class="glass-morphic rounded-2xl p-5 flex items-start gap-4 border border-white/10">
+<div class="w-10 h-10 rounded-xl bg-teal-support/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-teal-support">verified</span>
+</div>
+<div>
+<h4 class="font-bold text-sm">High Clarity</h4>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Our AI cleans background noise and optimizes frequencies for mobile carriers.</p>
+</div>
+</div>
+<div class="glass-morphic rounded-2xl p-5 flex items-start gap-4 border border-white/10">
+<div class="w-10 h-10 rounded-xl bg-ai-purple/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-ai-purple">psychology</span>
+</div>
+<div>
+<h4 class="font-bold text-sm">Script AI</h4>
+<p class="text-xs text-on-surface-variant mt-1 leading-relaxed">Need a script? Use the AI Assistant to generate high-converting call scripts.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- END: VM Drop Studio Content -->
+<!-- BEGIN: VM Library Sidebar -->
+<section class="col-span-12 lg:col-span-5 flex flex-col gap-6 h-full overflow-hidden">
+<div class="flex items-center justify-between">
+<h3 class="text-3xl font-hero font-extrabold tracking-tighter">VM Library</h3>
+<div class="flex gap-2">
+<button class="w-10 h-10 bg-surface-container border border-white/5 rounded-lg flex items-center justify-center hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-xl">search</span>
+</button>
+<button class="w-10 h-10 bg-surface-container border border-white/5 rounded-lg flex items-center justify-center hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-xl">filter_list</span>
+</button>
+</div>
+</div>
+<!-- Library Container -->
+<div class="flex-1 glass-morphic rounded-3xl border border-white/5 flex flex-col overflow-hidden">
+<div class="flex-1 overflow-y-auto p-4 space-y-3">
+<!-- Item: Follow-up -->
+<div class="p-4 bg-surface-container-high/40 hover:bg-surface-container-high/70 rounded-2xl border border-white/5 transition-all group cursor-pointer flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">play_arrow</span>
+</div>
+<div class="flex-1">
+<h4 class="font-bold text-sm">Follow-up: Real Estate Lead</h4>
+<div class="flex items-center gap-4 mt-1 text-[11px] text-on-surface-variant font-mono">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">schedule</span> 0:42</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">calendar_today</span> Oct 12, 2023</span>
+</div>
+</div>
+<button class="p-1 opacity-0 group-hover:opacity-100 transition-opacity"><span class="material-symbols-outlined">more_vert</span></button>
+</div>
+<!-- Item: Aggressive Intro (Active) -->
+<div class="p-4 bg-surface-container-high/60 rounded-2xl border-l-4 border-primary transition-all group cursor-pointer flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">play_arrow</span>
+</div>
+<div class="flex-1">
+<h4 class="font-bold text-sm">Aggressive Intro - Direct Dial</h4>
+<div class="flex items-center gap-4 mt-1 text-[11px] text-on-surface-variant font-mono">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">schedule</span> 0:18</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">calendar_today</span> Oct 11, 2023</span>
+</div>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="px-2 py-0.5 bg-primary/20 text-[10px] font-bold text-primary rounded tracking-widest uppercase">Active</span>
+<button class="p-1 opacity-0 group-hover:opacity-100 transition-opacity"><span class="material-symbols-outlined">more_vert</span></button>
+</div>
+</div>
+<!-- Item: No Answer -->
+<div class="p-4 bg-surface-container-high/40 hover:bg-surface-container-high/70 rounded-2xl border border-white/5 transition-all group cursor-pointer flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">play_arrow</span>
+</div>
+<div class="flex-1">
+<h4 class="font-bold text-sm">No Answer: Second Touch</h4>
+<div class="flex items-center gap-4 mt-1 text-[11px] text-on-surface-variant font-mono">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">schedule</span> 0:26</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">calendar_today</span> Oct 08, 2023</span>
+</div>
+</div>
+<button class="p-1 opacity-0 group-hover:opacity-100 transition-opacity"><span class="material-symbols-outlined">more_vert</span></button>
+</div>
+<div class="py-4 text-center border-t border-white/5 mt-4">
+<p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Showing 3 of 12 Recordings</p>
+<button class="text-primary text-sm font-bold mt-2 hover:underline">View All Recordings</button>
+</div>
+</div>
+<!-- Library Footer Stats -->
+<div class="bg-surface-container-low p-6 border-t border-white/10 grid grid-cols-2 gap-6">
+<div>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Storage Used</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="text-2xl font-hero font-extrabold">12.4 MB</span>
+<span class="text-xs text-on-surface-variant/50">/ 500 MB</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-highest rounded-full mt-3 overflow-hidden">
+<div class="w-[5%] h-full bg-primary rounded-full"></div>
+</div>
+</div>
+<div class="border-l border-white/10 pl-6">
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Total Drops</span>
+<div class="mt-1">
+<span class="text-2xl font-hero font-extrabold">1,482</span>
+</div>
+<div class="flex items-center gap-2 mt-3">
+<div class="w-2 h-2 rounded-full bg-teal-support shadow-[0_0_8px_rgba(0,212,200,0.6)]"></div>
+<span class="text-[10px] font-bold text-teal-support uppercase tracking-tighter">98.2% Completion</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: VM Library Sidebar -->
+</main>
+<!-- END: Main Content Area -->
+</div>
+<script data-purpose="recording-logic">
+    const micTrigger = document.getElementById('mic-trigger');
+    const micIcon = document.getElementById('mic-icon');
+    const timerDisplay = document.getElementById('timer-display');
+    const recordingStatus = document.getElementById('recording-status');
+    
+    let isRecording = false;
+    let seconds = 0;
+    let timerInterval = null;
+
+    function formatTime(totalSeconds) {
+      const h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
+      const m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
+      const s = (totalSeconds % 60).toString().padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    micTrigger.addEventListener('click', () => {
+      isRecording = !isRecording;
+      
+      if (isRecording) {
+        // Start Recording
+        micIcon.innerText = 'stop';
+        micIcon.classList.add('text-primary');
+        recordingStatus.innerText = 'Recording Live...';
+        recordingStatus.classList.remove('text-on-surface-variant');
+        recordingStatus.classList.add('text-primary', 'animate-pulse');
+        
+        seconds = 0;
+        timerInterval = setInterval(() => {
+          seconds++;
+          timerDisplay.innerText = formatTime(seconds);
+        }, 1000);
+      } else {
+        // Stop Recording
+        micIcon.innerText = 'mic';
+        micIcon.classList.remove('text-primary');
+        recordingStatus.innerText = 'Click to Start Recording';
+        recordingStatus.classList.remove('text-primary', 'animate-pulse');
+        recordingStatus.classList.add('text-on-surface-variant');
+        
+        clearInterval(timerInterval);
+      }
+    });
+  </script>
+
+
+</body></html>
