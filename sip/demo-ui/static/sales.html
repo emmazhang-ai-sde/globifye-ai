@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sales dashboard — GlobiFYE Voice Agent</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="app">
+
+    <header class="topbar">
+      <span class="brand-lamp"></span>
+      <span class="brand-name">GlobiFYE Voice Agent</span>
+      <span class="eyebrow">sales dashboard</span>
+      <span class="spacer"></span>
+      <span class="company-chip" id="company"></span>
+      <span class="user-name" id="user-name"></span>
+      <a class="btn-quiet" href="/client.html" target="_blank" rel="noopener">Client view ↗</a>
+      <button class="btn-quiet" id="logout">Sign out</button>
+    </header>
+
+    <div class="main">
+
+      <aside class="sidebar">
+        <section class="card">
+          <span class="eyebrow">Place a call</span>
+          <div class="cl-company" id="cl-company">—</div>
+          <button class="btn-call-lg" id="call-customer">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path d="M6.6 10.8a15.5 15.5 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.2.4 2.4.6 3.7.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.9 21 3 13.1 3 3.9 3 3.4 3.4 3 4 3h3.5c.6 0 1 .4 1 1 0 1.2.2 2.5.6 3.6.1.4 0 .8-.2 1l-2.3 2.2z"/></svg>
+            Call a customer
+          </button>
+          <button class="btn-quiet wide" id="view-kb">View knowledge base</button>
+          <p class="dial-note" id="dial-note">Rings the softphone; the AI answers as your business.</p>
+        </section>
+
+        <section class="card history-card">
+          <span class="eyebrow">Call history</span>
+          <ul class="history-list" id="history-list"></ul>
+          <p class="history-empty" id="history-empty">No calls yet.</p>
+        </section>
+      </aside>
+
+      <div class="call-col">
+
+        <div class="call-head">
+          <span class="call-company" id="call-company"></span>
+          <span class="status-chip" id="status-chip"><span class="lamp"></span><span id="status-text">IDLE</span></span>
+          <span class="call-timer" id="call-timer"></span>
+          <button class="btn-end" id="end-call" hidden>End call</button>
+          <span class="spacer" style="flex:1"></span>
+          <div class="stages" id="stages">
+            <span class="stage" data-stage="caller"><span class="lamp"></span>Caller</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage" data-stage="asterisk"><span class="lamp"></span>Asterisk</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage" data-stage="stt"><span class="lamp"></span>STT · Modulate</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage" data-stage="llm"><span class="lamp"></span>LLM · Groq</span>
+            <span class="stage-arrow">→</span>
+            <span class="stage" data-stage="tts"><span class="lamp"></span>TTS · Aura</span>
+          </div>
+        </div>
+
+        <section class="card transcript-card">
+          <span class="eyebrow" id="transcript-title">Live transcript</span>
+          <div class="transcript" id="transcript">
+            <p class="transcript-empty">Call a customer, or wait for one to call in. Final transcripts
+            appear here; the raw partial stream runs in the pipeline log below.</p>
+          </div>
+        </section>
+
+        <section class="card analysis-card" id="analysis-card" hidden>
+          <span class="eyebrow">Post-call analysis</span>
+          <div id="analysis-body"></div>
+        </section>
+
+      </div>
+    </div>
+
+    <div class="ring-modal" id="ring-modal" hidden>
+      <div class="ring-backdrop"></div>
+      <div class="ring-card">
+        <div class="ring-lamp"></div>
+        <div class="ring-label" id="ring-label">Incoming call</div>
+        <div class="ring-name" id="ring-name">Customer</div>
+        <div class="ring-actions">
+          <button class="ring-decline" id="ring-decline">Decline</button>
+          <button class="ring-accept" id="ring-accept">Accept</button>
+        </div>
+        <p class="ring-hint" id="ring-hint">Answer the softphone to connect the audio.</p>
+      </div>
+    </div>
+
+    <div class="kb-modal" id="kb-modal" hidden>
+      <div class="kb-backdrop" id="kb-backdrop"></div>
+      <div class="kb-dialog" role="dialog" aria-modal="true" aria-labelledby="kb-title">
+        <div class="kb-dialog-head">
+          <span class="eyebrow" id="kb-title">Knowledge base</span>
+          <button class="btn-quiet" id="kb-close">Close</button>
+        </div>
+        <div class="kb-content" id="kb-content"></div>
+        <p class="kb-foot">This is what the AI agent knows and answers from on a live call.</p>
+      </div>
+    </div>
+
+    <div class="log-panel" id="log-panel">
+      <button class="log-head" id="log-toggle" aria-expanded="true">
+        <span class="caret">▼</span>
+        <span class="eyebrow">Pipeline log — raw event stream (incl. STT partials)</span>
+        <span class="count" id="log-count"></span>
+      </button>
+      <div class="log-body" id="log-body"></div>
+    </div>
+
+  </div>
+
+  <script src="/sales.js"></script>
+</body>
+</html>

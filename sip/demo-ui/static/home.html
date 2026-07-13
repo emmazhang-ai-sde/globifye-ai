@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GlobiFYE Voice Agent — Choose a view</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <span class="brand-lamp"></span>
+      <span class="brand-name">GlobiFYE Voice Agent</span>
+      <span class="eyebrow">demo console</span>
+      <span class="spacer"></span>
+      <span class="company-chip" id="company"></span>
+      <span class="user-name" id="user-name"></span>
+      <button class="btn-quiet" id="logout">Sign out</button>
+    </header>
+
+    <div class="home-wrap">
+      <div class="home-inner">
+        <h1 class="home-title">Two sides of one call</h1>
+        <p class="home-sub">Open each view in its own window and place them side by side. When one side calls, the other rings. Post-call coaching shows on the sales side only.</p>
+
+        <div class="home-cards">
+          <a class="home-card" href="/sales.html" target="_blank" rel="noopener">
+            <span class="home-role">Sales</span>
+            <span class="home-name" id="home-company">Your business</span>
+            <span class="home-desc">Live transcript, pipeline activity, and post-call coaching analysis. Call a customer from here.</span>
+            <span class="home-open">Open sales dashboard →</span>
+          </a>
+          <a class="home-card" href="/client.html" target="_blank" rel="noopener">
+            <span class="home-role client">Client</span>
+            <span class="home-name">Customer phone</span>
+            <span class="home-desc">A phone screen: incoming call, live conversation. No coaching, no internals. Call the business from here.</span>
+            <span class="home-open">Open client phone →</span>
+          </a>
+        </div>
+
+        <p class="home-foot">Tip: answer the softphone (Linphone) when it rings — that carries the customer's voice for both views.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="/home.js"></script>
+</body>
+</html>
