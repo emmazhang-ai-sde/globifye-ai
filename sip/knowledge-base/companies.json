@@ -1,0 +1,16 @@
+{
+    "beauty": {
+        "display_name": "Belle Beauty Co.",
+        "extension": "1000",
+        "voice": "aura-2-thalia-en",
+        "kb_file": "beauty.md",
+        "blurb": "Salon & spa · hair, skin, nails, makeup"
+    },
+    "boutique": {
+        "display_name": "Maison Boutique",
+        "extension": "2000",
+        "voice": "aura-2-arcas-en",
+        "kb_file": "boutique.md",
+        "blurb": "Women's fashion boutique & personal styling"
+    }
+}
