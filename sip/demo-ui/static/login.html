@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in — GlobiFYE Voice Agent</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="login-wrap">
+    <form class="login-card" id="login-form">
+      <div class="brand">
+        <span class="brand-lamp"></span>
+        <span class="brand-name">GlobiFYE Voice Agent</span>
+      </div>
+      <p class="login-sub">Demo console · sign in with your company account</p>
+
+      <div class="field">
+        <label for="email">Work email</label>
+        <input id="email" type="email" autocomplete="username" required
+               placeholder="you@company.com">
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" required
+               placeholder="••••••••">
+      </div>
+
+      <button class="btn-primary" type="submit">Sign in</button>
+      <p class="login-error" id="error"></p>
+
+      <div class="demo-creds">
+        demo accounts (password: demo123)<br>
+        alice@belle-beauty.com &nbsp;· Belle Beauty Co.<br>
+        bob@maison-boutique.com · Maison Boutique
+      </div>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const errEl = document.getElementById('error');
+      errEl.textContent = '';
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: document.getElementById('email').value,
+          password: document.getElementById('password').value,
+        }),
+      });
+      if (res.ok) {
+        location.href = '/app.html';
+      } else {
+        const data = await res.json().catch(() => ({}));
+        errEl.textContent = data.error || 'Sign-in failed.';
+      }
+    });
+  </script>
+</body>
+</html>
