@@ -6,3 +6,6 @@ shuyang/
 
 sip/venv/
 env/
+
+__pycache__/
+sip/demo-ui/call-history/
