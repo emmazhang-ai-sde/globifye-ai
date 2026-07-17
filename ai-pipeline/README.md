@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Pipeline (Next.js)
 
-## Getting Started
+**Last updated:** 2026-07-16
 
-First, run the development server:
+The batch sales-call analysis pipeline and its web UI: upload / pick a call recording, run Deepgram STT, then Groq (LangChain) sales-coach analysis, and store results in Supabase. Built with Next.js (App Router) + Tailwind.
+
+## How to start
+
+From this folder:
 
 ```bash
+cd ~/GlobiFYE/globifye-ai/ai-pipeline
+npm install        # first time only
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open http://localhost:3000 in a browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Verify it is up:**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000
+```
 
-## Learn More
+Expected output: `200`.
 
-To learn more about Next.js, take a look at the following resources:
+Other scripts (from `package.json`):
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Command | What it does |
+|---------|--------------|
+| `npm run dev` | Dev server with hot reload on port 3000 |
+| `npm run build` | Production build |
+| `npm run start` | Serve the production build (run `build` first) |
+| `npm run lint` | ESLint |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Environment variables
 
-## Deploy on Vercel
+Secrets go in `ai-pipeline/.env.local` (never committed). Variables referenced by the code:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Variable | Used for |
+|----------|----------|
+| `DEEPGRAM_API_KEY`, `DEEPGRAM_PROJECT_ID` | STT transcription |
+| `GROQ_API_KEY` | LLM analysis (LangChain + Groq) |
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase client (browser side) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase writes from server-side code and scripts |
+| `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID` | TTS (shared with the SIP demo) |
+| `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` | Alternative LLM providers used in comparison/testing code |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Note: this same `.env.local` is also read by the SIP demo scripts (`sip/scripts/step2_stt_bridge.py` and `sip/demo-ui/demo_ui_server.py`), so it is the single place for secrets in this repo.
+
+## Folder map
+
+- `app/` — Next.js App Router pages (`page.tsx`, `demo/`, `batch/`) and API routes (`api/`)
+- `lib/` — pipeline logic (STT, LLM analysis, Supabase access)
+- `scripts/` — one-off Node/TS scripts (run with `npx tsx scripts/<name>.ts`)
+- `supabase/` — schema and migration SQL
+- `types/` — shared TypeScript types

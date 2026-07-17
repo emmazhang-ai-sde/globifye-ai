@@ -87,12 +87,12 @@ Wiring: `POST /api/call {direction}` sets a ringing state, broadcasts `incoming_
 
 ## 3. Multi-company routing and per-company knowledge base
 
-Which business answers is decided by the number dialed. Each business has its own knowledge base and its own TTS voice.
+Which business answers is decided by the number dialed. Each is a B2B company whose AI sales rep works a prospect through a five-stage pipeline (Prospect -> Contact -> Demo -> Proposal -> Closing); each has its own knowledge base (product, pricing, pipeline playbook) and TTS voice.
 
-| Line | Business | Voice | Knowledge base |
-|---|---|---|---|
-| 1000 | Belle Beauty Co. | `aura-2-thalia-en` | `sip/knowledge-base/beauty.md` |
-| 2000 | Maison Boutique | `aura-2-arcas-en` | `sip/knowledge-base/boutique.md` |
+| Line | Business | Sells | Voice | Knowledge base |
+|---|---|---|---|---|
+| 1000 | Pacific Beef Trading | USDA beef export | `aura-2-thalia-en` | `sip/knowledge-base/pacificbeef.md` |
+| 2000 | GlobiFYE | AI voice agents (product: DialForge) | `aura-2-arcas-en` | `sip/knowledge-base/globifye.md` |
 
 `sip/knowledge-base/companies.json` is the single source of truth (extension, voice, KB file per company); the bridge and the UI server both read it, so adding a third company is a one-file change plus a dialplan line.
 
@@ -103,7 +103,7 @@ Caller dials 1000                     Caller dials 2000
         |                                     |
         v                                     v
 [sip-mvp] 1000 ->                     [sip-mvp] 2000 ->
-  Stasis(sip-mvp-app, beauty)           Stasis(sip-mvp-app, boutique)
+  Stasis(sip-mvp-app, pacificbeef)      Stasis(sip-mvp-app, globifye)
         |                                     |
         +------------------+------------------+
                            v
@@ -118,7 +118,7 @@ Caller dials 1000                     Caller dials 2000
 > **Why a Stasis argument, not the dialed number:**
 > The extension is also readable from the event, and the bridge falls back to it. But an explicit key in the dialplan keeps the company mapping in one obvious place and survives a change of extension numbers.
 
-**How the KB grounds the agent:** the company's entire `sip/knowledge-base/<company>.md` (roughly 550-650 tokens today) is injected into the LLM system prompt for the call, with an instruction to answer only from it and never invent prices, hours, or availability. This is full-prompt injection, not RAG; at the current KB size that is the right call (zero added latency, no retrieval misses). The retrieval evolution and its trigger conditions are Step 7 territory, detailed in the [RAG design doc](../rag-per-company-knowledge-base-design-doc.md). Each company row in the dialer has a **KB** button showing exactly what the agent answers from.
+**How the KB grounds the agent:** the company's entire `sip/knowledge-base/<company>.md` (roughly 550-650 tokens today) is injected into the LLM system prompt for the call, with an instruction to answer only from it and never invent prices, hours, or availability. This is full-prompt injection, not RAG; at the current KB size that is the right call (zero added latency, no retrieval misses). The retrieval evolution and its trigger conditions are Step 7 territory, detailed in the [RAG design doc](../rag-per-company-kb-design-doc.md). Each company row in the dialer has a **KB** button showing exactly what the agent answers from.
 
 **Fallback when there is no grounded answer (added 2026-07-13):** whenever the KB does not cover a question, or a company has no KB connected at all (`kb_file` missing or empty in `companies.json`), the agent replies with the standard line, then collects the caller's name and phone number:
 
@@ -160,7 +160,7 @@ Waiting for bridge events on POST /internal/events (from step2_stt_bridge.py)
 Supabase mirror: ON -> https://... (or OFF with instructions if keys are missing)
 ```
 
-Demo accounts (password `demo123` for all): `alice@belle-beauty.com`, `dana@belle-beauty.com` (Belle Beauty Co., line 1000); `bob@maison-boutique.com` (Maison Boutique, line 2000).
+Demo accounts (password `demo123` for all), two sales-rep logins per company: `alice@pacificbeef.com`, `dana@pacificbeef.com` (Pacific Beef Trading, line 1000); `bob@globifye.com`, `marcus@globifye.com` (GlobiFYE, line 2000).
 
 **Demo flow for the PM:**
 

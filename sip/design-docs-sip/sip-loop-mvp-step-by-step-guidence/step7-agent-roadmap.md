@@ -6,7 +6,7 @@
 
 ## 1. Knowledge base -> RAG
 
-**Today (built, Step 5 section 3):** each company's whole KB file is injected into the LLM system prompt per call. At the current size (roughly 550-650 tokens per company) this is the right design: zero added latency, no retrieval failure modes, the whole KB always in context.
+**Today (built, Step 5 section 3):** each company's whole KB file is injected into the LLM system prompt per call. At the current size (roughly 950 tokens per company) this is the right design: zero added latency, no retrieval failure modes, the whole KB always in context.
 
 **Until RAG lands:** any question the KB does not cover, and any company without a KB connected, gets the standard fallback (say the `FALLBACK_LINE`, collect name and phone number; Step 5 section 3). Once a company's library is active, grounded answers take over automatically.
 
@@ -14,7 +14,7 @@
 
 Options, stack comparison (pgvector on the Step 6 Supabase project + OpenAI embeddings), tenant isolation, latency budget, and the full recommendation live in the dedicated decision doc:
 
-**[`../rag-per-company-knowledge-base-design-doc.md`](../rag-per-company-knowledge-base-design-doc.md)**
+**[`../rag-per-company-kb-design-doc.md`](../rag-per-company-kb-design-doc.md)**
 
 ## 2. AI agent / salesperson switching
 
@@ -53,12 +53,24 @@ Open questions to settle before building:
 
 | Question | Notes |
 |---|---|
-| Salesperson audio device | A second softphone registration is the near-term answer; browser WebRTC audio remains deferred (section 3). Needs a second device or a second Linphone identity |
+| Salesperson audio device | A second softphone registration is the near-term answer; browser WebRTC audio remains deferred (section 4). Needs a second device or a second Linphone identity |
 | Transcript speakers during human mode | `externalMedia` carries the mixed bridge audio, so human and client turns would not be separated. Diarization is off in the Modulate config today; either accept mixed turns or revisit diarization |
 | Analysis semantics | The sales-coach analysis assumes the agent side is one voice; a call with both AI and human segments needs a segment marker in the transcript |
-| Where `mode` lives per call | Single active call today makes a global flag fine; concurrency (section 3) would need it per-channel |
+| Where `mode` lives per call | Single active call today makes a global flag fine; concurrency (section 4) would need it per-channel |
 
-## 3. Deferred scope (updated 2026-07-13)
+## 3. Sales pipeline stage tracking (proposed)
+
+**Status: proposed (Shuyang, 2026-07-15).** Today the pipeline is **content only**: each company's KB and the agent prompt are written around the five stages (Prospect, Contact, Demo, Proposal, Closing; Step 5 section 3), and the agent works the prospect toward the next stage on the call. The stage is not stored or reported.
+
+The proposal is to make the stage structured and tracked:
+
+- **`contacts.pipeline_stage`** in the merged project: where each prospect currently sits, set or advanced per call.
+- **Post-call analysis**: the on-demand analysis already reads the transcript; have it also return the stage the call reached and the recommended next step, and write that to the contact.
+- **UI**: show the stage on the sales dashboard and in call history; optionally a per-company view of how many contacts sit at each stage.
+
+Cost: one column (or a small table) in Supabase, one added field in the analysis JSON + prompt, and a small UI addition. No change to the call path. Sequenced after the demo is settled with the PM.
+
+## 4. Deferred scope (updated 2026-07-15)
 
 Originally the Step 5 guardrails doc: a boundary list so the work does not quietly expand. Updated with what has changed since 2026-07-01.
 
@@ -75,6 +87,7 @@ Originally the Step 5 guardrails doc: a boundary list so the work does not quiet
 | **UI-editable knowledge base** | KB files are edited on disk; the UI only views them | With the RAG work (section 1) |
 | **RAG retrieval** | Designed, not implemented | Trigger conditions in section 1 |
 | **AI/salesperson switching** | Designed, not implemented (section 2) | PM review of the section 2 design |
+| **Sales pipeline stage tracking** | Content only today; structured tracking proposed (section 3) | PM review; after the demo is settled |
 | **Speaker diarization** | Needed for clean transcripts once a human can join the call (section 2) | With the switching build |
 
 Every item above is legitimate future work; none are dismissed. Writing them down explicitly keeps "that's real, and it's next, not now" easy to say mid-implementation.

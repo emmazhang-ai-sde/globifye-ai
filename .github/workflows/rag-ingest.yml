@@ -1,0 +1,35 @@
+# RAG Step 5 - keep the vector DB fresh automatically.
+# Three triggers: daily safety net, instant on KB edits, manual button.
+# Fails safe: if a run breaks, the previous vectors stay in place and live
+# calls are unaffected (ingest is entirely off the call path).
+# Doc: design-docs-rag/rag-build-step-by-step/step5-ingest-github-action.md
+
+name: RAG ingest
+
+on:
+  schedule:
+    - cron: "0 9 * * *" # daily, 09:00 UTC (~03:00/04:00 US Central)
+  push:
+    branches: [main]
+    paths:
+      - "sip/knowledge-base/**"
+  workflow_dispatch:
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12" # the script needs only stdlib + requests
+
+      - run: pip install requests
+
+      - name: Run the ingest
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python -u rag/ingest.py

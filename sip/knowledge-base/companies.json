@@ -1,16 +1,16 @@
 {
-  "beauty": {
-    "display_name": "Belle Beauty Co.",
+  "pacificbeef": {
+    "display_name": "Pacific Beef Trading",
     "extension": "1000",
     "voice": "aura-2-thalia-en",
-    "kb_file": "beauty.md",
-    "blurb": "Salon & spa · hair, skin, nails, makeup"
+    "kb_file": "pacificbeef.md",
+    "blurb": "Beef exporter · USDA beef to international markets"
   },
-  "boutique": {
-    "display_name": "Maison Boutique",
+  "globifye": {
+    "display_name": "GlobiFYE",
     "extension": "2000",
     "voice": "aura-2-arcas-en",
-    "kb_file": "boutique.md",
-    "blurb": "Women's fashion boutique & personal styling"
+    "kb_file": "globifye.md",
+    "blurb": "AI voice agents for business · product: DialForge"
   }
 }

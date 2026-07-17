@@ -315,7 +315,7 @@ Two library options, both verified to actually exist before relying on them here
 | Python | `pip install ari` | Confirmed on [PyPI](https://pypi.org/project/ari/), latest `0.1.3`, published by the official `asterisk/asterisk_rest_libraries` GitHub org, not a random third-party package.<br>Any Python 3 works; this box already has Python 3.14.5 / pip 26.1.1 installed. |
 | Node | `npm install ari-client` | Confirmed present on the npm registry. |
 
-Either is fine for the MVP; pick whichever the person writing this script is more comfortable in. The saved script: [`sip/scripts/verify_ari.py`](../../sip/scripts/verify_ari.py) - it connects over a raw websocket + `requests` instead of the `ari` package, same behavior (connect to ARI, subscribe to `sip-mvp-app`, answer on `StasisStart`).
+Either is fine for the MVP; pick whichever the person writing this script is more comfortable in. The saved script: [`sip/scripts/verify_ari.py`](../../scripts/verify_ari.py) - it connects over a raw websocket + `requests` instead of the `ari` package, same behavior (connect to ARI, subscribe to `sip-mvp-app`, answer on `StasisStart`).
 
 `http://localhost:8088` only resolves for a script running on the same Mac as Docker; if run elsewhere on the LAN, swap in the Mac's LAN IP from section 2 above.
 

@@ -40,7 +40,7 @@ POST /ari/channels/externalMedia
 
 This tells Asterisk to send the channel's audio as raw RTP to UDP port 9000 on localhost, encoded `slin16` (16-bit PCM — close to what Deepgram/Modulate already expect).
 
-## 3. Implementation: [`sip/scripts/step2_stt_bridge.py`](../../../../sip/scripts/step2_stt_bridge.py)
+## 3. Implementation: [`sip/scripts/step2_stt_bridge.py`](../../scripts/step2_stt_bridge.py)
 
 Full copy of Amy's `agent-test6.py`. Only the audio *source* changed — everything downstream (Modulate connection, transcript queue, Groq, Deepgram Aura TTS) is untouched:
 

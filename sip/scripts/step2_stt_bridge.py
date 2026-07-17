@@ -176,8 +176,8 @@ current_channel_id = None
 # --- MULTI-COMPANY ADDITION (2026-07-10): every business GlobiFYE serves has
 # its own knowledge base + TTS voice, chosen per call by the number the caller
 # dialed. The dialplan passes the company key as a Stasis() argument
-# (Stasis(sip-mvp-app,beauty) for 1000, ...,boutique for 2000); see
-# extensions.conf [sip-mvp] and step6 doc section 7. sip/knowledge-base/
+# (Stasis(sip-mvp-app,pacificbeef) for 1000, ...,globifye for 2000); see
+# extensions.conf [sip-mvp] and the step 5 demo-console doc. sip/knowledge-base/
 # companies.json is the shared source of truth -- the demo UI server reads the
 # same file. ---
 _KB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "knowledge-base")
@@ -203,15 +203,28 @@ FALLBACK_LINE = (
 )
 
 
+# The agent is a sales rep. Each company's KB describes its product, pricing,
+# and a five-stage sales pipeline (Prospect, Contact, Demo, Proposal, Closing);
+# the prompt tells the agent to figure out the prospect's stage and move them
+# to the next one. (Making that stage a tracked field on the contact + a
+# post-call analysis output is a proposed follow-up: see step7 roadmap.)
+SALES_PROCESS = (
+    "Work the sales pipeline: figure out where the prospect is (Prospect, Contact, "
+    "Demo, Proposal, Closing) and guide the conversation toward the next stage, using "
+    "the playbook in the knowledge base. Ask the qualifying questions, handle objections "
+    "with the responses provided, and always end with a clear next step."
+)
+
+
 def _build_system_prompt(display_name, kb_text):
     return {
         "role": "system",
         "content": (
-            f"You are the AI phone agent for {display_name}, answering inbound customer calls. "
-            f"{AGENT_RULES} "
-            f"Everything you know about {display_name} is in the knowledge base below. Answer only "
-            f"from it -- never invent prices, policies, hours, products, or availability. "
-            f"If a customer asks something the knowledge base does not cover, reply exactly: "
+            f"You are an AI sales representative for {display_name}, speaking with a prospect on a sales call. "
+            f"{AGENT_RULES} {SALES_PROCESS} "
+            f"Everything you know about {display_name}'s product, pricing, and process is in the knowledge "
+            f"base below. Answer only from it -- never invent prices, product details, or terms. "
+            f"If the prospect asks something the knowledge base does not cover, reply exactly: "
             f"\"{FALLBACK_LINE}\" and then collect their name and phone number.\n\n"
             f"--- {display_name} KNOWLEDGE BASE ---\n{kb_text}"
         ),
@@ -220,20 +233,20 @@ def _build_system_prompt(display_name, kb_text):
 
 def _build_fallback_prompt(display_name):
     """Used when a company has no knowledge base connected yet (no kb_file, or
-    the file is missing/empty). The agent handles greetings and small talk,
+    the file is missing/empty). The agent can greet and qualify at a high level,
     but every detail question gets the fallback line + contact capture.
     Once a KB (or later the RAG library) exists for the company, the loader
     below picks it up automatically and this prompt is not used."""
     return {
         "role": "system",
         "content": (
-            f"You are the AI phone agent for {display_name}, answering inbound customer calls. "
+            f"You are an AI sales representative for {display_name}, speaking with a prospect on a sales call. "
             f"{AGENT_RULES} "
             f"You do not yet have a knowledge base for {display_name}, so you cannot answer any "
-            f"question about prices, products, services, hours, policies, or availability. "
+            f"question about the product, pricing, or terms. "
             f"For any such question, reply exactly: \"{FALLBACK_LINE}\" "
-            f"Then collect the caller's name and phone number, confirm them back, and let the "
-            f"caller know a team member will call back. Never invent details."
+            f"Then collect the prospect's name and phone number, confirm them back, and let them "
+            f"know a team member will follow up. Never invent details."
         ),
     }
 
@@ -261,7 +274,7 @@ def _load_companies():
 
 COMPANIES = _load_companies()
 _EXT_TO_COMPANY = {c["extension"]: key for key, c in COMPANIES.items()}
-DEFAULT_COMPANY = "beauty"
+DEFAULT_COMPANY = "pacificbeef"
 
 # Set per call from StasisStart (single active call only, per MVP scope).
 current_company = DEFAULT_COMPANY

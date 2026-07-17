@@ -18,7 +18,7 @@ The earlier version of this doc flagged a discrepancy. The 6/30 meeting confirme
 
 Go with file-based playback first. It's slower per-turn but far simpler to debug, and this MVP's only requirement is proving the loop works end to end, not hitting the latency budget yet.
 
-## 3. Implementation: [`sip/scripts/step2_stt_bridge.py`](../../../../sip/scripts/step2_stt_bridge.py) (same file as Step 2)
+## 3. Implementation: [`sip/scripts/step2_stt_bridge.py`](../../scripts/step2_stt_bridge.py) (same file as Step 2)
 
 Step 3 doesn't add a new file. It adds to the same script Step 2 already has running, since both share the live call/channel. **Everything upstream of TTS (`rtp_listener`, `modulate_worker`, `groq_worker`, `tts_queue`) is untouched.** What's new on top of Step 2:
 

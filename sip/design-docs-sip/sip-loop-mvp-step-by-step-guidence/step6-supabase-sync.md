@@ -32,7 +32,7 @@ sip_calls    1 row  (-> recording_id)      contacts  1 row (if the caller gave a
 
 Not written: `gpu_jobs` (the batch pipeline's own job queue; SIP analysis runs in-process).
 
-Schema: [`sip/demo-ui/supabase-schema.sql`](../../../../sip/demo-ui/supabase-schema.sql). Writes use the service key, which bypasses RLS.
+Schema: [`sip/demo-ui/supabase-schema.sql`](../../demo-ui/supabase-schema.sql). Writes use the service key, which bypasses RLS.
 
 ## 3. Configuration
 

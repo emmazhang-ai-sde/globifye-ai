@@ -3,7 +3,7 @@
 **Created: July 1, 2026**
 **Author: Shuyang**
 **Status: Draft — not yet started (research/decision complete, implementation not begun)**
-**Related doc:** [`sip-telephony-provider-options.md`](../ai-agent-design-docs/sip-telephony-provider-options.md) (provider-level comparison: Asterisk vs. FreePBX vs. SignalWire)
+**Related doc:** [`sip-telephony-provider-options.md`](./sip-telephony-provider-options.md) (provider-level comparison: Asterisk vs. FreePBX vs. SignalWire)
 
 ---
 
@@ -78,7 +78,7 @@ Post-MVP: a standalone web console over the proven loop. Two synced interfaces (
 Calls, transcripts, and analyses synced into the merged backend project, reusing the ai-pipeline's own tables. Best-effort and off the hot path. **Live and verified (2026-07-13);** schema alignment log in [Step 6.1](./sip-loop-mvp-step-by-step-guidence/step6.1-schema-alignment-0713.md).
 
 ### [Step 7 — Agent roadmap and deferred scope](./sip-loop-mvp-step-by-step-guidence/step7-agent-roadmap.md)
-Designs, not implementations: the knowledge base's RAG evolution (see the [RAG design doc](./rag-per-company-knowledge-base-design-doc.md)), AI/salesperson switching, and the full deferred-scope list (concurrency, streaming TTS, WebRTC, real auth, diarization, and more).
+Designs, not implementations: the knowledge base's RAG evolution (see the [RAG design doc](./rag-per-company-kb-design-doc.md)), AI/salesperson switching, and the full deferred-scope list (concurrency, streaming TTS, WebRTC, real auth, diarization, and more).
 
 ---
 

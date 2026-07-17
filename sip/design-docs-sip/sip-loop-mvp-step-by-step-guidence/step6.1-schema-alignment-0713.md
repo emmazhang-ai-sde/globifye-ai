@@ -49,17 +49,17 @@ The backend already had the right tables; all three were empty. Seeded and linke
 
 | Table | Rows created |
 |---|---|
-| `organizations` | `Belle Beauty Co.` (id 2), `Maison Boutique` (id 3) |
+| `organizations` | id 2 and id 3, one per demo business (currently `Pacific Beef Trading` / `GlobiFYE`; the demo tenants have been renamed a few times, see step 5) |
 | `agent_configs` | One AI agent per business (name, objective, tone, persona, TTS voice). `account_type` accepts only `sales` or `support`; used `sales` |
 | `contacts` | The caller, created when their name/phone is captured (below) |
 
 **The client's name.** We never had it: no caller ID, and no call had captured one. Instead of inventing one, the agent's own fallback line already asks for it, so the **on-demand analysis now also extracts `caller_name` / `caller_phone`** from the conversation (no extra LLM cost -- same call). When found it writes a `contacts` row, sets `recordings.contact_id` + `caller_number`, and stamps the name onto that caller's transcript turns. If the caller never says their name, nothing is written.
 
-A transcript row now reads:
+A transcript row now reads (illustrative):
 
 ```
-client | Jordan Patel              | Belle Beauty Co. | Hi, do you sell hair extensions?
-agent  | Belle Beauty Co. AI Agent | Belle Beauty Co. | I'm not sure I have the details you're looking for...
+client | Jordan Patel              | Pacific Beef Trading | Which cuts do you carry, and can you do Halal?
+agent  | Pacific Beef Trading AI Agent | Pacific Beef Trading | Chuck, brisket, loin, round, and more; Halal programs are available...
 ```
 
 The 13 calls made before this change keep showing no client name -- accurate, since none of those callers gave one.
@@ -72,5 +72,5 @@ The 13 calls made before this change keep showing no client name -- accurate, si
 
 - Backfill pushed all local calls; zero sync warnings.
 - 14 `recordings` from SIP, each linked to its organization and agent config; 46 `transcript` rows all carrying `speaker_role`, `speaker_name`, `organization_id`.
-- Caller extraction end-to-end: a call where the caller says "my name is Jordan Patel and my number is 555-0142" produced a `contacts` row, a linked `recordings.contact_id`, and both of that caller's transcript turns named.
+- Caller extraction end-to-end: a call where the caller states a name and phone number ("Jordan Patel", "555-0142") produced a `contacts` row, a linked `recordings.contact_id`, and both of that caller's transcript turns named.
 - Sync is idempotent: re-running reuses the existing recording by `sip_session_id` instead of duplicating. `analysis` has exactly one row per recording.
