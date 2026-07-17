@@ -117,14 +117,15 @@ git remote get-url --push --all company  # 2 push addresses  (company + personal
 > **What this gives you:**
 > A remote's fetch address and push address are separate. `company` now fetches from one place (the shared repo) but pushes to two (shared + personal). That is the "pull from one place, push to both places" rule.
 
-### Step 5. Set the commit identity
+### Step 5. Set the commit identity and pull behavior
 
 ```bash
 git config user.name  "Shuyang Zhang"
 git config user.email "emma.zhang@globifye.com"
+git config pull.rebase false   # divergent pulls use merge, not rebase (see Troubleshooting)
 ```
 
-The email is what attributes commits to the globifye GitHub account. This is a local setting, so it only affects this repo.
+The email is what attributes commits to the globifye GitHub account. `pull.rebase false` makes `git pull` merge (not rebase) when the branch has diverged, so a first divergent pull does not stop and ask which strategy to use. These are local settings, so they only affect this repo.
 
 ### Step 6. Copy the environment files from the old folder
 
@@ -201,20 +202,27 @@ When git pushes to `company`, it asks Keychain for the `shuyangzhang-globifye` t
 
 ---
 
-## 6. Troubleshooting (real errors hit during setup)
+## 6. Troubleshooting (real errors and fixes)
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
 | `remote: Repository not found` (404) on push | git authenticated as the wrong account (`shuyangzhang-ai-sde`), which has no access to the private `dial-forge` | Put the authorized username in the remote URL (Step 2), push again, enter that account's PAT |
-| `! [rejected] main -> main (fetch first)` | The remote already had commits (the frontend landing page) that the local repo did not have | Do not force-push. Merge the remote first, then push (see below) |
+| `! [rejected] main -> main (fetch first)` | A teammate pushed commits to the company repo that you do not have locally | Do not force-push. `git pull company main`, then push again (see below) |
+| `fatal: Need to specify how to reconcile divergent branches` on `git pull` | Both sides gained commits the other lacks (branches diverged); newer git will not guess merge vs rebase | Use merge, not rebase: run `git config pull.rebase false` once (Step 5 sets this), then pull again |
 | `remote: This repository moved` | The personal repo was renamed on GitHub (`GlobiFYE-sde-ai`, now `globifye-ai`) | Update the remote URL to the new name with `git remote set-url` |
 
-**If a push is rejected with "fetch first"** (the remote has commits you lack):
+> **The dual push is not atomic:**
+> `git push company main` pushes to the company repo and the personal mirror as two independent steps. If a teammate pushed first, the company push is rejected while the personal push still succeeds, so the two repos are out of sync for a moment. This is expected, not a bug. Pulling and pushing again lines them back up.
+
+**When a push is rejected because a teammate pushed first:**
 
 ```bash
-git pull company main --allow-unrelated-histories --no-edit   # merge, do not force
-git push company main
+git pull company main --no-edit   # merge their work with yours (creates a merge commit)
+git push company main             # both repos line up again
 ```
+
+> **Why merge, not rebase:**
+> Your commit may already be on the personal mirror. Rebase would rewrite it into a new commit, so the mirror and your local copy would no longer match, and the next push to the mirror would be rejected. Merge leaves existing commits untouched and just adds a merge commit on top.
 
 > **Why never force-push here:**
 > The shared repo holds other people's work. `git push --force` overwrites remote history and would delete the frontend team's commits. Always merge or pull first, so the push is a fast-forward (a clean append onto existing history).
