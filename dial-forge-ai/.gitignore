@@ -1,12 +1,13 @@
 # Ignore MacOS system files
 .DS_Store
 
-# Personal notes
-shuyang/
-
 GlobiFYE/.claude/settings.local.json
 
 # Ignore virtual environment directories
 venv/
 __pycache__/
 sip/demo-ui/call-history/
+
+
+# Ignore log files
+*.log
