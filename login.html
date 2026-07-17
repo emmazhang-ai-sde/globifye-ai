@@ -1,0 +1,228 @@
+<!DOCTYPE html><html class="dark" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Sign In | DialForge</title>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Syne (Headings), DM Sans (Body), JetBrains Mono (Data) -->
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&amp;family=DM+Sans:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols for Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "fire-orange": "#FF7A1C",
+            "fire-red": "#FF2200",
+            "ai-purple": "#9B6DFF",
+            "surface-dark": "#0D0E15",
+            "surface-card": "rgba(30, 31, 39, 0.78)",
+            "on-surface": "#E3E1EC",
+            "on-surface-variant": "#A8A8B3",
+          },
+          fontFamily: {
+            "syne": ["Syne", "sans-serif"],
+            "dm-sans": ["DM Sans", "sans-serif"],
+          },
+          backgroundImage: {
+            'fire-gradient': 'linear-gradient(135deg, #FF7A1C 0%, #FF2200 100%)',
+          }
+        },
+      },
+    }
+  </script>
+<style data-purpose="custom-effects">
+    body {
+      background-color: #0d0e15;
+      overflow-x: hidden;
+    }
+
+    /* Glassmorphism Effect */
+    .liquid-glass {
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Dot Grid Background */
+    .dot-grid {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+
+    /* Animated Mesh Gradients */
+    .mesh-gradient {
+      background: radial-gradient(at 0% 0%, rgba(255, 122, 28, 0.12) 0px, transparent 50%),
+                  radial-gradient(at 100% 100%, rgba(155, 109, 255, 0.1) 0px, transparent 50%),
+                  radial-gradient(at 100% 0%, rgba(255, 34, 0, 0.05) 0px, transparent 50%);
+    }
+
+    /* Floating Orbs */
+    .floating-orb {
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.25;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Button Shimmer Effect */
+    .shimmer-btn {
+      position: relative;
+      overflow: hidden;
+    }
+    .shimmer-btn::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+      transform: rotate(45deg);
+      transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .shimmer-btn:hover::after {
+      left: 120%;
+    }
+
+    /* Custom Focus States */
+    input:focus {
+      outline: none;
+      border-color: #FF7A1C !important;
+      box-shadow: 0 0 0 2px rgba(255, 122, 28, 0.2);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center font-dm-sans text-on-surface antialiased p-4">
+<!-- BEGIN: Background Atmosphere -->
+<div class="fixed inset-0 dot-grid pointer-events-none"></div>
+<div class="fixed inset-0 mesh-gradient pointer-events-none"></div>
+<div class="floating-orb bg-fire-orange top-[-200px] left-[-200px]" id="orb-orange" style="transform: translate(24.7266px, 9.47712px);"></div>
+<div class="floating-orb bg-ai-purple bottom-[-200px] right-[-100px]" id="orb-purple" style="transform: translate(-14.8359px, -5.68627px);"></div>
+<!-- END: Background Atmosphere -->
+<!-- BEGIN: Main Container -->
+<main class="relative z-10 w-full max-w-[440px]" data-purpose="login-canvas">
+<!-- BEGIN: Glass Login Card -->
+<div class="liquid-glass rounded-[2rem] p-8 md:p-12 flex flex-col items-center">
+<!-- BEGIN: Branding -->
+<header class="mb-10 text-center" data-purpose="brand-identity">
+<div class="mb-6 inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#25262E] border border-white/10 shadow-xl">
+<span class="material-symbols-outlined text-3xl text-fire-orange" style="font-variation-settings: &quot;FILL&quot; 1;">
+            offline_bolt
+          </span>
+</div>
+<h1 class="font-syne text-4xl md:text-5xl font-extrabold tracking-tighter bg-gradient-to-r from-fire-orange to-[#FFB4A2] bg-clip-text text-transparent">
+          DialForge
+        </h1>
+<p class="text-sm font-medium text-on-surface-variant mt-3 tracking-wide">
+          High-Velocity Sales Performance
+        </p>
+</header>
+<!-- END: Branding -->
+<!-- BEGIN: Sign In Section -->
+<section class="w-full" data-purpose="auth-form">
+<h2 class="font-syne text-3xl font-bold mb-8 text-center text-white">Sign In</h2>
+<form class="space-y-5" id="loginForm">
+<!-- Email Field -->
+<div class="space-y-2">
+<label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant ml-1">Work Email</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">mail</span>
+<input class="w-full bg-[#1A1B23] border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-sm transition-all focus:ring-0" placeholder="name@company.com" required="" type="email">
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-2">
+<div class="flex justify-between items-center ml-1">
+<label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">Password</label>
+<a class="text-[10px] font-bold text-fire-orange hover:text-fire-red transition-colors uppercase tracking-wider" href="#">Forgot password?</a>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">lock</span>
+<input class="w-full bg-[#1A1B23] border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-sm transition-all focus:ring-0" placeholder="••••••••" required="" type="password">
+</div>
+</div>
+<!-- CTA Button -->
+<button class="shimmer-btn w-full mt-2 bg-fire-gradient hover:brightness-110 active:scale-[0.98] py-4 rounded-xl font-bold text-xs text-white uppercase tracking-[0.15em] flex items-center justify-center gap-2 transition-all shadow-lg shadow-fire-red/20" type="submit"><a href="Dashbaord.html" class="flex items-center justify-center gap-2 w-full h-full">
+            Launch Dashboard
+            <span class="material-symbols-outlined text-sm font-bold">arrow_forward</span>
+</a></button>
+</form>
+<!-- Divider -->
+<div class="flex items-center gap-4 my-8">
+<div class="h-[1px] flex-1 bg-white/10"></div>
+<span class="text-[9px] font-bold text-on-surface-variant/50 tracking-[0.25em] uppercase">Or Enterprise</span>
+<div class="h-[1px] flex-1 bg-white/10"></div>
+</div>
+<!-- SSO Button -->
+<button class="w-full py-3.5 rounded-xl border border-white/10 bg-white/5 font-bold text-[11px] text-on-surface uppercase tracking-wider flex items-center justify-center gap-3 hover:bg-white/10 transition-all active:scale-[0.98]">
+<!-- Using placeholder for SSO icon as requested -->
+<img alt="SSO Provider" class="w-5 h-5 opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAO0LDqOPpcCc4y3lwomgt1vV5CLapIJdmkr2iem2V2Lzdbdk26doPwZNFk3ltRN4c_R0cT-afbri1B2ZVrnRsLnW3cWqeF95_ULB9q0SqTeuBJi7dj9kbTEBfhQEf_1bwq2Pt3qVvtJTu3zmNxJGHyOn1tdhL4iko8Py9FV_u_soGgKjBLHG94UbV3gdGeCJNaloJ94gdNfSb3dzpctsU5tOJG2zaNvpbd7c9j2sl90loOjZz3vtz-L38NYlzC6nKOcaGIQbxcqJI">
+          Continue with SSO / SAML
+        </button>
+<!-- Footer Link -->
+<div class="mt-10 text-center">
+<p class="text-sm text-on-surface-variant">Need to switch roles? <a class="text-fire-orange font-bold hover:underline underline-offset-4 ml-1" href="{{DATA:SCREEN:SCREEN_61}}">Sign Up</a></p>
+</div>
+</section>
+<!-- END: Sign In Section -->
+</div>
+<!-- END: Glass Login Card -->
+<!-- BEGIN: System Footer Links -->
+<footer class="mt-8 flex justify-center gap-6 opacity-40 hover:opacity-60 transition-opacity">
+<a class="text-[10px] font-bold uppercase tracking-widest hover:text-white" href="#">Privacy Policy</a>
+<a class="text-[10px] font-bold uppercase tracking-widest hover:text-white" href="#">Terms of Service</a>
+<a class="text-[10px] font-bold uppercase tracking-widest hover:text-white" href="#">System Status</a>
+</footer>
+<!-- END: System Footer Links -->
+</main>
+<!-- END: Main Container -->
+<!-- BEGIN: Interactivity Script -->
+<script data-purpose="interactive-animations">
+    // Subtle mouse parallax for background orbs
+    document.addEventListener('mousemove', (e) => {
+      const x = (e.clientX / window.innerWidth) - 0.5;
+      const y = (e.clientY / window.innerHeight) - 0.5;
+      
+      const orangeOrb = document.getElementById('orb-orange');
+      const purpleOrb = document.getElementById('orb-purple');
+      
+      orangeOrb.style.transform = `translate(${x * 50}px, ${y * 50}px)`;
+      purpleOrb.style.transform = `translate(${x * -30}px, ${y * -30}px)`;
+    });
+
+    // Form Handling Simulation
+    const loginForm = document.getElementById('loginForm');
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const submitBtn = loginForm.querySelector('button[type="submit"]');
+      const originalContent = submitBtn.innerHTML;
+      
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `
+        <span class="material-symbols-outlined animate-spin text-sm">sync</span>
+        Authenticating...
+      `;
+      
+      setTimeout(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalContent;
+      }, 2000);
+    });
+  </script>
+<!-- END: Interactivity Script -->
+
+
+
+
+
+
+
+
+</body></html>
