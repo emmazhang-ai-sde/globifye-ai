@@ -1,0 +1,321 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DialForge Onboarding | Connect Your Stack</title>
+<!-- Tailwind CSS v3 CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts and Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&amp;family=DM+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style data-purpose="custom-theme-config">
+    /* Custom font families as defined in the project style guide */
+    :root {
+      --font-syne: 'Syne', sans-serif;
+      --font-dm-sans: 'DM Sans', sans-serif;
+    }
+  </style>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "background": "#12131a",
+            "surface-container": "#1e1f27",
+            "surface-container-low": "#1a1b23",
+            "on-surface": "#e3e1ec",
+            "on-surface-variant": "#e5beb4",
+            "fire-accent": "#FFAD1C",
+            "fire-gradient-start": "#FF7A1C",
+            "fire-gradient-end": "#FFAD1C",
+            "fire-gradient": "#FF7A1C",
+            "tertiary": "#00e478",
+            "ai-purple": "#9B6DFF",
+            "outline": "#ac8980",
+            "on-primary": "#611200",
+          },
+          fontFamily: {
+            "syne": ["Syne", "sans-serif"],
+            "dm-sans": ["DM Sans", "sans-serif"],
+            "mono-data": ["JetBrains Mono"],
+            "hero-h1": ["Syne"],
+            "body-base": ["DM Sans"],
+            "small-label": ["DM Sans"],
+            "button-text": ["DM Sans"],
+            "section-header": ["Syne"],
+          },
+          spacing: {
+            "gap-20": "20px",
+            "gap-16": "16px",
+            "gap-12": "12px",
+            "gap-8": "8px",
+            "margin-standard": "16px",
+          }
+        },
+      },
+    }
+  </script>
+<style data-purpose="visual-effects">
+    /* Glassmorphism effects */
+    .glass-card {
+      background: rgba(30, 31, 39, 0.78);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.05);
+    }
+    
+    .glass-hi {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Glow and Gradients */
+    .fire-glow {
+      box-shadow: 0 0 40px rgba(255, 122, 28, 0.15), 0 0 80px rgba(255, 122, 28, 0.05);
+    }
+
+    .text-fire-gradient {
+      background: linear-gradient(135deg, #FF7A1C 0%, #FFAD1C 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+
+    /* Noise Texture Overlay */
+    .fractal-noise {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      opacity: 0.03;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      z-index: 9999;
+    }
+
+    /* Animations */
+    @keyframes pulse-fire {
+      0%, 100% { transform: scale(1); opacity: 0.35; }
+      50% { transform: scale(1.2); opacity: 0.8; }
+    }
+    .pulse-dot {
+      animation: pulse-fire 2s infinite ease-in-out;
+    }
+
+    .shimmer {
+      position: relative;
+      overflow: hidden;
+    }
+    .shimmer::after {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(to bottom right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+      transform: rotate(45deg);
+      transition: all 0.5s;
+      opacity: 0;
+    }
+    .shimmer:hover::after {
+      left: 100%;
+      top: 100%;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-dm-sans overflow-x-hidden antialiased">
+<div class="fractal-noise"></div>
+<!-- BEGIN: Header -->
+<header class="fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-xl border-b border-white/10 px-margin-standard h-16 flex items-center justify-between" data-purpose="main-navigation">
+<div class="flex items-center gap-gap-12">
+<span class="hidden md:block h-4 w-[1px] bg-white/20"></span>
+<span class="font-hero-h1 text-2xl font-extrabold text-white">Dial<span class="text-fire-gradient">Forge</span></span>
+</div>
+<div class="flex items-center gap-gap-16">
+<span class="text-on-surface-variant/60 font-button-text text-sm text-button-text tracking-wider font-bold uppercase">Step 5 of 6</span>
+<div class="w-24 h-1.5 bg-white/10 rounded-full overflow-hidden">
+<div class="w-5/6 h-full bg-fire-gradient rounded-full shadow-[0_0_10px_#FF7A1C]"></div>
+</div>
+</div>
+</header>
+<!-- BEGIN: Onboarding Container -->
+<main class="min-h-screen relative flex flex-col items-center pt-12 md:pt-16 px-6 pb-40">
+
+<!-- BEGIN: Title Section -->
+<div class="text-center mb-12 max-w-2xl" data-purpose="page-heading">
+<h1 class="font-syne text-4xl md:text-5xl lg:text-6xl mb-4 tracking-tighter font-extrabold">Connect your stack</h1>
+<p class="text-on-surface-variant text-lg opacity-80">Auto-sync calls, contacts, and deals with the platforms you use every day.</p>
+</div>
+<!-- END: Title Section -->
+<!-- BEGIN: Success Notification -->
+<div class="w-full max-w-4xl mb-10" data-purpose="active-integrations-status">
+<div class="glass-card glass-hi rounded-xl p-4 flex items-center gap-4 border-tertiary/20">
+<div class="w-10 h-10 rounded-full bg-tertiary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary" style="font-variation-settings: &quot;FILL&quot; 1;">check_circle</span>
+</div>
+<div class="flex-1">
+<p class="font-bold text-sm text-tertiary">2 Integrations active</p>
+<p class="text-xs text-on-surface-variant/60">Slack and HubSpot are successfully synchronized.</p>
+</div>
+<div class="hidden md:flex -space-x-2">
+<!-- Active logos stack -->
+<div class="w-8 h-8 rounded-full border-2 border-surface-container bg-surface-container flex items-center justify-center p-1.5">
+<img alt="Slack" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVQFX5I4U8J8M_jV_jSVRzycRUPWub9P8QWAo4eX5ey_CKCRlnV-EhjjbgOJ7v4E1erfIrqRXohx-SjByMO5El4VE085AUhBGs6irgf-bOZLbN4kqkBdIHG7UFiCuwYNsEIg2x-K6n0NnvLYnDda2jFPnQT_JAAXvYZsmphIL7kbF8IIf8kyhPbWPQuQN6pcGKNDMqT55DWL_CJEgvgZMQhrZ9RD-XW0zbs2kP_wnZrADyWxJjiYspsZKtNjvZvpJdZPV9SK1l8SE">
+</div>
+<div class="w-8 h-8 rounded-full border-2 border-surface-container bg-surface-container flex items-center justify-center p-1.5">
+<img alt="HubSpot" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAp0PcXZfVSpwsq8OFv6JPAEq9XY2P_Xqs0Kbhon4oxEb7fOV_U6qvwv1fXyzi25gbMSnp1aXp-r17YtGN8ToGShDgjCEZk6mAcNPDY7p1EPPtZCPdDwyQtxE6dAp_gqEB-BF7YFa1Odfdplpb1Ni50fhPVk8bDkNIaecVYdeBY9lNRb2jJibZPCile7wwBz8g4h3egy7xZ6ycz1DpWKv190fdFeTlXuYF2D_uV6Bk8iRkiM7rGGngP0Rhl7J0SIkIP_smvDNjufLs">
+</div>
+</div>
+</div>
+</div>
+<!-- END: Success Notification -->
+<!-- BEGIN: Integrations Grid -->
+<div class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-purpose="integrations-bento-grid">
+<!-- HubSpot Card (Connected) -->
+<div class="glass-card glass-hi rounded-2xl p-6 border-fire-accent/20 group transition-all duration-300 hover:scale-[1.02]">
+<div class="flex justify-between items-start mb-6">
+<div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center p-2.5">
+<img alt="HubSpot Logo" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8Ua2AZ41cEcTRyzTGVyo9TKD_ZT0TK5e5M5oY-cjISXkX3dOmzwuqYfbkqIMmIPCcxctsRm_p7X0imiKzrvNvMPQtydsfSTBwyZq4ZhdNYUN6Aa0KV_Q3fYV-WKM3N0emGTPrmX8N33-VRQL7SyXN9SIlix7Itz4sph5TlmPWX8CWmkRj0VpJ39cgTZnTlCXOVvqkFRs_5WHYsueoKAmmm9E9XqqXff9ABfTlqmY0tI09TVc-xIBzYjS_YPjSbhH6wx9ZP9dGNcUfLCI">
+</div>
+<span class="bg-tertiary/10 text-tertiary text-[10px] font-extrabold px-2 py-1 rounded-full border border-tertiary/20">CONNECTED</span>
+</div>
+<h3 class="font-syne text-xl font-bold mb-1">HubSpot</h3>
+<p class="text-xs text-on-surface-variant/60 mb-6">Sync contacts, deals, and activities automatically.</p>
+<button class="w-full py-2.5 rounded-lg text-sm font-semibold border border-outline/20 text-on-surface-variant hover:bg-white/5 transition-all">Configure</button>
+</div>
+<!-- Salesforce Card (Toggleable) -->
+<div class="glass-card glass-hi rounded-2xl p-6 border-white/5 group transition-all duration-300 hover:scale-[1.02]">
+<div class="flex justify-between items-start mb-6">
+<div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center p-2.5">
+<img alt="Salesforce" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD4ucCoOWkdrEOvVFKGht7jRm2GyWaFisj0x7UdfwqLguwzUEMCx5Stuu1Gr12cZOrD2z53doCKTBIJvOM4FgqEg_yrD54RZdul0A03cGbdKGGAakzu3YBUfJpzMw12PR-FHyMx-NimtI-c_BJQEw46zZ57a_-WqGgAzn9QhOq4ElKtjg1lpKaz-yi86EZnBu8WWSf51y0enSsh5e2Z77eC8hsU1damzXoGBxifBO2oJDTgh_iRJfM-YUF_d1cbojbbJ8vRcjIbOtCWxrQ">
+</div>
+<!-- Toggle Switch Component -->
+<div class="w-10 h-6 bg-white/5 rounded-full relative cursor-pointer flex items-center px-1 transition-colors" data-purpose="toggle-integration">
+<div class="w-4 h-4 bg-white/20 rounded-full transition-transform"></div>
+</div>
+</div>
+<h3 class="font-syne text-xl font-bold mb-1">Salesforce</h3>
+<p class="text-xs text-on-surface-variant/60 mb-6">Deep bidirectional sync for enterprise CRM data.</p>
+<button class="w-full py-2.5 rounded-lg text-sm font-semibold bg-fire-gradient text-on-primary shimmer">Connect</button>
+</div>
+<!-- Slack Card (Connected) -->
+<div class="glass-card glass-hi rounded-2xl p-6 border-fire-accent/20 group transition-all duration-300 hover:scale-[1.02]">
+<div class="flex justify-between items-start mb-6">
+<div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center p-2.5">
+<img alt="Slack" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJNR_fkjsLiQhq6uYBP7weXeUq0PQri7qIInxE8UorunVRaB7byRahf4U6s3DqNpkQRFPCRqHF0UepY4ABQFKj0jJpepIKLWN35trk-3CxnMWgP1ohMksI-kz9m9LT32Szw43Fvb8ZNb2k-P7JNNDEQNm-gZ8QNSIClR35jo9XXUl2DN8QBpDItOiFpzwJi_Oo9Y-Cyv8ZPIHQajpLzru-fWaaqCOlnq4AHgO2q4D1IpcYOhsMYnTIhxcWWWLFwRaYztjsh5bGZIF4GSc">
+</div>
+<span class="bg-tertiary/10 text-tertiary text-[10px] font-extrabold px-2 py-1 rounded-full border border-tertiary/20">CONNECTED</span>
+</div>
+<h3 class="font-syne text-xl font-bold mb-1">Slack</h3>
+<p class="text-xs text-on-surface-variant/60 mb-6">Get real-time call alerts and coaching notifications.</p>
+<button class="w-full py-2.5 rounded-lg text-sm font-semibold border border-outline/20 text-on-surface-variant hover:bg-white/5 transition-all">Configure</button>
+</div>
+<!-- Apollo.io Card -->
+<div class="glass-card glass-hi rounded-2xl p-6 border-white/5 group transition-all duration-300 hover:scale-[1.02]">
+<div class="flex justify-between items-start mb-6">
+<div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center p-2.5">
+<img alt="Apollo.io" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoMg6-lGdkQGLKRr6k-_2IzIrZML52KwuafxbFYyJmZ3vnEnNI7XzbIyXYBtjKlqKWL9r2zMvmusuRKVTAEus0LSLAAbSvD29nj8y40iBDsDB6NYd1nd3EWTpPr0W5LTxz1ZeFFiQOIwICn3kLhnYxmfLUtTJdX5QKczlpK7dQEzWhjVPaXIUXQF3pKETgZvDlXVLAt4pt6LUGpZWogfl7V_cbGh3gzqmDrDex67KXCA6HwHjRnmsAwsTpv77u4i3T734H0Q7DpFRBg48">
+</div>
+<div class="w-10 h-6 bg-white/5 rounded-full relative cursor-pointer flex items-center px-1" data-purpose="toggle-integration">
+<div class="w-4 h-4 bg-white/20 rounded-full transition-transform"></div>
+</div>
+</div>
+<h3 class="font-syne text-xl font-bold mb-1">Apollo.io</h3>
+<p class="text-xs text-on-surface-variant/60 mb-6">Enrich your call logs with deep prospect intelligence.</p>
+<button class="w-full py-2.5 rounded-lg text-sm font-semibold bg-white/5 text-on-surface-variant hover:bg-white/10 transition-all">Connect</button>
+</div>
+<!-- Calendly Card -->
+<div class="glass-card glass-hi rounded-2xl p-6 border-white/5 group transition-all duration-300 hover:scale-[1.02]">
+<div class="flex justify-between items-start mb-6">
+<div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center p-2.5">
+<img alt="Calendly" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwSDuFe5pbbVBWu_bc8zqo44-S2cGj18Afae3kZmK59-Y83faoKV3RFafjSymt3RAsBamrdx79rJm2Jmz3Hd31NA6lQ0A680CF2uLsbbCzSq3FgMZ-NIomsq_lWwkxxqq_SPMjhl52pbCG0it9ZDiAQ0wwZRYPdaFOkacg0egHEmzLBnXnyBpuRSvgxqH5VAo4w0FQjMtQ4wJZ8VkXO9uv4eiLWNGYXOstbJcYExoIDKjPIkT34u0Ack2GIrrpvDLjd9CeLWFF7GGJ-w0">
+</div>
+<div class="w-10 h-6 bg-white/5 rounded-full relative cursor-pointer flex items-center px-1" data-purpose="toggle-integration">
+<div class="w-4 h-4 bg-white/20 rounded-full transition-transform"></div>
+</div>
+</div>
+<h3 class="font-syne text-xl font-bold mb-1">Calendly</h3>
+<p class="text-xs text-on-surface-variant/60 mb-6">Schedule follow-ups directly from your dialer.</p>
+<button class="w-full py-2.5 rounded-lg text-sm font-semibold bg-white/5 text-on-surface-variant hover:bg-white/10 transition-all">Connect</button>
+</div>
+<!-- Custom Webhooks Card -->
+<div class="glass-card glass-hi rounded-2xl p-6 border-white/5 group transition-all duration-300 hover:scale-[1.02] border-dashed">
+<div class="flex justify-between items-start mb-6">
+<div class="w-12 h-12 rounded-xl bg-ai-purple/10 flex items-center justify-center">
+<img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLUds37ySzAuBtuFwb7ADEu7YQbHxXjPt3dJHS7TVI-u0Ly0yJCxuSk3zm6TNxjzP4nhdEXnO-ihJ9jsGIKhKAZiZKFIpCGcszofG_u4erB-PhuOeX5uvENc5OV4yCTCx9bZJ3Ub36h8BOJXN8vmkpgR8-EpeRdyReasV3XCL2BdshkyAcllrhxX5nMQqP0ZI67Y3ApTNZ3GDBJAf-0nioah8NgOUUm0z1aPKChgTr_9kACXjSU5-MRbVHT4bjltAv5GJmv2lbJbugPJs" alt="Webhooks Logo" class="w-full h-full object-contain">
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/40 cursor-pointer hover:text-on-surface-variant transition-colors">more_horiz</span>
+</div>
+<h3 class="font-syne text-xl font-bold mb-1">Webhooks</h3>
+<p class="text-xs text-on-surface-variant/60 mb-6">Build custom workflows for any other platform.</p>
+<button class="w-full py-2.5 rounded-lg text-sm font-semibold bg-white/5 text-on-surface-variant hover:bg-white/10 border border-white/5 transition-all">Developer API</button>
+</div>
+</div>
+<!-- END: Integrations Grid -->
+<!-- BEGIN: Background Orbs -->
+<div class="fixed top-[-10%] left-[-5%] w-[40%] h-[40%] bg-fire-accent/10 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+<div class="fixed bottom-[10%] right-[-10%] w-[50%] h-[50%] bg-fire-accent/5 rounded-full blur-[150px] pointer-events-none -z-10"></div>
+<!-- END: Background Orbs -->
+<!-- BEGIN: Sticky Action Footer -->
+<div class="fixed bottom-0 left-0 w-full p-6 md:p-10 z-50 pointer-events-none">
+<div class="max-w-5xl mx-auto glass-card glass-hi rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 fire-glow pointer-events-auto">
+<!-- Engine Status Indicator -->
+<div class="flex items-center gap-3">
+<div class="relative flex items-center justify-center w-4 h-4">
+<div class="w-2 h-2 bg-fire-accent rounded-full pulse-dot absolute"></div>
+<div class="w-2 h-2 bg-fire-accent rounded-full relative z-10"></div>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-[0.2em] text-fire-accent/90">Syncing Engine Active</span>
+</div>
+<!-- Footer Buttons -->
+<div class="flex items-center gap-6 w-full md:w-auto">
+<button class="px-6 py-3 rounded-lg text-sm font-bold text-on-surface-variant hover:text-on-surface transition-colors" onclick="window.location.href='onboardingStep6.html'">Skip for now</button>
+<button class="flex-1 md:flex-none px-12 py-3.5 rounded-xl text-sm font-bold bg-fire-gradient text-on-primary shimmer shadow-[0_10px_30px_rgba(255,122,28,0.3)] active:scale-95 transition-all" onclick="window.location.href='onboardingStep6.html'">Save &amp; Continue</button>
+</div>
+</div>
+</div>
+<!-- END: Sticky Action Footer -->
+</main>
+<!-- END: Onboarding Container -->
+<!-- BEGIN: Interactive Scripts -->
+<script data-purpose="toggle-interactions">
+    // Logic for the integration toggle switches
+    document.querySelectorAll('[data-purpose="toggle-integration"]').forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        const knob = toggle.querySelector('div');
+        const isActive = toggle.classList.contains('bg-fire-gradient');
+        
+        if (!isActive) {
+          // Turn ON
+          knob.classList.remove('bg-white/20', 'translate-x-0');
+          knob.classList.add('bg-on-primary', 'translate-x-4');
+          toggle.classList.remove('bg-white/5');
+          toggle.classList.add('bg-fire-gradient');
+        } else {
+          // Turn OFF
+          knob.classList.add('bg-white/20', 'translate-x-0');
+          knob.classList.remove('bg-on-primary', 'translate-x-4');
+          toggle.classList.add('bg-white/5');
+          toggle.classList.remove('bg-fire-gradient');
+        }
+      });
+    });
+
+    // General button scale reaction
+    document.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.style.transform = 'scale(0.97)';
+        setTimeout(() => {
+          btn.style.transform = '';
+        }, 100);
+      });
+    });
+  </script>
+<!-- END: Interactive Scripts -->
+
+
+
+
+
+
+</body></html>
