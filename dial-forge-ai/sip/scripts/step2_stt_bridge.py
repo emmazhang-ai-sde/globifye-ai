@@ -73,7 +73,7 @@ def log(tag, text="", ms=None, blank_before=0, blank_after=0):
 # event stream the terminal shows. Decoupled by a queue + daemon sender
 # thread: if the UI server isn't running, each POST fails fast and the event
 # is dropped -- the call loop never blocks or slows down because of the UI. ---
-UI_EVENTS_URL = "http://localhost:8090/internal/events"
+UI_EVENTS_URL = "http://localhost:8400/internal/events"
 _ui_queue = queue.Queue()
 
 

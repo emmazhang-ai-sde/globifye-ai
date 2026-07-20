@@ -14,12 +14,12 @@ npm install        # first time only
 npm run dev
 ```
 
-Then open http://localhost:3000 in a browser.
+Then open http://localhost:3400 in a browser.
 
 **Verify it is up:**
 
 ```bash
-curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3400
 ```
 
 Expected output: `200`.
@@ -28,7 +28,7 @@ Other scripts (from `package.json`):
 
 | Command | What it does |
 |---------|--------------|
-| `npm run dev` | Dev server with hot reload on port 3000 |
+| `npm run dev` | Dev server with hot reload on port 3400 |
 | `npm run build` | Production build |
 | `npm run start` | Serve the production build (run `build` first) |
 | `npm run lint` | ESLint |

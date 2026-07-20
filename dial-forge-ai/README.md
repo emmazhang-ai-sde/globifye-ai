@@ -15,8 +15,8 @@ There are three frontend areas in this repo. Each has its own README with full s
 
 | Frontend | Start command (from repo root) | URL | Details |
 |----------|-------------------------------|-----|---------|
-| SIP demo console | `venv/bin/python sip/demo-ui/demo_ui_server.py` | http://localhost:8090 | [sip/demo-ui/README.md](sip/demo-ui/README.md) |
-| AI pipeline web UI | `cd ai-pipeline && npm run dev` | http://localhost:3000 | [ai-pipeline/README.md](ai-pipeline/README.md) |
+| SIP demo console | `venv/bin/python sip/demo-ui/demo_ui_server.py` | http://localhost:8400 | [sip/demo-ui/README.md](sip/demo-ui/README.md) |
+| AI pipeline web UI | `cd ai-pipeline && npm run dev` | http://localhost:3400 | [ai-pipeline/README.md](ai-pipeline/README.md) |
 | Frontend team references | none, open the `.html` files directly in a browser | n/a | [design-docs/frontend-sync/README.md](design-docs/frontend-sync/README.md) |
 
 Notes:

@@ -8,7 +8,7 @@ Design docs: [`design-docs-sip/`](design-docs-sip/). This README is just how to 
 Softphone (Linphone)  <->  Asterisk (Docker)  <->  step2_stt_bridge.py  (STT -> LLM -> TTS)
                                                           |  events
                                                           v
-                                                   demo_ui_server.py  ->  browser (localhost:8090)
+                                                   demo_ui_server.py  ->  browser (localhost:8400)
 ```
 
 ## Folders
@@ -46,21 +46,21 @@ venv/bin/python sip/demo-ui/demo_ui_server.py
 Terminal 3 should print:
 
 ```
-Demo UI running at http://localhost:8090
+Demo UI running at http://localhost:8400
 Waiting for bridge events on POST /internal/events (from step2_stt_bridge.py)
 Supabase mirror: ON -> https://...   (or OFF if no key)
 ```
 
 ## The web pages (localhost)
 
-Open **http://localhost:8090** and sign in (accounts below). After login you land on the chooser; open each view in its own window for a side-by-side demo.
+Open **http://localhost:8400** and sign in (accounts below). After login you land on the chooser; open each view in its own window for a side-by-side demo.
 
 | Page | URL | What it is |
 |---|---|---|
-| Sign in | `http://localhost:8090/login.html` | Demo login |
-| Chooser | `http://localhost:8090/home.html` | Pick a view |
-| Sales dashboard | `http://localhost:8090/sales.html` | Live transcript, pipeline log, call history, post-call analysis |
-| Customer phone | `http://localhost:8090/client.html` | Incoming-call screen + live conversation |
+| Sign in | `http://localhost:8400/login.html` | Demo login |
+| Chooser | `http://localhost:8400/home.html` | Pick a view |
+| Sales dashboard | `http://localhost:8400/sales.html` | Live transcript, pipeline log, call history, post-call analysis |
+| Customer phone | `http://localhost:8400/client.html` | Incoming-call screen + live conversation |
 
 Demo accounts (password `demo123`):
 

@@ -16,12 +16,12 @@ cd ~/GlobiFYE/globifye-ai
 venv/bin/python sip/demo-ui/demo_ui_server.py
 ```
 
-Then open http://localhost:8090 in a browser.
+Then open http://localhost:8400 in a browser.
 
 **Verify it is up:**
 
 ```bash
-curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8090/login
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8400/login
 ```
 
 Expected output: `200`.
@@ -43,7 +43,7 @@ The console is one of four pieces. Start order:
 
 ## Configuration
 
-There is no config file of its own. Settings live at the top of `demo_ui_server.py` (port `8090`, ARI credentials, softphone endpoint), and secrets are read from `ai-pipeline/.env.local`:
+There is no config file of its own. Settings live at the top of `demo_ui_server.py` (port `8400`, ARI credentials, softphone endpoint), and secrets are read from `ai-pipeline/.env.local`:
 
 | Variable | Required? | Used for |
 |----------|-----------|----------|
@@ -58,7 +58,7 @@ The company registry (`../knowledge-base/companies.json`) is shared with the bri
 
 | Symptom | Cause | Fix |
 |---------|-------|-----|
-| `OSError: [Errno 48] Address already in use` on start | A previous instance of this server is still running on port 8090 | Find it with `lsof -nP -iTCP:8090 -sTCP:LISTEN`, then `kill <PID>` and start again, or just use the already-running one at http://localhost:8090 |
+| `OSError: [Errno 48] Address already in use` on start | A previous instance of this server is still running on port 8400 | Find it with `lsof -nP -iTCP:8400 -sTCP:LISTEN`, then `kill <PID>` and start again, or just use the already-running one at http://localhost:8400 |
 | `WARNING: GROQ_API_KEY missing` on start | `ai-pipeline/.env.local` missing or key not set | Add `GROQ_API_KEY=...` to `ai-pipeline/.env.local` |
 | `ModuleNotFoundError: requests` / `groq` | Started with system Python instead of the repo venv | Use `venv/bin/python`, not `python3` |
 
