@@ -12,7 +12,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "sip/knowledge-base/**"
+      - "dial-forge-ai/sip/knowledge-base/**"
   workflow_dispatch:
 
 jobs:
@@ -32,4 +32,4 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: python -u rag/ingest.py
+        run: python -u dial-forge-ai/rag/ingest.py
