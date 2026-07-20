@@ -1,0 +1,368 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DialForge | Setup Complete</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&amp;family=DM+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#584236",
+                        "inverse-primary": "#9c4400",
+                        "primary-fixed": "#ffdbca",
+                        "tertiary": "#4de082",
+                        "outline": "#a78b7d",
+                        "surface-variant": "#33343d",
+                        "on-background": "#e3e1ec",
+                        "surface-container-low": "#1a1b23",
+                        "surface-bright": "#383941",
+                        "on-tertiary-fixed-variant": "#005227",
+                        "secondary-fixed": "#ffdbd0",
+                        "error-container": "#93000a",
+                        "primary-container": "#ff7a1c",
+                        "on-error": "#690005",
+                        "tertiary-fixed-dim": "#4de082",
+                        "surface-container": "#1e1f27",
+                        "on-secondary-fixed": "#3a0b00",
+                        "on-primary-fixed-variant": "#773200",
+                        "secondary-fixed-dim": "#ffb59e",
+                        "on-tertiary-container": "#00401d",
+                        "on-secondary-container": "#521300",
+                        "surface": "#12131a",
+                        "tertiary-fixed": "#6dfe9c",
+                        "fire-gradient-end": "#FF4D00",
+                        "surface-dim": "#12131a",
+                        "on-surface": "#e3e1ec",
+                        "tertiary-container": "#05b85f",
+                        "surface-container-high": "#292932",
+                        "on-primary-container": "#5e2700",
+                        "inverse-on-surface": "#2f3038",
+                        "surface-container-highest": "#33343d",
+                        "primary": "#ffb68f",
+                        "on-surface-variant": "#e0c0b1",
+                        "accent-glow": "rgba(255, 77, 0, 0.3)",
+                        "on-error-container": "#ffdad6",
+                        "indigo-depth": "#07080F",
+                        "error": "#ffb4ab",
+                        "surface-tint": "#ffb68f",
+                        "secondary": "#ffb59e",
+                        "glass-border": "rgba(255, 255, 255, 0.08)",
+                        "surface-container-lowest": "#0d0e15",
+                        "inverse-surface": "#e3e1ec",
+                        "on-primary": "#542100",
+                        "primary-fixed-dim": "#ffb68f",
+                        "on-secondary": "#5e1700",
+                        "background": "#12131a",
+                        "secondary-container": "#ff571a",
+                        "fire-gradient-start": "#FF7A1C",
+                        "on-tertiary-fixed": "#00210c",
+                        "on-primary-fixed": "#331200",
+                        "on-secondary-fixed-variant": "#852400",
+                        "on-tertiary": "#003919",
+                        "success-green": "#00E87A",
+                        "fire-gradient": "#FF7A1C",
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "stack-md": "16px",
+                        "gutter": "24px",
+                        "stack-lg": "24px",
+                        "container-padding": "32px",
+                        "stack-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["DM Sans"],
+                        "body-md": ["DM Sans"],
+                        "label-sm": ["DM Sans"],
+                        "body-lg": ["DM Sans"],
+                        "headline-lg": ["Syne"],
+                        "display-lg": ["Syne"],
+                        "headline-xl": ["Syne"],
+                        "hero-h1": ["Syne"],
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.08em", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "headline-lg": ["24px", {"lineHeight": "1.3", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "headline-xl": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #07080F;
+            overflow: hidden;
+        }
+
+        .liquid-fire-glass {
+            backdrop-filter: blur(20px) saturate(150%);
+            background: radial-gradient(circle at 50% 0%, rgba(255, 122, 28, 0.08), rgba(255, 255, 255, 0.03) 70%);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .fire-gradient {
+            background: linear-gradient(135deg, #FF7A1C 0%, #FF4D00 50%, #FFAD1C 100%);
+        }
+
+        .shimmer-loop {
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+            background-size: 200% 100%;
+            animation: shimmer-anim 2.5s infinite linear;
+        }
+
+        @keyframes shimmer-anim {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .pulse-success {
+            animation: pulse-green-soft 2s infinite;
+        }
+
+        @keyframes pulse-green-soft {
+            0% { box-shadow: 0 0 0 0 rgba(0, 232, 122, 0.4); transform: scale(1); }
+            50% { box-shadow: 0 0 0 8px rgba(0, 232, 122, 0); transform: scale(1.05); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 232, 122, 0); transform: scale(1); }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeInUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .confetti-piece {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            top: -10px;
+            opacity: 0;
+            z-index: 50;
+        }
+
+        .floating-glow {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 122, 28, 0.12) 0%, transparent 70%);
+            filter: blur(60px);
+            z-index: 0;
+            pointer-events: none;
+            animation: float-glow 15s infinite alternate ease-in-out;
+        }
+
+        @keyframes float-glow {
+            0% { transform: translate(-20%, -20%) scale(1); }
+            100% { transform: translate(20%, 20%) scale(1.2); }
+        }
+
+        .spring-hover {
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .spring-hover:hover {
+            transform: scale(1.03);
+        }
+        .spring-hover:active {
+            transform: scale(0.96);
+        }
+
+        .dot-pulse {
+            width: 8px;
+            height: 8px;
+            background-color: #00E87A;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            animation: dot-pulse-anim 1.5s infinite;
+        }
+
+        @keyframes dot-pulse-anim {
+            0% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 232, 122, 0.7); }
+            70% { opacity: 0.5; box-shadow: 0 0 0 6px rgba(0, 232, 122, 0); }
+            100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 232, 122, 0); }
+        }
+
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.25s; }
+        .stagger-3 { animation-delay: 0.4s; }
+        .stagger-4 { animation-delay: 0.55s; }
+        .stagger-5 { animation-delay: 0.7s; }
+        .stagger-6 { animation-delay: 0.85s; }
+        .stagger-7 { animation-delay: 1s; }
+    </style>
+</head>
+<body class="flex overflow-hidden h-screen text-on-surface bg-[#07080F]">
+<!-- Ambient Atmosphere Glows -->
+<div class="floating-glow" style="top: 10%; left: 10%;"></div>
+<div class="floating-glow" style="bottom: 10%; right: 10%; animation-delay: -5s; background: radial-gradient(circle, rgba(255, 77, 0, 0.08) 0%, transparent 70%);"></div>
+<!-- Side Navigation Shell (Dimmed/Blurred focus state) -->
+
+<div class="flex-1 flex flex-col relative z-20 overflow-hidden">
+<!-- Top Nav Shell (Dimmed/Blurred) -->
+<header class="flex justify-between items-center w-full px-container-padding h-16 border-b border-glass-border backdrop-blur-md bg-surface opacity-40 blur-[1px] pointer-events-none">
+<span class="font-hero-h1 text-2xl font-extrabold text-white">Dial<span class="text-fire-gradient">Forge</span></span>
+
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex items-center justify-center p-gutter relative">
+<!-- Success Confetti Container -->
+<canvas class="absolute inset-0 pointer-events-none z-50" id="confetti-canvas" width="1280" height="1024"></canvas>
+<!-- Central Completion Card -->
+<div class="max-w-xl w-full liquid-fire-glass rounded-[2rem] p-stack-lg relative overflow-hidden fade-in-up" style="transform: translate(3.26667px, 5.36667px);">
+<!-- Shimmer Overlay for Card -->
+<div class="absolute inset-0 shimmer-loop opacity-5 pointer-events-none"></div>
+<div class="text-center mb-stack-lg relative z-10">
+<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary-container/20 text-primary-container mb-6 fade-in-up stagger-1">
+<span class="material-symbols-outlined text-[48px] pulse-success" style="font-variation-settings: &quot;FILL&quot; 1;">check_circle</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-white mb-2 fade-in-up stagger-2">Setup Complete</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-md mx-auto fade-in-up stagger-3">
+                    Your workspace is optimized and synced. <span class="text-primary-container font-bold">High-velocity sales mode</span> activated.
+                </p>
+</div>
+<!-- Interactive Checklist with Stagger -->
+<div class="space-y-4 mb-stack-lg relative z-10 px-4">
+<div class="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 fade-in-up stagger-4 transition-all hover:bg-white/10 group">
+<div class="w-8 h-8 rounded-full bg-success-green/20 flex items-center justify-center text-success-green pulse-success">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: &quot;FILL&quot; 1;">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Account created</span>
+</div>
+<div class="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 fade-in-up stagger-5 transition-all hover:bg-white/10 group">
+<div class="w-8 h-8 rounded-full bg-success-green/20 flex items-center justify-center text-success-green pulse-success" style="animation-delay: 0.4s;">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: &quot;FILL&quot; 1;">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Workspace configured</span>
+</div>
+<div class="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 fade-in-up stagger-6 transition-all hover:bg-white/10 group">
+<div class="w-8 h-8 rounded-full bg-success-green/20 flex items-center justify-center text-success-green pulse-success" style="animation-delay: 0.8s;">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: &quot;FILL&quot; 1;">check</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface">Audio optimized</span>
+</div>
+</div>
+<!-- CTA Button -->
+<div class="fade-in-up stagger-7 px-4">
+<a href="Dashboard.html" class="w-full fire-gradient h-16 rounded-2xl relative overflow-hidden group spring-hover shadow-[0_20px_40px_rgba(255,77,0,0.3)] flex items-center justify-center">
+<div class="absolute inset-0 shimmer-loop opacity-30"></div>
+<span class="relative font-headline-lg text-headline-lg text-white flex items-center justify-center gap-3">
+                        Launch Dashboard
+                        <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">bolt</span>
+</span>
+</a>
+<!-- System Status Indicator -->
+<div class="flex items-center justify-center mt-6 text-on-surface-variant/60">
+<span class="dot-pulse"></span>
+<p class="font-label-sm text-label-sm uppercase tracking-[0.2em]">System Status: Nominal</p>
+</div>
+</div>
+</div>
+<!-- Background Texture Layer -->
+<div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: url(&quot;https://www.transparenttextures.com/patterns/carbon-fibre.png&quot;);"></div>
+</main>
+</div>
+<script>
+    // Lightweight Canvas Confetti
+    function initConfetti() {
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        
+        const resize = () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        };
+        window.addEventListener('resize', resize);
+        resize();
+
+        const colors = ['#FF7A1C', '#FF4D00', '#FFAD1C', '#00E87A', '#FFFFFF'];
+        const particles = [];
+        const count = 120;
+
+        for (let i = 0; i < count; i++) {
+            particles.push({
+                x: Math.random() * width,
+                y: Math.random() * height - height,
+                r: Math.random() * 6 + 4,
+                d: Math.random() * count,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                tilt: Math.floor(Math.random() * 10) - 10,
+                tiltAngleIncremental: (Math.random() * 0.07) + 0.05,
+                tiltAngle: 0,
+                speed: (Math.random() * 2) + 1
+            });
+        }
+
+        let animationFrame;
+        const draw = () => {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach((p, i) => {
+                p.tiltAngle += p.tiltAngleIncremental;
+                p.y += p.speed;
+                p.x += Math.sin(p.d) * 1;
+                p.tilt = Math.sin(p.tiltAngle) * 15;
+
+                ctx.beginPath();
+                ctx.lineWidth = p.r;
+                ctx.strokeStyle = p.color;
+                ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+                ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+                ctx.stroke();
+
+                if (p.y > height) {
+                    particles[i].y = -20;
+                    particles[i].x = Math.random() * width;
+                }
+            });
+            animationFrame = requestAnimationFrame(draw);
+        };
+
+        // Stop after 8 seconds
+        draw();
+        setTimeout(() => {
+            cancelAnimationFrame(animationFrame);
+            ctx.clearRect(0, 0, width, height);
+        }, 8000);
+    }
+
+    // Initialize animations on load
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(initConfetti, 400);
+        
+        // Micro-interaction: Mouse move parallax for the main card
+        const card = document.querySelector('.liquid-fire-glass');
+        document.addEventListener('mousemove', (e) => {
+            const x = (e.clientX - window.innerWidth / 2) / 60;
+            const y = (e.clientY - window.innerHeight / 2) / 60;
+            card.style.transform = `translate(${x}px, ${y}px)`;
+        });
+    });
+</script>
+
+
+
+
+</body></html>

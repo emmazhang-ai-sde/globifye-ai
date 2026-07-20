@@ -1,0 +1,2009 @@
+<!DOCTYPE html><html class="dark" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DialForge | Team Governance</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Syne, DM Sans, JetBrains Mono, Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&amp;family=DM+Sans:wght@400;500;700&amp;family=JetBrains+Mono:wght@400&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "background": "#12131a",
+            "surface": "#12131a",
+            "surface-container": "#1e1f27",
+            "surface-container-low": "#1a1b23",
+            "surface-container-high": "#292932",
+            "surface-container-highest": "#33343d",
+            "primary": "#ffb4a2",
+            "primary-container": "#ff562a",
+            "fire-gradient": "#FF7A1C",
+            "fire-accent": "#FFAD1C",
+            "on-background": "#e3e1ec",
+            "on-surface": "#e3e1ec",
+            "on-surface-variant": "#e5beb4",
+            "tertiary": "#00e478",
+          },
+          fontFamily: {
+            "syne": ["Syne", "sans-serif"],
+            "dm-sans": ["DM Sans", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"],
+          }
+        },
+      },
+    }
+  </script>
+<style data-purpose="liquid-glass-effects">
+    /* Glassmorphism Styles */
+    .active-glow {
+      filter: drop-shadow(0 0 8px #FF7A1C);
+    }
+
+    .glass-card {
+      background: rgba(30, 31, 39, 0.7);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .fire-glow {
+      box-shadow: 0 0 50px rgba(255, 122, 28, 0.15);
+    }
+
+    .glass-hi {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s ease, background 0.3s ease;
+    }
+
+    /* Fire Gradient Utilities */
+    .bg-fire-gradient {
+      background: linear-gradient(135deg, #FF7A1C 0%, #FF2200 100%);
+    }
+    
+    .text-fire-gradient {
+      background: linear-gradient(135deg, #FF7A1C 0%, #FF2200 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .glow-fire {
+      box-shadow: 0 0 30px rgba(255, 122, 28, 0.2), 0 0 60px rgba(255, 34, 0, 0.1);
+    }
+
+    /* Noise Texture Overlay */
+    .noise-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.02;
+      z-index: 9999;
+      background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuADSjexkZhJlvrHxUGNtHaOGC-gCyJNfUtJxcXcTNkL67rWUqZQqfJpBdpvM4EtoPbdOIQ7_TQc414pVVqCz98okAfjnYscdTFxVWy_zS0SIwtcJJDzPRuN_mYdFtFiZmzGNXZ1615MN4EXSwv5tGjA20JIt9fc3C8kpB7N_Ft9d6hfYervzPpOZL0fUxulCddz51nD20Am9Hdgx2r7vrXUiCYEDrR3k061-7MfK5oTymIm8d7t4vCjo8558UFOivWj_8XCoktLxm8);
+    }
+
+    /* Ambient Background Glows */
+    .ambient-glow {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(255, 122, 28, 0.08) 0%, rgba(255, 34, 0, 0) 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    @keyframes pulse-status {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .animate-pulse-status {
+      animation: pulse-status 2s infinite ease-in-out;
+    }
+
+    /* --- Added: Modal / Toast / Interaction styles (kept consistent with existing tokens) --- */
+    .df-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      padding: 1rem;
+    }
+    .df-modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .df-modal-overlay .df-modal-panel {
+      transform: translateY(12px) scale(0.98);
+      transition: transform 0.2s ease;
+    }
+    .df-modal-overlay.open .df-modal-panel {
+      transform: translateY(0) scale(1);
+    }
+    .df-toast-stack {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-width: 360px;
+    }
+    .df-toast {
+      opacity: 0;
+      transform: translateX(20px);
+      transition: all 0.25s ease;
+    }
+    .df-toast.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .df-field {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0.75rem;
+      padding: 0.65rem 0.9rem;
+      font-size: 0.875rem;
+      width: 100%;
+      color: #e3e1ec;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+    .df-field:focus {
+      border-color: #FF7A1C;
+    }
+    .df-row-remove {
+      animation: dfRowOut 0.3s ease forwards;
+    }
+    @keyframes dfRowOut {
+      to { opacity: 0; transform: scale(0.97); }
+    }
+    .df-row-add {
+      animation: dfRowIn 0.4s ease;
+    }
+    @keyframes dfRowIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .df-spin {
+      animation: dfSpin 0.8s linear infinite;
+    }
+    @keyframes dfSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* --- Added: Team & Roles tabs, quota bars, toggle switches, wizard --- */
+    .df-tab-btn {
+      position: relative;
+      padding: 0.85rem 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: rgba(227, 225, 236, 0.5);
+      transition: color 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .df-tab-btn:hover {
+      color: #fff;
+    }
+    .df-tab-btn.active {
+      color: #fff;
+    }
+    .df-tab-btn.active::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: -1px;
+      height: 2px;
+      background: linear-gradient(135deg, #FF7A1C 0%, #FF2200 100%);
+      border-radius: 2px;
+    }
+    .df-tab-panel { display: none; }
+    .df-tab-panel.active { display: block; animation: dfRowIn 0.3s ease; }
+
+    .df-quota-track {
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+      width: 100%;
+    }
+    .df-quota-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #FF7A1C 0%, #FFAD1C 100%);
+      transition: width 0.4s ease;
+    }
+    .df-quota-fill.over {
+      background: linear-gradient(90deg, #00e478 0%, #00e478 100%);
+    }
+
+    .df-toggle {
+      width: 40px;
+      height: 22px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.1);
+      position: relative;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.2s ease;
+    }
+    .df-toggle.on {
+      background: #FF7A1C;
+      border-color: #FF7A1C;
+    }
+    .df-toggle .df-toggle-knob {
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform 0.2s ease;
+    }
+    .df-toggle.on .df-toggle-knob {
+      transform: translateX(18px);
+    }
+    .df-toggle.disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .df-wizard-step-dot {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 800;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(227,225,236,0.5);
+    }
+    .df-wizard-step-dot.active {
+      background: #FF7A1C;
+      border-color: #FF7A1C;
+      color: #fff;
+    }
+    .df-wizard-step-dot.done {
+      background: rgba(0, 228, 120, 0.15);
+      border-color: rgba(0, 228, 120, 0.4);
+      color: #00e478;
+    }
+    .df-wizard-line {
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.12);
+    }
+    .df-role-card {
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .df-role-card:hover {
+      border-color: rgba(255,122,28,0.3);
+    }
+    .df-status-deactivated {
+      opacity: 0.5;
+    }
+    .df-member-row-inactive-badge {
+      background: rgba(255,255,255,0.06);
+      color: rgba(227,225,236,0.6);
+    }
+
+    /* Right CRM panel (ported from Dashboard) */
+    .crm-panel {
+      width: 18rem;
+      transition: width 240ms ease, transform 240ms ease, opacity 240ms ease;
+      transform: translateX(0);
+    }
+    .crm-panel.is-collapsed {
+      width: 4.5rem;
+    }
+    .crm-panel .panel-body {
+      opacity: 1;
+      transform: translateX(0);
+      transition: opacity 220ms ease, transform 220ms ease;
+    }
+    .crm-panel.is-collapsed .panel-body {
+      opacity: 0;
+      transform: translateX(8px);
+      pointer-events: none;
+    }
+    @media (min-width: 1024px) {
+      .page-main {
+        margin-right: 18rem !important;
+        transition: margin-right 240ms ease;
+      }
+      .page-main.crm-collapsed {
+        margin-right: 4.5rem !important;
+      }
+    }
+    @media (max-width: 1023px) {
+      .crm-panel {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-dm-sans selection:bg-fire-gradient selection:text-white">
+<!-- BEGIN: Decoration -->
+<div class="noise-overlay"></div>
+<div class="ambient-glow top-[-200px] left-[-100px]"></div>
+<div class="ambient-glow bottom-[-200px] right-[-100px]"></div>
+<!-- END: Decoration -->
+<!-- BEGIN: IncomingCallWidget -->
+<div id="incomingCallOverlay" class="hidden fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
+  <div class="modal-in glass-card fire-glow w-full max-w-sm rounded-2xl p-8 flex flex-col items-center text-center">
+    <span class="text-[10px] font-extrabold text-tertiary uppercase tracking-widest mb-6">Incoming Call</span>
+    <div class="relative w-24 h-24 mb-5">
+      <span class="ringing-pulse"></span>
+      <span class="ringing-pulse delay-1"></span>
+      <span class="ringing-pulse delay-2"></span>
+      <img id="incomingCallAvatar" alt="Caller avatar" class="relative w-24 h-24 rounded-full object-cover border-2 border-tertiary z-10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE">
+    </div>
+    <span id="incomingCallName" class="font-section-header text-xl text-white mb-1">Jordan Blake</span>
+    <span id="incomingCallCompany" class="text-xs font-bold text-on-surface-variant/60 mb-1">Meridian Capital Partners</span>
+    <span id="incomingCallNumber" class="font-mono-data text-sm text-fire-accent mb-8">+1 (415) 555-0148</span>
+    <div class="flex items-center gap-3 mb-3 w-full">
+      <span class="material-symbols-outlined text-fire-accent ringing-icon">ring_volume</span>
+      <span class="text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest">Ringing…</span>
+    </div>
+    <div class="grid grid-cols-3 gap-3 w-full">
+      <button id="declineCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-error-red/10 border border-error-red/30 text-error-red hover:bg-error-red/20 transition-all">
+        <span class="material-symbols-outlined">call_end</span>
+        <span class="text-[9px] font-extrabold uppercase tracking-wider">Decline</span>
+      </button>
+      <button id="acceptCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-tertiary/10 border border-tertiary/40 text-tertiary hover:bg-tertiary/20 transition-all">
+        <span class="material-symbols-outlined">call</span>
+        <span class="text-[9px] font-extrabold uppercase tracking-wider">Accept</span>
+      </button>
+      <button id="voicemailCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-surface-container-high/60 border border-white/10 text-on-surface-variant hover:text-white transition-all">
+        <span class="material-symbols-outlined">voicemail</span>
+        <span class="text-[9px] font-extrabold uppercase tracking-wider">Voicemail</span>
+      </button>
+    </div>
+  </div>
+</div>
+<!-- END: IncomingCallWidget -->
+ <div id="newCallModal" class="hidden fixed inset-0 z-[120] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
+  <div class="modal-in glass-card w-full max-w-lg rounded-3xl p-6 shadow-2xl">
+    <div class="flex items-start justify-between gap-4 mb-6">
+      <div>
+        <p class="text-[10px] font-extrabold uppercase tracking-[0.3em] text-fire-accent">New Call</p>
+        <h3 class="text-xl font-section-header text-white">Start a conversation</h3>
+      </div>
+      <button id="cancelCallBtn" type="button" class="rounded-full p-2 text-on-surface-variant/70 hover:bg-white/10 hover:text-white transition-all">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <label for="callContactSelect" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Contact</label>
+        <select id="callContactSelect" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none ring-0 focus:border-fire-accent">
+          <option value="">Manual entry</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="callNumberInput" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Phone number</label>
+        <input id="callNumberInput" type="tel" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none placeholder:text-on-surface-variant/40 focus:border-fire-accent" placeholder="Enter a phone number" />
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button id="cancelCallSecondaryBtn" type="button" class="rounded-xl border border-white/10 px-4 py-2 text-sm font-bold text-on-surface-variant hover:bg-white/10 hover:text-white transition-all">Cancel</button>
+        <button id="startCallBtn" type="button" class="flex items-center gap-2 rounded-xl bg-fire-gradient px-4 py-2 text-sm font-bold text-on-primary shadow-lg transition-all hover:brightness-110">
+          <span class="material-symbols-outlined text-sm">call</span>
+          Start Call
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BEGIN: ActiveCallBar -->
+<div id="activeCallBar" class="hidden fixed top-16 left-0 lg:left-20 right-0 z-40 bg-tertiary-container/95 backdrop-blur-xl border-b border-tertiary/30 px-6 py-3 flex items-center justify-between">
+  <div class="flex items-center gap-3">
+    <span class="w-2 h-2 rounded-full bg-white active-orb"></span>
+    <span id="activeCallStatusLabel" class="text-[10px] font-extrabold text-white uppercase tracking-widest">Active Call</span>
+    <span class="text-white/50">•</span>
+    <span id="activeCallName" class="text-sm font-bold text-white">Jordan Blake</span>
+    <span id="activeCallCompany" class="text-xs text-white/70 font-bold">Meridian Capital Partners</span>
+  </div>
+  <div class="flex items-center gap-2">
+    <span id="activeCallDuration" class="font-mono-data text-sm font-bold text-white">00:00</span>
+    <button id="holdCallBtn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all">
+      <span class="material-symbols-outlined text-sm">pause</span>
+      Hold
+    </button>
+    <button id="endCallBtn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-error-red text-white text-xs font-bold hover:brightness-110 transition-all">
+      <span class="material-symbols-outlined text-sm">call_end</span>
+      End
+    </button>
+  </div>
+</div>
+<!-- END: ActiveCallBar -->
+
+<!-- BEGIN: MainHeader -->
+<header class="fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-xl border-b border-white/10 flex justify-between items-center px-6 h-16">
+<div class="flex items-center gap-8">
+<span class="font-hero-h1 text-2xl font-extrabold text-white">Dial<span class="text-fire-gradient">Forge</span></span>
+<div class="h-8 w-px bg-white/10 hidden lg:block"></div>
+  <div class="flex flex-col justify-center">
+    <h2 class="text-xs font-bold text-on-surface-variant/60 uppercase tracking-widest leading-none mb-1">Page</h2>
+    <span class="text-sm font-bold text-white whitespace-nowrap">Team Governance</span>
+  </div>
+
+</div>
+
+<div class="flex items-center gap-4">
+  <!-- Usage Pill -->
+  <div class="hidden md:flex items-center gap-3 bg-surface-container-high/40 border border-white/5 rounded-full px-3 py-1.5 relative overflow-hidden">
+    <div class="absolute inset-0 bg-fire-gradient/10 w-[84%]"></div>
+    <span class="material-symbols-outlined text-fire-accent text-sm relative z-10">hourglass_empty</span>
+    <span class="text-[10px] font-bold text-white relative z-10">842 / 1,000 mins</span>
+  </div>
+
+  <!-- Live Timer -->
+   <div id="callTimerContainer" class="flex items-center gap-2 bg-surface-container-lowest/50 border border-white/5 rounded-lg px-3 py-1.5">
+    <span id="callTimerDot" class="w-1.5 h-1.5 rounded-full bg-white/20"></span>
+    <span id="callTimerText" class="font-mono-data text-sm font-bold text-white">00:00</span>
+  </div>
+
+  <div class="h-8 w-px bg-white/10 mx-2"></div>
+
+  <!-- Action Buttons -->
+  <div class="flex items-center gap-2">
+    <button id="testInboundBtn" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-high/50 border border-white/10 text-on-surface-variant hover:text-white transition-all text-xs font-bold">
+      <span class="material-symbols-outlined text-sm">ring_volume</span>
+      Test Inbound
+    </button>
+    <button id="newCallBtn" type="button" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-fire-gradient text-on-primary font-bold text-xs hover:brightness-110 transition-all shadow-lg">
+      <span class="material-symbols-outlined text-sm">add</span>
+      New Call
+    </button>
+  </div>
+
+  <div class="h-8 w-px bg-white/10 mx-2"></div>
+
+  <!-- Utility Icons -->
+  <div class="flex items-center gap-1">
+    <button class="p-2 text-on-surface-variant/60 hover:text-white transition-colors">
+      <span class="material-symbols-outlined">dark_mode</span>
+    </button>
+    <button id="crmPanelToggle" type="button" class="p-2 text-on-surface-variant/60 hover:text-white transition-colors">
+      <span class="material-symbols-outlined">side_navigation</span>
+    </button>
+  </div>
+</div>
+</header>
+<!-- END: MainHeader -->
+
+<!-- BEGIN: MainContent -->
+<main class="page-main pt-24 pl-72 pr-8 pb-12 min-h-screen max-w-[1600px] mx-auto">
+<!-- BEGIN: PageHeader -->
+<section class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 mb-10" data-purpose="header-section">
+<div>
+<h1 class="font-hero-h1 text-5xl font-extrabold text-white tracking-tight">Team <span class="text-fire-gradient">Governance</span></h1>
+<p class="text-on-surface-variant max-w-2xl leading-relaxed">
+          Orchestrate your high-velocity sales force. Manage permissions, monitor real-time output, and scale your operations with precision.
+        </p>
+</div>
+<div class="flex gap-3">
+<button class="px-5 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all font-bold text-xs flex items-center gap-2" id="permission-matrix-btn">
+<span class="material-symbols-outlined text-lg">security</span>
+          Permission Matrix
+        </button>
+<button class="px-6 py-3 rounded-xl bg-fire-gradient text-white font-bold text-xs shadow-lg glow-fire hover:scale-105 transition-all flex items-center gap-2" id="invite-member-btn">
+<span class="material-symbols-outlined text-lg">person_add</span>
+          Add Member
+        </button>
+</div>
+</section>
+<!-- END: PageHeader -->
+<!-- BEGIN: Tabs -->
+<div class="flex items-center gap-8 border-b border-white/10 mb-8" id="team-tabs" data-purpose="team-tabs">
+<button type="button" class="df-tab-btn active" data-tab="members">
+<span class="material-symbols-outlined text-lg">group</span>
+Members
+</button>
+<button type="button" class="df-tab-btn" data-tab="roles">
+<span class="material-symbols-outlined text-lg">shield_person</span>
+Roles
+</button>
+<button type="button" class="df-tab-btn" data-tab="performance">
+<span class="material-symbols-outlined text-lg">monitoring</span>
+Performance
+</button>
+</div>
+<!-- END: Tabs -->
+<div class="grid grid-cols-12 gap-6">
+<!-- BEGIN: LeftSidebar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex flex-col bg-surface-container-low/78 backdrop-blur-xl border-r border-white/5 items-center py-6 gap-8 z-40">
+<div class="flex flex-col items-center gap-4 w-full overflow-y-auto flex-1">
+  <a href="Dashboard.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">dashboard</span>
+    <span class="text-[8px] uppercase font-bold">Dashboard</span>
+  </a>
+  <a href="activeCall.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">call</span>
+    <span class="text-[8px] uppercase font-bold">Call</span>
+  </a>
+  <a href="supportQueue_x" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">queue</span>
+    <span class="text-[8px] uppercase font-bold">Queue</span>
+  </a>
+  <a href="callHistory" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">graphic_eq</span>
+      <span class="text-[8px] uppercase font-bold">Coaching</span>
+    </button>
+  </a>
+  <a href="powerDialer.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">dialer_sip</span>
+    <span class="text-[8px] uppercase font-bold">Dialer</span>
+  </a>
+  <a href="salesPipeline.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">view_kanban</span>
+    <span class="text-[8px] uppercase font-bold">Pipeline</span>
+  </a>
+  <a href="callHistory.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">history</span>
+      <span class="text-[8px] uppercase font-bold">History</span>
+    </button>
+  </a>
+  <a href="contacts.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">group</span>
+    <span class="text-[8px] uppercase font-bold">Contacts</span>
+  </a>
+  <a href="integrationsHub.html"class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">apps</span>
+    <span class="text-[8px] uppercase font-bold">Integrations</span>
+  </a>
+  <a href="numbers.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">123</span>
+    <span class="text-[8px] uppercase font-bold">Numbers</span>
+  </a>
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <a href="billingSubscription.html" class="flex flex-col items-center gap-1 w-full h-full text-inherit no-underline">
+      <span class="material-symbols-outlined">payments</span>
+      <span class="text-[8px] uppercase font-bold">Billing</span>
+    </a>
+  </button>
+  <a href="teamGovernance.html" class="group relative flex flex-col items-center gap-1 w-full py-3 bg-primary-container/20 text-fire-accent border-l-4 border-fire-accent shadow-[0_0_20px_rgba(255,122,28,0.2)]">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">groups</span>
+      <span class="text-[8px] uppercase font-bold">Team</span>
+    </button>
+  </a>
+   <a href="settingsGeneral.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">settings</span>
+      <span class="text-[8px] uppercase font-bold">Settings</span>
+    </button>
+  </a>
+  <a href="notifications.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">notifications</span>
+      <span class="text-[8px] uppercase font-bold">Notifications</span>
+    </button>
+  </a>
+</div>
+<div class="flex flex-col items-center gap-4 w-full pb-4">
+  <a href="profile.html" class="block w-full h-full cursor-pointer">
+    <div class="h-10 w-10 rounded-full overflow-hidden border border-white/10 items-center ml-4">
+    <img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs">
+  </div>
+  </a>
+</div>
+</aside>
+<!-- END: LeftSidebar -->
+  
+<!-- BEGIN: TabPanels -->
+<div class="col-span-12 flex flex-col gap-4">
+
+<!-- ================= MEMBERS TAB ================= -->
+<div class="df-tab-panel active" id="tab-panel-members" data-purpose="tab-panel-members">
+<!-- Table Header Labels -->
+<div class="hidden lg:grid grid-cols-12 px-6 py-2 text-[10px] font-extrabold text-on-surface-variant uppercase tracking-widest">
+<div class="col-span-3">Team Member</div>
+<div class="col-span-2">Title / Role</div>
+<div class="col-span-1 text-center">Calls</div>
+<div class="col-span-1 text-center">AI Score</div>
+<div class="col-span-2">Quota</div>
+<div class="col-span-1 text-center">Last Active</div>
+<div class="col-span-2 text-right">Actions</div>
+</div>
+<div class="flex flex-col gap-4" id="member-table-container"></div>
+</div>
+
+<!-- ================= ROLES TAB ================= -->
+<div class="df-tab-panel" id="tab-panel-roles" data-purpose="tab-panel-roles">
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5 mb-8" id="role-cards-container"></div>
+<div class="glass-card rounded-2xl p-6" id="permission-matrix-panel">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-syne text-lg font-extrabold text-white flex items-center gap-2"><span class="material-symbols-outlined text-fire-accent">security</span>Permission Matrix</h3>
+</div>
+<div class="overflow-x-auto">
+<div id="permission-matrix-table"></div>
+</div>
+</div>
+</div>
+
+<!-- ================= PERFORMANCE TAB ================= -->
+<div class="df-tab-panel" id="tab-panel-performance" data-purpose="tab-panel-performance">
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+<!-- Leaderboard -->
+<div class="glass-card rounded-2xl p-6 xl:col-span-2">
+<h3 class="font-syne text-lg font-extrabold text-white mb-1 flex items-center gap-2"><span class="material-symbols-outlined text-fire-accent">leaderboard</span>Leaderboard</h3>
+<p class="text-xs text-on-surface-variant mb-5">Ranked by calls, AI score and quota attainment</p>
+<div class="hidden lg:grid grid-cols-12 px-3 py-2 text-[10px] font-extrabold text-on-surface-variant uppercase tracking-widest">
+<div class="col-span-1">#</div>
+<div class="col-span-4">Member</div>
+<div class="col-span-2 text-center">Calls</div>
+<div class="col-span-2 text-center">AI Score</div>
+<div class="col-span-3">Quota</div>
+</div>
+<div class="flex flex-col gap-2" id="leaderboard-container"></div>
+</div>
+<!-- Coaching focus -->
+<div class="glass-card rounded-2xl p-6">
+<h3 class="font-syne text-lg font-extrabold text-white mb-1 flex items-center gap-2"><span class="material-symbols-outlined text-fire-accent">graphic_eq</span>Coaching Focus</h3>
+<p class="text-xs text-on-surface-variant mb-5">Where each rep needs the most support</p>
+<div class="flex flex-col gap-3" id="coaching-focus-container"></div>
+</div>
+</div>
+<!-- Activity feed -->
+<div class="glass-card rounded-2xl p-6 mt-6">
+<h3 class="font-syne text-lg font-extrabold text-white mb-5 flex items-center gap-2"><span class="material-symbols-outlined text-fire-accent">timeline</span>Team Activity Feed</h3>
+<div class="flex flex-col gap-4" id="activity-feed-container"></div>
+</div>
+</div>
+
+</div>
+<!-- END: TabPanels -->
+</div>
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: Right CRM Panel (ported from Dashboard) -->
+<aside id="crmPanel" class="crm-panel fixed top-16 right-0 z-[45] h-[calc(100vh-64px)] border-l border-white/10 bg-surface-container-low/95 backdrop-blur-xl shadow-2xl overflow-hidden">
+  <div class="flex h-full">
+    <div class="w-16 flex-shrink-0 border-r border-white/10 bg-surface-container-lowest/60 flex flex-col items-center justify-between py-4">
+      <button id="crmPanelToggleRail" type="button" class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-surface-container-high/70 text-on-surface-variant transition-all hover:bg-white/10 hover:text-white" aria-label="Toggle CRM panel" aria-expanded="true">
+        <span id="crmPanelToggleRailIcon" class="material-symbols-outlined">keyboard_double_arrow_right</span>
+      </button>
+      <div class="flex flex-col items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/70">
+        <span class="material-symbols-outlined text-base">insights</span>
+        <span>CRM</span>
+      </div>
+    </div>
+
+    <div class="panel-body flex-1 overflow-y-auto px-4 py-4">
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <p class="text-[10px] font-extrabold uppercase tracking-[0.3em] text-fire-accent">Right CRM</p>
+          <h3 class="text-sm font-section-header text-white">Context Hub</h3>
+        </div>
+        <span class="rounded-full border border-tertiary/20 bg-tertiary/10 px-2 py-1 text-[10px] font-bold text-tertiary">Live</span>
+      </div>
+
+      <div class="space-y-4">
+        <section class="rounded-2xl border border-white/10 bg-surface-container-high/30 p-3">
+          <div class="mb-3 flex items-center gap-2">
+            <span class="material-symbols-outlined text-fire-accent">history</span>
+            <h4 class="text-sm font-bold text-white">Recent Calls</h4>
+          </div>
+          <ul id="crmRecentCalls" class="space-y-2"></ul>
+        </section>
+
+        <section class="rounded-2xl border border-white/10 bg-surface-container-high/30 p-3">
+          <div class="mb-3 flex items-center gap-2">
+            <span class="material-symbols-outlined text-tertiary">workspace_premium</span>
+            <h4 class="text-sm font-bold text-white">Top Deals</h4>
+          </div>
+          <ul id="crmTopDeals" class="space-y-2"></ul>
+        </section>
+
+        <section class="rounded-2xl border border-white/10 bg-surface-container-high/30 p-3">
+          <div class="mb-3 flex items-center gap-2">
+            <span class="material-symbols-outlined text-ai-purple">auto_awesome</span>
+            <h4 class="text-sm font-bold text-white">AI Suggestions</h4>
+          </div>
+          <ul id="crmSuggestions" class="space-y-2"></ul>
+        </section>
+      </div>
+    </div>
+  </div>
+</aside>
+<!-- END: Right CRM Panel -->
+<!-- BEGIN: FAB -->
+<div class="fixed bottom-10 right-10 z-50">
+<button class="bg-fire-gradient text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl glow-fire hover:scale-110 active:scale-95 transition-all" id="fab-add-call-btn">
+<span class="material-symbols-outlined text-3xl">add_call</span>
+</button>
+</div>
+<!-- END: FAB -->
+<script data-purpose="micro-interactions">
+    // Tilt effect for glass cards
+    document.querySelectorAll('.glass-hi').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        const rotateX = (y - centerY) / 50;
+        const rotateY = (centerX - x) / 50;
+        
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      });
+      
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+      });
+    });
+  </script>
+
+<!-- BEGIN: Modal Root -->
+<div class="df-modal-overlay" id="df-modal-overlay">
+<div class="glass-card df-modal-panel rounded-2xl w-full max-w-lg p-8 relative" id="df-modal-panel"></div>
+</div>
+<!-- END: Modal Root -->
+<!-- BEGIN: Toast Stack -->
+<div class="df-toast-stack" id="df-toast-stack"></div>
+<script data-purpose="incoming-call-and-timer">
+  (function () {
+    // ---------------------------------------------------------------------
+    // CALL state object — single source of truth for the header timer and
+    // the active call bar. Nothing else in the app should create a second
+    // setInterval for the timer; everyone reads/writes this object.
+    // ---------------------------------------------------------------------
+    const CALL = {
+      status: 'idle',        // idle | ringing | active | hold | ended
+      caller: null,          // { name, company, number, avatar }
+      elapsedSeconds: 0,      // accumulated *active* talk time (hold time excluded)
+      tickHandle: null,      // setInterval handle — guarded so we never duplicate it
+    direction: 'inbound'   // inbound | outbound
+    };
+    window.CALL = CALL; // exposed for debugging / future screens
+
+    const SAMPLE_CALLERS = [
+      { name: 'Jordan Blake', company: 'Meridian Capital Partners', number: '+1 (415) 555-0148', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE' },
+      { name: 'Priya Anand', company: 'Nova Fintech Group', number: '+1 (312) 555-0199', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCcIsQXOEfl9RPSSkYicZMQ5sZEXB_YEaWoTeRrnAo1-nAKuvFvlT46sDnAWOA7VkquKxtVzp5yjZv4DNj2NUZgU4etcHIroG96_E4yWdR_osy9rpoyTTuryFKuIyfkcTnf9FFhG2oA-M-U6JuX6WdWCZu-SM5MrrHJaNQJ4ZCYaNTHQs0TL6BH3YXV0DqvhDq1Vuw4n1-NjhNdDgGvmF4YaY0FVQlMxtXxQWjSXkpodrsqF8olnkV-WKEzTNiCPTtXW-yghBOX-jQ' },
+      { name: 'Marcus Feld', company: 'Ironclad Logistics', number: '+1 (206) 555-0121', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDxpGJ4Ipzimbxj3HtSBAli7TjUBzI2_5jjspz16beTbPyfWRo4lyp0H-rao99dlnU47rfKmrSl5Ypolg02PBuRqcpau7OiaZM_vaP30nvyBffUQ73WPhJ5rNNh743XfSRDHe9arWVzaIzIYC4iwT7FLP4rjkGJ5LeJjetwtF2qmuRIjoV9VT5p5Rjt9gmq3gPKohuev805CdvWmVD8dLVE2ZrGgqxkGjCXUgVqEBVoieyHd78ep4o2yrNlx8WjNlSrm-MMwDrKxRc' }
+    ];
+
+    // ---- Element references -------------------------------------------------
+    const overlay = document.getElementById('incomingCallOverlay');
+    const avatarEl = document.getElementById('incomingCallAvatar');
+    const nameEl = document.getElementById('incomingCallName');
+    const companyEl = document.getElementById('incomingCallCompany');
+    const numberEl = document.getElementById('incomingCallNumber');
+
+    const acceptBtn = document.getElementById('acceptCallBtn');
+    const declineBtn = document.getElementById('declineCallBtn');
+    const voicemailBtn = document.getElementById('voicemailCallBtn');
+    const testInboundBtn = document.getElementById('testInboundBtn');
+
+    const activeBar = document.getElementById('activeCallBar');
+    const activeName = document.getElementById('activeCallName');
+    const activeCompany = document.getElementById('activeCallCompany');
+    const activeStatusLabel = document.getElementById('activeCallStatusLabel');
+    const activeDuration = document.getElementById('activeCallDuration');
+    const holdBtn = document.getElementById('holdCallBtn');
+    const endBtn = document.getElementById('endCallBtn');
+
+    const timerDot = document.getElementById('callTimerDot');
+    const timerText = document.getElementById('callTimerText');
+    const historyBody = document.getElementById('recentActivityBody');
+        const newCallBtn = document.getElementById('newCallBtn');
+    const newCallModal = document.getElementById('newCallModal');
+    const cancelCallBtn = document.getElementById('cancelCallBtn');
+    const cancelCallSecondaryBtn = document.getElementById('cancelCallSecondaryBtn');
+    const startCallBtn = document.getElementById('startCallBtn');
+    const callContactSelect = document.getElementById('callContactSelect');
+    const callNumberInput = document.getElementById('callNumberInput');
+
+    // ---- Helpers --------------------------------------------------------
+    function formatTime(totalSeconds) {
+      const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+      const s = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function randomCaller() {
+      return SAMPLE_CALLERS[Math.floor(Math.random() * SAMPLE_CALLERS.length)];
+    }
+
+    // Renders CALL.elapsedSeconds + CALL.status into the header timer pill
+    // and (if visible) the active call bar. This is the ONLY place that
+    // touches those DOM nodes, so there is exactly one render path.
+    function renderTimer() {
+      timerText.textContent = formatTime(CALL.elapsedSeconds);
+      activeDuration.textContent = formatTime(CALL.elapsedSeconds);
+
+      timerDot.classList.remove('bg-white/20', 'bg-tertiary', 'active-orb', 'bg-fire-accent');
+      if (CALL.status === 'active') {
+        timerDot.classList.add('bg-tertiary', 'active-orb');
+      } else if (CALL.status === 'hold') {
+        timerDot.classList.add('bg-fire-accent');
+      } else {
+        timerDot.classList.add('bg-white/20');
+      }
+    }
+
+    // Single interval, guarded against duplicates. It only advances
+    // elapsedSeconds while status === 'active' — on hold it keeps running
+    // but simply skips incrementing, so resuming continues seamlessly.
+    function ensureTicking() {
+      if (CALL.tickHandle !== null) return; // already ticking, never duplicate
+      CALL.tickHandle = setInterval(() => {
+        if (CALL.status === 'active') {
+          CALL.elapsedSeconds += 1;
+        }
+        renderTimer();
+      }, 1000);
+    }
+
+    function stopTicking() {
+      if (CALL.tickHandle !== null) {
+        clearInterval(CALL.tickHandle);
+        CALL.tickHandle = null;
+      }
+    }
+
+    function populateCallContacts() {
+      if (!callContactSelect) return;
+      callContactSelect.innerHTML = '<option value="">Manual entry</option>';
+      SAMPLE_CALLERS.forEach((caller) => {
+        const option = document.createElement('option');
+        option.value = caller.number;
+        option.dataset.name = caller.name;
+        option.dataset.company = caller.company;
+        option.dataset.avatar = caller.avatar;
+        option.textContent = `${caller.name} • ${caller.company}`;
+        callContactSelect.appendChild(option);
+      });
+    }
+
+    function addHistoryRow({ type, icon, iconColor, name, company, status, statusClasses, duration, revenue, revenueClasses }) {
+      if (!historyBody) return;
+      const row = document.createElement('tr');
+      row.className = 'border-b border-white/5 hover:bg-white/5 transition-colors group';
+      row.innerHTML = `
+        <td class="py-5 px-2">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined ${iconColor}">${icon}</span>
+            <span class="text-white/80 font-medium">${type}</span>
+          </div>
+        </td>
+        <td class="py-5 px-2">
+          <div class="text-white font-bold">${company}</div>
+          <div class="text-[10px] text-on-surface-variant/60 font-bold">${name}</div>
+        </td>
+        <td class="py-5 px-2">
+          <span class="px-3 py-1 ${statusClasses} text-[10px] rounded-full font-extrabold">${status}</span>
+        </td>
+        <td class="py-5 px-2 font-mono-data text-on-surface-variant/80">${duration}</td>
+        <td class="py-5 px-2 text-right font-mono-data font-bold ${revenueClasses}">${revenue}</td>
+      `;
+      historyBody.insertBefore(row, historyBody.firstChild);
+    }
+
+    // ---- Incoming call widget --------------------------------------------
+    function showIncomingCall() {
+      const caller = randomCaller();
+      CALL.caller = caller;
+      CALL.status = 'ringing';
+
+      avatarEl.src = caller.avatar;
+      avatarEl.alt = caller.name;
+      nameEl.textContent = caller.name;
+      companyEl.textContent = caller.company;
+      numberEl.textContent = caller.number;
+
+      overlay.classList.remove('hidden');
+    }
+
+    function hideIncomingCall() {
+      overlay.classList.add('hidden');
+    }
+
+    function acceptCall() {
+      hideIncomingCall();
+      CALL.status = 'active';
+      CALL.direction = 'inbound';
+      CALL.elapsedSeconds = 0; // fresh timer for the new call
+
+      activeName.textContent = CALL.caller.name;
+      activeCompany.textContent = CALL.caller.company;
+      activeStatusLabel.textContent = 'Active Call';
+      holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">pause</span>Hold';
+      activeBar.classList.remove('hidden');
+
+      renderTimer();
+      ensureTicking(); // starts the live, once-only interval
+    }
+
+    function declineCall() {
+      hideIncomingCall();
+      CALL.status = 'idle';
+      CALL.caller = null;
+      // Decline simply dismisses the widget — no history entry, no timer.
+    }
+
+    function sendToVoicemail() {
+      const caller = CALL.caller;
+      hideIncomingCall();
+      CALL.status = 'idle';
+      CALL.caller = null;
+
+      addHistoryRow({
+        type: 'Inbound',
+        icon: 'voicemail',
+        iconColor: 'text-on-surface-variant/60',
+        name: caller.name,
+        company: caller.company,
+        status: 'VOICEMAIL',
+        statusClasses: 'bg-white/5 text-on-surface-variant/60 border border-white/10',
+        duration: '00:00',
+        revenue: '$0',
+        revenueClasses: 'text-on-surface-variant/40'
+      });
+    }
+
+    // ---- Active call controls ---------------------------------------------
+    function toggleHold() {
+      if (CALL.status === 'active') {
+        CALL.status = 'hold';
+        activeStatusLabel.textContent = 'On Hold';
+        holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">play_arrow</span>Resume';
+      } else if (CALL.status === 'hold') {
+        CALL.status = 'active';
+        activeStatusLabel.textContent = 'Active Call';
+        holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">pause</span>Hold';
+      }
+      renderTimer();
+    }
+
+    function endCall() {
+      if (CALL.status === 'idle' || CALL.status === 'ended') return;
+
+      const caller = CALL.caller;
+      const finalDuration = formatTime(CALL.elapsedSeconds);
+      const isOutbound = CALL.direction === 'outbound';
+
+      stopTicking();
+
+      if (caller) {
+        addHistoryRow({
+          type: isOutbound ? 'Outbound' : 'Inbound',
+          icon: isOutbound ? 'call_made' : 'call_received',
+          iconColor: isOutbound ? 'text-tertiary' : 'text-fire-accent',
+          name: caller.name,
+          company: caller.company,
+          status: 'COMPLETED',
+          statusClasses: 'bg-tertiary/10 text-tertiary border border-tertiary/20',
+          duration: finalDuration,
+          revenue: '$0',
+          revenueClasses: 'text-on-surface-variant/40'
+        });
+      }
+
+      // Reset CALL for the next call.
+      CALL.status = 'idle';
+      CALL.caller = null;
+      CALL.elapsedSeconds = 0;
+      CALL.direction = 'inbound';
+
+      activeBar.classList.add('hidden');
+      renderTimer();
+    }
+
+    function openNewCallModal() {
+      if (!newCallModal) return;
+      populateCallContacts();
+      callNumberInput.value = '';
+      callContactSelect.value = '';
+      newCallModal.classList.remove('hidden');
+      callNumberInput.focus();
+    }
+
+    function closeNewCallModal() {
+      if (!newCallModal) return;
+      newCallModal.classList.add('hidden');
+    }
+
+    function startOutboundCall() {
+      const selectedOption = callContactSelect.selectedOptions[0];
+      const manualNumber = callNumberInput.value.trim();
+      const hasSelection = Boolean(selectedOption && selectedOption.value);
+      const number = hasSelection ? selectedOption.value : manualNumber;
+
+      if (!number) return;
+
+      const caller = hasSelection
+        ? {
+            name: selectedOption.dataset.name || 'Contact',
+            company: selectedOption.dataset.company || 'Saved Contact',
+            number: selectedOption.value,
+            avatar: selectedOption.dataset.avatar || 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE'
+          }
+        : {
+            name: 'New Contact',
+            company: 'Manual Entry',
+            number,
+            avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE'
+          };
+
+      closeNewCallModal();
+
+      CALL.status = 'active';
+      CALL.direction = 'outbound';
+      CALL.elapsedSeconds = 0;
+      CALL.caller = caller;
+
+      activeName.textContent = caller.name;
+      activeCompany.textContent = caller.company;
+      activeStatusLabel.textContent = 'Active Call';
+      holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">pause</span>Hold';
+      activeBar.classList.remove('hidden');
+
+      renderTimer();
+      ensureTicking();
+    }
+    
+    function applyTheme(theme) {
+      if (!themeToggle || !themeIcon) return;
+      const nextTheme = theme || 'dark';
+      document.documentElement.setAttribute('data-theme', nextTheme);
+      document.documentElement.classList.toggle('dark', nextTheme === 'dark');
+      document.documentElement.classList.toggle('light', nextTheme === 'light');
+      localStorage.setItem('dialforge-theme', nextTheme);
+      themeIcon.textContent = nextTheme === 'light' ? 'dark_mode' : 'light_mode';
+    }
+
+    function setInitialTheme() {
+      const storedTheme = localStorage.getItem('dialforge-theme');
+      const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+      const theme = storedTheme || (prefersLight ? 'light' : 'dark');
+      applyTheme(theme);
+    }
+
+    // ---- Wire up events -----------------------------------------------
+    testInboundBtn.addEventListener('click', showIncomingCall);
+    acceptBtn.addEventListener('click', acceptCall);
+    declineBtn.addEventListener('click', declineCall);
+    voicemailBtn.addEventListener('click', sendToVoicemail);
+    holdBtn.addEventListener('click', toggleHold);
+    endBtn.addEventListener('click', endCall);
+    newCallBtn?.addEventListener('click', openNewCallModal);
+    cancelCallBtn?.addEventListener('click', closeNewCallModal);
+    cancelCallSecondaryBtn?.addEventListener('click', closeNewCallModal);
+    startCallBtn?.addEventListener('click', startOutboundCall);
+    callContactSelect?.addEventListener('change', () => {
+      const selected = callContactSelect.selectedOptions[0];
+      if (selected?.value) callNumberInput.value = selected.value;
+    });
+    themeToggle?.addEventListener('click', () => {
+      const nextTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      applyTheme(nextTheme);
+    });
+
+    setInitialTheme();
+
+    // Initial paint: idle timer at 00:00.
+    renderTimer();
+  })();
+</script>
+
+<script data-purpose="crm-panel">
+  (function () {
+    const panel = document.getElementById('crmPanel');
+    const toggleButtons = [document.getElementById('crmPanelToggle'), document.getElementById('crmPanelToggleRail')];
+    const panelIcon = document.getElementById('crmPanelToggleRailIcon');
+    const recentCallsList = document.getElementById('crmRecentCalls');
+    const topDealsList = document.getElementById('crmTopDeals');
+    const suggestionsList = document.getElementById('crmSuggestions');
+    const storageKey = 'dialforge-crm-panel-open';
+
+    const recentCalls = [
+      { name: 'Jordan Blake', time: '8m ago', outcome: 'Qualified' },
+      { name: 'Priya Anand', time: '24m ago', outcome: 'Follow-up' },
+      { name: 'Marcus Feld', time: '1h ago', outcome: 'Voicemail' },
+      { name: 'Alicia Gomez', time: '2h ago', outcome: 'Booked demo' },
+      { name: 'Noah Park', time: '3h ago', outcome: 'Closed' }
+    ];
+
+    const topDeals = [
+      { name: 'Northwind Labs', value: '$142k', stage: 'Negotiation' },
+      { name: 'BrightPath AI', value: '$96k', stage: 'Proposal' },
+      { name: 'Redline Ops', value: '$84k', stage: 'Discovery' }
+    ];
+
+    function getActiveScreenName() {
+      const label = document.querySelector('header [data-purpose="page-title"] h1')?.textContent?.trim();
+      if (label) return label;
+      const headerScreen = document.querySelector('header .text-sm.font-bold.text-white.whitespace-nowrap')?.textContent?.trim();
+      return headerScreen || 'Team Governance';
+    }
+
+    function getSuggestions(screenName) {
+      const suggestionsByScreen = {
+        'Team Governance': [
+          'Review pending role change requests before end of day.',
+          'Deactivate seats for members who have left the team.'
+        ]
+      };
+      return suggestionsByScreen[screenName] || suggestionsByScreen['Team Governance'];
+    }
+
+    function renderPanel() {
+      if (!recentCallsList || !topDealsList || !suggestionsList) return;
+
+      recentCallsList.innerHTML = recentCalls.map((call) => `
+        <li class="rounded-xl border border-white/10 bg-surface-container-lowest/70 px-3 py-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-sm font-bold text-white">${call.name}</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">${call.time}</span>
+          </div>
+          <div class="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-tertiary">${call.outcome}</div>
+        </li>
+      `).join('');
+
+      topDealsList.innerHTML = topDeals.map((deal) => `
+        <li class="rounded-xl border border-white/10 bg-surface-container-lowest/70 px-3 py-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-sm font-bold text-white">${deal.name}</span>
+            <span class="text-[10px] font-bold text-fire-accent">${deal.value}</span>
+          </div>
+          <div class="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/60">${deal.stage}</div>
+        </li>
+      `).join('');
+
+      const suggestions = getSuggestions(getActiveScreenName());
+      suggestionsList.innerHTML = suggestions.map((suggestion) => `
+        <li class="rounded-xl border border-white/10 bg-surface-container-lowest/70 px-3 py-2 text-sm text-on-surface-variant">
+          ${suggestion}
+        </li>
+      `).join('');
+    }
+
+    function setPanelState(isOpen) {
+      if (!panel) return;
+      panel.classList.toggle('is-collapsed', !isOpen);
+      const pageMain = document.querySelector('main.page-main');
+      if (pageMain) pageMain.classList.toggle('crm-collapsed', !isOpen);
+      toggleButtons.forEach((button) => {
+        if (button) button.setAttribute('aria-expanded', String(isOpen));
+      });
+      if (panelIcon) {
+        panelIcon.textContent = isOpen ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left';
+      }
+      localStorage.setItem(storageKey, String(isOpen));
+    }
+
+    function syncPanelVisibility() {
+      if (!panel) return;
+      if (window.innerWidth < 1024) {
+        panel.classList.add('hidden');
+        return;
+      }
+
+      panel.classList.remove('hidden');
+      const stored = localStorage.getItem(storageKey);
+      const shouldOpen = stored === null ? true : stored === 'true';
+      setPanelState(shouldOpen);
+    }
+
+    toggleButtons.forEach((button) => {
+      button?.addEventListener('click', () => {
+        if (!panel) return;
+        const isOpen = !panel.classList.contains('is-collapsed');
+        setPanelState(!isOpen);
+      });
+    });
+
+    window.addEventListener('resize', syncPanelVisibility);
+
+    renderPanel();
+    syncPanelVisibility();
+  })();
+</script>
+<!-- END: Toast Stack -->
+
+
+
+ <script data-purpose="app-state-and-logic">
+(function() {
+  'use strict';
+
+  /* =========================================================
+     STATE
+     ========================================================= */
+  const PERMISSIONS = [
+    { key: 'make_calls', label: 'Make & Receive Calls' },
+    { key: 'view_call_logs', label: 'View Call Logs' },
+    { key: 'view_reports', label: 'View Analytics & Reports' },
+    { key: 'manage_integrations', label: 'Manage Integrations' },
+    { key: 'provision_numbers', label: 'Provision Phone Numbers' },
+    { key: 'invite_members', label: 'Invite Members' },
+    { key: 'edit_roles', label: 'Edit Roles & Permissions' },
+    { key: 'manage_billing', label: 'Manage Billing' },
+    { key: 'delete_recordings', label: 'Delete Recordings' },
+  ];
+
+  function permSet(onKeys) {
+    const s = {};
+    PERMISSIONS.forEach(p => { s[p.key] = onKeys.indexOf(p.key) !== -1; });
+    return s;
+  }
+
+  const STATE = {
+    roles: [
+      {
+        name: 'Superadmin', icon: 'verified_user', color: 'fire-accent', locked: true,
+        description: 'Full unrestricted access to every workspace, billing, and security setting.',
+        permissions: permSet(PERMISSIONS.map(p => p.key)),
+      },
+      {
+        name: 'Admin', icon: 'admin_panel_settings', color: 'primary', locked: false,
+        description: 'Manage team members, calls, and integrations without billing or role control.',
+        permissions: permSet(['make_calls', 'view_call_logs', 'view_reports', 'manage_integrations', 'provision_numbers', 'invite_members']),
+      },
+      {
+        name: 'Member', icon: 'person', color: 'tertiary', locked: false,
+        description: 'Make calls, track personal performance, and access shared reports.',
+        permissions: permSet(['make_calls', 'view_call_logs', 'view_reports']),
+      },
+      {
+        name: 'Viewer', icon: 'visibility', color: 'on-surface-variant', locked: false,
+        description: 'Read-only access to dashboards and reports. Cannot make changes.',
+        permissions: permSet(['view_reports']),
+      },
+    ],
+    members: [
+      {
+        id: 'elena-rodriguez', name: 'Elena Rodriguez', email: 'elena.r@dialforge.pro', title: 'VP of Sales',
+        dept: 'Strategic Sales', role: 'Superadmin', calls: 142, score: 98, quotaPct: 118,
+        lastActive: 'Active now', status: 'Active', customPermissions: null,
+        avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDAQz8xQkCi0iTPDW_GDKcyOqCMRUfhDqruuthbuDLcIcFB2pRJKN2Ek72YeLHYCQDeGRH1khR1EazU-fAT0OOavJmdMBVmMqAUarZ7L_dZY4M9vsdTNv9u8MH5ydZucDFmhRgHGH_Xtv0awtxm6eJhUtN54vN-8SL7pSd1YyNnJyYnIVtaZs7pn45aEFJIK0yj4Srt8KEzAK0a4GVulCxMZzhBWGNDU7vlk9TdvKFPRJq8vSDfJLST01G40ZwlPa6zN4aFMgSQDlQ',
+      },
+      {
+        id: 'marcus-thorne', name: 'Marcus Thorne', email: 'm.thorne@dialforge.pro', title: 'Sales Manager',
+        dept: 'Mid-Market', role: 'Admin', calls: 89, score: 84, quotaPct: 76,
+        lastActive: '12m ago', status: 'Active', customPermissions: null,
+        avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDK1U_VRAmXCfnYyeTSDepaK4Fg7zqszu-oph512KEZyhfDT1iJOSn315B_VN1kBtuFUxo2v9Fkci4wj6xt8sVUo6-HIUdf8u0p6zxJmyYUj_5eREMBS8KthuubZbhhT3glr1Itma1_tguoXqqj3Fid6zH5VblJgc4HenVH43kCPL0Iy7fIPPW4I4A15hl25BgLsYBH-wd1GDUSEJgl4oZ42ZnAhrfxcp84ditmLzefzmiVcxNv269qema-9tXj80OH6xfhgcsvQWE',
+      },
+      {
+        id: 'julian-chen', name: 'Julian Chen', email: 'j.chen@dialforge.pro', title: 'Account Executive',
+        dept: 'Support Eng', role: 'Member', calls: 215, score: 92, quotaPct: 104,
+        lastActive: 'Active now', status: 'Active', customPermissions: null,
+        avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD32BihA98X700Z6mZXEBr6MzMDkPOSqkNVQ8pokq5qr6VxxgyAVFTHvdjJNQ3rD_3f46_IYKE_HBJnNN0afoAIQypuUASBwQPDAsRLUWAVySNpR17nGtIz7jXBogaOrPtHvzT8t8gSnZnnxq2--iKsmcf4NrgSESV4N4py04rkzGPRVEf0HFRHzU5sMlijLc6ZYPOY4fuqwXbzHejDXzDarPrMkxvwtffVyG3AWsp0n40NyMVLd41ZhkBYHvdJOMlWjnWeKlMWT_Q',
+      },
+      {
+        id: 'priya-nandan', name: 'Priya Nandan', email: 'priya.n@dialforge.pro', title: 'Account Executive',
+        dept: 'Enterprise', role: 'Member', calls: 58, score: 67, quotaPct: 42,
+        lastActive: '3h ago', status: 'Active', customPermissions: null, avatar: null,
+      },
+      {
+        id: 'sam-okafor', name: 'Sam Okafor', email: 's.okafor@dialforge.pro', title: 'Revenue Ops Analyst',
+        dept: 'Revenue Ops', role: 'Viewer', calls: 0, score: null, quotaPct: 0,
+        lastActive: '2d ago', status: 'Deactivated', customPermissions: null, avatar: null,
+      },
+    ],
+    activity: [
+      { icon: 'person_add', color: 'tertiary', text: 'Elena Rodriguez invited Priya Nandan to Strategic Sales.', time: '2h ago' },
+      { icon: 'shield_person', color: 'fire-accent', text: 'Admin role permissions updated by Elena Rodriguez.', time: '1d ago' },
+      { icon: 'toggle_off', color: 'on-surface-variant', text: 'Sam Okafor was deactivated by Elena Rodriguez.', time: '3d ago' },
+      { icon: 'trending_up', color: 'tertiary', text: 'Julian Chen hit 104% of monthly quota.', time: '4d ago' },
+    ],
+    memberCounter: 0,
+  };
+
+  const COACHING_AREAS = ['Objection handling', 'Discovery questions', 'Closing technique', 'Call opening energy', 'Follow-up cadence'];
+
+  /* =========================================================
+     HELPERS
+     ========================================================= */
+  function getRole(name) { return STATE.roles.find(r => r.name === name); }
+
+  function effectivePermissions(member) {
+    if (member.customPermissions) return member.customPermissions;
+    const role = getRole(member.role);
+    return role ? role.permissions : permSet([]);
+  }
+
+  function initials(name) { return name.split(' ').map(w => w.charAt(0)).join('').slice(0, 2).toUpperCase(); }
+
+  function addActivity(icon, color, text) {
+    STATE.activity.unshift({ icon, color, text, time: 'just now' });
+    if (STATE.activity.length > 12) STATE.activity.pop();
+    renderActivityFeed();
+  }
+
+  /* ---------------- Toasts ---------------- */
+  function toast(message, type) {
+    type = type || 'success';
+    const stack = document.getElementById('df-toast-stack');
+    const colors = {
+      success: { border: 'border-tertiary/30', icon: 'check_circle', iconColor: 'text-tertiary' },
+      error: { border: 'border-red-500/30', icon: 'error', iconColor: 'text-red-400' },
+      info: { border: 'border-fire-gradient/30', icon: 'info', iconColor: 'text-fire-accent' },
+    };
+    const c = colors[type] || colors.success;
+    const el = document.createElement('div');
+    el.className = 'df-toast glass-card rounded-xl px-4 py-3.5 flex items-center gap-3 border ' + c.border;
+    el.innerHTML =
+      '<span class="material-symbols-outlined ' + c.iconColor + '">' + c.icon + '</span>' +
+      '<span class="text-sm font-medium text-on-surface flex-1">' + message + '</span>';
+    stack.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('show'));
+    setTimeout(() => {
+      el.classList.remove('show');
+      setTimeout(() => el.remove(), 300);
+    }, 3800);
+  }
+
+  /* ---------------- Modal ---------------- */
+  const overlay = document.getElementById('df-modal-overlay');
+  const panel = document.getElementById('df-modal-panel');
+
+  function openModal(html, wide) {
+    panel.innerHTML = html;
+    panel.classList.toggle('max-w-2xl', !!wide);
+    panel.classList.toggle('max-w-lg', !wide);
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    setTimeout(() => { panel.innerHTML = ''; }, 200);
+  }
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+  function closeBtnHtml() {
+    return '<button type="button" data-modal-close class="absolute top-5 right-5 text-on-surface-variant hover:text-white transition-colors"><span class="material-symbols-outlined">close</span></button>';
+  }
+  function bindModalClose() {
+    panel.querySelectorAll('[data-modal-close]').forEach(b => b.addEventListener('click', closeModal));
+  }
+
+  function toggleHtml(key, isOn, disabled, extraClass) {
+    return '<div class="df-toggle ' + (isOn ? 'on ' : '') + (disabled ? 'disabled ' : '') + (extraClass || '') + '" data-perm-toggle="' + key + '"' + (disabled ? ' data-disabled="1"' : '') + '><div class="df-toggle-knob"></div></div>';
+  }
+  function bindToggles(root, onChange) {
+    root.querySelectorAll('[data-perm-toggle]').forEach(t => {
+      if (t.dataset.disabled) return;
+      t.addEventListener('click', () => {
+        t.classList.toggle('on');
+        onChange(t.dataset.permToggle, t.classList.contains('on'));
+      });
+    });
+  }
+
+  /* =========================================================
+     TABS
+     ========================================================= */
+  document.querySelectorAll('#team-tabs .df-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      document.querySelectorAll('#team-tabs .df-tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+      document.querySelectorAll('.df-tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-panel-' + tab));
+    });
+  });
+  function switchToTab(tab) {
+    const btn = document.querySelector('#team-tabs .df-tab-btn[data-tab="' + tab + '"]');
+    if (btn) btn.click();
+  }
+
+  /* =========================================================
+     MEMBERS TAB
+     ========================================================= */
+  function memberRowHtml(m) {
+    const role = getRole(m.role);
+    const isDeactivated = m.status === 'Deactivated';
+    const avatarHtml = m.avatar
+      ? '<img alt="' + m.name + '" class="w-12 h-12 rounded-xl object-cover border border-white/10" src="' + m.avatar + '">'
+      : '<div class="w-12 h-12 rounded-xl border border-white/10 bg-white/10 flex items-center justify-center font-syne font-extrabold text-white">' + initials(m.name) + '</div>';
+    const dotColor = isDeactivated ? 'bg-on-surface-variant' : (m.lastActive === 'Active now' ? 'bg-tertiary animate-pulse-status' : 'bg-on-surface-variant');
+    const quotaPct = Math.max(0, m.quotaPct || 0);
+    const quotaWidth = Math.min(quotaPct, 100);
+    const quotaOver = quotaPct >= 100;
+    return (
+      '<div class="glass-card glass-hi p-6 rounded-2xl transition-all group ' + (isDeactivated ? 'df-status-deactivated' : '') + '" data-purpose="member-row" data-member-id="' + m.id + '">' +
+        '<div class="grid grid-cols-1 lg:grid-cols-12 items-center gap-4 lg:gap-2">' +
+          '<div class="col-span-1 lg:col-span-3 flex items-center gap-4">' +
+            '<div class="relative">' + avatarHtml +
+              '<div class="absolute -bottom-1 -right-1 w-4 h-4 ' + dotColor + ' border-4 border-background rounded-full"></div>' +
+            '</div>' +
+            '<div><h4 class="text-white font-bold">' + m.name + '</h4><p class="text-xs text-on-surface-variant">' + m.email + '</p></div>' +
+          '</div>' +
+          '<div class="col-span-1 lg:col-span-2">' +
+            '<p class="text-sm text-white font-bold">' + m.title + '</p>' +
+            '<div class="flex items-center gap-1.5 mt-0.5">' +
+              '<span class="material-symbols-outlined text-' + (role ? role.color : 'on-surface-variant') + ' text-sm">' + (role ? role.icon : 'person') + '</span>' +
+              '<span class="text-xs text-on-surface-variant">' + m.role + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="col-span-1 lg:col-span-1 text-center"><span class="font-mono text-white font-bold">' + m.calls + '</span></div>' +
+          '<div class="col-span-1 lg:col-span-1 flex justify-center">' +
+            '<div class="w-10 h-10 rounded-lg bg-tertiary/10 border border-tertiary/20 flex items-center justify-center">' +
+              '<span class="text-tertiary font-bold font-mono text-sm">' + (m.score === null ? '—' : m.score) + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="col-span-1 lg:col-span-2">' +
+            '<div class="flex items-center justify-between mb-1"><span class="text-[10px] text-on-surface-variant font-bold">Quota</span><span class="text-[10px] font-mono font-bold ' + (quotaOver ? 'text-tertiary' : 'text-fire-accent') + '">' + quotaPct + '%</span></div>' +
+            '<div class="df-quota-track"><div class="df-quota-fill ' + (quotaOver ? 'over' : '') + '" style="width:' + quotaWidth + '%"></div></div>' +
+          '</div>' +
+          '<div class="col-span-1 lg:col-span-1 text-center"><p class="text-[11px] text-on-surface-variant">' + m.lastActive + '</p></div>' +
+          '<div class="col-span-1 lg:col-span-2 flex items-center justify-end gap-2">' +
+            '<button type="button" class="p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-on-surface-variant hover:text-white transition-all" data-action="edit-member" data-member-id="' + m.id + '" title="Edit member">' +
+              '<span class="material-symbols-outlined text-lg">edit</span>' +
+            '</button>' +
+            '<button type="button" class="px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wide transition-all ' + (isDeactivated ? 'bg-tertiary/10 border border-tertiary/30 text-tertiary hover:bg-tertiary/20' : 'bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20') + '" data-action="toggle-status" data-member-id="' + m.id + '">' +
+              (isDeactivated ? 'Reactivate' : 'Deactivate') +
+            '</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function renderMembers() {
+    const container = document.getElementById('member-table-container');
+    container.innerHTML = STATE.members.map(memberRowHtml).join('');
+    bindTilt(container);
+    container.querySelectorAll('[data-action="edit-member"]').forEach(btn => {
+      btn.addEventListener('click', (e) => { e.stopPropagation(); openEditMemberModal(btn.dataset.memberId); });
+    });
+    container.querySelectorAll('[data-action="toggle-status"]').forEach(btn => {
+      btn.addEventListener('click', (e) => { e.stopPropagation(); toggleMemberStatus(btn.dataset.memberId); });
+    });
+  }
+
+  function bindTilt(root) {
+    root.querySelectorAll('.glass-hi').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const rotateX = (y - rect.height / 2) / 60;
+        const rotateY = (rect.width / 2 - x) / 60;
+        card.style.transform = 'perspective(1000px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg)';
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+      });
+    });
+  }
+
+  function toggleMemberStatus(id) {
+    const m = STATE.members.find(x => x.id === id);
+    if (!m) return;
+    m.status = m.status === 'Active' ? 'Deactivated' : 'Active';
+    if (m.status === 'Deactivated') m.lastActive = 'Deactivated';
+    renderMembers();
+    renderLeaderboard();
+    addActivity(m.status === 'Active' ? 'toggle_on' : 'toggle_off', m.status === 'Active' ? 'tertiary' : 'on-surface-variant', m.name + ' was ' + (m.status === 'Active' ? 'reactivated' : 'deactivated') + '.');
+    toast(m.name + ' ' + (m.status === 'Active' ? 'reactivated' : 'deactivated'), m.status === 'Active' ? 'success' : 'info');
+  }
+
+  function addMember(data) {
+    STATE.memberCounter += 1;
+    const id = 'invited-' + STATE.memberCounter;
+    const member = {
+      id, name: data.name, email: data.email, title: data.title || 'Team Member', dept: data.dept,
+      role: data.role, calls: 0, score: null, quotaPct: 0, lastActive: 'Pending', status: 'Active',
+      customPermissions: data.overrides || null, avatar: null,
+    };
+    STATE.members.push(member);
+    renderMembers();
+    renderRoleCards();
+    renderLeaderboard();
+    addActivity('person_add', 'tertiary', member.name + ' was added to ' + member.dept + ' as ' + member.role + '.');
+    return member;
+  }
+
+  /* ---------------- Edit Member Modal ---------------- */
+  function openEditMemberModal(id) {
+    const m = STATE.members.find(x => x.id === id);
+    if (!m) return;
+    const eff = effectivePermissions(m);
+    openModal(
+      closeBtnHtml() +
+      '<div class="flex items-center gap-4 mb-6">' +
+        '<div class="w-14 h-14 rounded-xl border border-white/10 bg-white/10 flex items-center justify-center font-syne font-extrabold text-white text-xl">' + initials(m.name) + '</div>' +
+        '<div><h3 class="font-syne text-xl font-extrabold text-white">' + m.name + '</h3><p class="text-xs text-on-surface-variant">' + m.email + '</p></div>' +
+      '</div>' +
+      '<div class="grid grid-cols-2 gap-4 mb-6 text-sm">' +
+        '<div class="bg-black/20 border border-white/5 rounded-xl p-4"><p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Calls</p><p class="font-mono font-bold text-white text-lg">' + m.calls + '</p></div>' +
+        '<div class="bg-black/20 border border-white/5 rounded-xl p-4"><p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">AI Score</p><p class="font-mono font-bold text-tertiary text-lg">' + (m.score === null ? '—' : m.score) + '</p></div>' +
+      '</div>' +
+      '<div class="grid grid-cols-2 gap-3 mb-4">' +
+        '<div><label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1.5 block">Title</label>' +
+        '<input class="df-field" id="member-title-input" value="' + m.title + '"></div>' +
+        '<div><label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1.5 block">Department</label>' +
+        '<input class="df-field" id="member-dept-input" value="' + m.dept + '"></div>' +
+      '</div>' +
+      '<div class="mb-6"><label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1.5 block">Role</label>' +
+      '<select class="df-field" id="member-role-select">' +
+        STATE.roles.map(r => '<option value="' + r.name + '"' + (r.name === m.role ? ' selected' : '') + '>' + r.name + '</option>').join('') +
+      '</select></div>' +
+      '<div class="mb-6">' +
+        '<div class="flex items-center justify-between mb-2">' +
+          '<label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest block">Custom Permissions</label>' +
+          '<span class="text-[10px] text-on-surface-variant/60">Overrides role defaults</span>' +
+        '</div>' +
+        '<div class="bg-black/20 border border-white/5 rounded-xl p-4 flex flex-col gap-3 max-h-52 overflow-y-auto" id="member-perms-list">' +
+          PERMISSIONS.map(p =>
+            '<div class="flex items-center justify-between">' +
+              '<span class="text-xs text-on-surface-variant">' + p.label + '</span>' +
+              toggleHtml(p.key, !!eff[p.key], false) +
+            '</div>'
+          ).join('') +
+        '</div>' +
+      '</div>' +
+      '<div class="flex gap-3 mb-3">' +
+        '<button type="button" data-modal-close class="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 text-sm font-bold hover:bg-white/10 transition-all">Close</button>' +
+        '<button type="button" id="save-member-btn" class="flex-1 py-3 rounded-xl bg-fire-gradient text-white text-sm font-bold shadow-lg glow-fire">Save Changes</button>' +
+      '</div>' +
+      '<button type="button" id="remove-member-btn" class="w-full py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold hover:bg-red-500/20 transition-all">Remove from team</button>',
+      true
+    );
+    bindModalClose();
+
+    let pendingPerms = Object.assign({}, eff);
+    bindToggles(panel, (key, isOn) => { pendingPerms[key] = isOn; });
+
+    // If role changes, reset the displayed toggle defaults to the new role (still editable/overridable)
+    document.getElementById('member-role-select').addEventListener('change', (e) => {
+      const newRoleDefaults = getRole(e.target.value).permissions;
+      pendingPerms = Object.assign({}, newRoleDefaults);
+      panel.querySelectorAll('[data-perm-toggle]').forEach(t => {
+        t.classList.toggle('on', !!pendingPerms[t.dataset.permToggle]);
+      });
+    });
+
+    document.getElementById('save-member-btn').addEventListener('click', () => {
+      m.title = document.getElementById('member-title-input').value.trim() || m.title;
+      m.dept = document.getElementById('member-dept-input').value.trim() || m.dept;
+      m.role = document.getElementById('member-role-select').value;
+      m.customPermissions = pendingPerms;
+      renderMembers();
+      renderRoleCards();
+      renderLeaderboard();
+      closeModal();
+      addActivity('edit', 'fire-accent', m.name + '\u2019s profile was updated.');
+      toast(m.name + ' updated', 'success');
+    });
+
+    document.getElementById('remove-member-btn').addEventListener('click', () => {
+      closeModal();
+      setTimeout(() => {
+        openModal(
+          closeBtnHtml() +
+          '<div class="flex items-center gap-2 mb-4"><span class="material-symbols-outlined text-red-400 text-2xl">warning</span><h3 class="font-syne text-xl font-extrabold text-white">Remove ' + m.name + '?</h3></div>' +
+          '<p class="text-sm text-on-surface-variant mb-6 leading-relaxed">They will immediately lose access to DialForge. This cannot be undone.</p>' +
+          '<div class="flex gap-3">' +
+            '<button type="button" data-modal-close class="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 text-sm font-bold hover:bg-white/10 transition-all">Cancel</button>' +
+            '<button type="button" id="confirm-remove-btn" class="flex-1 py-3 rounded-xl bg-red-500 text-white text-sm font-black uppercase tracking-wider shadow-lg">Remove</button>' +
+          '</div>'
+        );
+        bindModalClose();
+        document.getElementById('confirm-remove-btn').addEventListener('click', () => {
+          STATE.members = STATE.members.filter(x => x.id !== m.id);
+          renderMembers();
+          renderRoleCards();
+          renderLeaderboard();
+          closeModal();
+          addActivity('person_remove', 'on-surface-variant', m.name + ' was removed from the team.');
+          toast(m.name + ' removed from team', 'info');
+        });
+      }, 220);
+    });
+  }
+
+  /* =========================================================
+     INVITE WIZARD
+     ========================================================= */
+  let wizard = null;
+
+  function startWizard() {
+    wizard = { step: 1, name: '', email: '', title: '', dept: 'Mid-Market', role: 'Member', overrides: null };
+    renderWizardStep();
+  }
+
+  function wizardStepsHtml(active) {
+    const labels = ['Details', 'Role', 'Permissions'];
+    return '<div class="flex items-center gap-2 mb-7">' +
+      labels.map((label, i) => {
+        const n = i + 1;
+        const state = n === active ? 'active' : (n < active ? 'done' : '');
+        const dot = '<div class="flex flex-col items-center gap-1"><div class="df-wizard-step-dot ' + state + '">' + (n < active ? '<span class="material-symbols-outlined text-sm">check</span>' : n) + '</div><span class="text-[9px] font-bold uppercase tracking-wide ' + (n === active ? 'text-white' : 'text-on-surface-variant/50') + '">' + label + '</span></div>';
+        return dot + (n < labels.length ? '<div class="df-wizard-line"></div>' : '');
+      }).join('') +
+    '</div>';
+  }
+
+  function renderWizardStep() {
+    if (wizard.step === 1) renderWizardStep1();
+    else if (wizard.step === 2) renderWizardStep2();
+    else renderWizardStep3();
+  }
+
+  function renderWizardStep1() {
+    openModal(
+      closeBtnHtml() +
+      '<h3 class="font-syne text-xl font-extrabold text-white mb-1">Invite Team Member</h3>' +
+      '<p class="text-xs text-on-surface-variant mb-6">Step 1 of 3 — Basic details</p>' +
+      wizardStepsHtml(1) +
+      '<form id="wizard-form-1" class="space-y-4">' +
+        '<div><label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1.5 block">Full Name</label>' +
+        '<input required class="df-field" placeholder="e.g. Sam Okafor" id="wiz-name" value="' + wizard.name + '"></div>' +
+        '<div><label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1.5 block">Email</label>' +
+        '<input required type="email" class="df-field" placeholder="sam.o@dialforge.pro" id="wiz-email" value="' + wizard.email + '"></div>' +
+        '<div class="grid grid-cols-2 gap-3">' +
+          '<div><label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1.5 block">Title</label>' +
+          '<input class="df-field" placeholder="e.g. Account Executive" id="wiz-title" value="' + wizard.title + '"></div>' +
+          '<div><label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1.5 block">Department</label>' +
+          '<input class="df-field" placeholder="e.g. Mid-Market" id="wiz-dept" value="' + wizard.dept + '"></div>' +
+        '</div>' +
+        '<div class="flex gap-3 pt-2">' +
+          '<button type="button" data-modal-close class="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 text-sm font-bold hover:bg-white/10 transition-all">Cancel</button>' +
+          '<button type="submit" class="flex-1 py-3 rounded-xl bg-fire-gradient text-white text-sm font-bold shadow-lg glow-fire">Next</button>' +
+        '</div>' +
+      '</form>',
+      true
+    );
+    bindModalClose();
+    document.getElementById('wizard-form-1').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('wiz-name').value.trim();
+      const email = document.getElementById('wiz-email').value.trim();
+      if (!name || !email) { toast('Fill in name and email', 'error'); return; }
+      wizard.name = name;
+      wizard.email = email;
+      wizard.title = document.getElementById('wiz-title').value.trim() || 'Team Member';
+      wizard.dept = document.getElementById('wiz-dept').value.trim() || 'Mid-Market';
+      wizard.step = 2;
+      renderWizardStep();
+    });
+  }
+
+  function renderWizardStep2() {
+    openModal(
+      closeBtnHtml() +
+      '<h3 class="font-syne text-xl font-extrabold text-white mb-1">Assign a Role</h3>' +
+      '<p class="text-xs text-on-surface-variant mb-6">Step 2 of 3 — Choose ' + wizard.name + '\u2019s role</p>' +
+      wizardStepsHtml(2) +
+      '<div class="grid grid-cols-1 gap-3 mb-6" id="wiz-role-options">' +
+        STATE.roles.map(r =>
+          '<button type="button" data-role="' + r.name + '" class="df-role-card text-left flex items-center gap-3 p-4 rounded-xl border ' + (r.name === wizard.role ? 'border-fire-accent bg-fire-accent/10' : 'border-white/10 bg-white/5 hover:bg-white/10') + '">' +
+            '<span class="material-symbols-outlined text-' + r.color + ' text-2xl">' + r.icon + '</span>' +
+            '<div class="flex-1"><p class="text-sm font-bold text-white">' + r.name + '</p><p class="text-[11px] text-on-surface-variant leading-snug">' + r.description + '</p></div>' +
+            '<span class="material-symbols-outlined text-fire-accent ' + (r.name === wizard.role ? '' : 'opacity-0') + '" data-role-check="' + r.name + '">check_circle</span>' +
+          '</button>'
+        ).join('') +
+      '</div>' +
+      '<div class="flex gap-3">' +
+        '<button type="button" id="wiz-back-2" class="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 text-sm font-bold hover:bg-white/10 transition-all">Back</button>' +
+        '<button type="button" id="wiz-next-2" class="flex-1 py-3 rounded-xl bg-fire-gradient text-white text-sm font-bold shadow-lg glow-fire">Next</button>' +
+      '</div>',
+      true
+    );
+    bindModalClose();
+    panel.querySelectorAll('[data-role]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        wizard.role = btn.dataset.role;
+        panel.querySelectorAll('[data-role]').forEach(b => {
+          const active = b.dataset.role === wizard.role;
+          b.classList.toggle('border-fire-accent', active);
+          b.classList.toggle('bg-fire-accent/10', active);
+          b.classList.toggle('border-white/10', !active);
+          b.classList.toggle('bg-white/5', !active);
+        });
+        panel.querySelectorAll('[data-role-check]').forEach(c => {
+          c.classList.toggle('opacity-0', c.dataset.roleCheck !== wizard.role);
+        });
+      });
+    });
+    document.getElementById('wiz-back-2').addEventListener('click', () => { wizard.step = 1; renderWizardStep(); });
+    document.getElementById('wiz-next-2').addEventListener('click', () => { wizard.step = 3; renderWizardStep(); });
+  }
+
+  function renderWizardStep3() {
+    const roleDefaults = getRole(wizard.role).permissions;
+    const overrides = wizard.overrides || roleDefaults;
+    openModal(
+      closeBtnHtml() +
+      '<h3 class="font-syne text-xl font-extrabold text-white mb-1">Permission Overrides</h3>' +
+      '<p class="text-xs text-on-surface-variant mb-6">Step 3 of 3 — Fine-tune access beyond the ' + wizard.role + ' defaults</p>' +
+      wizardStepsHtml(3) +
+      '<div class="bg-black/20 border border-white/5 rounded-xl p-4 flex flex-col gap-3 max-h-64 overflow-y-auto mb-6" id="wiz-perms-list">' +
+        PERMISSIONS.map(p =>
+          '<div class="flex items-center justify-between">' +
+            '<div><span class="text-xs text-on-surface-variant">' + p.label + '</span>' + (roleDefaults[p.key] ? '' : '<span class="ml-2 text-[9px] text-fire-accent/70 uppercase font-bold">override</span>') + '</div>' +
+            toggleHtml(p.key, !!overrides[p.key], false) +
+          '</div>'
+        ).join('') +
+      '</div>' +
+      '<div class="flex gap-3">' +
+        '<button type="button" id="wiz-back-3" class="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 text-sm font-bold hover:bg-white/10 transition-all">Back</button>' +
+        '<button type="button" id="wiz-finish" class="flex-1 py-3 rounded-xl bg-fire-gradient text-white text-sm font-bold shadow-lg glow-fire">Send Invite</button>' +
+      '</div>',
+      true
+    );
+    bindModalClose();
+    let pendingOverrides = Object.assign({}, overrides);
+    bindToggles(panel, (key, isOn) => { pendingOverrides[key] = isOn; });
+    document.getElementById('wiz-back-3').addEventListener('click', () => { wizard.overrides = pendingOverrides; wizard.step = 2; renderWizardStep(); });
+    document.getElementById('wiz-finish').addEventListener('click', (e) => {
+      const btn = e.target;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="material-symbols-outlined df-spin text-base align-middle">progress_activity</span>';
+      // Only store as custom overrides if they differ from role defaults
+      let differs = PERMISSIONS.some(p => !!pendingOverrides[p.key] !== !!roleDefaults[p.key]);
+      setTimeout(() => {
+        addMember({
+          name: wizard.name, email: wizard.email, title: wizard.title, dept: wizard.dept,
+          role: wizard.role, overrides: differs ? pendingOverrides : null,
+        });
+        closeModal();
+        toast('Invite sent to ' + wizard.email, 'success');
+        wizard = null;
+      }, 700);
+    });
+  }
+
+  document.getElementById('invite-member-btn').addEventListener('click', startWizard);
+
+  /* =========================================================
+     ROLES TAB
+     ========================================================= */
+  function roleCardHtml(r) {
+    const count = STATE.members.filter(m => m.role === r.name).length;
+    const enabledCount = PERMISSIONS.filter(p => r.permissions[p.key]).length;
+    return (
+      '<div class="df-role-card glass-card rounded-2xl p-6 border border-white/10 flex flex-col" data-purpose="role-card" data-role="' + r.name + '">' +
+        '<div class="flex items-start justify-between mb-4">' +
+          '<div class="w-12 h-12 rounded-xl bg-' + r.color + '/10 border border-' + r.color + '/20 flex items-center justify-center">' +
+            '<span class="material-symbols-outlined text-' + r.color + '">' + r.icon + '</span>' +
+          '</div>' +
+          '<button type="button" class="p-1.5 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 text-on-surface-variant hover:text-white transition-all" data-action="edit-role" data-role="' + r.name + '" title="Edit role">' +
+            '<span class="material-symbols-outlined text-base">edit</span>' +
+          '</button>' +
+        '</div>' +
+        '<h4 class="font-syne text-lg font-extrabold text-white mb-1">' + r.name + '</h4>' +
+        '<p class="text-xs text-on-surface-variant leading-relaxed mb-4 flex-1">' + r.description + '</p>' +
+        '<div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-on-surface-variant border-t border-white/5 pt-3">' +
+          '<span>' + count + ' member' + (count === 1 ? '' : 's') + '</span>' +
+          '<span>' + enabledCount + '/' + PERMISSIONS.length + ' permissions</span>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function renderRoleCards() {
+    const container = document.getElementById('role-cards-container');
+    container.innerHTML = STATE.roles.map(roleCardHtml).join('');
+    container.querySelectorAll('[data-action="edit-role"]').forEach(btn => {
+      btn.addEventListener('click', () => openRoleEditor(btn.dataset.role));
+    });
+  }
+
+  function renderPermissionMatrix() {
+    const container = document.getElementById('permission-matrix-table');
+    const header =
+      '<div class="grid items-center pb-3 border-b border-white/10 text-[10px] font-black uppercase tracking-widest text-on-surface-variant" style="grid-template-columns: 2fr repeat(' + STATE.roles.length + ', 1fr);">' +
+        '<span>Permission</span>' +
+        STATE.roles.map(r => '<span class="text-center">' + r.name + '</span>').join('') +
+      '</div>';
+    const rows = PERMISSIONS.map(p =>
+      '<div class="grid items-center py-3 border-b border-white/5 text-sm" style="grid-template-columns: 2fr repeat(' + STATE.roles.length + ', 1fr);">' +
+        '<span class="text-on-surface-variant">' + p.label + '</span>' +
+        STATE.roles.map(r => '<span class="flex justify-center"><span class="material-symbols-outlined ' + (r.permissions[p.key] ? 'text-tertiary' : 'text-on-surface-variant/30') + '">' + (r.permissions[p.key] ? 'check_circle' : 'remove_circle') + '</span></span>').join('') +
+      '</div>'
+    ).join('');
+    container.innerHTML = '<div style="min-width:560px">' + header + rows + '</div>';
+  }
+
+  document.getElementById('permission-matrix-btn').addEventListener('click', () => {
+    switchToTab('roles');
+    setTimeout(() => {
+      const el = document.getElementById('permission-matrix-panel');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+  });
+
+  /* ---------------- Role Editor ---------------- */
+  function openRoleEditor(roleName) {
+    const r = getRole(roleName);
+    if (!r) return;
+    openModal(
+      closeBtnHtml() +
+      '<div class="flex items-center gap-4 mb-6">' +
+        '<div class="w-14 h-14 rounded-xl bg-' + r.color + '/10 border border-' + r.color + '/20 flex items-center justify-center">' +
+          '<span class="material-symbols-outlined text-' + r.color + ' text-2xl">' + r.icon + '</span>' +
+        '</div>' +
+        '<div><h3 class="font-syne text-xl font-extrabold text-white">' + r.name + '</h3><p class="text-xs text-on-surface-variant">' + STATE.members.filter(m => m.role === r.name).length + ' members assigned</p></div>' +
+      '</div>' +
+      (r.locked ? '<div class="mb-5 px-4 py-3 rounded-xl bg-fire-accent/10 border border-fire-accent/20 text-xs text-fire-accent flex items-center gap-2"><span class="material-symbols-outlined text-base">lock</span>Superadmin permissions are fixed and cannot be edited.</div>' : '') +
+      '<div class="mb-6"><label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1.5 block">Description</label>' +
+      '<input class="df-field" id="role-desc-input" value="' + r.description + '"' + (r.locked ? ' disabled' : '') + '></div>' +
+      '<div class="mb-6">' +
+        '<label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2 block">Permission Toggles</label>' +
+        '<div class="bg-black/20 border border-white/5 rounded-xl p-4 flex flex-col gap-3 max-h-64 overflow-y-auto" id="role-perms-list">' +
+          PERMISSIONS.map(p =>
+            '<div class="flex items-center justify-between">' +
+              '<span class="text-xs text-on-surface-variant">' + p.label + '</span>' +
+              toggleHtml(p.key, !!r.permissions[p.key], r.locked) +
+            '</div>'
+          ).join('') +
+        '</div>' +
+      '</div>' +
+      '<div class="flex gap-3">' +
+        '<button type="button" data-modal-close class="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 text-sm font-bold hover:bg-white/10 transition-all">Cancel</button>' +
+        (r.locked ? '' : '<button type="button" id="save-role-btn" class="flex-1 py-3 rounded-xl bg-fire-gradient text-white text-sm font-bold shadow-lg glow-fire">Save Role</button>') +
+      '</div>',
+      true
+    );
+    bindModalClose();
+    if (r.locked) return;
+    let pendingPerms = Object.assign({}, r.permissions);
+    bindToggles(panel, (key, isOn) => { pendingPerms[key] = isOn; });
+    document.getElementById('save-role-btn').addEventListener('click', () => {
+      r.description = document.getElementById('role-desc-input').value.trim() || r.description;
+      r.permissions = pendingPerms;
+      renderRoleCards();
+      renderPermissionMatrix();
+      renderMembers();
+      closeModal();
+      addActivity('shield_person', 'fire-accent', r.name + ' role permissions updated.');
+      toast(r.name + ' role updated', 'success');
+    });
+  }
+
+  /* =========================================================
+     PERFORMANCE TAB
+     ========================================================= */
+  function renderLeaderboard() {
+    const container = document.getElementById('leaderboard-container');
+    const active = STATE.members.filter(m => m.status === 'Active').slice().sort((a, b) => b.calls - a.calls);
+    container.innerHTML = active.map((m, i) => {
+      const rank = i + 1;
+      const rankColor = rank === 1 ? 'text-fire-accent' : rank === 2 ? 'text-white' : rank === 3 ? 'text-primary' : 'text-on-surface-variant';
+      const avatarHtml = m.avatar
+        ? '<img alt="' + m.name + '" class="w-9 h-9 rounded-lg object-cover border border-white/10" src="' + m.avatar + '">'
+        : '<div class="w-9 h-9 rounded-lg border border-white/10 bg-white/10 flex items-center justify-center font-syne font-extrabold text-white text-xs">' + initials(m.name) + '</div>';
+      const quotaPct = Math.max(0, m.quotaPct || 0);
+      const quotaOver = quotaPct >= 100;
+      return (
+        '<div class="grid grid-cols-12 items-center gap-2 px-3 py-3 rounded-xl hover:bg-white/5 transition-all">' +
+          '<div class="col-span-2 lg:col-span-1 font-mono font-black text-sm ' + rankColor + '">#' + rank + '</div>' +
+          '<div class="col-span-10 lg:col-span-4 flex items-center gap-3">' + avatarHtml + '<div><p class="text-sm font-bold text-white leading-tight">' + m.name + '</p><p class="text-[10px] text-on-surface-variant">' + m.role + '</p></div></div>' +
+          '<div class="col-span-4 lg:col-span-2 text-center font-mono font-bold text-white">' + m.calls + '</div>' +
+          '<div class="col-span-4 lg:col-span-2 text-center font-mono font-bold text-tertiary">' + (m.score === null ? '—' : m.score) + '</div>' +
+          '<div class="col-span-4 lg:col-span-3">' +
+            '<div class="flex items-center justify-between mb-1"><span class="text-[10px] font-mono font-bold ' + (quotaOver ? 'text-tertiary' : 'text-fire-accent') + '">' + quotaPct + '%</span></div>' +
+            '<div class="df-quota-track"><div class="df-quota-fill ' + (quotaOver ? 'over' : '') + '" style="width:' + Math.min(quotaPct, 100) + '%"></div></div>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+  }
+
+  function renderCoachingFocus() {
+    const container = document.getElementById('coaching-focus-container');
+    const candidates = STATE.members
+      .filter(m => m.status === 'Active' && m.score !== null)
+      .slice()
+      .sort((a, b) => a.score - b.score)
+      .slice(0, 4);
+    if (!candidates.length) {
+      container.innerHTML = '<p class="text-sm text-on-surface-variant">No coaching flags right now — the team is on track.</p>';
+      return;
+    }
+    container.innerHTML = candidates.map((m, i) => {
+      const area = COACHING_AREAS[i % COACHING_AREAS.length];
+      return (
+        '<div class="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/5">' +
+          '<div class="w-9 h-9 rounded-lg border border-white/10 bg-white/10 flex items-center justify-center font-syne font-extrabold text-white text-xs flex-shrink-0">' + initials(m.name) + '</div>' +
+          '<div class="flex-1">' +
+            '<p class="text-sm font-bold text-white leading-tight">' + m.name + '</p>' +
+            '<p class="text-[11px] text-fire-accent font-bold mt-0.5">' + area + '</p>' +
+            '<p class="text-[11px] text-on-surface-variant mt-1 leading-snug">AI score at ' + m.score + ' — flagged below team average this cycle.</p>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+  }
+
+  function renderActivityFeed() {
+    const container = document.getElementById('activity-feed-container');
+    container.innerHTML = STATE.activity.map(a =>
+      '<div class="flex items-start gap-3">' +
+        '<div class="w-9 h-9 rounded-lg bg-' + a.color + '/10 border border-' + a.color + '/20 flex items-center justify-center flex-shrink-0">' +
+          '<span class="material-symbols-outlined text-' + a.color + ' text-lg">' + a.icon + '</span>' +
+        '</div>' +
+        '<div class="flex-1 border-b border-white/5 pb-3">' +
+          '<p class="text-sm text-white">' + a.text + '</p>' +
+          '<p class="text-[10px] text-on-surface-variant mt-0.5">' + a.time + '</p>' +
+        '</div>' +
+      '</div>'
+    ).join('');
+  }
+
+  /* =========================================================
+     FAB: Start a call (kept from base app, now state-driven)
+     ========================================================= */
+  document.getElementById('fab-add-call-btn').addEventListener('click', () => {
+    const activeMembers = STATE.members.filter(m => m.status === 'Active');
+    openModal(
+      closeBtnHtml() +
+      '<div class="flex items-center gap-2 mb-4"><span class="material-symbols-outlined text-fire-accent text-2xl">add_call</span><h3 class="font-syne text-xl font-extrabold text-white">Start a Call</h3></div>' +
+      '<form id="start-call-form" class="space-y-4">' +
+        '<div><label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1.5 block">Assign to</label>' +
+        '<select class="df-field" id="call-assignee">' +
+          activeMembers.map(m => '<option value="' + m.name + '">' + m.name + '</option>').join('') +
+        '</select></div>' +
+        '<div><label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1.5 block">Phone Number</label>' +
+        '<input required class="df-field font-mono" placeholder="+1 (555) 000-0000" id="call-number"></div>' +
+        '<div class="flex gap-3 pt-2">' +
+          '<button type="button" data-modal-close class="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 text-sm font-bold hover:bg-white/10 transition-all">Cancel</button>' +
+          '<button type="submit" class="flex-1 py-3 rounded-xl bg-fire-gradient text-white text-sm font-bold shadow-lg glow-fire">Start Call</button>' +
+        '</div>' +
+      '</form>'
+    );
+    bindModalClose();
+    document.getElementById('start-call-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const assignee = document.getElementById('call-assignee').value;
+      const number = document.getElementById('call-number').value.trim();
+      if (!number) { toast('Enter a phone number', 'error'); return; }
+      closeModal();
+      toast('Call to ' + number + ' assigned to ' + assignee, 'success');
+    });
+  });
+
+  /* =========================================================
+     INITIAL RENDER
+     ========================================================= */
+  renderMembers();
+  renderRoleCards();
+  renderPermissionMatrix();
+  renderLeaderboard();
+  renderCoachingFocus();
+  renderActivityFeed();
+
+})();
+</script>
+</body></html>

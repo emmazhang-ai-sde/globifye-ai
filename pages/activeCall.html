@@ -1,0 +1,2904 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DialForge | Active Call Stage</title>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Syne, DM Sans, JetBrains Mono -->
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&amp;family=Syne:wght@800&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            surface: "#12131a",
+            "on-tertiary-fixed-variant": "#005227",
+            "on-primary": "#611200",
+            "on-tertiary": "#003919",
+            "inverse-primary": "#b32a00",
+            "tertiary-fixed-dim": "#00e478",
+            "surface-container": "#1e1f27",
+            "surface-container-low": "#1a1b23",
+            "surface-container-high": "#292932",
+            "on-primary-fixed": "#3c0800",
+            "gold": "#F5C518",
+            "fire-gradient": "#FF7A1C",
+            "on-tertiary-container": "#003115",
+            "secondary-fixed": "#d6e3ff",
+            "secondary-fixed-dim": "#a8c8ff",
+            "primary-fixed": "#ffdbd2",
+            "fire-accent": "#FFAD1C",
+            "ai-purple": "#9B6DFF",
+            "primary-container": "#ff562a",
+            "on-secondary-container": "#002956",
+            "surface-container-low": "#1a1b23",
+            "inverse-surface": "#e3e1ec",
+            "surface": "#12131a",
+            "surface-variant": "#33343d",
+            "error-container": "#93000a",
+            "error-red": "#FF3B30",
+            "secondary-container": "#3791ff",
+            "surface-container-high": "#292932",
+            "primary-fixed-dim": "#ffb4a2",
+            "on-secondary-fixed": "#001b3c",
+            "background": "#12131a",
+            "surface-tint": "#ffb4a2",
+            "surface-bright": "#383941",
+            "outline": "#ac8980",
+            "on-primary-container": "#550f00",
+            "ember-alert": "#FF2200",
+            "on-tertiary-fixed": "#00210c",
+            "tertiary": "#00e478",
+            "surface-dim": "#12131a",
+            "tertiary-container": "#00a756",
+            "tertiary-fixed": "#61ff98",
+            "teal-support": "#00D4C8",
+            "outline-variant": "#5c4039",
+            "surface-container-highest": "#33343d",
+            "secondary": "#a8c8ff",
+            "error-red": "#FF3B30",
+            "on-error-container": "#ffdad6",
+            "on-surface-variant": "#e5beb4",
+            "glass-border": "rgba(255, 255, 255, 0.08)",
+            "on-primary-fixed-variant": "#891e00",
+            "primary": "#ffb4a2",
+            "on-secondary": "#003062",
+            "on-error": "#690005",
+            "surface-container-lowest": "#0d0e15",
+            "on-surface": "#e3e1ec",
+            "on-background": "#e3e1ec",
+            "error": "#ffb4ab",
+            "inverse-on-surface": "#2f3038",
+            "on-secondary-fixed-variant": "#00468a"
+          },
+          fontFamily: {
+            syne: ["Syne", "sans-serif"],
+            sans: ["DM Sans", "sans-serif"],
+            mono: ["JetBrains Mono", "monospace"],
+            "mono-data": ["JetBrains Mono"],
+            "hero-h1": ["Syne"],
+            "button-text": ["DM Sans"],
+            "badge-text": ["DM Sans"],
+            "section-header": ["Syne"],
+            "stat-value": ["Syne"],
+            "body-base": ["DM Sans"],
+            "small-label": ["DM Sans"]
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-animations">@keyframes pulse-ring {
+    0% {
+        transform: scale(0.95);
+        opacity: 0.5;
+        } 50% {
+        transform: scale(1.1);
+        opacity: 0.3;
+        } 100% {
+        transform: scale(1.3);
+        opacity: 0;
+        }
+    }
+.animate-pulse-ring {
+    animation: pulse-ring 3s cubic-bezier(0.4, 0, 0.6, 1) infinite
+    }
+.animate-pulse-ring-slow {
+    animation: pulse-ring 4s cubic-bezier(0.4, 0, 0.6, 1) infinite
+    }
+.glass-card {
+    background: rgba(30, 31, 39, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1)
+    }
+    .liquid-glass {
+    background: rgba(26, 27, 35, 0.6);
+    backdrop-filter: blur(40px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+.fire-glow {
+    box-shadow: 0 0 50px rgba(255, 122, 28, 0.15)
+    }
+    .fire-gradient {
+    background: linear-gradient(135deg, #FF7A1C 0%, #FF4D00 100%)
+    }
+.fire-border {
+    border: 2px solid #FF7A1C;
+    box-shadow: 0 0 15px rgba(255, 122, 28, 0.2)
+    }
+.noise-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.02;
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuAjBgxhjjpbQ1X6hvaeggcEsORm0cusjq8KmhkMIem9paSnZ7_7H4035tguD8hQF_wyJfO0-xi5zinWRn5KCM4dsf9akf-ZEUIsx8r2p38OT_3LwtrA_hw0Bqp7LEHGHhjXR6QSfhiz5U0QWGx-RgUC23zQ_gXBKToAxBg8Gydr2pnyjVJzW_LFuaMzmeu54c7PrLK77yNnBemFzvrQWsOo-ahwjnkRQn0xqS8r25dnS6iz5_tsV9azzSv_REk-2thWjE9T9bosd9s)
+    }
+    @keyframes pulse-glow {
+      0% { box-shadow: 0 0 0 0 rgba(0, 228, 120, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(0, 228, 120, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 228, 120, 0); }
+    }
+    .active-orb {
+      animation: pulse-glow 2s infinite;
+    }
+    @keyframes ring-shake {
+      0%, 100% { transform: rotate(0deg); }
+      10%, 30%, 50%, 70% { transform: rotate(-14deg); }
+      20%, 40%, 60%, 80% { transform: rotate(14deg); }
+      90% { transform: rotate(0deg); }
+    }
+    @keyframes ring-pulse-ring {
+      0% { transform: scale(0.9); opacity: 0.8; }
+      100% { transform: scale(1.9); opacity: 0; }
+    }
+    .ringing-icon {
+      animation: ring-shake 1.2s ease-in-out infinite;
+    }
+    .ringing-pulse {
+      position: absolute;
+      inset: 0;
+      border-radius: 9999px;
+      border: 2px solid rgba(0, 228, 120, 0.6);
+      animation: ring-pulse-ring 1.6s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+    }
+    .ringing-pulse.delay-1 { animation-delay: 0.5s; }
+    .ringing-pulse.delay-2 { animation-delay: 1s; }
+    @keyframes modal-in {
+      0% { opacity: 0; transform: translateY(16px) scale(0.97); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-in {
+      animation: modal-in 0.25s ease-out forwards;
+    }
+    .crm-panel {
+      width: 18rem;
+      transition: width 240ms ease, transform 240ms ease, opacity 240ms ease;
+      transform: translateX(0);
+    }
+    .crm-panel.is-collapsed {
+      width: 4.5rem;
+    }
+    .crm-panel .panel-body {
+      opacity: 1;
+      transform: translateX(0);
+      transition: opacity 220ms ease, transform 220ms ease;
+    }
+    .crm-panel.is-collapsed .panel-body {
+      opacity: 0;
+      transform: translateX(8px);
+      pointer-events: none;
+    }
+    @media (max-width: 899px) {
+      .crm-panel {
+        display: none !important;
+      }
+    }
+::-webkit-scrollbar {
+    width: 4px
+    }
+::-webkit-scrollbar-track {
+    background: transparent
+    }
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px
+    }
+    @keyframes fade-in-out {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; }
+}
+.coach-suggestion-fade {
+    animation: fade-in-out 14s ease-in-out forwards;
+}
+.modal-overlay {
+animation: fade-in 0.3s ease-out;
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+}
+.modal-overlay.active {
+    display: flex;
+}
+.modal-content {
+  animation: scale-in 0.3s ease-out;
+    background: rgba(30, 31, 39, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.modal-content::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+@keyframes rec-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+.rec-pulse {
+    animation: rec-pulse 1.5s ease-in-out infinite;
+}
+/* Fixed AI Coach Bubble Layout */
+.transcript-container {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+.coach-bubble-fixed {
+    flex-shrink: 0;
+    position: sticky;
+    bottom: 0;
+}
+/* Modals for Camera and Screen Share */
+.screen-share-modal-overlay,
+.camera-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 300;
+    align-items: center;
+    justify-content: center;
+}
+.screen-share-modal-overlay.active,
+.camera-modal-overlay.active {
+    display: flex;
+}
+.screen-share-modal-content,
+.camera-modal-content {
+    background: rgba(30, 31, 39, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.5rem;
+    max-width: 800px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+/* Preview panels expand/collapse animation */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.preview-panel-enter {
+    animation: slideInUp 0.3s ease-out;
+}
+@keyframes scale-in {
+    from { 
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to { 
+        opacity: 1;
+        transform: scale(1);
+    }
+    }
+.pip-panel {
+    transition: all 0.3s ease-out;
+    }
+.badge-pulse {
+    animation: badge-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+@keyframes badge-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+    }
+    </style>
+</head>
+<body class="bg-surface text-[#e3e1ec] font-sans selection:bg-fire-accent/30 overflow-hidden">
+<div class="noise-overlay"></div>
+
+<!-- BEGIN: IncomingCallWidget -->
+<div id="incomingCallOverlay" class="hidden fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
+  <div class="modal-in glass-card fire-glow w-full max-w-sm rounded-2xl p-8 flex flex-col items-center text-center">
+    <span class="text-[10px] font-extrabold text-tertiary uppercase tracking-widest mb-6">Incoming Call</span>
+    <div class="relative w-24 h-24 mb-5">
+      <span class="ringing-pulse"></span>
+      <span class="ringing-pulse delay-1"></span>
+      <span class="ringing-pulse delay-2"></span>
+      <img id="incomingCallAvatar" alt="Caller avatar" class="relative w-24 h-24 rounded-full object-cover border-2 border-tertiary z-10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE">
+    </div>
+    <span id="incomingCallName" class="font-section-header text-xl text-white mb-1">Jordan Blake</span>
+    <span id="incomingCallCompany" class="text-xs font-bold text-on-surface-variant/60 mb-1">Meridian Capital Partners</span>
+    <span id="incomingCallNumber" class="font-mono-data text-sm text-fire-accent mb-8">+1 (415) 555-0148</span>
+    <div class="flex items-center gap-3 mb-3 w-full">
+      <span class="material-symbols-outlined text-fire-accent ringing-icon">ring_volume</span>
+      <span class="text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest">Ringing…</span>
+    </div>
+    <div class="grid grid-cols-3 gap-3 w-full">
+      <button id="declineCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-error-red/10 border border-error-red/30 text-error-red hover:bg-error-red/20 transition-all">
+        <span class="material-symbols-outlined">call_end</span>
+        <span class="text-[9px] font-extrabold uppercase tracking-wider">Decline</span>
+      </button>
+      <button id="acceptCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-tertiary/10 border border-tertiary/40 text-tertiary hover:bg-tertiary/20 transition-all">
+        <span class="material-symbols-outlined">call</span>
+        <span class="text-[9px] font-extrabold uppercase tracking-wider">Accept</span>
+      </button>
+      <button id="voicemailCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-surface-container-high/60 border border-white/10 text-on-surface-variant hover:text-white transition-all">
+        <span class="material-symbols-outlined">voicemail</span>
+        <span class="text-[9px] font-extrabold uppercase tracking-wider">Voicemail</span>
+      </button>
+    </div>
+  </div>
+</div>
+<!-- END: IncomingCallWidget -->
+ <div id="newCallModal" class="hidden fixed inset-0 z-[120] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
+  <div class="modal-in glass-card w-full max-w-lg rounded-3xl p-6 shadow-2xl">
+    <div class="flex items-start justify-between gap-4 mb-6">
+      <div>
+        <p class="text-[10px] font-extrabold uppercase tracking-[0.3em] text-fire-accent">New Call</p>
+        <h3 class="text-xl font-section-header text-white">Start a conversation</h3>
+      </div>
+      <button id="cancelCallBtn" type="button" class="rounded-full p-2 text-on-surface-variant/70 hover:bg-white/10 hover:text-white transition-all">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <label for="callContactSelect" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Contact</label>
+        <select id="callContactSelect" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none ring-0 focus:border-fire-accent">
+          <option value="">Manual entry</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="callNumberInput" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Phone number</label>
+        <input id="callNumberInput" type="tel" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none placeholder:text-on-surface-variant/40 focus:border-fire-accent" placeholder="Enter a phone number" />
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button id="cancelCallSecondaryBtn" type="button" class="rounded-xl border border-white/10 px-4 py-2 text-sm font-bold text-on-surface-variant hover:bg-white/10 hover:text-white transition-all">Cancel</button>
+        <button id="startCallBtn" type="button" class="flex items-center gap-2 rounded-xl bg-fire-gradient px-4 py-2 text-sm font-bold text-on-primary shadow-lg transition-all hover:brightness-110">
+          <span class="material-symbols-outlined text-sm">call</span>
+          Start Call
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BEGIN: ActiveCallBar -->
+<div id="activeCallBar" class="hidden fixed top-16 left-0 lg:left-20 right-0 z-40 bg-tertiary-container/95 backdrop-blur-xl border-b border-tertiary/30 px-6 py-3 flex items-center justify-between">
+  <div class="flex items-center gap-3">
+    <span class="w-2 h-2 rounded-full bg-white active-orb"></span>
+    <span id="activeCallStatusLabel" class="text-[10px] font-extrabold text-white uppercase tracking-widest">Active Call</span>
+    <span class="text-white/50">•</span>
+    <span id="activeCallName" class="text-sm font-bold text-white">Jordan Blake</span>
+    <span id="activeCallCompany" class="text-xs text-white/70 font-bold">Meridian Capital Partners</span>
+  </div>
+  <div class="flex items-center gap-2 xl:pr-16">
+    <span id="activeCallDuration" class="font-mono-data text-sm font-bold text-white">00:00</span>
+    <button id="holdCallBtn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all">
+      <span class="material-symbols-outlined text-sm">pause</span>
+      Hold
+    </button>
+    <button id="endCallBtn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-error-red text-white text-xs font-bold hover:brightness-110 transition-all">
+      <span class="material-symbols-outlined text-sm">call_end</span>
+      End
+    </button>
+  </div>
+</div>
+<!-- END: ActiveCallBar -->
+
+<!-- BEGIN: TopAppBar -->
+<header class="fixed top-0 w-full z-50 h-16 glass-card flex items-center justify-between px-6 border-b border-white/5">
+<div class="flex items-center gap-6">
+<span class="font-hero-h1 text-2xl font-extrabold text-white">Dial<span class="text-fire-gradient">Forge</span></span>
+<div class="h-8 w-px bg-white/10 hidden lg:block"></div>
+  <div class="flex flex-col justify-center">
+    <h2 class="text-xs font-bold text-on-surface-variant/60 uppercase tracking-widest leading-none mb-1">Page</h2>
+    <span class="text-sm font-bold text-white whitespace-nowrap">Active Call</span>
+  </div>
+  <span class="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_8px_#00e478] animate-pulse"></span>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface" id="call-status-indicator">Live Call • <span id="call-timer">00:00</span></span>
+
+</div>
+
+<div class="flex items-center gap-4">
+  <!-- Usage Pill -->
+  <div class="hidden md:flex items-center gap-3 bg-surface-container-high/40 border border-white/5 rounded-full px-3 py-1.5 relative overflow-hidden">
+    <div class="absolute inset-0 bg-fire-gradient/10 w-[84%]"></div>
+    <span class="material-symbols-outlined text-fire-accent text-sm relative z-10">hourglass_empty</span>
+    <span class="text-[10px] font-bold text-white relative z-10">842 / 1,000 mins</span>
+  </div>
+
+  <!-- Live Timer with REC Indicator -->
+   <div id="callTimerContainer" class="flex items-center gap-2 bg-surface-container-lowest/50 border border-white/5 rounded-lg px-3 py-1.5">
+    <span id="callTimerDot" class="w-1.5 h-1.5 rounded-full bg-white/20"></span>
+    <span id="callTimerText" class="font-mono-data text-sm font-bold text-white">00:00</span>
+    <span id="recIndicator" class="hidden ml-2 px-2 py-0.5 bg-error-red/20 text-error-red text-[10px] font-bold rounded flex items-center gap-1 rec-pulse">
+      <span class="w-1.5 h-1.5 rounded-full bg-error-red"></span>
+      REC
+    </span>
+  </div>
+
+  <div class="h-8 w-px bg-white/10 mx-2"></div>
+
+  <!-- Action Buttons -->
+  <div class="flex items-center gap-2">
+    <button id="testInboundBtn" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-high/50 border border-white/10 text-on-surface-variant hover:text-white transition-all text-xs font-bold">
+      <span class="material-symbols-outlined text-sm">ring_volume</span>
+      Test Inbound
+    </button>
+    <button id="newCallBtn" type="button" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-fire-gradient text-on-primary font-bold text-xs hover:brightness-110 transition-all shadow-lg">
+      <span class="material-symbols-outlined text-sm">add</span>
+      New Call
+    </button>
+  </div>
+
+  <div class="h-8 w-px bg-white/10 mx-2"></div>
+
+  <!-- Utility Icons -->
+  <div class="flex items-center gap-1">
+    <button class="p-2 text-on-surface-variant/60 hover:text-white transition-colors">
+      <span class="material-symbols-outlined">dark_mode</span>
+    </button>
+    <button id="crmPanelToggle" type="button" class="p-2 text-on-surface-variant/60 hover:text-white transition-colors">
+      <span class="material-symbols-outlined">side_navigation</span>
+    </button>
+  </div>
+
+</div>
+</header>
+<!-- END: TopAppBar -->
+<!-- BEGIN: SideNav -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex flex-col items-center py-6 gap-6 glass-card border-r border-white/5 z-40 overflow-y-auto">
+<div class="flex flex-col gap-4 items-center">
+    <a href="Dashboard.html" class="block">
+        <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="text-[8px] uppercase font-bold">Dashboard</span>
+        </button>
+    </a>
+<button class="group relative flex flex-col items-center gap-1 w-full py-3 bg-primary-container/20 text-fire-accent border-l-4 border-fire-accent shadow-[0_0_20px_rgba(255,122,28,0.2)]">
+    <span class="material-symbols-outlined">call</span>
+    <span class="text-[8px] uppercase font-bold">Call</span>
+</button>
+<a href="supportQueue.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">queue</span>
+    <span class="text-[8px] uppercase font-bold">Queue</span>
+  </a>
+  <a href="callCoaching.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">graphic_eq</span>
+      <span class="text-[8px] uppercase font-bold">Coaching</span>
+    </button>
+  </a>
+  <a href="powerDialer.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">dialer_sip</span>
+    <span class="text-[8px] uppercase font-bold">Dialer</span>
+  </a>
+  <a href="salesPipeline.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">view_kanban</span>
+    <span class="text-[8px] uppercase font-bold">Pipeline</span>
+  </a>
+  <a href="callHistory.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">history</span>
+      <span class="text-[8px] uppercase font-bold">History</span>
+    </button>
+  </a>
+  <a href="contacts.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">group</span>
+    <span class="text-[8px] uppercase font-bold">Contacts</span>
+  </a>
+  <a href="integrationsHub.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">apps</span>
+    <span class="text-[8px] uppercase font-bold">Integrations</span>
+  </a>
+  <a href="numbers.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">123</span>
+    <span class="text-[8px] uppercase font-bold">Numbers</span>
+  </a>
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <a href="billingSubscription.html" class="flex flex-col items-center gap-1 w-full h-full text-inherit no-underline">
+      <span class="material-symbols-outlined">payments</span>
+      <span class="text-[8px] uppercase font-bold">Billing</span>
+    </a>
+  </button>
+  <a href="teamGovernance_y.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">groups</span>
+      <span class="text-[8px] uppercase font-bold">Team</span>
+    </button>
+  </a>
+  <a href="settingsGeneral.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">settings</span>
+      <span class="text-[8px] uppercase font-bold">Settings</span>
+    </button>
+  </a>
+  <a href="notifications.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">notifications</span>
+      <span class="text-[8px] uppercase font-bold">Notif</span>
+    </button>
+  </a>
+</div>
+<div class="flex flex-col items-center gap-4 w-full pb-4">
+<a href="profile.html" class="block w-full h-full cursor-pointer">
+<div class="h-10 w-10 rounded-full overflow-hidden border border-white/10 items-center ml-4">
+    <img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs">
+  </div>
+  </a>
+</div>
+</aside>
+<!-- END: SideNav -->
+<main class="ml-20 mt-16 h-[calc(100vh-64px)] flex xl:pr-20">
+<!-- BEGIN: LeftPanel_Transcript -->
+<section class="w-80 lg:w-[400px] flex flex-col p-6 border-r border-white/5 bg-surface-container-low/30">
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-syne text-xs uppercase tracking-widest text-fire-accent font-bold">Live Transcript</h2>
+<span class="bg-ai-purple/20 text-ai-purple text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-tighter">AI-Active</span>
+</div>
+<!-- Transcript Container - Scrollable independently -->
+<div class="transcript-container space-y-6 pr-2 mb-6" id="transcript-feed">
+<!-- Message 1 -->
+<div class="space-y-2">
+<div class="flex justify-between items-center px-1">
+<span class="text-[10px] text-gray-500 font-bold uppercase">14:10 • Sarah Connor</span>
+</div>
+<div class="bg-white/5 p-4 rounded-2xl rounded-tl-none border border-white/10 text-sm leading-relaxed">
+            "The pricing seems a bit steep for the 'Solo' tier. We were hoping for more team-based features at that price point."
+          </div>
+</div>
+<!-- Message 2 -->
+<div class="space-y-2">
+<div class="flex justify-end px-1">
+<span class="text-[10px] text-fire-accent/60 font-bold uppercase">14:11 • You</span>
+</div>
+<div class="bg-fire-accent/5 p-4 rounded-2xl rounded-tr-none border border-fire-accent/10 text-sm leading-relaxed">
+            "I understand. Let's look at the ROI DialForge brings to teams your size..."
+          </div>
+</div>
+<!-- Message 3 -->
+<div class="space-y-2">
+<div class="flex justify-between items-center px-1">
+<span class="text-[10px] text-gray-500 font-bold uppercase">14:12 • Sarah Connor</span>
+</div>
+<div class="bg-white/5 p-4 rounded-2xl rounded-tl-none border border-white/10 text-sm leading-relaxed">
+            "How does the integration with Salesforce handle deduplication of leads?"
+          </div>
+</div>
+</div>
+<!-- AI Coach Bubble - Fixed position -->
+<div id="ai-coach-bubble" class="coach-bubble-fixed glass-card p-5 rounded-3xl border-fire-accent/30 fire-glow relative overflow-hidden group">
+<div class="absolute inset-0 bg-fire-gradient opacity-[0.02] group-hover:opacity-[0.05] transition-opacity"></div>
+<div class="relative z-10">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-fire-accent text-lg" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+<span class="text-[10px] font-bold uppercase tracking-widest text-fire-accent">AI Coach Suggestion</span>
+</div>
+<h3 id="coach-title" class="text-sm font-bold mb-1">Handling Objection: Price Sensitivity</h3>
+<p id="coach-text" class="text-xs text-gray-400 leading-normal">
+            "Focus on the 22% average increase in call volume our clients see within 30 days. Mention the automated deduplication engine."
+          </p>
+<div class="mt-4 flex gap-2">
+<button class="flex-1 py-2 bg-fire-accent/20 hover:bg-fire-accent/30 text-fire-accent text-[11px] font-bold rounded-xl transition-all border border-fire-accent/20">Copy Rebuttal</button>
+<button class="flex-1 py-2 bg-white/5 hover:bg-white/10 text-gray-400 text-[11px] font-bold rounded-xl transition-all border border-white/5">Dismiss</button>
+</div>
+</div>
+</div>
+</section>
+<!-- END: LeftPanel_Transcript -->
+<!-- BEGIN: CenterStage -->
+<section class="flex-grow flex flex-col items-center justify-center relative bg-surface overflow-hidden">
+<!-- Background Ambient Glows -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-fire-gradient/10 rounded-full blur-[120px] pointer-events-none"></div>
+<!-- Avatar Stage -->
+<div class="relative flex flex-col items-center z-10">
+<div class="relative mb-12">
+<!-- Pulse Rings -->
+<div class="absolute inset-0 rounded-full border-2 border-fire-accent/20 animate-pulse-ring"></div>
+<div class="absolute inset-0 rounded-full border-2 border-fire-accent/10 animate-pulse-ring-slow"></div>
+<div class="w-64 h-64 rounded-full border-[8px] border-surface-container-high shadow-2xl overflow-hidden relative fire-glow">
+<img alt="Sarah Connor" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqKguv2lN-Bz17QH9A5oJ04TkQSL4nMLIAKfF9xp4iOEpTKOiZEaEHl--uHjC9vHGXU6qmkQ8SAjrqYN2C5ZC0j0r3BIhBFSbt2mBmxkoGo8qxofHET6kJrC-YmSooHt2JdsXAUudIM2DjBPuGycorYtogSyZEIsTXmimMxi0zwngsa6Xw93Z3U8i9cgKZaiG6k08y-t5t8PWxjLRW4f0Waz8F9OhmRfq8HzPfeCgvHAb8TQZArckHVJ0rmXREH7UOib28r3OKIGk">
+</div>
+<!-- State Badges -->
+<div class="absolute top-8 right-8 flex flex-col gap-2 z-20" id="status-badges">
+<div id="badge-live" class="px-3 py-1 bg-tertiary/20 text-tertiary border border-tertiary/30 rounded-full text-[10px] font-bold uppercase badge-pulse">LIVE</div>
+</div>
+<!-- Voice Visualizer Overlay -->
+<div class="absolute -bottom-4 left-1/2 -translate-x-1/2 flex items-end justify-center gap-1.5 h-12 px-6 py-2 glass-card rounded-full border border-white/10">
+<div class="w-1.5 bg-fire-accent rounded-full animate-[bounce_1s_infinite]" style="height: 40%"></div>
+<div class="w-1.5 bg-fire-accent rounded-full animate-[bounce_0.8s_infinite]" style="height: 85%"></div>
+<div class="w-1.5 bg-fire-accent rounded-full animate-[bounce_1.4s_infinite]" style="height: 60%"></div>
+<div class="w-1.5 bg-fire-accent rounded-full animate-[bounce_1s_infinite]" style="height: 95%"></div>
+<div class="w-1.5 bg-fire-accent rounded-full animate-[bounce_1.2s_infinite]" style="height: 50%"></div>
+</div>
+</div>
+<div class="text-center">
+<h1 class="font-syne text-5xl font-extrabold mb-3 tracking-tight">Sarah Connor</h1>
+<div class="flex items-center justify-center gap-2 text-gray-400">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span class="text-sm font-medium tracking-wide">Cyberdyne Systems • Palo Alto, CA</span>
+</div>
+</div>
+</div>
+
+<!-- Camera PiP Panel -->
+<div id="camera-pip" class="pip-panel hidden fixed bottom-20 right-20 w-48 h-36 rounded-2xl overflow-hidden border-2 border-fire-accent/30 shadow-lg z-20 bg-black">
+<div class="absolute -top-1 -right-1 w-6 h-6 bg-fire-accent rounded-full flex items-center justify-center text-xs text-white cursor-pointer hover:bg-fire-accent/80 transition-colors" onclick="toggleCameraPiP()">
+<span class="material-symbols-outlined text-sm">close</span>
+</div>
+<img alt="Camera Preview" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJY3CV4HEwNBrtENpl6YwHYRZGHUGTijslP6awNQW5IN6t9mf2N5HE2D7bd8J1sk1errWg8f7nwSrIIZggze6sBkXxjR0lVruRBp77DOG6vwEShsd6OaCgGse6pKJBOiWghpMTPF8DZ2ROJ3q32gqQN_N-hP8tJi0iD4zGcqax3vz0CODob8XYK0lfpj5MhrJCtgFitHLhrwYfdAEviAdO3OU38acQdB4VAcPXDA0e1HMtP1Z5V7qDPL1SZq0Gqrp3ic-Ny8Egfoh1">
+<div class="absolute top-2 left-2 bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded text-[8px] font-mono text-white">CAMERA</div>
+</div>
+
+<!-- Screen Share Preview Panel -->
+<div id="screen-share-preview" class="pip-panel hidden fixed bottom-20 right-64 w-48 h-36 rounded-2xl overflow-hidden border-2 border-fire-accent/30 shadow-lg z-20 bg-black">
+<div class="absolute -top-1 -right-1 w-6 h-6 bg-fire-accent rounded-full flex items-center justify-center text-xs text-white cursor-pointer hover:bg-fire-accent/80 transition-colors" onclick="toggleScreenSharePreview()">
+<span class="material-symbols-outlined text-sm">close</span>
+</div>
+<div class="w-full h-full bg-surface-container-high flex items-center justify-center text-gray-400">
+<span class="material-symbols-outlined">screen_share</span>
+</div>
+<div class="absolute top-2 left-2 bg-black/60 backdrop-blur-sm px-2 py-0.5 rounded text-[8px] font-mono text-white">SCREEN SHARE</div>
+</div>
+
+<!-- Call Control Bar -->
+<div class="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-4 glass-card rounded-[2.5rem] border border-white/10 shadow-2xl z-30">
+<div class="flex items-center gap-2">
+<button id="btn-mute" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Mute (M)"><span class="material-symbols-outlined">mic</span></button>
+<button id="btn-camera" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Camera"><span class="material-symbols-outlined">videocam</span></button>
+<button id="btn-screen-share" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Screen Share"><span class="material-symbols-outlined">present_to_all</span></button>
+<button id="btn-hold" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Hold (H)"><span class="material-symbols-outlined">pause</span></button>
+<button id="btn-transfer" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Transfer"><span class="material-symbols-outlined">forward_to_inbox</span></button>
+<button id="btn-record" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Record"><span class="material-symbols-outlined">fiber_manual_record</span></button>
+<button id="btn-vm-drop" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="VM Studio"><span class="material-symbols-outlined">voicemail</span></button>
+<button id="btn-quick-note" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Quick Note"><span class="material-symbols-outlined">note_add</span></button>
+</div>
+<div class="w-px h-8 bg-white/10 mx-2"></div>
+<a href="postCallSummary.html"><button class="px-8 py-3.5 bg-error-red hover:bg-red-600 text-white rounded-full flex items-center gap-3 font-bold transition-all active:scale-95 shadow-[0_0_25px_rgba(255,59,48,0.4)]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">call_end</span>
+<span class="">End Call</span>
+</button></a>
+
+</div>
+</section>
+<!-- END: CenterStage -->
+
+
+<!-- BEGIN: RightPanel_CRM -->
+<section class="w-80 lg:w-[350px] flex flex-col p-6 border-l border-white/5 bg-surface-container-low/30 overflow-y-auto">
+<h2 class="font-syne text-xs uppercase tracking-widest text-fire-accent font-bold mb-6">CRM Insights</h2>
+
+<!-- Contact Information -->
+<div class="mb-8">
+<h3 class="text-[10px] font-bold uppercase text-gray-500 border-b border-white/5 pb-2 mb-4">Contact Information</h3>
+<div class="space-y-4">
+<div class="flex gap-3 items-start">
+<img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqKguv2lN-Bz17QH9A5oJ04TkQSL4nMLIAKfF9xp4iOEpTKOiZEaEHl--uHjC9vHGXU6qmkQ8SAjrqYN2C5ZC0j0r3BIhBFSbt2mBmxkoGo8qxofHET6kJrC-YmSooHt2JdsXAUudIM2DjBPuGycorYtogSyZEIsTXmimMxi0zwngsa6Xw93Z3U8i9cgKZaiG6k08y-t5t8PWxjLRW4f0Waz8F9OhmRfq8HzPfeCgvHAb8TQZArckHVJ0rmXREH7UOib28r3OKIGk" alt="Contact" class="w-12 h-12 rounded-lg object-cover"/>
+<div>
+<p class="font-bold text-sm">Sarah Connor</p>
+<p class="text-[11px] text-gray-500">Director of Operations</p>
+<p class="text-[11px] text-gray-600">Cyberdyne Systems</p>
+</div>
+</div>
+<div class="space-y-2 text-[11px]">
+<div class="flex items-center gap-2 text-gray-400">
+<span class="material-symbols-outlined text-sm">phone</span>
+<span>(650) 555-0102</span>
+</div>
+<div class="flex items-center gap-2 text-gray-400">
+<span class="material-symbols-outlined text-sm">mail</span>
+<span>sarah@cyberdyne.com</span>
+</div>
+<div class="flex items-center gap-2 text-gray-400">
+<span class="material-symbols-outlined text-sm">attach_money</span>
+<span class="text-fire-accent font-bold">$42,500 Deal Value</span>
+</div>
+<div class="flex items-center gap-2 text-gray-400">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="text-teal-support font-bold">Proposal Sent</span>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Live Transcript Section -->
+<div class="mb-8">
+<h3 class="text-[10px] font-bold uppercase text-gray-500 border-b border-white/5 pb-2 mb-3">Transcript Feed</h3>
+<div class="space-y-3 max-h-[200px] overflow-y-auto pr-2 text-[11px]" id="right-transcript">
+<div class="space-y-1">
+<span class="text-[9px] text-gray-600">14:12 • Sarah</span>
+<p class="text-gray-300">How does the integration with Salesforce handle lead deduplication?</p>
+</div>
+</div>
+</div>
+
+<!-- Objection Alerts -->
+<div class="mb-8">
+<h3 class="text-[10px] font-bold uppercase text-gray-500 border-b border-white/5 pb-2 mb-3">Objection Alerts</h3>
+<div id="objection-alerts" class="space-y-2">
+<div class="glass-card p-3 rounded-xl border-l-2 border-error-red bg-error-red/5">
+<p class="text-[10px] font-bold text-error-red mb-1">🚨 Pricing Objection Detected</p>
+<p class="text-[11px] text-gray-400">Customer concerned about Solo tier pricing</p>
+<p class="text-[10px] text-fire-accent mt-1">→ Recommend: Highlight ROI metrics</p>
+</div>
+</div>
+</div>
+
+<!-- Call Notes -->
+<div class="mb-6">
+<h3 class="text-[10px] font-bold uppercase text-gray-500 border-b border-white/5 pb-2 mb-3">Call Notes</h3>
+<textarea id="call-notes" placeholder="Type notes during the call..." class="w-full h-24 px-3 py-2 bg-surface-container/50 border border-white/10 rounded-lg text-[11px] text-gray-300 resize-none focus:border-fire-accent/50 focus:outline-none transition-colors placeholder:text-gray-600"></textarea>
+</div>
+
+<!-- Lead Score Card -->
+<div class="glass-card p-5 rounded-2xl border-white/5 mb-8">
+<div class="flex justify-between items-center mb-4">
+<span class="text-[10px] font-bold uppercase text-gray-500">Lead Score</span>
+<span class="font-syne text-xl font-extrabold text-fire-accent">84<span class="text-xs text-gray-500 ml-0.5">/100</span></span>
+</div>
+<div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-fire-gradient to-fire-accent w-[84%] shadow-[0_0_10px_rgba(255,122,28,0.4)]"></div>
+</div>
+</div>
+
+<!-- Financial/Pipeline Stats -->
+<div class="space-y-6 mb-8">
+<div>
+<label class="text-[10px] font-bold uppercase text-gray-500 block mb-1">Opportunity Value</label>
+<span class="font-syne text-2xl font-extrabold">$42,500.00</span>
+</div>
+<div>
+<label class="text-[10px] font-bold uppercase text-gray-500 block mb-2">Pipeline Stage</label>
+<span class="px-3 py-1 bg-teal-support/10 text-teal-support border border-teal-support/20 rounded-full text-[11px] font-bold">Proposal Sent</span>
+</div>
+</div>
+<!-- Timeline -->
+<div class="space-y-4 mb-8">
+<h3 class="text-[10px] font-bold uppercase text-gray-500 border-b border-white/5 pb-2">Recent Timeline</h3>
+<div class="flex gap-4">
+<div class="w-8 h-8 rounded-full bg-teal-support/10 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[16px] text-teal-support">mail</span>
+</div>
+<div>
+<p class="text-[13px] font-bold">Opened Pricing Deck</p>
+<p class="text-[11px] text-gray-500">Today • 10:45 AM</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="w-8 h-8 rounded-full bg-fire-accent/10 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[16px] text-fire-accent">web</span>
+</div>
+<div>
+<p class="text-[13px] font-bold">Visited ROI Calculator</p>
+<p class="text-[11px] text-gray-500">Yesterday • 4:12 PM</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="w-8 h-8 rounded-full bg-ai-purple/10 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[16px] text-ai-purple">link</span>
+</div>
+<div>
+<p class="text-[13px] font-bold">LinkedIn Interaction</p>
+<p class="text-[11px] text-gray-500">2 days ago</p>
+</div>
+</div>
+</div>
+<!-- Footer CTA -->
+<button class="mt-auto w-full py-4 glass-card rounded-2xl text-fire-accent font-bold text-sm border-white/10 hover:bg-fire-accent/10 transition-all flex items-center justify-center gap-2 group">
+<span class="material-symbols-outlined text-lg group-hover:scale-110 transition-transform">open_in_new</span>
+        Open Salesforce Record
+      </button>
+</section>
+<!-- END: RightPanel_CRM -->
+</main>
+
+ <aside id="crmPanel" class="crm-panel fixed top-16 right-0 z-[45] h-[calc(100vh-64px)] border-l border-white/10 bg-surface-container-low/95 backdrop-blur-xl shadow-2xl overflow-hidden">
+  <div class="flex h-full">
+    <div class="w-16 flex-shrink-0 border-r border-white/10 bg-surface-container-lowest/60 flex flex-col items-center justify-between py-4">
+      <button id="crmPanelToggleRail" type="button" class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-surface-container-high/70 text-on-surface-variant transition-all hover:bg-white/10 hover:text-white" aria-label="Toggle CRM panel" aria-expanded="true">
+        <span id="crmPanelToggleRailIcon" class="material-symbols-outlined">keyboard_double_arrow_right</span>
+      </button>
+      <div class="flex flex-col items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/70">
+        <span class="material-symbols-outlined text-base">insights</span>
+        <span>CRM</span>
+      </div>
+    </div>
+
+    <div class="panel-body flex-1 overflow-y-auto px-4 py-4">
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <p class="text-[10px] font-extrabold uppercase tracking-[0.3em] text-fire-accent">Right CRM</p>
+          <h3 class="text-sm font-section-header text-white">Context Hub</h3>
+        </div>
+        <span class="rounded-full border border-tertiary/20 bg-tertiary/10 px-2 py-1 text-[10px] font-bold text-tertiary">Live</span>
+      </div>
+
+      <div class="space-y-4">
+        <section class="rounded-2xl border border-white/10 bg-surface-container-high/30 p-3">
+          <div class="mb-3 flex items-center gap-2">
+            <span class="material-symbols-outlined text-fire-accent">history</span>
+            <h4 class="text-sm font-bold text-white">Recent Calls</h4>
+          </div>
+          <ul id="crmRecentCalls" class="space-y-2"></ul>
+        </section>
+
+        <section class="rounded-2xl border border-white/10 bg-surface-container-high/30 p-3">
+          <div class="mb-3 flex items-center gap-2">
+            <span class="material-symbols-outlined text-tertiary">workspace_premium</span>
+            <h4 class="text-sm font-bold text-white">Top Deals</h4>
+          </div>
+          <ul id="crmTopDeals" class="space-y-2"></ul>
+        </section>
+
+        <section class="rounded-2xl border border-white/10 bg-surface-container-high/30 p-3">
+          <div class="mb-3 flex items-center gap-2">
+            <span class="material-symbols-outlined text-ai-purple">auto_awesome</span>
+            <h4 class="text-sm font-bold text-white">AI Suggestions</h4>
+          </div>
+          <ul id="crmSuggestions" class="space-y-2"></ul>
+        </section>
+      </div>
+    </div>
+  </div>
+</aside>
+<!--End CRM-->
+
+<!--Models-->
+
+<!-- Mute Modal
+<div id="mute-modal" class="modal-overlay">
+<div class="modal-content relative">
+<button class="absolute top-4 right-4 text-gray-400 hover:text-white" id="mute-close">
+<span class="material-symbols-outlined">close</span>
+</button>
+<h2 class="font-syne text-lg font-bold mb-4">Microphone Settings</h2>
+<div class="space-y-5">
+<div>
+<label class="text-[11px] font-bold uppercase text-gray-500 block mb-2">Microphone Status</label>
+<div class="flex items-center gap-2 p-3 bg-white/5 rounded-lg border border-white/10">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="text-sm">Microphone Active</span>
+</div>
+</div>
+<div>
+<label class="text-[11px] font-bold uppercase text-gray-500 block mb-2">Input Device</label>
+<select class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:border-fire-accent/50 focus:outline-none">
+<option>Built-in Microphone</option>
+<option>External USB Mic</option>
+<option>Headset Microphone</option>
+</select>
+</div>
+<div>
+<label class="text-[11px] font-bold uppercase text-gray-500 block mb-2">Microphone Sensitivity</label>
+<input type="range" min="0" max="100" value="75" class="w-full"/>
+<div class="text-[10px] text-gray-500 mt-1">75%</div>
+</div>
+<div class="space-y-2">
+<label class="flex items-center gap-2 cursor-pointer">
+<input type="checkbox" checked class="rounded"/>
+<span class="text-sm">Noise Suppression</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer">
+<input type="checkbox" checked class="rounded"/>
+<span class="text-sm">Echo Cancellation</span>
+</label>
+</div>
+</div>
+<div class="flex gap-3 mt-6">
+<button class="flex-1 px-4 py-2 bg-fire-gradient hover:opacity-90 text-white rounded-lg font-bold transition-all" id="mute-apply">Apply</button>
+<button class="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg font-bold transition-all" id="mute-dismiss">Close</button>
+</div>
+</div>
+</div>
+</div>
+
+<- Hold Modal ->
+<div id="hold-modal" class="modal-overlay">
+<div class="modal-content relative">
+<button class="absolute top-4 right-4 text-gray-400 hover:text-white" id="hold-close">
+<span class="material-symbols-outlined">close</span>
+</button>
+<h2 class="font-syne text-lg font-bold mb-4">Call Hold</h2>
+<div class="space-y-5">
+<div class="p-4 bg-fire-accent/10 rounded-lg border border-fire-accent/20">
+<p class="text-[13px]">Call is currently <span class="font-bold text-fire-accent">on hold</span></p>
+</div>
+<div>
+<label class="text-[11px] font-bold uppercase text-gray-500 block mb-2">Hold Duration</label>
+<p class="text-2xl font-syne font-bold" id="hold-timer">00:45</p>
+</div>
+<p class="text-[11px] text-gray-500">The customer cannot hear you while the call is on hold.</p>
+</div>
+<div class="flex gap-3 mt-6">
+<button class="flex-1 px-4 py-2 bg-tertiary hover:opacity-90 text-surface rounded-lg font-bold transition-all" id="hold-resume">Resume Call</button>
+<button class="flex-1 px-4 py-2 bg-error-red hover:opacity-90 text-white rounded-lg font-bold transition-all" id="hold-end">End Call</button>
+</div>
+</div>
+</div>
+</div>
+
+<- Record Modal ->
+<div id="record-modal" class="modal-overlay">
+<div class="modal-content relative">
+<button class="absolute top-4 right-4 text-gray-400 hover:text-white" id="record-close">
+<span class="material-symbols-outlined">close</span>
+</button>
+<h2 class="font-syne text-lg font-bold mb-4">Recording Settings</h2>
+<div class="space-y-5">
+<div class="flex items-center gap-3 p-4 bg-red-500/10 rounded-lg border border-red-500/20">
+<span class="material-symbols-outlined text-red-500" style="font-variation-settings: 'FILL' 1;">fiber_manual_record</span>
+<div>
+<p class="text-[11px] font-bold text-red-500 uppercase">Recording Active</p>
+<p class="text-[10px] text-gray-500">This call is being recorded</p>
+</div>
+</div>
+<div>
+<label class="text-[11px] font-bold uppercase text-gray-500 block mb-2">Recording Time</label>
+<p class="text-2xl font-syne font-bold" id="record-timer">03:45</p>
+</div>
+<div>
+<label class="text-[11px] font-bold uppercase text-gray-500 block mb-2">Recording Quality</label>
+<select class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:border-fire-accent/50">
+<option>HD (48 kHz)</option>
+<option>Standard (16 kHz)</option>
+<option>Low (8 kHz)</option>
+</select>
+</div>
+</div>
+<div class="flex gap-3 mt-6">
+<button class="flex-1 px-4 py-2 bg-tertiary hover:opacity-90 text-surface rounded-lg font-bold transition-all" id="record-stop">Stop Recording</button>
+<button class="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg font-bold transition-all" id="record-dismiss">Close</button>
+</div>
+</div>
+</div>
+
+<- Add Note Modal ->
+<div id="note-modal" class="modal-overlay">
+<div class="modal-content relative">
+<button class="absolute top-4 right-4 text-gray-400 hover:text-white" id="note-close">
+<span class="material-symbols-outlined">close</span>
+</button>
+<h2 class="font-syne text-lg font-bold mb-4">Add Note</h2>
+<div class="space-y-4">
+<div>
+<label class="text-[11px] font-bold uppercase text-gray-500 block mb-2">Note Title</label>
+<input type="text" id="note-title" placeholder="Brief summary..." class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:border-fire-accent/50 focus:outline-none"/>
+</div>
+<div>
+<label class="text-[11px] font-bold uppercase text-gray-500 block mb-2">Note</label>
+<textarea id="note-content" placeholder="Write your note here..." class="w-full h-32 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm resize-none focus:border-fire-accent/50 focus:outline-none"></textarea>
+</div>
+<div>
+<label class="text-[11px] font-bold uppercase text-gray-500 block mb-2">Category</label>
+<select id="note-category" class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:border-fire-accent/50">
+<option>General</option>
+<option>Follow-up</option>
+<option>Objection</option>
+<option>Pricing Discussion</option>
+<option>Next Steps</option>
+</select>
+</div>
+</div>
+<div class="flex gap-3 mt-6">
+<button class="flex-1 px-4 py-2 bg-fire-gradient hover:opacity-90 text-white rounded-lg font-bold transition-all" id="note-save">Save Note</button>
+<button class="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg font-bold transition-all" id="note-cancel">Cancel</button>
+</div>
+</div>
+</div> -->
+
+<!-- Camera Configuration Modal -->
+<div id="camera-modal-overlay" class="modal-overlay hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center" onclick="closeCameraModal(event)">
+<div class="modal-content liquid-glass rounded-3xl w-full max-w-2xl mx-4 p-10 relative overflow-hidden" onclick="event.stopPropagation()">
+<!-- Close Button -->
+<button onclick="closeCameraModal()" class="absolute top-6 right-6 p-2 hover:bg-white/10 rounded-full transition-colors" title="Close (Esc)">
+<span class="material-symbols-outlined text-gray-300">close</span>
+</button>
+<!-- Header -->
+<div class="mb-8">
+<h3 class="font-syne text-2xl font-extrabold text-white mb-2">Camera Configuration</h3>
+<p class="text-gray-400">Set up your camera device and stream quality</p>
+</div>
+<!-- Video Preview -->
+<div class="relative aspect-video rounded-lg overflow-hidden border border-glass-border bg-surface-container-lowest mb-8">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJY3CV4HEwNBrtENpl6YwHYRZGHUGTijslP6awNQW5IN6t9mf2N5HE2D7bd8J1sk1errWg8f7nwSrIIZggze6sBkXxjR0lVruRBp77DOG6vwEShsd6OaCgGse6pKJBOiWghpMTPF8DZ2ROJ3q32gqQN_N-hP8tJi0iD4zGcqax3vz0CODob8XYK0lfpj5MhrJCtgFitHLhrwYfdAEviAdO3OU38acQdB4VAcPXDA0e1HMtP1Z5V7qDPL1SZq0Gqrp3ic-Ny8Egfoh1">
+<div class="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-2 border border-white/10">
+<span class="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_6px_#4ADE80]"></span>
+<span class="font-mono text-[10px] text-white">LIVE PREVIEW</span>
+</div>
+</div>
+<!-- Settings Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+<div class="space-y-2">
+<label class="text-[10px] font-bold uppercase text-gray-500 px-1">Hardware Device</label>
+<div class="relative group">
+<select id="camera-device" class="w-full bg-surface-container-high border border-glass-border rounded-lg px-4 py-3 text-sm font-medium text-white appearance-none focus:ring-1 focus:ring-fire-accent outline-none transition-all">
+<option>Logitech MX Brio 4K</option>
+<option>Integrated FaceTime HD</option>
+<option>OBS Virtual Camera</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">expand_more</span>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] font-bold uppercase text-gray-500 px-1">Stream Quality</label>
+<div class="relative group">
+<select id="camera-quality" class="w-full bg-surface-container-high border border-glass-border rounded-lg px-4 py-3 text-sm font-medium text-white appearance-none focus:ring-1 focus:ring-fire-accent outline-none transition-all">
+<option>Ultra HD (4K)</option>
+<option selected>Full HD (1080p)</option>
+<option>HD (720p)</option>
+<option>Standard (480p)</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Toggle Option -->
+<div class="flex items-center justify-between p-4 bg-surface-container-low/50 rounded-lg border border-glass-border mb-8">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary">auto_fix_high</span>
+<div>
+<p class="text-sm font-medium text-white">Auto-Focus & Light Optimization</p>
+<p class="text-xs text-gray-500">Enhance clarity in low-light environments</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input id="camera-auto-focus" checked class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-fire-accent"></div>
+</label>
+</div>
+<!-- Action Buttons -->
+<div class="flex gap-4">
+<button onclick="closeCameraModal()" class="flex-1 px-6 py-3 rounded-lg border border-glass-border text-gray-300 hover:text-white hover:bg-white/5 transition-all font-medium">
+Cancel
+</button>
+<button onclick="startCamera()" class="flex-1 px-6 py-3 rounded-lg fire-gradient text-white font-bold shadow-lg hover:shadow-xl transition-all">
+Start Camera
+</button>
+</div>
+</div>
+</div>
+
+<!-- Screen Share Modal -->
+<div id="screen-share-modal-overlay" class="modal-overlay hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center" onclick="closeScreenShareModal(event)">
+<div class="modal-content liquid-glass rounded-3xl w-full max-w-3xl mx-4 p-10 relative overflow-hidden" onclick="event.stopPropagation()">
+<!-- Close Button -->
+<button onclick="closeScreenShareModal()" class="absolute top-6 right-6 p-2 hover:bg-white/10 rounded-full transition-colors" title="Close (Esc)">
+<span class="material-symbols-outlined text-gray-300">close</span>
+</button>
+<!-- Header -->
+<div class="mb-10">
+<h3 class="font-syne text-2xl font-extrabold text-white mb-2">Share your screen</h3>
+<p class="text-gray-400">Select what you'd like to show to Sarah Connor</p>
+</div>
+<!-- Selection Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<!-- Browser Tab -->
+<div class="group cursor-pointer liquid-glass bg-surface-container-low/50 p-8 rounded-2xl border border-glass-border hover:border-fire-accent/50 transition-all duration-300 flex flex-col items-center text-center" onclick="selectScreenShareOption(this, 'tab')">
+<div class="w-16 h-16 rounded-2xl bg-surface-container-highest flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl text-gray-400 group-hover:text-fire-accent transition-colors">tab</span>
+</div>
+<h4 class="font-syne text-lg font-bold mb-2 text-white">Browser Tab</h4>
+<p class="text-sm text-gray-500">Focus on a single tab within Chrome or Edge.</p>
+</div>
+<!-- Window (Active by default) -->
+<div class="group cursor-pointer liquid-glass bg-surface-container p-8 rounded-2xl fire-border transition-all duration-300 flex flex-col items-center text-center" onclick="selectScreenShareOption(this, 'window')">
+<!-- Active Glow -->
+<div class="absolute top-12 w-24 h-24 bg-fire-gradient opacity-20 blur-3xl"></div>
+<div class="w-16 h-16 rounded-2xl fire-gradient flex items-center justify-center mb-6 shadow-xl shadow-fire-gradient/20 z-10">
+<span class="material-symbols-outlined text-3xl text-white" style="font-variation-settings: 'FILL' 1;">window</span>
+</div>
+<h4 class="font-syne text-lg font-bold mb-2 text-white">Window</h4>
+<p class="text-sm text-fire-accent font-medium">Show a specific app like Slack, Figma, or VS Code.</p>
+</div>
+<!-- Entire Screen -->
+<div class="group cursor-pointer liquid-glass bg-surface-container-low/50 p-8 rounded-2xl border border-glass-border hover:border-fire-accent/50 transition-all duration-300 flex flex-col items-center text-center" onclick="selectScreenShareOption(this, 'screen')">
+<div class="w-16 h-16 rounded-2xl bg-surface-container-highest flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl text-gray-400 group-hover:text-fire-accent transition-colors">monitor</span>
+</div>
+<h4 class="font-syne text-lg font-bold mb-2 text-white">Entire Screen</h4>
+<p class="text-sm text-gray-500">Share your whole desktop and notifications.</p>
+</div>
+</div>
+<!-- WebRTC Info -->
+<div class="p-4 bg-surface-container-low/50 rounded-lg border border-glass-border mb-8">
+<p class="text-xs text-gray-500"><span class="font-bold text-gray-400">What is screen sharing?</span> We use WebRTC to securely stream your screen content in real-time with end-to-end encryption.</p>
+</div>
+<!-- Footer -->
+<div class="flex items-center justify-between border-t border-glass-border pt-8">
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="relative w-5 h-5 border-2 border-glass-border rounded group-hover:border-fire-accent transition-colors flex items-center justify-center">
+<input id="share-system-audio" checked class="peer hidden" type="checkbox">
+<span class="material-symbols-outlined text-fire-accent text-lg opacity-0 peer-checked:opacity-100 transition-opacity">check</span>
+</div>
+<span class="text-sm text-gray-400 group-hover:text-white transition-colors">Share system audio</span>
+</label>
+<div class="flex gap-4">
+<button onclick="closeScreenShareModal()" class="px-6 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all font-medium">
+Cancel
+</button>
+<button id="start-sharing-btn" onclick="startScreenShare()" class="px-8 py-3 rounded-lg fire-gradient text-white font-bold shadow-lg hover:shadow-xl transition-all">
+Start Sharing
+</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Transfer Modal -->
+<div id="transfer-modal-overlay" class="modal-overlay hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center" onclick="closeTransferModal(event)">
+<div class="modal-content liquid-glass rounded-3xl w-full max-w-3xl mx-4 p-10 relative overflow-hidden" onclick="event.stopPropagation()">
+<!-- Close Button -->
+<button onclick="closeTransferModal()" class="absolute top-6 right-6 p-2 hover:bg-white/10 rounded-full transition-colors" title="Close (Esc)">
+<span class="material-symbols-outlined text-gray-300">close</span>
+</button>
+<!-- Header -->
+<div class="mb-8">
+<h3 class="font-syne text-2xl font-extrabold text-white mb-2">Transfer Call</h3>
+<p class="text-gray-400">Select transfer type and team member</p>
+</div>
+<!-- Transfer Type Tabs -->
+<div class="flex gap-3 mb-8 border-b border-glass-border pb-4">
+<button class="transfer-tab-btn px-4 py-2 text-sm font-medium text-fire-accent border-b-2 border-fire-accent transition-colors" onclick="switchTransferTab('warm')">Warm Transfer</button>
+<button class="transfer-tab-btn px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors" onclick="switchTransferTab('cold')">Cold Transfer</button>
+<button class="transfer-tab-btn px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors" onclick="switchTransferTab('conference')">Conference</button>
+</div>
+<!-- Search -->
+<div class="mb-6">
+<input type="text" id="transfer-search" placeholder="Search team members..." class="w-full bg-surface-container-high border border-glass-border rounded-lg px-4 py-2 text-sm text-white placeholder:text-gray-500 focus:ring-1 focus:ring-fire-accent outline-none transition-all">
+</div>
+<!-- Team Members List -->
+<div class="space-y-2 mb-8 max-h-64 overflow-y-auto">
+<div class="p-4 bg-surface-container-low/50 rounded-lg border border-glass-border hover:border-fire-accent/50 cursor-pointer transition-all group flex items-center gap-4" onclick="selectTeamMember(this, 'Marcus J.', 'Tier 2 Solutions Architect')">
+<div class="w-10 h-10 rounded-full bg-fire-accent/20 flex items-center justify-center flex-shrink-0 text-fire-accent text-sm font-bold group-hover:bg-fire-accent group-hover:text-white">MJ</div>
+<div>
+<p class="text-sm font-bold text-white">Marcus J.</p>
+<p class="text-xs text-gray-500">Tier 2 Solutions Architect</p>
+</div>
+<span class="material-symbols-outlined ml-auto text-gray-400 group-hover:text-fire-accent">check_circle</span>
+</div>
+<div class="p-4 bg-surface-container-low/50 rounded-lg border border-glass-border hover:border-fire-accent/50 cursor-pointer transition-all group flex items-center gap-4" onclick="selectTeamMember(this, 'Elena R.', 'Senior Sales Specialist')">
+<div class="w-10 h-10 rounded-full bg-teal-support/20 flex items-center justify-center flex-shrink-0 text-teal-support text-sm font-bold group-hover:bg-teal-support group-hover:text-white">ER</div>
+<div>
+<p class="text-sm font-bold text-white">Elena R.</p>
+<p class="text-xs text-gray-500">Senior Sales Specialist</p>
+</div>
+<span class="material-symbols-outlined ml-auto text-gray-400 group-hover:text-fire-accent">check_circle</span>
+</div>
+<div class="p-4 bg-surface-container-low/50 rounded-lg border border-glass-border hover:border-fire-accent/50 cursor-pointer transition-all group flex items-center gap-4" onclick="selectTeamMember(this, 'David K.', 'Support Manager')">
+<div class="w-10 h-10 rounded-full bg-ai-purple/20 flex items-center justify-center flex-shrink-0 text-ai-purple text-sm font-bold group-hover:bg-ai-purple group-hover:text-white">DK</div>
+<div>
+<p class="text-sm font-bold text-white">David K.</p>
+<p class="text-xs text-gray-500">Support Manager</p>
+</div>
+<span class="material-symbols-outlined ml-auto text-gray-400 group-hover:text-fire-accent">check_circle</span>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex gap-4">
+<button onclick="closeTransferModal()" class="flex-1 px-6 py-3 rounded-lg border border-glass-border text-gray-300 hover:text-white hover:bg-white/5 transition-all font-medium">
+Cancel
+</button>
+<button onclick="execTransfer()" class="flex-1 px-6 py-3 rounded-lg fire-gradient text-white font-bold shadow-lg hover:shadow-xl transition-all">
+Start Transfer
+</button>
+</div>
+</div>
+</div>
+
+<!-- VM Studio Modal -->
+<div id="vm-studio-modal-overlay" class="modal-overlay hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center" onclick="closeVMStudioModal(event)">
+<div class="modal-content liquid-glass rounded-3xl w-full max-w-3xl mx-4 p-10 relative overflow-hidden" onclick="event.stopPropagation()">
+<!-- Close Button -->
+<button onclick="closeVMStudioModal()" class="absolute top-6 right-6 p-2 hover:bg-white/10 rounded-full transition-colors" title="Close (Esc)">
+<span class="material-symbols-outlined text-gray-300">close</span>
+</button>
+<!-- Header -->
+<div class="mb-8">
+<h3 class="font-syne text-2xl font-extrabold text-white mb-2">VM Studio</h3>
+<p class="text-gray-400">Record voicemails or browse your voicemail library</p>
+</div>
+<!-- Tab Buttons -->
+<div class="flex gap-3 mb-8 border-b border-glass-border pb-4">
+<button class="vm-tab-btn px-4 py-2 text-sm font-medium text-fire-accent border-b-2 border-fire-accent transition-colors" onclick="switchVMTab('library')">VM Library</button>
+<button class="vm-tab-btn px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors" onclick="switchVMTab('record')">Record New</button>
+</div>
+<!-- Library Tab Content -->
+<div id="vm-library-content" class="space-y-2 max-h-64 overflow-y-auto mb-8">
+<div class="p-4 bg-surface-container-low/50 rounded-lg border border-glass-border hover:border-fire-accent/50 transition-all group flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-fire-accent/20 flex items-center justify-center flex-shrink-0 text-fire-accent group-hover:bg-fire-accent group-hover:text-white transition-all">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1">play_arrow</span>
+</div>
+<div class="flex-1">
+<h4 class="font-bold text-sm text-white">Follow-up: Real Estate Lead</h4>
+<p class="text-xs text-gray-500">0:42 • Oct 12, 2023</p>
+</div>
+<button class="p-2 hover:bg-fire-accent/10 rounded transition-colors" title="Play"><span class="material-symbols-outlined text-gray-400 group-hover:text-fire-accent">play_circle</span></button>
+<button class="p-2 hover:bg-error-red/10 rounded transition-colors" title="Delete"><span class="material-symbols-outlined text-gray-400 group-hover:text-error-red">delete</span></button>
+</div>
+<div class="p-4 bg-surface-container/60 rounded-lg border-l-4 border-fire-accent transition-all group flex items-center gap-4">
+<div class="w-12 h-12 rounded-full fire-gradient flex items-center justify-center flex-shrink-0 text-white">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1">play_arrow</span>
+</div>
+<div class="flex-1">
+<h4 class="font-bold text-sm text-white">Aggressive Intro - Direct Dial</h4>
+<p class="text-xs text-gray-500">0:18 • Oct 11, 2023</p>
+</div>
+<span class="px-2 py-0.5 bg-fire-accent/20 text-[10px] font-bold text-fire-accent rounded">Active</span>
+<button class="p-2 hover:bg-fire-accent/10 rounded transition-colors" title="Play"><span class="material-symbols-outlined text-gray-400 group-hover:text-fire-accent">play_circle</span></button>
+<button class="p-2 hover:bg-error-red/10 rounded transition-colors" title="Delete"><span class="material-symbols-outlined text-gray-400 group-hover:text-error-red">delete</span></button>
+</div>
+<div class="p-4 bg-surface-container-low/50 rounded-lg border border-glass-border hover:border-fire-accent/50 transition-all group flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-fire-accent/20 flex items-center justify-center flex-shrink-0 text-fire-accent group-hover:bg-fire-accent group-hover:text-white transition-all">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1">play_arrow</span>
+</div>
+<div class="flex-1">
+<h4 class="font-bold text-sm text-white">No Answer: Second Touch</h4>
+<p class="text-xs text-gray-500">0:26 • Oct 08, 2023</p>
+</div>
+<button class="p-2 hover:bg-fire-accent/10 rounded transition-colors" title="Play"><span class="material-symbols-outlined text-gray-400 group-hover:text-fire-accent">play_circle</span></button>
+<button class="p-2 hover:bg-error-red/10 rounded transition-colors" title="Delete"><span class="material-symbols-outlined text-gray-400 group-hover:text-error-red">delete</span></button>
+</div>
+</div>
+<!-- Record Tab Content (Hidden by default) -->
+<div id="vm-record-content" class="hidden space-y-6 mb-8">
+<div class="p-8 bg-surface-container-low/50 rounded-lg border border-glass-border text-center">
+<div class="w-20 h-20 rounded-full fire-gradient flex items-center justify-center mx-auto mb-4 animate-pulse">
+<span class="material-symbols-outlined text-3xl text-white">mic</span>
+</div>
+<p class="text-sm font-medium text-white mb-2">Ready to record</p>
+<p class="text-xs text-gray-500 mb-6">Click the mic button to start recording your voicemail</p>
+<button onclick="startVMRecording()" class="px-8 py-3 fire-gradient text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all">
+<span class="material-symbols-outlined inline mr-2">fiber_manual_record</span>Start Recording
+</button>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex gap-4">
+<button onclick="closeVMStudioModal()" class="flex-1 px-6 py-3 rounded-lg border border-glass-border text-gray-300 hover:text-white hover:bg-white/5 transition-all font-medium">
+Close
+</button>
+</div>
+</div>
+</div>
+
+<!-- Quick Note Modal -->
+<div id="quick-note-modal-overlay" class="modal-overlay hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center" onclick="closeQuickNoteModal(event)">
+<div class="modal-content liquid-glass rounded-3xl w-full max-w-2xl mx-4 p-10 relative overflow-hidden max-h-[80vh] overflow-y-auto" onclick="event.stopPropagation()">
+<!-- Close Button -->
+<button onclick="closeQuickNoteModal()" class="absolute top-6 right-6 p-2 hover:bg-white/10 rounded-full transition-colors" title="Close (Esc)">
+<span class="material-symbols-outlined text-gray-300">close</span>
+</button>
+<!-- Header -->
+<div class="mb-8">
+<h3 class="font-syne text-2xl font-extrabold text-white mb-2">Quick Note</h3>
+<p class="text-gray-400">Add notes to this call</p>
+</div>
+<!-- Note Type Tabs -->
+<div class="flex gap-2 mb-8 border-b border-glass-border pb-4 overflow-x-auto">
+<button class="note-tab-btn whitespace-nowrap px-3 py-2 text-sm font-medium text-fire-accent border-b-2 border-fire-accent transition-colors" onclick="switchNoteTab('general')">General</button>
+<button class="note-tab-btn whitespace-nowrap px-3 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors" onclick="switchNoteTab('objection')">Objection</button>
+<button class="note-tab-btn whitespace-nowrap px-3 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors" onclick="switchNoteTab('followup')">Follow-Up</button>
+<button class="note-tab-btn whitespace-nowrap px-3 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors" onclick="switchNoteTab('nextsteps')">Next Steps</button>
+<button class="note-tab-btn whitespace-nowrap px-3 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors" onclick="switchNoteTab('crm')">CRM</button>
+</div>
+<!-- Textarea -->
+<textarea id="quick-note-textarea" placeholder="Type your note here..." class="w-full h-48 bg-surface-container-high border border-glass-border rounded-lg px-4 py-3 text-sm text-white placeholder:text-gray-500 focus:ring-1 focus:ring-fire-accent outline-none transition-all resize-none mb-6"></textarea>
+<!-- Action Buttons -->
+<div class="flex gap-4">
+<button onclick="closeQuickNoteModal()" class="flex-1 px-6 py-3 rounded-lg border border-glass-border text-gray-300 hover:text-white hover:bg-white/5 transition-all font-medium">
+Cancel
+</button>
+<button onclick="saveQuickNote()" class="flex-1 px-6 py-3 rounded-lg bg-white/10 text-white hover:bg-white/20 font-medium transition-all">
+Save Note
+</button>
+<button onclick="saveAndSyncQuickNote()" class="flex-1 px-6 py-3 rounded-lg fire-gradient text-white font-bold shadow-lg hover:shadow-xl transition-all">
+Save & Sync
+</button>
+</div>
+</div>
+</div>
+
+<script data-purpose="state-management">
+// ===== APPLICATION STATE =====
+const CALL = {
+  isActive: true,
+  isMuted: false,
+  isOnHold: false,
+  isRecording: false,
+  cameraActive: false,
+  screenShareActive: false,
+  screenShareType: 'window', // 'tab', 'window', 'screen'
+  transferType: 'warm', // 'warm', 'cold', 'conference'
+  selectedTransferee: null,
+  vmTab: 'library',
+  noteTab: 'general',
+  notes: [],
+  duration: 0,
+  startTime: Date.now(),
+};
+
+const S = {
+  cameraModalOpen: false,
+  screenShareModalOpen: false,
+  transferModalOpen: false,
+  vmStudioModalOpen: false,
+  quickNoteModalOpen: false,
+  cameraPiPVisible: false,
+  screenSharePreviewVisible: false,
+};
+
+const callHistory = [];
+
+const aiCoachTips = [
+  "Acknowledge their concern before offering solutions.",
+  "Use data to support your value proposition.",
+  "Ask open-ended questions to understand their needs.",
+  "Paraphrase what they said to show understanding.",
+  "Focus on the outcomes, not just features.",
+  "Build rapport by finding common ground.",
+  "Be prepared with specific ROI numbers.",
+  "Handle objections by addressing root causes."
+];
+
+let aiCoachIndex = 0;
+let aiCoachInterval = null;
+let callTimerInterval = null;
+let keyboardListenersRegistered = false;
+
+// ===== STATE PERSISTENCE =====
+function saveState() {
+  const state = {
+    CALL,
+    S,
+    callHistory,
+    aiCoachIndex
+  };
+  localStorage.setItem('dialforgeCallState', JSON.stringify(state));
+}
+
+function loadState() {
+  const saved = localStorage.getItem('dialforgeCallState');
+  if (saved) {
+    const state = JSON.parse(saved);
+    Object.assign(CALL, state.CALL);
+    Object.assign(S, state.S);
+    callHistory.push(...state.callHistory);
+    aiCoachIndex = state.aiCoachIndex || 0;
+  }
+}
+
+// ===== TIMER MANAGEMENT =====
+function startCallTimer() {
+  if (callTimerInterval) clearInterval(callTimerInterval);
+  
+  callTimerInterval = setInterval(() => {
+    if (!CALL.isOnHold) {
+      CALL.duration++;
+    }
+    updateTimerDisplay();
+    saveState();
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const mins = Math.floor(CALL.duration / 60);
+  const secs = CALL.duration % 60;
+  const timeStr = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  const timerEl = document.getElementById('call-timer');
+  if (timerEl) timerEl.textContent = timeStr;
+}
+
+function stopCallTimer() {
+  if (callTimerInterval) {
+    clearInterval(callTimerInterval);
+    callTimerInterval = null;
+  }
+}
+
+// ===== AI COACH ROTATION =====
+function startAICoachRotation() {
+  if (aiCoachInterval) clearInterval(aiCoachInterval);
+  
+  aiCoachInterval = setInterval(() => {
+    aiCoachIndex = (aiCoachIndex + 1) % aiCoachTips.length;
+    updateAICoachTip();
+    saveState();
+  }, 14000); // Rotate every 14 seconds
+}
+
+function updateAICoachTip() {
+  const tipEl = document.getElementById('ai-coach-tip');
+  if (tipEl) {
+    tipEl.textContent = aiCoachTips[aiCoachIndex];
+  }
+}
+
+function stopAICoachRotation() {
+  if (aiCoachInterval) {
+    clearInterval(aiCoachInterval);
+    aiCoachInterval = null;
+  }
+}
+
+// ===== STATUS BADGES =====
+function updateStatusBadges() {
+  const badgesContainer = document.getElementById('status-badges');
+  if (!badgesContainer) return;
+  
+  badgesContainer.innerHTML = '';
+  
+  if (CALL.isActive) {
+    const liveBadge = document.createElement('div');
+    liveBadge.className = 'px-3 py-1 bg-tertiary/20 text-tertiary border border-tertiary/30 rounded-full text-[10px] font-bold uppercase badge-pulse';
+    liveBadge.textContent = 'LIVE';
+    badgesContainer.appendChild(liveBadge);
+  }
+  
+  if (CALL.isOnHold) {
+    const holdBadge = document.createElement('div');
+    holdBadge.className = 'px-3 py-1 bg-error-red/20 text-error-red border border-error-red/30 rounded-full text-[10px] font-bold uppercase';
+    holdBadge.textContent = 'ON HOLD';
+    badgesContainer.appendChild(holdBadge);
+  }
+  
+  if (CALL.isMuted) {
+    const muteBadge = document.createElement('div');
+    muteBadge.className = 'px-3 py-1 bg-fire-accent/20 text-fire-accent border border-fire-accent/30 rounded-full text-[10px] font-bold uppercase';
+    muteBadge.textContent = 'MUTED';
+    badgesContainer.appendChild(muteBadge);
+  }
+  
+  if (CALL.screenShareActive) {
+    const screenBadge = document.createElement('div');
+    screenBadge.className = 'px-3 py-1 bg-ai-purple/20 text-ai-purple border border-ai-purple/30 rounded-full text-[10px] font-bold uppercase';
+    screenBadge.textContent = 'SHARING SCREEN';
+    badgesContainer.appendChild(screenBadge);
+  }
+  
+  if (CALL.isRecording) {
+    const recBadge = document.createElement('div');
+    recBadge.className = 'px-3 py-1 bg-error-red/20 text-error-red border border-error-red/30 rounded-full text-[10px] font-bold uppercase badge-pulse';
+    recBadge.innerHTML = '<span class="w-1.5 h-1.5 bg-error-red rounded-full inline-block mr-1 animate-pulse"></span>RECORDING';
+    badgesContainer.appendChild(recBadge);
+  }
+}
+
+// ===== CONTROL FUNCTIONS =====
+function toggleMute() {
+  CALL.isMuted = !CALL.isMuted;
+  const btn = document.getElementById('btn-mute');
+  if (btn) {
+    if (CALL.isMuted) {
+      btn.classList.add('bg-fire-accent/20', 'text-fire-accent', 'border-fire-accent/30');
+    } else {
+      btn.classList.remove('bg-fire-accent/20', 'text-fire-accent', 'border-fire-accent/30');
+    }
+  }
+  updateStatusBadges();
+  saveState();
+}
+
+function toggleHold() {
+  CALL.isOnHold = !CALL.isOnHold;
+  const btn = document.getElementById('btn-hold');
+  if (btn) {
+    if (CALL.isOnHold) {
+      btn.classList.add('bg-fire-accent/20', 'text-fire-accent', 'border-fire-accent/30');
+      if (callTimerInterval) {
+        // Timer will pause automatically in the interval check
+      }
+    } else {
+      btn.classList.remove('bg-fire-accent/20', 'text-fire-accent', 'border-fire-accent/30');
+    }
+  }
+  updateStatusBadges();
+  saveState();
+}
+
+function toggleRecord() {
+  CALL.isRecording = !CALL.isRecording;
+  const btn = document.getElementById('btn-record');
+  if (btn) {
+    if (CALL.isRecording) {
+      btn.classList.add('bg-error-red/20', 'text-error-red');
+    } else {
+      btn.classList.remove('bg-error-red/20', 'text-error-red');
+    }
+  }
+  updateStatusBadges();
+  saveState();
+}
+
+// ===== CAMERA FUNCTIONS =====
+function openCameraFlow() {
+  S.cameraModalOpen = true;
+  const overlay = document.getElementById('camera-modal-overlay');
+  if (overlay) {
+    overlay.classList.remove('hidden');
+  }
+  saveState();
+}
+
+function closeCameraModal(event) {
+  if (event && event.target.id !== 'camera-modal-overlay') return;
+  S.cameraModalOpen = false;
+  const overlay = document.getElementById('camera-modal-overlay');
+  if (overlay) {
+    overlay.classList.add('hidden');
+  }
+  saveState();
+}
+
+function startCamera() {
+  CALL.cameraActive = true;
+  closeCameraModal();
+  
+  const cameraPip = document.getElementById('camera-pip');
+  if (cameraPip) {
+    cameraPip.classList.remove('hidden');
+  }
+  
+  const btn = document.getElementById('btn-camera');
+  if (btn) {
+    btn.classList.add('fire-gradient', 'text-fire-accent', 'shadow-lg', 'shadow-fire-gradient/30');
+  }
+  
+  updateStatusBadges();
+  saveState();
+}
+
+function toggleCameraPiP() {
+  S.cameraPiPVisible = !S.cameraPiPVisible;
+  const cameraPip = document.getElementById('camera-pip');
+  if (cameraPip) {
+    if (S.cameraPiPVisible) {
+      cameraPip.classList.remove('hidden');
+    } else {
+      cameraPip.classList.add('hidden');
+    }
+  }
+  saveState();
+}
+
+// ===== SCREEN SHARE FUNCTIONS =====
+function openScreenShareFlow() {
+  S.screenShareModalOpen = true;
+  const overlay = document.getElementById('screen-share-modal-overlay');
+  if (overlay) {
+    overlay.classList.remove('hidden');
+  }
+  saveState();
+}
+
+function closeScreenShareModal(event) {
+  if (event && event.target.id !== 'screen-share-modal-overlay') return;
+  S.screenShareModalOpen = false;
+  const overlay = document.getElementById('screen-share-modal-overlay');
+  if (overlay) {
+    overlay.classList.add('hidden');
+  }
+  saveState();
+}
+
+function selectScreenShareOption(element, type) {
+  // Remove previous selection
+  document.querySelectorAll('#screen-share-modal-overlay .cursor-pointer').forEach(card => {
+    card.classList.remove('fire-border', 'bg-surface-container');
+    card.classList.add('bg-surface-container-low/50', 'border-glass-border');
+    const icon = card.querySelector('.material-symbols-outlined');
+    if (icon) icon.style.fontVariationSettings = "'FILL' 0";
+    const h4 = card.querySelector('h4');
+    if (h4) h4.classList.remove('text-white');
+  });
+  
+  // Apply selection to clicked element
+  element.classList.add('fire-border', 'bg-surface-container');
+  element.classList.remove('bg-surface-container-low/50', 'border-glass-border');
+  const activeIcon = element.querySelector('.material-symbols-outlined');
+  if (activeIcon) activeIcon.style.fontVariationSettings = "'FILL' 1";
+  const activeH4 = element.querySelector('h4');
+  if (activeH4) activeH4.classList.add('text-white');
+  
+  CALL.screenShareType = type;
+  saveState();
+}
+
+function startScreenShare() {
+  CALL.screenShareActive = true;
+  closeScreenShareModal();
+  
+  const previewPanel = document.getElementById('screen-share-preview');
+  if (previewPanel) {
+    previewPanel.classList.remove('hidden');
+  }
+  
+  const btn = document.getElementById('btn-screen-share');
+  if (btn) {
+    btn.classList.add('fire-gradient', 'text-fire-accent', 'shadow-lg', 'shadow-fire-gradient/30');
+  }
+  
+  updateStatusBadges();
+  saveState();
+}
+
+function stopScreenShare() {
+  CALL.screenShareActive = false;
+  
+  const previewPanel = document.getElementById('screen-share-preview');
+  if (previewPanel) {
+    previewPanel.classList.add('hidden');
+  }
+  
+  const btn = document.getElementById('btn-screen-share');
+  if (btn) {
+    btn.classList.remove('fire-gradient', 'text-fire-accent', 'shadow-lg', 'shadow-fire-gradient/30');
+  }
+  
+  updateStatusBadges();
+  saveState();
+}
+
+function toggleScreenSharePreview() {
+  S.screenSharePreviewVisible = !S.screenSharePreviewVisible;
+  const previewPanel = document.getElementById('screen-share-preview');
+  if (previewPanel) {
+    if (S.screenSharePreviewVisible) {
+      previewPanel.classList.remove('hidden');
+    } else {
+      previewPanel.classList.add('hidden');
+    }
+  }
+  saveState();
+}
+
+// ===== TRANSFER FUNCTIONS =====
+function openTransferFlow() {
+  S.transferModalOpen = true;
+  CALL.transferType = 'warm';
+  const overlay = document.getElementById('transfer-modal-overlay');
+  if (overlay) {
+    overlay.classList.remove('hidden');
+  }
+  saveState();
+}
+
+function closeTransferModal(event) {
+  if (event && event.target.id !== 'transfer-modal-overlay') return;
+  S.transferModalOpen = false;
+  const overlay = document.getElementById('transfer-modal-overlay');
+  if (overlay) {
+    overlay.classList.add('hidden');
+  }
+  saveState();
+}
+
+function switchTransferTab(tab) {
+  CALL.transferType = tab;
+  document.querySelectorAll('.transfer-tab-btn').forEach(btn => {
+    btn.classList.remove('text-fire-accent', 'border-b-2', 'border-fire-accent');
+    btn.classList.add('text-gray-400');
+  });
+  event.target.classList.remove('text-gray-400');
+  event.target.classList.add('text-fire-accent', 'border-b-2', 'border-fire-accent');
+  saveState();
+}
+
+function selectTeamMember(element, name, role) {
+  document.querySelectorAll('#transfer-modal-overlay .p-4').forEach(item => {
+    item.classList.remove('border-fire-accent/50');
+  });
+  element.classList.add('border-fire-accent/50');
+  CALL.selectedTransferee = { name, role };
+  saveState();
+}
+
+function execTransfer() {
+  if (!CALL.selectedTransferee) return;
+  closeTransferModal();
+  const btn = document.getElementById('btn-transfer');
+  if (btn) {
+    btn.classList.add('fire-gradient', 'text-fire-accent', 'shadow-lg');
+  }
+  updateStatusBadges();
+  saveState();
+}
+
+// ===== VM STUDIO FUNCTIONS =====
+function openVMStudioFlow() {
+  S.vmStudioModalOpen = true;
+  const overlay = document.getElementById('vm-studio-modal-overlay');
+  if (overlay) {
+    overlay.classList.remove('hidden');
+  }
+  saveState();
+}
+
+function closeVMStudioModal(event) {
+  if (event && event.target.id !== 'vm-studio-modal-overlay') return;
+  S.vmStudioModalOpen = false;
+  const overlay = document.getElementById('vm-studio-modal-overlay');
+  if (overlay) {
+    overlay.classList.add('hidden');
+  }
+  saveState();
+}
+
+function switchVMTab(tab) {
+  const libraryContent = document.getElementById('vm-library-content');
+  const recordContent = document.getElementById('vm-record-content');
+  
+  document.querySelectorAll('.vm-tab-btn').forEach(btn => {
+    btn.classList.remove('text-fire-accent', 'border-b-2', 'border-fire-accent');
+    btn.classList.add('text-gray-400');
+  });
+  event.target.classList.remove('text-gray-400');
+  event.target.classList.add('text-fire-accent', 'border-b-2', 'border-fire-accent');
+  
+  if (tab === 'library') {
+    libraryContent.classList.remove('hidden');
+    recordContent.classList.add('hidden');
+  } else {
+    libraryContent.classList.add('hidden');
+    recordContent.classList.remove('hidden');
+  }
+  
+  CALL.vmTab = tab;
+  saveState();
+}
+
+function startVMRecording() {
+  // Simulate recording
+  alert('Recording started. Speak after the beep.');
+  saveState();
+}
+
+// ===== QUICK NOTE FUNCTIONS =====
+function openQuickNoteFlow() {
+  S.quickNoteModalOpen = true;
+  const overlay = document.getElementById('quick-note-modal-overlay');
+  if (overlay) {
+    overlay.classList.remove('hidden');
+    const textarea = document.getElementById('quick-note-textarea');
+    if (textarea) {
+      textarea.focus();
+    }
+  }
+  saveState();
+}
+
+function closeQuickNoteModal(event) {
+  if (event && event.target.id !== 'quick-note-modal-overlay') return;
+  S.quickNoteModalOpen = false;
+  const overlay = document.getElementById('quick-note-modal-overlay');
+  if (overlay) {
+    overlay.classList.add('hidden');
+  }
+  saveState();
+}
+
+function switchNoteTab(tab) {
+  document.querySelectorAll('.note-tab-btn').forEach(btn => {
+    btn.classList.remove('text-fire-accent', 'border-b-2', 'border-fire-accent');
+    btn.classList.add('text-gray-400');
+  });
+  event.target.classList.remove('text-gray-400');
+  event.target.classList.add('text-fire-accent', 'border-b-2', 'border-fire-accent');
+  
+  CALL.noteTab = tab;
+  saveState();
+}
+
+function saveQuickNote() {
+  const textarea = document.getElementById('quick-note-textarea');
+  if (textarea && textarea.value.trim()) {
+    if (!CALL.notes) CALL.notes = [];
+    CALL.notes.push({
+      type: CALL.noteTab || 'general',
+      content: textarea.value,
+      timestamp: new Date().toISOString()
+    });
+    closeQuickNoteModal();
+    saveState();
+  }
+}
+
+function saveAndSyncQuickNote() {
+  const textarea = document.getElementById('quick-note-textarea');
+  if (textarea && textarea.value.trim()) {
+    if (!CALL.notes) CALL.notes = [];
+    CALL.notes.push({
+      type: CALL.noteTab || 'general',
+      content: textarea.value,
+      timestamp: new Date().toISOString(),
+      synced: true
+    });
+    closeQuickNoteModal();
+    saveState();
+  }
+}
+
+// ===== KEYBOARD SHORTCUTS =====
+function registerKeyboardShortcuts() {
+  if (keyboardListenersRegistered) return;
+  
+  document.addEventListener('keydown', function(e) {
+    // Ignore if typing in an input
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.contentEditable === 'true') {
+      return;
+    }
+    
+    switch(e.key) {
+      case 'Escape':
+        if (S.cameraModalOpen) closeCameraModal();
+        if (S.screenShareModalOpen) closeScreenShareModal();
+        if (S.transferModalOpen) closeTransferModal();
+        if (S.vmStudioModalOpen) closeVMStudioModal();
+        if (S.quickNoteModalOpen) closeQuickNoteModal();
+        break;
+      case 'k':
+      case 'K':
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey) {
+          // Cmd/Ctrl + Shift + K - Open dial pad (if implemented)
+          e.preventDefault();
+        }
+        break;
+      case 'm':
+      case 'M':
+        const anyModalOpen = S.cameraModalOpen || S.screenShareModalOpen || S.transferModalOpen || S.vmStudioModalOpen || S.quickNoteModalOpen;
+        if (!anyModalOpen) {
+          e.preventDefault();
+          toggleMute();
+        }
+        break;
+      case 'h':
+      case 'H':
+        const anyModalOpenForHold = S.cameraModalOpen || S.screenShareModalOpen || S.transferModalOpen || S.vmStudioModalOpen || S.quickNoteModalOpen;
+        if (!anyModalOpenForHold) {
+          e.preventDefault();
+          toggleHold();
+        }
+        break;
+    }
+  });
+  
+  keyboardListenersRegistered = true;
+}
+
+// ===== EVENT LISTENERS SETUP =====
+function setupEventListeners() {
+  const btnMute = document.getElementById('btn-mute');
+  if (btnMute) btnMute.addEventListener('click', toggleMute);
+  
+  const btnCamera = document.getElementById('btn-camera');
+  if (btnCamera) btnCamera.addEventListener('click', openCameraFlow);
+  
+  const btnScreenShare = document.getElementById('btn-screen-share');
+  if (btnScreenShare) btnScreenShare.addEventListener('click', openScreenShareFlow);
+  
+  const btnHold = document.getElementById('btn-hold');
+  if (btnHold) btnHold.addEventListener('click', toggleHold);
+  
+  const btnTransfer = document.getElementById('btn-transfer');
+  if (btnTransfer) btnTransfer.addEventListener('click', openTransferFlow);
+  
+  const btnRecord = document.getElementById('btn-record');
+  if (btnRecord) btnRecord.addEventListener('click', toggleRecord);
+  
+  const btnVMDrop = document.getElementById('btn-vm-drop');
+  if (btnVMDrop) btnVMDrop.addEventListener('click', openVMStudioFlow);
+  
+  const btnQuickNote = document.getElementById('btn-quick-note');
+  if (btnQuickNote) btnQuickNote.addEventListener('click', openQuickNoteFlow);
+}
+
+// ===== INITIALIZATION =====
+function initializeApp() {
+  loadState();
+  registerKeyboardShortcuts();
+  setupEventListeners();
+  
+  startCallTimer();
+  updateTimerDisplay();
+  
+  startAICoachRotation();
+  updateAICoachTip();
+  
+  updateStatusBadges();
+  
+  // Restore UI state
+  if (CALL.isMuted) {
+    const btn = document.getElementById('btn-mute');
+    if (btn) btn.classList.add('bg-fire-accent/20', 'text-fire-accent', 'border-fire-accent/30');
+  }
+  
+  if (CALL.isOnHold) {
+    const btn = document.getElementById('btn-hold');
+    if (btn) btn.classList.add('bg-fire-accent/20', 'text-fire-accent', 'border-fire-accent/30');
+  }
+  
+  if (CALL.cameraActive && !S.cameraPiPVisible) {
+    const cameraPip = document.getElementById('camera-pip');
+    if (cameraPip) cameraPip.classList.remove('hidden');
+  }
+  
+  if (CALL.screenShareActive && !S.screenSharePreviewVisible) {
+    const previewPanel = document.getElementById('screen-share-preview');
+    if (previewPanel) previewPanel.classList.remove('hidden');
+  }
+}
+
+// Auto-scroll transcript feed
+function autoScrollTranscript() {
+  const transcriptFeed = document.getElementById('transcript-feed');
+  if (transcriptFeed) {
+    transcriptFeed.scrollTop = transcriptFeed.scrollHeight;
+  }
+}
+
+// Start app when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function() {
+    initializeApp();
+    autoScrollTranscript();
+  });
+} else {
+  initializeApp();
+  autoScrollTranscript();
+}
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+  stopCallTimer();
+  stopAICoachRotation();
+  saveState();
+});
+</script>
+
+<script data-purpose="interface-interactivity">
+    // Example: Toggle control button active state
+    // document.querySelectorAll('.control-bar button').forEach(btn => {
+    //   btn.addEventListener('click', function() {
+    //     if (!this.classList.contains('bg-error-red')) {
+    //       this.classList.toggle('bg-fire-accent/20');
+    //       this.classList.toggle('text-fire-accent');
+    //       this.classList.toggle('border-fire-accent/30');
+    //     }
+    //   });
+    // });
+   
+    // ==================== AI COACH ROTATION ====================
+const coachingSuggestions = [
+  {
+    title: "Ask an Open-Ended Question",
+    text: "Encourage the prospect to share their challenges. Try: 'What's your biggest priority for the next quarter?'"
+  },
+  {
+    title: "Mention ROI Before Pricing",
+    text: "Lead with value metrics. Reference case studies showing 22% call volume increase within 30 days."
+  },
+  {
+    title: "Address the Customer's Objection",
+    text: "Acknowledge their concern about pricing, then pivot to cost savings through automation."
+  },
+  {
+    title: "Slow Down Your Speaking Pace",
+    text: "Pause after key points. Give the customer time to process. Speak at 120-140 words per minute."
+  },
+  {
+    title: "Confirm the Next Meeting",
+    text: "Don't end the call without clarity. Ask: 'Should we schedule a follow-up demo for Thursday?'"
+  },
+  {
+    title: "Reinforce the Value Proposition",
+    text: "Tie features back to their stated needs. Connect our deduplication engine to their integration requirements."
+  }
+];
+
+let currentSuggestionIndex = 0;
+let lastSuggestionIndex = -1;
+let coachRotationInterval = null;
+
+function updateCoachSuggestion() {
+  let newIndex = Math.floor(Math.random() * coachingSuggestions.length);
+  while (newIndex === lastSuggestionIndex) {
+    newIndex = Math.floor(Math.random() * coachingSuggestions.length);
+  }
+  lastSuggestionIndex = newIndex;
+  
+  const suggestion = coachingSuggestions[newIndex];
+  const titleEl = document.getElementById('coach-title');
+  const textEl = document.getElementById('coach-text');
+  
+  if (titleEl) titleEl.textContent = suggestion.title;
+  if (textEl) textEl.textContent = suggestion.text;
+}
+
+function startCoachRotation() {
+  updateCoachSuggestion();
+  if (coachRotationInterval) clearInterval(coachRotationInterval);
+  coachRotationInterval = setInterval(updateCoachSuggestion, 14000);
+}
+
+function stopCoachRotation() {
+  if (coachRotationInterval) clearInterval(coachRotationInterval);
+}
+
+startCoachRotation();
+
+// ==================== MODAL SYSTEM ====================
+// const modals = {
+//   mute: { overlay: 'mute-modal', closeBtn: 'mute-close', dismissBtn: 'mute-dismiss', applyBtn: 'mute-apply' },
+//   hold: { overlay: 'hold-modal', closeBtn: 'hold-close', resumeBtn: 'hold-resume', endBtn: 'hold-end' },
+//   record: { overlay: 'record-modal', closeBtn: 'record-close', stopBtn: 'record-stop', dismissBtn: 'record-dismiss' },
+//   note: { overlay: 'note-modal', closeBtn: 'note-close', saveBtn: 'note-save', cancelBtn: 'note-cancel' }
+// };
+
+// function openModal(modalName) {
+//   const overlay = document.getElementById(modals[modalName].overlay);
+//   if (overlay) overlay.classList.add('active');
+// }
+
+// function closeModal(modalName) {
+//   const overlay = document.getElementById(modals[modalName].overlay);
+//   if (overlay) overlay.classList.remove('active');
+// }
+
+// // Close modals on escape key
+// document.addEventListener('keydown', (e) => {
+//   if (e.key === 'Escape') {
+//     Object.keys(modals).forEach(key => closeModal(key));
+//     closeScreenShareModal();
+//     closeCameraModal();
+//   }
+// });
+
+// // Close modals on outside click
+// Object.keys(modals).forEach(modalName => {
+//   const overlay = document.getElementById(modals[modalName].overlay);
+//   if (overlay) {
+//     overlay.addEventListener('click', (e) => {
+//       if (e.target === overlay) closeModal(modalName);
+//     });
+//   }
+// });
+
+// // ==================== MUTE MODAL ====================
+// const muteBtn = document.getElementById('mic-btn');
+// if (muteBtn) {
+//   muteBtn.addEventListener('click', () => openModal('mute'));
+// }
+
+// document.getElementById('mute-close')?.addEventListener('click', () => closeModal('mute'));
+// document.getElementById('mute-dismiss')?.addEventListener('click', () => closeModal('mute'));
+// document.getElementById('mute-apply')?.addEventListener('click', () => {
+//   alert('Microphone settings applied');
+//   closeModal('mute');
+// });
+
+// // ==================== HOLD MODAL ====================
+// const holdBtn = document.getElementById('hold-btn');
+// if (holdBtn) {
+//   holdBtn.addEventListener('click', () => {
+//     openModal('hold');
+//     startHoldTimer();
+//   });
+// }
+
+// let holdSeconds = 45;
+// let holdInterval = null;
+
+// function startHoldTimer() {
+//   holdSeconds = 45;
+//   if (holdInterval) clearInterval(holdInterval);
+//   holdInterval = setInterval(() => {
+//     holdSeconds++;
+//     const mins = Math.floor(holdSeconds / 60);
+//     const secs = holdSeconds % 60;
+//     document.getElementById('hold-timer').textContent = 
+//       `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+//   }, 1000);
+// }
+
+// document.getElementById('hold-close')?.addEventListener('click', () => {
+//   clearInterval(holdInterval);
+//   closeModal('hold');
+// });
+
+// document.getElementById('hold-resume')?.addEventListener('click', () => {
+//   clearInterval(holdInterval);
+//   alert('Call resumed');
+//   closeModal('hold');
+// });
+
+// document.getElementById('hold-end')?.addEventListener('click', () => {
+//   clearInterval(holdInterval);
+//   alert('Call ended');
+//   closeModal('hold');
+//   window.location.href = 'postCallSummary.html';
+// });
+
+// // ==================== RECORD MODAL ====================
+// const recordBtn = document.getElementById('record-btn');
+// if (recordBtn) {
+//   recordBtn.addEventListener('click', () => {
+//     openModal('record');
+//     startRecordTimer();
+//   });
+// }
+
+// let recordSeconds = 225;
+// let recordInterval = null;
+
+// function startRecordTimer() {
+//   recordSeconds = 225;
+//   if (recordInterval) clearInterval(recordInterval);
+//   recordInterval = setInterval(() => {
+//     recordSeconds++;
+//     const mins = Math.floor(recordSeconds / 60);
+//     const secs = recordSeconds % 60;
+//     document.getElementById('record-timer').textContent = 
+//       `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+//   }, 1000);
+// }
+
+// document.getElementById('record-close')?.addEventListener('click', () => {
+//   clearInterval(recordInterval);
+//   closeModal('record');
+// });
+
+// document.getElementById('record-stop')?.addEventListener('click', () => {
+//   clearInterval(recordInterval);
+//   alert('Recording stopped and saved');
+//   closeModal('record');
+// });
+
+// document.getElementById('record-dismiss')?.addEventListener('click', () => {
+//   clearInterval(recordInterval);
+//   closeModal('record');
+// });
+
+// // ==================== NOTE MODAL ====================
+// const noteBtn = document.getElementById('note-btn');
+// if (noteBtn) {
+//   noteBtn.addEventListener('click', () => openModal('note'));
+// }
+
+// document.getElementById('note-close')?.addEventListener('click', () => closeModal('note'));
+// document.getElementById('note-cancel')?.addEventListener('click', () => closeModal('note'));
+
+// document.getElementById('note-save')?.addEventListener('click', () => {
+//   const title = document.getElementById('note-title').value;
+//   const content = document.getElementById('note-content').value;
+//   const category = document.getElementById('note-category').value;
+  
+//   if (!title || !content) {
+//     alert('Please fill in title and note');
+//     return;
+//   }
+  
+//   // Update call notes textarea
+//   const callNotesEl = document.getElementById('call-notes');
+//   if (callNotesEl) {
+//     const timestamp = new Date().toLocaleTimeString();
+//     const noteText = `[${timestamp}] ${title} (${category})\n${content}\n`;
+//     callNotesEl.value = noteText + callNotesEl.value;
+//   }
+  
+//   alert('Note saved to call');
+//   closeModal('note');
+//   document.getElementById('note-title').value = '';
+//   document.getElementById('note-content').value = '';
+// });
+
+// // ==================== CALL NOTES PERSISTENCE ====================
+// const callNotesEl = document.getElementById('call-notes');
+// if (callNotesEl) {
+//   callNotesEl.addEventListener('blur', () => {
+//     localStorage.setItem('activeCallNotes', callNotesEl.value);
+//   });
+  
+//   // Load saved notes
+//   const savedNotes = localStorage.getItem('activeCallNotes');
+//   if (savedNotes) {
+//     callNotesEl.value = savedNotes;
+//   }
+// }
+
+// ==================== TRANSCRIPT AUTO-SCROLL ====================
+const transcriptFeed = document.getElementById('transcript-feed');
+if (transcriptFeed) {
+  transcriptFeed.scrollTop = transcriptFeed.scrollHeight;
+}
+
+// ==================== SIMULATE LIVE TRANSCRIPT ====================
+const transcriptMessages = [
+  "Let me explain how our deduplication works...",
+  "We use machine learning to identify duplicates across your data sources.",
+  "That's a great question about integration complexity.",
+  "Our integration team handles the implementation for you."
+];
+
+let messageIndex = 0;
+
+function appendTranscriptMessage(isUser = false) {
+  if (messageIndex >= transcriptMessages.length) {
+    messageIndex = 0;
+  }
+  
+  const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  const speaker = isUser ? 'You' : 'Sarah';
+  const message = transcriptMessages[messageIndex % transcriptMessages.length];
+  
+  const messageEl = document.createElement('div');
+  messageEl.className = 'space-y-2';
+  messageEl.innerHTML = `
+    <div class="flex ${isUser ? 'justify-end' : 'justify-between'} items-center px-1">
+      <span class="text-[10px] text-${isUser ? 'fire-accent/60' : 'gray-500'} font-bold uppercase">${time} • ${speaker}</span>
+    </div>
+    <div class="bg-${isUser ? 'fire-accent/5' : 'white/5'} p-4 rounded-2xl rounded-${isUser ? 'tr' : 'tl'}-none border border-${isUser ? 'fire-accent/10' : 'white/10'} text-sm leading-relaxed">
+      "${message}"
+    </div>
+  `;
+  
+  transcriptFeed?.appendChild(messageEl);
+  transcriptFeed?.scrollTo({ top: transcriptFeed.scrollHeight, behavior: 'smooth' });
+  messageIndex++;
+}
+
+// Simulate messages every 8-12 seconds
+setInterval(() => {
+  appendTranscriptMessage(Math.random() > 0.6);
+}, Math.random() * 4000 + 8000);
+</script>
+
+<!-- <script data-purpose="screen-share-camera-modals">
+// ==================== SCREEN SHARE MODAL ====================
+const screenShareToggleBtn = document.getElementById('screenShareToggleBtn');
+const screenShareModalOverlay = document.getElementById('screenShareModalOverlay');
+const screenShareModalCloseBtn = document.getElementById('screenShareModalCloseBtn');
+const screenShareContainer = document.getElementById('screenShareContainer');
+const screenSharePipCloseBtn = document.getElementById('screenSharePipCloseBtn');
+const screenShareOptions = document.querySelectorAll('.screenShareOption');
+
+let screenShareActive = false;
+
+function openScreenShareModal() {
+  screenShareModalOverlay.classList.add('active');
+}
+
+function closeScreenShareModal() {
+  screenShareModalOverlay.classList.remove('active');
+}
+
+function toggleScreenSharePreview() {
+  if (screenShareActive) {
+    screenShareContainer.classList.add('hidden');
+    screenShareActive = false;
+  } else {
+    screenShareContainer.classList.remove('hidden');
+    screenShareActive = true;
+  }
+}
+
+// Screen share button click handler
+screenShareToggleBtn.addEventListener('click', () => {
+  if (screenShareActive) {
+    toggleScreenSharePreview();
+  } else {
+    openScreenShareModal();
+  }
+});
+
+// Close screen share modal
+screenShareModalCloseBtn.addEventListener('click', closeScreenShareModal);
+
+// Close screen share preview
+screenSharePipCloseBtn.addEventListener('click', () => {
+  screenShareContainer.classList.add('hidden');
+  screenShareActive = false;
+});
+
+// Screen share option selection
+screenShareOptions.forEach(option => {
+  option.addEventListener('click', () => {
+    screenShareOptions.forEach(o => {
+      o.classList.remove('border-fire-accent/50', 'bg-surface-container');
+      o.classList.add('border-glass-border', 'bg-surface-container-low/50');
+    });
+    option.classList.remove('border-glass-border', 'bg-surface-container-low/50');
+    option.classList.add('border-fire-accent/50', 'bg-surface-container');
+    
+    // Simulate screen share start
+    setTimeout(() => {
+      closeScreenShareModal();
+      toggleScreenSharePreview();
+    }, 300);
+  });
+});
+
+// Close on outside click
+screenShareModalOverlay.addEventListener('click', (e) => {
+  if (e.target === screenShareModalOverlay) closeScreenShareModal();
+});
+
+// ==================== CAMERA MODAL ====================
+const cameraToggleBtn = document.getElementById('cameraToggleBtn');
+const cameraModalOverlay = document.getElementById('cameraModalOverlay');
+const cameraModalCloseBtn = document.getElementById('cameraModalCloseBtn');
+const cameraEnableBtn = document.getElementById('cameraEnableBtn');
+const cameraCancelBtn = document.getElementById('cameraCancelBtn');
+const cameraPipContainer = document.getElementById('cameraPipContainer');
+const cameraPipCloseBtn = document.getElementById('cameraPipCloseBtn');
+
+let cameraActive = false;
+
+function openCameraModal() {
+  cameraModalOverlay.classList.add('active');
+}
+
+function closeCameraModal() {
+  cameraModalOverlay.classList.remove('active');
+}
+
+function toggleCameraPreview() {
+  if (cameraActive) {
+    cameraPipContainer.classList.add('hidden');
+    cameraActive = false;
+  } else {
+    cameraPipContainer.classList.remove('hidden');
+    cameraActive = true;
+  }
+}
+
+// Camera button click handler
+cameraToggleBtn.addEventListener('click', () => {
+  if (cameraActive) {
+    toggleCameraPreview();
+  } else {
+    openCameraModal();
+  }
+});
+
+// Close camera modal
+cameraModalCloseBtn.addEventListener('click', closeCameraModal);
+cameraCancelBtn.addEventListener('click', closeCameraModal);
+
+// Enable camera
+cameraEnableBtn.addEventListener('click', () => {
+  closeCameraModal();
+  toggleCameraPreview();
+});
+
+// Close camera preview
+cameraPipCloseBtn.addEventListener('click', () => {
+  cameraPipContainer.classList.add('hidden');
+  cameraActive = false;
+});
+
+// Close on outside click
+cameraModalOverlay.addEventListener('click', (e) => {
+  if (e.target === cameraModalOverlay) closeCameraModal();
+});
+</script> -->
+
+  <script data-purpose="incoming-call-and-timer">
+  (function () {
+    // ---------------------------------------------------------------------
+    // CALL state object — single source of truth for the header timer and
+    // the active call bar. Nothing else in the app should create a second
+    // setInterval for the timer; everyone reads/writes this object.
+    // ---------------------------------------------------------------------
+    const CALL = {
+      status: 'idle',        // idle | ringing | active | hold | ended
+      caller: null,          // { name, company, number, avatar }
+      elapsedSeconds: 0,      // accumulated *active* talk time (hold time excluded)
+      tickHandle: null,      // setInterval handle — guarded so we never duplicate it
+    direction: 'inbound'   // inbound | outbound
+    };
+    window.CALL = CALL; // exposed for debugging / future screens
+
+    const SAMPLE_CALLERS = [
+      { name: 'Jordan Blake', company: 'Meridian Capital Partners', number: '+1 (415) 555-0148', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE' },
+      { name: 'Priya Anand', company: 'Nova Fintech Group', number: '+1 (312) 555-0199', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCcIsQXOEfl9RPSSkYicZMQ5sZEXB_YEaWoTeRrnAo1-nAKuvFvlT46sDnAWOA7VkquKxtVzp5yjZv4DNj2NUZgU4etcHIroG96_E4yWdR_osy9rpoyTTuryFKuIyfkcTnf9FFhG2oA-M-U6JuX6WdWCZu-SM5MrrHJaNQJ4ZCYaNTHQs0TL6BH3YXV0DqvhDq1Vuw4n1-NjhNdDgGvmF4YaY0FVQlMxtXxQWjSXkpodrsqF8olnkV-WKEzTNiCPTtXW-yghBOX-jQ' },
+      { name: 'Marcus Feld', company: 'Ironclad Logistics', number: '+1 (206) 555-0121', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDxpGJ4Ipzimbxj3HtSBAli7TjUBzI2_5jjspz16beTbPyfWRo4lyp0H-rao99dlnU47rfKmrSl5Ypolg02PBuRqcpau7OiaZM_vaP30nvyBffUQ73WPhJ5rNNh743XfSRDHe9arWVzaIzIYC4iwT7FLP4rjkGJ5LeJjetwtF2qmuRIjoV9VT5p5Rjt9gmq3gPKohuev805CdvWmVD8dLVE2ZrGgqxkGjCXUgVqEBVoieyHd78ep4o2yrNlx8WjNlSrm-MMwDrKxRc' }
+    ];
+
+    // ---- Element references -------------------------------------------------
+    const overlay = document.getElementById('incomingCallOverlay');
+    const avatarEl = document.getElementById('incomingCallAvatar');
+    const nameEl = document.getElementById('incomingCallName');
+    const companyEl = document.getElementById('incomingCallCompany');
+    const numberEl = document.getElementById('incomingCallNumber');
+
+    const acceptBtn = document.getElementById('acceptCallBtn');
+    const declineBtn = document.getElementById('declineCallBtn');
+    const voicemailBtn = document.getElementById('voicemailCallBtn');
+    const testInboundBtn = document.getElementById('testInboundBtn');
+
+ const activeBar = document.getElementById('activeCallBar');
+    const activeName = document.getElementById('activeCallName');
+    const activeCompany = document.getElementById('activeCallCompany');
+    const activeStatusLabel = document.getElementById('activeCallStatusLabel');
+    const activeDuration = document.getElementById('activeCallDuration');
+    const holdBtn = document.getElementById('holdCallBtn');
+    const endBtn = document.getElementById('endCallBtn');
+
+    const timerDot = document.getElementById('callTimerDot');
+    const timerText = document.getElementById('callTimerText');
+    const historyBody = document.getElementById('recentActivityBody');
+
+        const newCallBtn = document.getElementById('newCallBtn');
+    const newCallModal = document.getElementById('newCallModal');
+    const cancelCallBtn = document.getElementById('cancelCallBtn');
+    const cancelCallSecondaryBtn = document.getElementById('cancelCallSecondaryBtn');
+    const startCallBtn = document.getElementById('startCallBtn');
+    const callContactSelect = document.getElementById('callContactSelect');
+    const callNumberInput = document.getElementById('callNumberInput');
+
+    // ---- Helpers --------------------------------------------------------
+    function formatTime(totalSeconds) {
+      const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+      const s = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function randomCaller() {
+      return SAMPLE_CALLERS[Math.floor(Math.random() * SAMPLE_CALLERS.length)];
+    }
+
+    // Renders CALL.elapsedSeconds + CALL.status into the header timer pill
+    // and (if visible) the active call bar. This is the ONLY place that
+    // touches those DOM nodes, so there is exactly one render path.
+    
+    function renderTimer() {
+         timerText.textContent = formatTime(CALL.elapsedSeconds);
+      activeDuration.textContent = formatTime(CALL.elapsedSeconds);
+
+
+      timerDot.classList.remove('bg-white/20', 'bg-tertiary', 'active-orb', 'bg-fire-accent');
+      if (CALL.status === 'active') {
+        timerDot.classList.add('bg-tertiary', 'active-orb');
+      } else if (CALL.status === 'hold') {
+        timerDot.classList.add('bg-fire-accent');
+      } else {
+        timerDot.classList.add('bg-white/20');
+
+      }
+    }
+
+    // Single interval, guarded against duplicates. It only advances
+    // elapsedSeconds while status === 'active' — on hold it keeps running
+    // but simply skips incrementing, so resuming continues seamlessly.
+    function ensureTicking() {
+      if (CALL.tickHandle !== null) return; // already ticking, never duplicate
+      CALL.tickHandle = setInterval(() => {
+        if (CALL.status === 'active') {
+          CALL.elapsedSeconds += 1;
+        }
+        renderTimer();
+      }, 1000);
+    }
+
+    function stopTicking() {
+      if (CALL.tickHandle !== null) {
+        clearInterval(CALL.tickHandle);
+        CALL.tickHandle = null;
+      }
+    }
+
+    function populateCallContacts() {
+      if (!callContactSelect) return;
+      callContactSelect.innerHTML = '<option value="">Manual entry</option>';
+      SAMPLE_CALLERS.forEach((caller) => {
+        const option = document.createElement('option');
+        option.value = caller.number;
+        option.dataset.name = caller.name;
+        option.dataset.company = caller.company;
+        option.dataset.avatar = caller.avatar;
+        option.textContent = `${caller.name} • ${caller.company}`;
+        callContactSelect.appendChild(option);
+      });
+    }
+
+    function addHistoryRow({ type, icon, iconColor, name, company, status, statusClasses, duration, revenue, revenueClasses }) {
+      if (!historyBody) return;
+      const row = document.createElement('tr');
+      row.className = 'border-b border-white/5 hover:bg-white/5 transition-colors group';
+      row.innerHTML = `
+        <td class="py-5 px-2">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined ${iconColor}">${icon}</span>
+            <span class="text-white/80 font-medium">${type}</span>
+          </div>
+        </td>
+        <td class="py-5 px-2">
+          <div class="text-white font-bold">${company}</div>
+          <div class="text-[10px] text-on-surface-variant/60 font-bold">${name}</div>
+        </td>
+        <td class="py-5 px-2">
+          <span class="px-3 py-1 ${statusClasses} text-[10px] rounded-full font-extrabold">${status}</span>
+        </td>
+        <td class="py-5 px-2 font-mono-data text-on-surface-variant/80">${duration}</td>
+        <td class="py-5 px-2 text-right font-mono-data font-bold ${revenueClasses}">${revenue}</td>
+      `;
+      historyBody.insertBefore(row, historyBody.firstChild);
+    }
+
+    // ---- Incoming call widget --------------------------------------------
+    function showIncomingCall() {
+      const caller = randomCaller();
+      CALL.caller = caller;
+      CALL.status = 'ringing';
+
+      avatarEl.src = caller.avatar;
+      avatarEl.alt = caller.name;
+      nameEl.textContent = caller.name;
+      companyEl.textContent = caller.company;
+      numberEl.textContent = caller.number;
+
+      overlay.classList.remove('hidden');
+    }
+
+    function hideIncomingCall() {
+      overlay.classList.add('hidden');
+    }
+
+    function acceptCall() {
+      hideIncomingCall();
+      CALL.status = 'active';
+      CALL.direction = 'inbound';
+      CALL.elapsedSeconds = 0; // fresh timer for the new call
+
+      activeName.textContent = CALL.caller.name;
+      activeCompany.textContent = CALL.caller.company;
+      activeStatusLabel.textContent = 'Active Call';
+      holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">pause</span>Hold';
+      activeBar.classList.remove('hidden');
+
+      renderTimer();
+      ensureTicking(); // starts the live, once-only interval
+    }
+
+    function declineCall() {
+      hideIncomingCall();
+      CALL.status = 'idle';
+      CALL.caller = null;
+      // Decline simply dismisses the widget — no history entry, no timer.
+    }
+
+    function sendToVoicemail() {
+      const caller = CALL.caller;
+      hideIncomingCall();
+      CALL.status = 'idle';
+      CALL.caller = null;
+
+      addHistoryRow({
+        type: 'Inbound',
+        icon: 'voicemail',
+        iconColor: 'text-on-surface-variant/60',
+        name: caller.name,
+        company: caller.company,
+        status: 'VOICEMAIL',
+        statusClasses: 'bg-white/5 text-on-surface-variant/60 border border-white/10',
+        duration: '00:00',
+        revenue: '$0',
+        revenueClasses: 'text-on-surface-variant/40'
+      });
+    }
+
+    // ---- Active call controls ---------------------------------------------
+    function toggleHold() {
+      if (CALL.status === 'active') {
+        CALL.status = 'hold';
+        activeStatusLabel.textContent = 'On Hold';
+        holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">play_arrow</span>Resume';
+      } else if (CALL.status === 'hold') {
+        CALL.status = 'active';
+        activeStatusLabel.textContent = 'Active Call';
+        holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">pause</span>Hold';
+      }
+      renderTimer();
+    }
+
+    function endCall() {
+      if (CALL.status === 'idle' || CALL.status === 'ended') return;
+
+      const caller = CALL.caller;
+      const finalDuration = formatTime(CALL.elapsedSeconds);
+      const isOutbound = CALL.direction === 'outbound';
+
+      stopTicking();
+
+      if (caller) {
+        addHistoryRow({
+          type: isOutbound ? 'Outbound' : 'Inbound',
+          icon: isOutbound ? 'call_made' : 'call_received',
+          iconColor: isOutbound ? 'text-tertiary' : 'text-fire-accent',
+          name: caller.name,
+          company: caller.company,
+          status: 'COMPLETED',
+          statusClasses: 'bg-tertiary/10 text-tertiary border border-tertiary/20',
+          duration: finalDuration,
+          revenue: '$0',
+          revenueClasses: 'text-on-surface-variant/40'
+        });
+      }
+
+      // Reset CALL for the next call.
+      CALL.status = 'idle';
+      CALL.caller = null;
+      CALL.elapsedSeconds = 0;
+      CALL.direction = 'inbound';
+
+      activeBar.classList.add('hidden');
+      renderTimer();
+    }
+
+    function openNewCallModal() {
+      if (!newCallModal) return;
+      populateCallContacts();
+      callNumberInput.value = '';
+      callContactSelect.value = '';
+      newCallModal.classList.remove('hidden');
+      callNumberInput.focus();
+    }
+
+    function closeNewCallModal() {
+      if (!newCallModal) return;
+      newCallModal.classList.add('hidden');
+    }
+
+    function startOutboundCall() {
+      const selectedOption = callContactSelect.selectedOptions[0];
+      const manualNumber = callNumberInput.value.trim();
+      const hasSelection = Boolean(selectedOption && selectedOption.value);
+      const number = hasSelection ? selectedOption.value : manualNumber;
+
+      if (!number) return;
+
+      const caller = hasSelection
+        ? {
+            name: selectedOption.dataset.name || 'Contact',
+            company: selectedOption.dataset.company || 'Saved Contact',
+            number: selectedOption.value,
+            avatar: selectedOption.dataset.avatar || 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE'
+          }
+        : {
+            name: 'New Contact',
+            company: 'Manual Entry',
+            number,
+            avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE'
+          };
+
+      closeNewCallModal();
+
+      CALL.status = 'active';
+      CALL.direction = 'outbound';
+      CALL.elapsedSeconds = 0;
+      CALL.caller = caller;
+
+      activeName.textContent = caller.name;
+      activeCompany.textContent = caller.company;
+      activeStatusLabel.textContent = 'Active Call';
+      holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">pause</span>Hold';
+      activeBar.classList.remove('hidden');
+
+      renderTimer();
+      ensureTicking();
+    }
+
+    // ---- Wire up events -----------------------------------------------
+    testInboundBtn.addEventListener('click', showIncomingCall);
+    acceptBtn.addEventListener('click', acceptCall);
+    declineBtn.addEventListener('click', declineCall);
+    voicemailBtn.addEventListener('click', sendToVoicemail);
+    holdBtn.addEventListener('click', toggleHold);
+    endBtn.addEventListener('click', endCall);
+    newCallBtn?.addEventListener('click', openNewCallModal);
+    cancelCallBtn?.addEventListener('click', closeNewCallModal);
+    cancelCallSecondaryBtn?.addEventListener('click', closeNewCallModal);
+    startCallBtn?.addEventListener('click', startOutboundCall);
+    callContactSelect?.addEventListener('change', () => {
+      const selected = callContactSelect.selectedOptions[0];
+      if (selected?.value) callNumberInput.value = selected.value;
+    });
+
+    // Initial paint: idle timer at 00:00.
+    renderTimer();
+  })();
+</script>
+
+
+<script data-purpose="crm-panel">
+  (function () {
+    const panel = document.getElementById('crmPanel');
+    const toggleButtons = [document.getElementById('crmPanelToggle'), document.getElementById('crmPanelToggleRail')];
+    const panelIcon = document.getElementById('crmPanelToggleRailIcon');
+    const recentCallsList = document.getElementById('crmRecentCalls');
+    const topDealsList = document.getElementById('crmTopDeals');
+    const suggestionsList = document.getElementById('crmSuggestions');
+    const storageKey = 'dialforge-crm-panel-open';
+
+    const recentCalls = [
+      { name: 'Jordan Blake', time: '8m ago', outcome: 'Qualified' },
+      { name: 'Priya Anand', time: '24m ago', outcome: 'Follow-up' },
+      { name: 'Marcus Feld', time: '1h ago', outcome: 'Voicemail' },
+      { name: 'Alicia Gomez', time: '2h ago', outcome: 'Booked demo' },
+      { name: 'Noah Park', time: '3h ago', outcome: 'Closed' }
+    ];
+
+    const topDeals = [
+      { name: 'Northwind Labs', value: '$142k', stage: 'Negotiation' },
+      { name: 'BrightPath AI', value: '$96k', stage: 'Proposal' },
+      { name: 'Redline Ops', value: '$84k', stage: 'Discovery' }
+    ];
+
+    function getActiveScreenName() {
+      const label = document.querySelector('header [data-purpose="page-title"] h1')?.textContent?.trim();
+      if (label) return label;
+      const headerScreen = document.querySelector('header .text-sm.font-bold.text-white.whitespace-nowrap')?.textContent?.trim();
+      return headerScreen || 'Dashboard';
+    }
+
+    function getSuggestions(screenName) {
+      const suggestionsByScreen = {
+        Dashboard: [
+          'Prioritize high-intent leads from today\'s inbound queue.',
+          'Re-engage the largest open opportunities before noon.'
+        ],
+        'Active Call': [
+          'Capture the next-step commitment before ending the call.',
+          'Log a follow-up note while the context is still fresh.'
+        ],
+        Queue: [
+          'Rebalance call volume across the busiest reps.',
+          'Move stalled leads into a next-step follow-up.'
+        ],
+        Coaching: [
+          'Review the most recent talk track wins from this week.',
+          'Share a coaching note with the team before the next shift.'
+        ],
+        Dialer: [
+          'Focus on numbers that have not been attempted today.',
+          'Promote the best-fit contacts to the next call block.'
+        ],
+        Pipeline: [
+          'Prioritize deals approaching their decision date.',
+          'Surface stalled opportunities that need a re-engagement.'
+        ],
+        History: [
+          'Spot the call patterns behind your strongest conversions.',
+          'Flag repeat objections that need a tailored playbook.'
+        ],
+        Contacts: [
+          'Refresh contact notes for your top accounts.',
+          'Link new conversations to the right account owner.'
+        ]
+      };
+      return suggestionsByScreen[screenName] || suggestionsByScreen.Dashboard;
+    }
+
+    function renderPanel() {
+      if (!recentCallsList || !topDealsList || !suggestionsList) return;
+
+      recentCallsList.innerHTML = recentCalls.map((call) => `
+        <li class="rounded-xl border border-white/10 bg-surface-container-lowest/70 px-3 py-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-sm font-bold text-white">${call.name}</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">${call.time}</span>
+          </div>
+          <div class="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-tertiary">${call.outcome}</div>
+        </li>
+      `).join('');
+
+      topDealsList.innerHTML = topDeals.map((deal) => `
+        <li class="rounded-xl border border-white/10 bg-surface-container-lowest/70 px-3 py-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-sm font-bold text-white">${deal.name}</span>
+            <span class="text-[10px] font-bold text-fire-accent">${deal.value}</span>
+          </div>
+          <div class="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/60">${deal.stage}</div>
+        </li>
+      `).join('');
+
+      const suggestions = getSuggestions(getActiveScreenName());
+      suggestionsList.innerHTML = suggestions.map((suggestion) => `
+        <li class="rounded-xl border border-white/10 bg-surface-container-lowest/70 px-3 py-2 text-sm text-on-surface-variant">
+          ${suggestion}
+        </li>
+      `).join('');
+    }
+
+    function setPanelState(isOpen) {
+      if (!panel) return;
+      panel.classList.toggle('is-collapsed', !isOpen);
+      toggleButtons.forEach((button) => {
+        if (button) button.setAttribute('aria-expanded', String(isOpen));
+      });
+      if (panelIcon) {
+        panelIcon.textContent = isOpen ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left';
+      }
+      localStorage.setItem(storageKey, String(isOpen));
+    }
+
+    function syncPanelVisibility() {
+      if (!panel) return;
+      if (window.innerWidth < 900) {
+        panel.classList.add('hidden');
+        return;
+      }
+
+      panel.classList.remove('hidden');
+      const stored = localStorage.getItem(storageKey);
+      const shouldOpen = stored === null ? true : stored === 'true';
+      setPanelState(shouldOpen);
+    }
+
+    toggleButtons.forEach((button) => {
+      button?.addEventListener('click', () => {
+        if (!panel) return;
+        const isOpen = !panel.classList.contains('is-collapsed');
+        setPanelState(!isOpen);
+      });
+    });
+
+    window.addEventListener('resize', syncPanelVisibility);
+
+    renderPanel();
+    syncPanelVisibility();
+  })();
+</script>
+
+</body></html>

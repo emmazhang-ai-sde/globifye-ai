@@ -1,0 +1,297 @@
+<!DOCTYPE html><html class="dark" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DialForge · Create Your Workspace</title>
+<!-- BEGIN: External Resources -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&amp;family=Syne:wght@400..800&amp;family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<!-- END: External Resources -->
+<!-- BEGIN: Tailwind Configuration -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-background": "#e3e1ec",
+            "on-surface": "#e3e1ec",
+            "on-surface-variant": "#e5beb4",
+            "fire-accent": "#FF7A1C",
+            "fire-glow": "#FF562A",
+            "surface-container-high": "#292932",
+            "outline-variant": "#5c4039",
+            "ai-purple": "#9B6DFF",
+            "tertiary": "#00e478",
+            "on-surface-variant": "#e5beb4",
+            "fire-gradient": "#FF7A1C",
+          },
+          fontFamily: {
+            "syne": ["Syne", "sans-serif"],
+            "dm-sans": ["DM Sans", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"],
+            "button-text": ["DM Sans"],
+            "mono-data": ["JetBrains Mono"],
+            "hero-h1": ["Syne"],
+            "body-base": ["DM Sans"],
+            "small-label": ["DM Sans"],
+            "button-text": ["DM Sans"],
+            "section-header": ["Syne"],
+          },
+          spacing: {
+            "gap-20": "20px",
+            "gap-16": "16px",
+            "gap-12": "12px",
+            "gap-8": "8px",
+            "margin-standard": "16px",
+          }
+        },
+      },
+    }
+  </script>
+<!-- END: Tailwind Configuration -->
+<!-- BEGIN: Custom Styles -->
+<style data-purpose="layout-effects">
+    body {
+      background: radial-gradient(circle at 50% 0%, #1a1b23 0%, #12131a 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .liquid-glass {
+      background: rgba(26, 27, 35, 0.78);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+    }
+
+    .fire-gradient-btn {
+      background: linear-gradient(135deg, #FF7A1C 0%, #FF562A 100%);
+      box-shadow: 0 0 20px rgba(255, 122, 28, 0.3), 0 0 40px rgba(255, 86, 42, 0.1);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .fire-gradient-btn:hover {
+      filter: saturate(1.2) brightness(1.1);
+      transform: translateY(-2px);
+    }
+
+    .noise-overlay {
+      position: fixed;
+      inset: 0;
+      background: url("https://grainy-gradients.vercel.app/noise.svg");
+      opacity: 0.03;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    .specular-highlight {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    }
+
+    .strength-segment {
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.1);
+      transition: all 0.4s ease;
+    }
+
+    .active-orb {
+      animation: pulse-glow 3s infinite ease-in-out;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.4; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.3); }
+    }
+  </style>
+<!-- END: Custom Styles -->
+</head>
+<body class="text-on-background p-6">
+<div class="noise-overlay"></div>
+<!-- BEGIN: Header -->
+<header class="fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-xl border-b border-white/10 px-margin-standard h-16 flex items-center justify-between" data-purpose="main-navigation">
+<div class="flex items-center gap-gap-12">
+<span class="font-hero-h1-mobile text-2xl font-extrabold text-fire-gradient bg-clip-text text-transparent">DialForge</span>
+<span class="hidden md:block h-4 w-[1px] bg-white/20"></span>
+<span class="font-hero-h1 text-2xl font-extrabold text-white">Dial<span class="text-fire-gradient">Forge</span></span>
+</div>
+<div class="flex items-center gap-gap-16">
+<span class="text-on-surface-variant/60 font-button-text text-sm text-button-text tracking-wider font-bold uppercase">Step 2 of 6</span>
+<div class="w-24 h-1.5 bg-white/10 rounded-full overflow-hidden">
+<div class="w-2/6 h-full bg-fire-gradient rounded-full shadow-[0_0_10px_#FF7A1C]"></div>
+</div>
+</div>
+</header>
+<!-- BEGIN: Main Onboarding Section -->
+<main class="w-full max-w-xl relative z-10">
+<!-- Ambient Background Lights -->
+<div class="absolute -top-40 -left-40 w-80 h-80 bg-fire-accent/10 blur-[120px] rounded-full"></div>
+<div class="absolute -bottom-40 -right-40 w-80 h-80 bg-ai-purple/10 blur-[120px] rounded-full"></div>
+<!-- BEGIN: Header Title -->
+<div class="flex flex-col items-center mb-10 mt-20 text-center">
+ 
+<h1 class="text-[42px] md:text-[56px] leading-[1.1] font-syne font-extrabold text-on-surface mb-4">Create your Account</h1>
+<p class="text-sm md:text-base text-on-surface-variant max-w-sm font-dm-sans opacity-80">
+        Join thousands of high-performance sales teams optimizing their pipeline with DialForge.
+      </p>
+</div>
+<!-- END: Header Title -->
+<!-- BEGIN: Form Card -->
+<section class="liquid-glass rounded-2xl p-8 md:p-12 relative overflow-hidden" data-purpose="registration-card">
+<div class="specular-highlight"></div>
+<form action="#" class="space-y-6" id="registration-form">
+<!-- Name Fields Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="space-y-2">
+<label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider" for="first_name">First Name</label>
+<input class="w-full bg-surface-container-high/40 border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:border-fire-accent/50 focus:ring-1 focus:ring-fire-accent/50 transition-all placeholder:text-on-surface-variant/20" id="first_name" placeholder="John" type="text">
+</div>
+<div class="space-y-2">
+<label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider" for="last_name">Last Name</label>
+<input class="w-full bg-surface-container-high/40 border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:border-fire-accent/50 focus:ring-1 focus:ring-fire-accent/50 transition-all placeholder:text-on-surface-variant/20" id="last_name" placeholder="Doe" type="text">
+</div>
+</div>
+<!-- Work Email Field -->
+<div class="space-y-2">
+<label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider" for="work_email">Work Email</label>
+<div class="relative">
+<input class="w-full bg-surface-container-high/40 border border-outline-variant/30 rounded-xl pl-12 pr-4 py-3 text-sm text-on-surface focus:border-fire-accent/50 focus:ring-1 focus:ring-fire-accent/50 transition-all placeholder:text-on-surface-variant/20" id="work_email" placeholder="name@company.com" type="email">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/40 text-[20px]">mail</span>
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-2">
+<label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider" for="password">Password</label>
+<div class="relative">
+<input class="w-full bg-surface-container-high/40 border border-outline-variant/30 rounded-xl pl-12 pr-4 py-3 text-sm text-on-surface focus:border-fire-accent/50 focus:ring-1 focus:ring-fire-accent/50 transition-all placeholder:text-on-surface-variant/20" id="password" placeholder="••••••••" type="password">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/40 text-[20px]">lock</span>
+</div>
+<!-- Password Strength Indicator -->
+<div class="flex gap-2 pt-2" id="strength-container">
+<div class="strength-segment flex-1"></div>
+<div class="strength-segment flex-1"></div>
+<div class="strength-segment flex-1"></div>
+<div class="strength-segment flex-1"></div>
+</div>
+<div class="flex items-center gap-2 pt-1">
+<span class="material-symbols-outlined text-[14px] text-fire-accent">info</span>
+<p class="text-[10px] text-on-surface-variant/60 font-dm-sans">Password must be at least 12 characters with 1 symbol.</p>
+</div>
+</div>
+<!-- Terms & Privacy -->
+<div class="flex items-start gap-3 py-2">
+<div class="relative flex items-center h-5">
+<input class="peer appearance-none w-5 h-5 border border-outline-variant/40 rounded bg-surface-container-high checked:bg-fire-accent checked:border-transparent transition-all cursor-pointer focus:ring-0 focus:ring-offset-0" id="terms" type="checkbox">
+<span class="material-symbols-outlined absolute pointer-events-none opacity-0 peer-checked:opacity-100 text-[16px] left-[2px] text-[#12131a] font-bold">check</span>
+</div>
+<label class="text-[13px] text-on-surface-variant leading-tight cursor-pointer font-dm-sans" for="terms">
+            I agree to the <a class="text-fire-accent hover:underline decoration-fire-accent/30 underline-offset-2" href="#">Terms of Service</a> and <a class="text-fire-accent hover:underline decoration-fire-accent/30 underline-offset-2" href="#">Privacy Policy</a>.
+          </label>
+</div>
+<!-- Submit Action -->
+<div class="pt-4">
+<a href="onboardingStep3.html" class="block">
+<button class="fire-gradient-btn w-full py-4 rounded-xl font-bold text-white uppercase tracking-widest text-[12px] flex items-center justify-center gap-2 group" type="button">
+            Create Workspace
+            <span class="material-symbols-outlined text-[18px] transition-transform group-hover:translate-x-1">arrow_forward</span>
+</button>
+</a>
+</div>
+</form>
+<!-- BEGIN: Social Proof Footer -->
+<div class="mt-10 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+<p class="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest font-dm-sans">Secured by DialForge Cloud</p>
+<div class="flex items-center -space-x-2.5">
+<img alt="Trusted User 1" class="w-8 h-8 rounded-full border-2 border-[#1a1b23] object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnRUVSOidP5JOADz2tZcSqsA0jGwVEetwPNkaEnaOA5Lo9fU7rq4YTmB2t0oRWJ1FEhGPSFVu3b4OMwuGX4xoyA-xWB3SbarBJhELb8rhWFDBSpPoLgO0qlZntSSf2cCk66QIsezjw3cZskH6IuOLnL5Pke1FCadvh5b9bcuhv5tZEadCfgqx2VbjY-rJCMi7VYeg-YXP4RVxAH0rDHYIcA5A30lmCk80QYmQfWQwmwpWLdq4G3P7Yn5dkV66uZXuLMNVKMMzQxm4">
+<img alt="Trusted User 2" class="w-8 h-8 rounded-full border-2 border-[#1a1b23] object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrt42YQaKftwEEdNV8K7VOJ2zzH05NnOGYHBmrv7Dqvy0UhfFL3nkZfDOGZ5GrAoEuNcTSyIk_WOADMC5z4m5lVEUnQwpkalPeXYVCMdaOZqzaO_plGd5-Z_UfOXzgDMzm51wfbdiIRRcpoazXRIu1PPduQWoZrdv1xZq1vmPQkels74Etzl3tLbRMh5FfDcmDnvpcQVnPMRg1I2t7mR3txDx5iP5XMJSMwORpHuhAQtWU0zVYgK3RX5L07jYDE3TSw4do9YfP6uo">
+<img alt="Trusted User 3" class="w-8 h-8 rounded-full border-2 border-[#1a1b23] object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlzjLXvgAeQKvewaAv9XJp5NC6pUIFAdpJ7DDmNXaN0hGR6938oKR0Hx_uLfc9UDxN4NfD7wOdBVtZF81SXzqAigESog_OfKN9wWpPRrfj5o7DqFEo5AlbAnzVD-uh6qhCOiRdYJqvsQPOvjO90KEaS7WnfQOrbOrMvY2_QTdtPFsJrzpfXwBPoZS2n7EoHw9Ywbo7XD8A37w09D2Ku1KtC5a1vA3YuCk0C6T5ny79TJMtXgt_j7vwa2oN7seng_HGKNIRMJKBOWE">
+<div class="w-8 h-8 rounded-full bg-surface-container-high border-2 border-[#1a1b23] flex items-center justify-center text-[9px] font-bold text-on-surface-variant">+12k</div>
+</div>
+</div>
+<!-- END: Social Proof Footer -->
+</section>
+<!-- END: Form Card -->
+<!-- Login Link -->
+<div class="mt-8 text-center">
+<p class="text-sm text-on-surface-variant">
+        Already have an account? <a class="text-fire-accent font-bold hover:underline underline-offset-4" href="#">Log in</a>
+</p>
+</div>
+</main>
+<!-- END: Main Onboarding Section -->
+<!-- BEGIN: Global Footer Help & Status -->
+<footer class="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-6 px-6 py-2 bg-[#1a1b23]/40 backdrop-blur-lg rounded-full border border-white/5 z-20" data-purpose="system-footer">
+<button class="flex items-center gap-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[16px]">help_center</span>
+      Need help?
+    </button>
+<div class="h-4 w-[1px] bg-white/10"></div>
+<div class="flex items-center gap-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
+<span class="w-2 h-2 rounded-full bg-tertiary active-orb shadow-[0_0_10px_rgba(0,228,120,0.4)]"></span>
+      System Operational
+    </div>
+</footer>
+<!-- END: Global Footer Help & Status -->
+<!-- BEGIN: Logic & Interaction -->
+<script data-purpose="password-logic">
+    const passwordInput = document.getElementById('password');
+    const segments = document.querySelectorAll('.strength-segment');
+
+    passwordInput.addEventListener('input', (e) => {
+      const val = e.target.value;
+      const length = val.length;
+      
+      segments.forEach((seg, index) => {
+        if (length > (index * 3)) {
+          seg.style.backgroundColor = getStrengthColor(index);
+          seg.style.boxShadow = `0 0 10px ${getStrengthColor(index)}66`; // 40% opacity
+        } else {
+          seg.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+          seg.style.boxShadow = 'none';
+        }
+      });
+    });
+
+    function getStrengthColor(index) {
+      const colors = ['#FF3B30', '#FFAD1C', '#F5C518', '#00e478'];
+      return colors[index];
+    }
+  </script>
+<script data-purpose="form-submission">
+    document.getElementById('registration-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalContent = submitBtn.innerHTML;
+      
+      submitBtn.innerHTML = `
+        <span class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+        Processing...
+      `;
+      submitBtn.style.pointerEvents = 'none';
+      submitBtn.style.opacity = '0.7';
+
+      setTimeout(() => {
+        submitBtn.innerHTML = originalContent;
+        submitBtn.style.pointerEvents = 'auto';
+        submitBtn.style.opacity = '1';
+        alert('Validation complete. Moving to Step 2...');
+      }, 1500);
+    });
+  </script>
+<!-- END: Logic & Interaction -->
+
+
+
+
+</body></html>
