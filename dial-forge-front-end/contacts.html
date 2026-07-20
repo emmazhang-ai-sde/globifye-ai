@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DialForge | Contacts Directory</title>
+<!-- Tailwind CSS v3 CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&amp;family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style data-purpose="custom-theme-config">
+    /* Custom CSS for glassmorphism and specialized gradients */
+    .glass-card {
+      background: rgba(26, 27, 35, 0.78);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    .fire-gradient-bg {
+      background: linear-gradient(135deg, #FF7A1C 0%, #FF562A 100%);
+    }
+    .fire-glow {
+      box-shadow: 0 0 20px rgba(255, 122, 28, 0.2), 0 0 40px rgba(255, 86, 42, 0.1);
+    }
+    .shimmer {
+      position: relative;
+      overflow: hidden;
+    }
+    .shimmer::after {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(to bottom right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0) 60%, rgba(255, 255, 255, 0) 100%);
+      transform: rotate(45deg);
+      animation: shimmer-effect 3s infinite;
+    }
+    @keyframes shimmer-effect {
+      0% { transform: translateX(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) rotate(45deg); }
+    }
+    .noise-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0.03;
+      background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuDHdsyubSP05uRUbr0C9nXW2usmvbm7XTvK-VsLGkhGybIS4n2HoPb0NJ36sFvx-LipiK-Gwr0fZO_z-ysjKbJ44ABxetk9wG3MVb5NHhP68VDfoet-wVM0eFDY4QKqOyuLHFD_L74WEfUXcbkB_WOBi4B-yFyqbsVjGz6efXL6H1xTg2E9iEFzGR1m72tMN7nTIpY10pApBc7k2Kww60wBlYeRYtX2YPbX7golKz5ed5MNGpLSOFxadBGWVXbyaRDtflZMX_PuKCA);
+      z-index: 9999;
+    }
+    .active-orb {
+      box-shadow: 0 0 8px rgba(255, 122, 28, 0.6);
+      animation: pulse-glow 2s infinite;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+        .crm-panel {
+      width: 18rem;
+      transition: width 240ms ease, transform 240ms ease, opacity 240ms ease;
+      transform: translateX(0);
+    }
+    .crm-panel.is-collapsed {
+      width: 4.5rem;
+    }
+    .crm-panel .panel-body {
+      opacity: 1;
+      transform: translateX(0);
+      transition: opacity 220ms ease, transform 220ms ease;
+    }
+    .crm-panel.is-collapsed .panel-body {
+      opacity: 0;
+      transform: translateX(8px);
+      pointer-events: none;
+    }
+    @media (max-width: 899px) {
+      .crm-panel {
+        display: none !important;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+  </style>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "background": "#12131a",
+            "surface": "#12131a",
+            "surface-container": "#1e1f27",
+            "surface-container-low": "#1a1b23",
+            "surface-container-high": "#292932",
+            "surface-container-highest": "#33343d",
+            "surface-container-lowest": "#0d0e15",
+            "on-surface": "#e3e1ec",
+            "on-surface-variant": "#e5beb4",
+            "fire-accent": "#FFAD1C",
+            "fire-gradient": "#FF7A1C",
+            "primary-container": "#ff562a",
+            "ember-alert": "#FF2200",
+            "ai-purple": "#9B6DFF",
+            "tertiary": "#00e478",
+            "secondary": "#a8c8ff"
+          },
+          fontFamily: {
+            "syne": ["Syne", "sans-serif"],
+            "dm-sans": ["DM Sans", "sans-serif"],
+            "mono-data": ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-background text-on-surface font-dm-sans overflow-hidden select-none">
+<div class="noise-overlay"></div>
+<!-- BEGIN: MainHeader -->
+<header class="fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-xl border-b border-white/10 flex justify-between items-center px-6 h-16">
+<div class="flex items-center gap-8">
+<span class="font-hero-h1 text-2xl font-extrabold text-white">Dial<span class="text-fire-gradient">Forge</span></span>
+<div class="h-8 w-px bg-white/10 hidden lg:block"></div>
+  <div class="flex flex-col justify-center">
+    <h2 class="text-xs font-bold text-on-surface-variant/60 uppercase tracking-widest leading-none mb-1">Page</h2>
+    <span class="text-sm font-bold text-white whitespace-nowrap">Contacts</span>
+  </div>
+
+</div>
+
+<div class="flex items-center gap-4">
+  <!-- Usage Pill -->
+  <div class="hidden md:flex items-center gap-3 bg-surface-container-high/40 border border-white/5 rounded-full px-3 py-1.5 relative overflow-hidden">
+    <div class="absolute inset-0 bg-fire-gradient/10 w-[84%]"></div>
+    <span class="material-symbols-outlined text-fire-accent text-sm relative z-10">hourglass_empty</span>
+    <span class="text-[10px] font-bold text-white relative z-10">842 / 1,000 mins</span>
+  </div>
+
+  <!-- Live Timer -->
+   <div id="callTimerContainer" class="flex items-center gap-2 bg-surface-container-lowest/50 border border-white/5 rounded-lg px-3 py-1.5">
+    <span id="callTimerDot" class="w-1.5 h-1.5 rounded-full bg-white/20"></span>
+    <span id="callTimerText" class="font-mono-data text-sm font-bold text-white">00:00</span>
+  </div>
+
+  <div class="h-8 w-px bg-white/10 mx-2"></div>
+
+  <!-- Action Buttons -->
+  <div class="flex items-center gap-2">
+    <button id="testInboundBtn" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-high/50 border border-white/10 text-on-surface-variant hover:text-white transition-all text-xs font-bold">
+      <span class="material-symbols-outlined text-sm">ring_volume</span>
+      Test Inbound
+    </button>
+    <button id="newCallBtn" type="button" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-fire-gradient text-on-primary font-bold text-xs hover:brightness-110 transition-all shadow-lg">
+      <span class="material-symbols-outlined text-sm">add</span>
+      New Call
+    </button>
+  </div>
+
+  <div class="h-8 w-px bg-white/10 mx-2"></div>
+
+  <!-- Utility Icons -->
+  <div class="flex items-center gap-1">
+    <button class="p-2 text-on-surface-variant/60 hover:text-white transition-colors">
+      <span class="material-symbols-outlined">dark_mode</span>
+    </button>
+    <button id="crmPanelToggle" type="button" class="p-2 text-on-surface-variant/60 hover:text-white transition-colors">
+      <span class="material-symbols-outlined">side_navigation</span>
+    </button>
+  </div>
+</div>
+</header>
+<!-- END: MainHeader -->
+
+
+  
+      <!-- BEGIN: LeftSidebar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex flex-col bg-surface-container-low/78 backdrop-blur-xl border-r border-white/5 items-center py-6 gap-8 z-40">
+<div class="flex flex-col items-center gap-4 w-full overflow-y-auto flex-1">
+  <a href="./Dashboard.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">dashboard</span>
+    <span class="text-[8px] uppercase font-bold">Dashboard</span>
+  
+  <a href="./activeCall.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">call</span>
+    <span class="text-[8px] uppercase font-bold">Call</span>
+  </a>
+  
+  <a href="./supportQueue.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">queue</span>
+    <span class="text-[8px] uppercase font-bold">Queue</span>
+  </a>
+ <a href="./callCoaching.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">graphic_eq</span>
+      <span class="text-[8px] uppercase font-bold">Coaching</span>
+    </button>
+  </a>
+
+  <a href="./powerDialer.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">dialer_sip</span>
+    <span class="text-[8px] uppercase font-bold">Dialer</span>
+  </a>
+  <a href="./salesPipeline.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">view_kanban</span>
+    <span class="text-[8px] uppercase font-bold">Pipeline</span>
+  </a>
+  <a href="./callHistory.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">history</span>
+      <span class="text-[8px] uppercase font-bold">History</span>
+    </button>
+  </a>
+  <a href="./contacts.html" class="group relative flex flex-col items-center gap-1 w-full py-3 bg-primary-container/20 text-fire-accent border-l-4 border-fire-accent shadow-[0_0_20px_rgba(255,122,28,0.2)]" >
+    <span class="material-symbols-outlined">group</span>
+    <span class="text-[8px] uppercase font-bold">Contacts</span>
+  </a>
+  <a href="./integrationsHub.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">apps</span>
+    <span class="text-[8px] uppercase font-bold">Integrations</span>
+  </a>
+  <a href="./numbers.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">123</span>
+    <span class="text-[8px] uppercase font-bold">Numbers</span>
+  </a>
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <a href="./billingSubscription.html" class="flex flex-col items-center gap-1 w-full h-full text-inherit no-underline">
+      <span class="material-symbols-outlined">payments</span>
+      <span class="text-[8px] uppercase font-bold">Billing</span>
+    </a>
+  </button>
+  <a href="./teamGovernance.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">groups</span>
+      <span class="text-[8px] uppercase font-bold">Team</span>
+    </button>
+  </a>
+</div>
+<div class="flex flex-col items-center gap-4 w-full pb-4">
+  <button class="material-symbols-outlined text-on-surface-variant/60 hover:text-white">help_center</button>
+</div>
+</aside>
+<!-- END: LeftSidebar -->
+  
+
+
+<!-- BEGIN: IncomingCallWidget -->
+<div id="incomingCallOverlay" class="hidden fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
+  <div class="modal-in glass-card fire-glow w-full max-w-sm rounded-2xl p-8 flex flex-col items-center text-center">
+    <span class="text-[10px] font-extrabold text-tertiary uppercase tracking-widest mb-6">Incoming Call</span>
+    <div class="relative w-24 h-24 mb-5">
+      <span class="ringing-pulse"></span>
+      <span class="ringing-pulse delay-1"></span>
+      <span class="ringing-pulse delay-2"></span>
+      <img id="incomingCallAvatar" alt="Caller avatar" class="relative w-24 h-24 rounded-full object-cover border-2 border-tertiary z-10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE">
+    </div>
+    <span id="incomingCallName" class="font-section-header text-xl text-white mb-1">Jordan Blake</span>
+    <span id="incomingCallCompany" class="text-xs font-bold text-on-surface-variant/60 mb-1">Meridian Capital Partners</span>
+    <span id="incomingCallNumber" class="font-mono-data text-sm text-fire-accent mb-8">+1 (415) 555-0148</span>
+    <div class="flex items-center gap-3 mb-3 w-full">
+      <span class="material-symbols-outlined text-fire-accent ringing-icon">ring_volume</span>
+      <span class="text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest">Ringing…</span>
+    </div>
+    <div class="grid grid-cols-3 gap-3 w-full">
+      <button id="declineCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-error-red/10 border border-error-red/30 text-error-red hover:bg-error-red/20 transition-all">
+        <span class="material-symbols-outlined">call_end</span>
+        <span class="text-[9px] font-extrabold uppercase tracking-wider">Decline</span>
+      </button>
+      <button id="acceptCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-tertiary/10 border border-tertiary/40 text-tertiary hover:bg-tertiary/20 transition-all">
+        <span class="material-symbols-outlined">call</span>
+        <span class="text-[9px] font-extrabold uppercase tracking-wider">Accept</span>
+      </button>
+      <button id="voicemailCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-surface-container-high/60 border border-white/10 text-on-surface-variant hover:text-white transition-all">
+        <span class="material-symbols-outlined">voicemail</span>
+        <span class="text-[9px] font-extrabold uppercase tracking-wider">Voicemail</span>
+      </button>
+    </div>
+  </div>
+</div>
+<!-- END: IncomingCallWidget -->
+ <div id="newCallModal" class="hidden fixed inset-0 z-[120] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
+  <div class="modal-in glass-card w-full max-w-lg rounded-3xl p-6 shadow-2xl">
+    <div class="flex items-start justify-between gap-4 mb-6">
+      <div>
+        <p class="text-[10px] font-extrabold uppercase tracking-[0.3em] text-fire-accent">New Call</p>
+        <h3 class="text-xl font-section-header text-white">Start a conversation</h3>
+      </div>
+      <button id="cancelCallBtn" type="button" class="rounded-full p-2 text-on-surface-variant/70 hover:bg-white/10 hover:text-white transition-all">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <label for="callContactSelect" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Contact</label>
+        <select id="callContactSelect" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none ring-0 focus:border-fire-accent">
+          <option value="">Manual entry</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="callNumberInput" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Phone number</label>
+        <input id="callNumberInput" type="tel" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none placeholder:text-on-surface-variant/40 focus:border-fire-accent" placeholder="Enter a phone number" />
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button id="cancelCallSecondaryBtn" type="button" class="rounded-xl border border-white/10 px-4 py-2 text-sm font-bold text-on-surface-variant hover:bg-white/10 hover:text-white transition-all">Cancel</button>
+        <button id="startCallBtn" type="button" class="flex items-center gap-2 rounded-xl bg-fire-gradient px-4 py-2 text-sm font-bold text-on-primary shadow-lg transition-all hover:brightness-110">
+          <span class="material-symbols-outlined text-sm">call</span>
+          Start Call
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BEGIN: ActiveCallBar -->
+<div id="activeCallBar" class="hidden fixed top-16 left-0 lg:left-20 right-0 z-40 bg-tertiary-container/95 backdrop-blur-xl border-b border-tertiary/30 px-6 py-3 flex items-center justify-between">
+  <div class="flex items-center gap-3">
+    <span class="w-2 h-2 rounded-full bg-white active-orb"></span>
+    <span id="activeCallStatusLabel" class="text-[10px] font-extrabold text-white uppercase tracking-widest">Active Call</span>
+    <span class="text-white/50">•</span>
+    <span id="activeCallName" class="text-sm font-bold text-white">Jordan Blake</span>
+    <span id="activeCallCompany" class="text-xs text-white/70 font-bold">Meridian Capital Partners</span>
+  </div>
+  <div class="flex items-center gap-2 xl:pr-16">
+    <span id="activeCallDuration" class="font-mono-data text-sm font-bold text-white">00:00</span>
+    <button id="holdCallBtn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all">
+      <span class="material-symbols-outlined text-sm">pause</span>
+      Hold
+    </button>
+    <button id="endCallBtn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-error-red text-white text-xs font-bold hover:brightness-110 transition-all">
+      <span class="material-symbols-outlined text-sm">call_end</span>
+      End
+    </button>
+  </div>
+</div>
+<!-- END: ActiveCallBar -->
+
+
+
+
+<!-- BEGIN: CRM       -->
+<div id="taskModal" class="hidden fixed inset-0 z-[120] bg-black/70 backdrop-blur-sm px-4 py-10">
+  <div class="mx-auto flex max-w-lg flex-col rounded-2xl border border-white/10 bg-surface-container-low/95 p-6 shadow-2xl">
+    <div class="mb-6 flex items-start justify-between gap-3">
+      <div>
+        <p class="text-[10px] font-extrabold uppercase tracking-[0.3em] text-fire-accent">Planning</p>
+        <h4 class="text-lg font-section-header text-white">Add Task</h4>
+      </div>
+      <button id="closeTaskModalBtn" type="button" class="rounded-full border border-white/10 bg-surface-container-high/70 p-2 text-on-surface-variant transition-all hover:bg-white/10 hover:text-white" aria-label="Close task modal">
+        <span class="material-symbols-outlined text-base">close</span>
+      </button>
+    </div>
+    <form id="taskForm" class="space-y-4">
+      <label class="block">
+        <span class="mb-2 block text-[11px] font-extrabold uppercase tracking-[0.2em] text-on-surface-variant/70">Task title</span>
+        <input id="taskTitleInput" name="title" type="text" required class="w-full rounded-xl border border-white/10 bg-surface-container-high/60 px-3 py-3 text-sm text-white outline-none ring-0 placeholder:text-on-surface-variant/40" placeholder="Follow up with the team" />
+      </label>
+      <label class="block">
+        <span class="mb-2 block text-[11px] font-extrabold uppercase tracking-[0.2em] text-on-surface-variant/70">Description</span>
+        <textarea id="taskDescriptionInput" name="description" rows="3" class="w-full rounded-xl border border-white/10 bg-surface-container-high/60 px-3 py-3 text-sm text-white outline-none ring-0 placeholder:text-on-surface-variant/40" placeholder="Optional notes"></textarea>
+      </label>
+      <div class="grid gap-4 md:grid-cols-2">
+        <label class="block">
+          <span class="mb-2 block text-[11px] font-extrabold uppercase tracking-[0.2em] text-on-surface-variant/70">Due time</span>
+          <input id="taskDueInput" name="dueTime" type="time" class="w-full rounded-xl border border-white/10 bg-surface-container-high/60 px-3 py-3 text-sm text-white outline-none ring-0" />
+        </label>
+        <label class="block">
+          <span class="mb-2 block text-[11px] font-extrabold uppercase tracking-[0.2em] text-on-surface-variant/70">Priority</span>
+          <select id="taskPriorityInput" name="priority" class="w-full rounded-xl border border-white/10 bg-surface-container-high/60 px-3 py-3 text-sm text-white outline-none ring-0">
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+          </select>
+        </label>
+      </div>
+      <div class="flex justify-end gap-3 pt-2">
+        <button id="cancelTaskBtn" type="button" class="rounded-full border border-white/10 bg-surface-container-high/70 px-4 py-2 text-[10px] font-extrabold uppercase tracking-[0.2em] text-on-surface-variant transition-all hover:bg-white/10 hover:text-white">Cancel</button>
+        <button type="submit" class="rounded-full bg-fire-gradient px-4 py-2 text-[10px] font-extrabold uppercase tracking-[0.2em] text-on-primary shadow-lg">Save Task</button>
+      </div>
+    </form>
+  </div>
+</div>
+ <aside id="crmPanel" class="crm-panel fixed top-16 right-0 z-[45] h-[calc(100vh-64px)] border-l border-white/10 bg-surface-container-low/95 backdrop-blur-xl shadow-2xl overflow-hidden">
+  <div class="flex h-full">
+    <div class="w-16 flex-shrink-0 border-r border-white/10 bg-surface-container-lowest/60 flex flex-col items-center justify-between py-4">
+      <button id="crmPanelToggleRail" type="button" class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-surface-container-high/70 text-on-surface-variant transition-all hover:bg-white/10 hover:text-white" aria-label="Toggle CRM panel" aria-expanded="true">
+        <span id="crmPanelToggleRailIcon" class="material-symbols-outlined">keyboard_double_arrow_right</span>
+      </button>
+      <div class="flex flex-col items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/70">
+        <span class="material-symbols-outlined text-base">insights</span>
+        <span>CRM</span>
+      </div>
+    </div>
+
+    <div class="panel-body flex-1 overflow-y-auto px-4 py-4">
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <p class="text-[10px] font-extrabold uppercase tracking-[0.3em] text-fire-accent">Right CRM</p>
+          <h3 class="text-sm font-section-header text-white">Context Hub</h3>
+        </div>
+        <span class="rounded-full border border-tertiary/20 bg-tertiary/10 px-2 py-1 text-[10px] font-bold text-tertiary">Live</span>
+      </div>
+
+      <div class="space-y-4">
+        <section class="rounded-2xl border border-white/10 bg-surface-container-high/30 p-3">
+          <div class="mb-3 flex items-center gap-2">
+            <span class="material-symbols-outlined text-fire-accent">history</span>
+            <h4 class="text-sm font-bold text-white">Recent Calls</h4>
+          </div>
+          <ul id="crmRecentCalls" class="space-y-2"></ul>
+        </section>
+
+        <section class="rounded-2xl border border-white/10 bg-surface-container-high/30 p-3">
+          <div class="mb-3 flex items-center gap-2">
+            <span class="material-symbols-outlined text-tertiary">workspace_premium</span>
+            <h4 class="text-sm font-bold text-white">Top Deals</h4>
+          </div>
+          <ul id="crmTopDeals" class="space-y-2"></ul>
+        </section>
+
+        <section class="rounded-2xl border border-white/10 bg-surface-container-high/30 p-3">
+          <div class="mb-3 flex items-center gap-2">
+            <span class="material-symbols-outlined text-ai-purple">auto_awesome</span>
+            <h4 class="text-sm font-bold text-white">AI Suggestions</h4>
+          </div>
+          <ul id="crmSuggestions" class="space-y-2"></ul>
+        </section>
+      </div>
+    </div>
+  </div>
+</aside>
+<!--End CRM-->
+
+<!-- BEGIN: MainContent -->
+<main class="ml-20 mt-16 h-[calc(100vh-64px)] flex flex-col">
+<!-- BEGIN: HubSpotBanner -->
+<div class="bg-surface-container-high/40 backdrop-blur-md px-6 py-3 flex items-center justify-between border-b border-white/5">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-[#FF7A59]/20 flex items-center justify-center border border-[#FF7A59]/30">
+<span class="material-symbols-outlined text-[#FF7A59] text-[18px]" style="font-variation-settings: 'FILL' 1;">sync</span>
+</div>
+<div>
+<p class="text-xs font-semibold text-on-surface">HubSpot CRM Integration Active</p>
+<p class="text-[10px] text-on-surface-variant/60" id="hubspotSyncStatus">Last synced 4 minutes ago • <span id="hubspotContactCount">2,402</span> contacts</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 px-3 py-1 bg-tertiary/10 rounded-full border border-tertiary/20" id="hubspotLiveBadge">
+<div class="w-1.5 h-1.5 rounded-full bg-tertiary active-orb"></div>
+<span class="text-[10px] font-bold text-tertiary">Live Sync</span>
+</div>
+<button id="hubspotSyncBtn" class="text-xs font-semibold text-fire-accent hover:underline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" id="hubspotSyncIcon">sync</span>
+Sync Now
+</button>
+<button class="text-xs font-semibold text-on-surface-variant/60 hover:underline">Settings</button>
+</div>
+</div>
+<!-- END: HubSpotBanner -->
+<div class="flex flex-1 overflow-hidden">
+<!-- BEGIN: LeadsList -->
+<div class="w-[400px] border-r border-white/5 flex flex-col bg-surface-container-low/40">
+<div class="p-6 border-b border-white/5 flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h2 class="font-syne text-2xl font-bold tracking-tight">Leads</h2>
+<div class="flex gap-2">
+<button id="viewListBtn" title="List view" class="p-2 bg-fire-accent/15 text-fire-accent rounded-lg border border-fire-accent/30 hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-lg">view_list</span>
+</button>
+<button id="viewGridBtn" title="Grid view" class="p-2 bg-white/5 rounded-lg border border-white/5 hover:bg-white/10 transition-colors text-on-surface-variant/60">
+<span class="material-symbols-outlined text-lg">grid_view</span>
+</button>
+<div class="relative">
+<button id="filterBtn" title="Filter by status" class="p-2 bg-white/5 rounded-lg border border-white/5 hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-lg">filter_list</span>
+</button>
+<div id="filterMenu" class="hidden absolute right-0 top-11 z-50 w-36 glass-card rounded-xl p-1.5 shadow-xl">
+<button data-status="all" class="filter-option w-full text-left px-3 py-2 rounded-lg text-xs font-semibold hover:bg-white/10 transition-colors flex items-center justify-between">All Statuses <span class="material-symbols-outlined text-sm status-check">check</span></button>
+<button data-status="hot" class="filter-option w-full text-left px-3 py-2 rounded-lg text-xs font-semibold hover:bg-white/10 transition-colors flex items-center justify-between text-ember-alert">Hot <span class="material-symbols-outlined text-sm status-check">check</span></button>
+<button data-status="warm" class="filter-option w-full text-left px-3 py-2 rounded-lg text-xs font-semibold hover:bg-white/10 transition-colors flex items-center justify-between text-fire-accent">Warm <span class="material-symbols-outlined text-sm status-check">check</span></button>
+<button data-status="cold" class="filter-option w-full text-left px-3 py-2 rounded-lg text-xs font-semibold hover:bg-white/10 transition-colors flex items-center justify-between text-secondary">Cold <span class="material-symbols-outlined text-sm status-check">check</span></button>
+</div>
+</div>
+<button id="newContactBtn" class="fire-gradient-bg rounded-lg fire-glow flex items-center gap-2 px-3 py-2 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-lg">add</span>
+<span class="text-xs font-semibold">New Lead</span>
+</button>
+</div>
+</div>
+<div class="flex items-center bg-white/5 rounded-xl px-3 py-2 border border-white/5">
+<span class="material-symbols-outlined text-on-surface-variant/60 text-lg">search</span>
+<input id="companySearchInput" class="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-on-surface-variant/40" placeholder="Search by company..." type="text"/>
+</div>
+</div>
+<!-- Scrollable List -->
+<div id="contactsListContainer" class="flex-1 overflow-y-auto p-2"></div>
+</div>
+<!-- END: LeadsList -->
+<!-- BEGIN: LeadDetailPanel -->
+<div class="flex-1 bg-surface-container-lowest/50 overflow-y-auto p-8">
+<div class="max-w-5xl mx-auto space-y-6" id="detailPanelContainer">
+</div>
+</div>
+<!-- END: LeadDetailPanel -->
+</div>
+</main>
+<!-- END: MainContent -->
+<script data-purpose="app-logic">
+/* ===================== DialForge Contacts — App Logic ===================== */
+
+let contacts = [
+  {
+    id: 1,
+    name: "Alex Rivera",
+    title: "VP of Growth",
+    company: "Scale.io",
+    avatarUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuD4KTM-SG00SVoLnUzz4KX5y9C9sQ9GzYpf3ocbgY9H9vTTnGRnmDjFj3FSUGTgZHbWBoiedqTWFOa6jNTsg25z8TpyzkPM1LIzjFZ-uQ7A9z8dzqpfip29IeTFx9vRp5zX4suFmbJ37jyK1Uc-aijLUpBgNHnoLhHGNeoit4aHvGtBOnof7HL-VNeUF13vWICXQ10pdG3PaT92w4nYULmz74g08ofy5-tppdhrawSIs3Uomk2SfYtzCgvwObcMdnlgYGD4OI1bOm4",
+    status: "hot",
+    dealValue: 24000,
+    dealStage: "Discovery",
+    dealProgress: 25,
+    callCount: 7,
+    email: "",
+    phone: "",
+    linkedin: "linkedin.com/in/alex-rivera-growth",
+    bio: "Currently scaling growth operations at Scale.io. Previously led customer acquisition at FlowState. Expert in GTM strategy and outbound automation.",
+    tags: ["Decision Maker", "Tech Focus", "Q4 Budget"],
+    calls: [
+      { type: "missed", title: "Missed call", label: "from DialForge", time: "Yesterday at 4:15 PM" },
+      { type: "ai", title: "AI Smart Research complete", label: "Identified expansion intent", time: "2 days ago" }
+    ]
+  },
+  {
+    id: 2,
+    name: "Marcus Thorne",
+    title: "CTO",
+    company: "Vertex Digital",
+    avatarUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuAt-YAPxoLVK_QMfMbNudkD-dnVDGYQCmsB_PXEb1UOEwN4_hOzk6YhWMoR02ahQcVqlvpcNEyJ0gSQ__CKEv6Gn0ZTHPGUMQR9LA-lUFrVmV5B4NccHf-GOJ0vjpfx2b7ef9uNCIjkPcSwCkQ80HCBRoDxmes8sPTO5pgl9nCkPdqtSGetHSCLMlc5z1qaww0Xlnausv46Be2YFbT0KBWZS3vdyPIk7MVE8UOWwIJXhDuTe3r5wiofKI6ejGhj60Y7FVyvfWV8umU",
+    status: "warm",
+    dealValue: 8500,
+    dealStage: "Proposal",
+    dealProgress: 55,
+    callCount: 3,
+    email: "marcus@vertexdigital.com",
+    phone: "+1 (415) 555-0132",
+    linkedin: "",
+    bio: "Technical decision maker at Vertex Digital, evaluating outbound tooling to support a growing SDR team.",
+    tags: ["Technical Buyer"],
+    calls: [
+      { type: "call", title: "Discovery call completed", label: "32 min • positive sentiment", time: "3 days ago" }
+    ]
+  },
+  {
+    id: 3,
+    name: "Sarah Chen",
+    title: "Director",
+    company: "OmniMedia",
+    avatarUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuCCk7sxP2Qo72vt4wJimUQ332sEs7BF1Mp2SrQ0ra7N1eLGn6Y7m7JfUs2J4UHcgJEVWL0zisSYZWlJs8jE4RpiCoC-u4W-klFsAgLu5MJj8tnsBVp23CEuYnNumq_n2XR2mKeOkCBzjU59uaa99J48UjtvnoziRtUskpvlv3JUkZy_XhO36--K1GI24wjj9_73k-WO75efg7TXyskCTq3KYJGENbXaUh2pqgtwJRFlvtgD6N8L3I3E5qnNL1JNKi2Aw5dGKbfCTZw",
+    status: "cold",
+    dealValue: 0,
+    dealStage: "",
+    dealProgress: 0,
+    callCount: 1,
+    email: "",
+    phone: "+1 (312) 555-0199",
+    linkedin: "",
+    bio: "Oversees media buying operations at OmniMedia. Early-stage conversation, no active deal yet.",
+    tags: [],
+    calls: [
+      { type: "missed", title: "Missed call", label: "voicemail left", time: "1 week ago" }
+    ]
+  },
+  {
+    id: 4,
+    name: "Jordan Davis",
+    title: "Founder",
+    company: "Stealth Co",
+    avatarUrl: "",
+    status: "cold",
+    dealValue: 0,
+    dealStage: "",
+    dealProgress: 0,
+    callCount: 0,
+    email: "",
+    phone: "",
+    linkedin: "",
+    bio: "",
+    tags: [],
+    calls: []
+  }
+];
+
+let selectedId = 1;
+let viewMode = "list";      // "list" | "grid"
+let statusFilter = "all";   // "all" | "hot" | "warm" | "cold"
+let companyQuery = "";
+
+/* ----------------------------- Helpers ----------------------------- */
+
+function initials(name) {
+  return name.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
+}
+
+function escapeHtml(str) {
+  return (str || "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function formatMoney(v) {
+  if (!v) return "No active deal";
+  return "$" + v.toLocaleString("en-US") + (v >= 1000 ? " ARR" : "");
+}
+
+function getMissing(c) {
+  const m = [];
+  if (!c.email) m.push({ key: "email", label: "Email", icon: "mail" });
+  if (!c.phone) m.push({ key: "phone", label: "Phone", icon: "phone" });
+  if (!c.title) m.push({ key: "title", label: "Title", icon: "work" });
+  if (!c.company) m.push({ key: "company", label: "Company", icon: "apartment" });
+  return m;
+}
+
+function statusMeta(status) {
+  return {
+    hot: { label: "HOT", cls: "bg-ember-alert/10 text-ember-alert border-ember-alert/20" },
+    warm: { label: "WARM", cls: "bg-fire-accent/10 text-fire-accent border-fire-accent/20" },
+    cold: { label: "COLD", cls: "bg-secondary/10 text-secondary border-secondary/20" }
+  }[status];
+}
+
+function getContact(id) {
+  return contacts.find(c => c.id === id);
+}
+
+/* ------------------------- List Rendering ------------------------- */
+
+function getFilteredContacts() {
+  return contacts.filter(c => {
+    const statusOk = statusFilter === "all" || c.status === statusFilter;
+    const q = companyQuery.trim().toLowerCase();
+    const companyOk = !q || (c.company || "").toLowerCase().includes(q);
+    return statusOk && companyOk;
+  });
+}
+
+function avatarHTML(c, sizeClasses) {
+  if (c.avatarUrl) {
+    return `<div class="${sizeClasses} rounded-full border border-white/10 overflow-hidden shrink-0">
+      <img alt="${escapeHtml(c.name)}" class="w-full h-full object-cover" src="${c.avatarUrl}"/>
+    </div>`;
+  }
+  return `<div class="${sizeClasses} rounded-full bg-surface-container-highest flex items-center justify-center border border-white/5 text-xs font-bold shrink-0">${initials(c.name)}</div>`;
+}
+
+function contactCardHTML(c) {
+  const active = c.id === selectedId;
+  const missing = getMissing(c);
+  const meta = statusMeta(c.status);
+  const missingChip = missing.length
+    ? `<span class="flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[8px] font-black bg-ember-alert/10 text-ember-alert border border-ember-alert/20" title="Missing: ${missing.map(m => m.label).join(', ')}">
+        <span class="material-symbols-outlined text-[10px]">warning</span>${missing.length}
+       </span>`
+    : "";
+
+  if (viewMode === "grid") {
+    return `
+    <div class="contact-card ${active ? 'glass-card border-fire-accent/30 shadow-[0_0_15px_rgba(255,122,28,0.1)]' : 'hover:bg-white/5 border border-transparent'} p-4 rounded-xl cursor-pointer flex flex-col items-center text-center gap-2 transition-colors" data-id="${c.id}">
+      <div class="flex items-center justify-between w-full">
+        <span class="px-2 py-0.5 rounded text-[8px] font-black ${meta.cls} border">${meta.label}</span>
+        ${missingChip}
+      </div>
+      ${avatarHTML(c, "w-14 h-14")}
+      <div>
+        <h4 class="text-sm font-bold ${active ? 'text-on-surface' : 'text-on-surface/80'}">${escapeHtml(c.name)}</h4>
+        <p class="text-[9px] text-on-surface-variant/50 uppercase tracking-wider leading-tight">${escapeHtml(c.title || "No title")}</p>
+        <p class="text-[9px] text-on-surface-variant/50 uppercase tracking-wider leading-tight">${escapeHtml(c.company || "No company")}</p>
+      </div>
+      <div class="flex items-center gap-3 text-[10px] text-on-surface-variant/60 font-mono-data">
+        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs">call</span>${c.callCount}</span>
+        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs">attach_money</span>${c.dealValue ? (c.dealValue / 1000) + 'k' : '0'}</span>
+      </div>
+    </div>`;
+  }
+
+  return `
+  <div class="contact-card ${active ? 'glass-card border-fire-accent/30 shadow-[0_0_15px_rgba(255,122,28,0.1)]' : 'hover:bg-white/5 border border-transparent'} p-4 rounded-xl cursor-pointer transition-colors" data-id="${c.id}">
+    <div class="flex justify-between items-start gap-2">
+      <div class="flex items-center gap-3 min-w-0">
+        ${avatarHTML(c, "w-10 h-10")}
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <h4 class="text-sm font-bold ${active ? 'text-on-surface' : 'text-on-surface/80'} truncate">${escapeHtml(c.name)}</h4>
+            ${missingChip}
+          </div>
+          <p class="text-[10px] text-on-surface-variant/50 uppercase tracking-wider truncate">${escapeHtml(c.title || "No title")} • ${escapeHtml(c.company || "No company")}</p>
+          <div class="flex items-center gap-3 mt-1.5 text-[10px] text-on-surface-variant/60 font-mono-data">
+            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs">payments</span>${formatMoney(c.dealValue)}</span>
+            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs">call</span>${c.callCount} call${c.callCount === 1 ? '' : 's'}</span>
+          </div>
+        </div>
+      </div>
+      <span class="px-2 py-0.5 rounded text-[8px] font-black ${meta.cls} border shrink-0">${meta.label}</span>
+    </div>
+  </div>`;
+}
+
+function renderList() {
+  const container = document.getElementById("contactsListContainer");
+  const list = getFilteredContacts();
+
+  container.className = viewMode === "grid"
+    ? "flex-1 overflow-y-auto p-2 grid grid-cols-2 gap-2"
+    : "flex-1 overflow-y-auto space-y-1 p-2";
+
+  if (list.length === 0) {
+    container.innerHTML = `<div class="p-8 text-center text-on-surface-variant/40 text-sm">
+      <span class="material-symbols-outlined text-3xl mb-2 block">search_off</span>
+      No contacts match your filters.
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(contactCardHTML).join("");
+
+  container.querySelectorAll(".contact-card").forEach(card => {
+    card.addEventListener("click", () => {
+      selectedId = Number(card.dataset.id);
+      renderList();
+      renderDetail();
+    });
+  });
+}
+
+/* ------------------------- Detail Rendering ------------------------- */
+
+function timelineIcon(type) {
+  return {
+    missed: { icon: "call", cls: "text-fire-accent bg-white/5 border-white/10" },
+    ai: { icon: "auto_awesome", cls: "text-ai-purple bg-ai-purple/10 border-ai-purple/20" },
+    call: { icon: "call", cls: "text-tertiary bg-tertiary/10 border-tertiary/20" },
+    note: { icon: "edit_note", cls: "text-secondary bg-secondary/10 border-secondary/20" },
+    deal: { icon: "payments", cls: "text-fire-accent bg-fire-accent/10 border-fire-accent/20" }
+  }[type] || { icon: "circle", cls: "text-on-surface-variant bg-white/5 border-white/10" };
+}
+
+function infoRowHTML(c, field, icon, value, placeholder) {
+  const has = !!value;
+  return `
+  <div class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 group hover:bg-white/10 transition-colors" data-field-row="${field}">
+    <div class="flex items-center gap-3 min-w-0 flex-1">
+      <span class="material-symbols-outlined text-fire-accent">${icon}</span>
+      <span class="text-sm ${has ? 'font-mono-data text-on-surface truncate' : 'text-on-surface-variant/40 italic'} field-display" data-field="${field}">${has ? escapeHtml(value) : placeholder}</span>
+    </div>
+    <button class="edit-field-btn text-on-surface-variant/40 hover:text-fire-accent opacity-0 group-hover:opacity-100 transition-opacity p-1" data-field="${field}" title="Edit ${field}">
+      <span class="material-symbols-outlined text-lg">edit</span>
+    </button>
+  </div>`;
+}
+
+function renderDetail() {
+  const c = getContact(selectedId);
+  const container = document.getElementById("detailPanelContainer");
+  if (!c) { container.innerHTML = `<p class="text-on-surface-variant/50 p-8">Select a contact to view details.</p>`; return; }
+
+  const missing = getMissing(c);
+  const meta = statusMeta(c.status);
+
+  const missingBanner = missing.length ? `
+  <div class="col-span-12 glass-card p-6 rounded-2xl border-ember-alert/20 bg-ember-alert/5 flex items-center justify-between flex-wrap gap-4">
+    <div class="flex items-center gap-4">
+      <div class="w-10 h-10 rounded-xl bg-ember-alert/20 flex items-center justify-center shrink-0">
+        <span class="material-symbols-outlined text-ember-alert">warning</span>
+      </div>
+      <div>
+        <h4 class="font-bold text-ember-alert">Missing Contact Information</h4>
+        <p class="text-sm text-on-surface-variant/80">${c.name.split(' ')[0]}'s ${missing.map(m => m.label.toLowerCase()).join(', ')} ${missing.length === 1 ? 'is' : 'are'} missing from HubSpot.</p>
+      </div>
+    </div>
+    <div class="flex gap-2 flex-wrap">
+      ${missing.map(m => `<button class="add-missing-btn bg-ember-alert text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-ember-alert/80 transition-all" data-field="${m.key}">Add ${m.label}</button>`).join("")}
+    </div>
+  </div>` : "";
+
+  const timelineHTML = c.calls.length ? c.calls.map((call, i) => {
+    const t = timelineIcon(call.type);
+    const isLast = i === c.calls.length - 1;
+    return `
+    <div class="flex gap-4">
+      <div class="flex flex-col items-center">
+        <div class="w-8 h-8 rounded-full border flex items-center justify-center ${t.cls}">
+          <span class="material-symbols-outlined text-sm">${t.icon}</span>
+        </div>
+        ${isLast ? "" : '<div class="w-0.5 h-full bg-white/5 mt-1"></div>'}
+      </div>
+      <div class="pb-2">
+        <p class="text-sm"><span class="font-bold">${escapeHtml(call.title)}</span> ${call.label ? '<span class="text-on-surface-variant/60">' + escapeHtml(call.label) + '</span>' : ''}</p>
+        <p class="text-[10px] text-on-surface-variant/40 font-mono-data">${escapeHtml(call.time)}</p>
+      </div>
+    </div>`;
+  }).join("") : `<p class="text-sm text-on-surface-variant/40 italic">No activity logged yet.</p>`;
+
+  container.innerHTML = `
+  <!-- BEGIN: ProfileHeader -->
+  <div class="flex items-start justify-between flex-wrap gap-6">
+    <div class="flex gap-6">
+      <div class="relative">
+        <div class="w-32 h-32 rounded-3xl overflow-hidden border-2 border-fire-accent shadow-[0_0_30px_rgba(255,122,28,0.3)] ${c.avatarUrl ? '' : 'bg-surface-container-highest flex items-center justify-center'}">
+          ${c.avatarUrl ? `<img alt="${escapeHtml(c.name)} Large" class="w-full h-full object-cover scale-110" src="${c.avatarUrl}"/>` : `<span class="font-syne text-4xl font-extrabold text-on-surface-variant/60">${initials(c.name)}</span>`}
+        </div>
+        ${c.status === 'hot' ? `<div class="absolute -bottom-2 -right-2 w-8 h-8 bg-tertiary rounded-full border-4 border-background flex items-center justify-center shadow-lg">
+          <span class="material-symbols-outlined text-background text-sm font-bold">check</span>
+        </div>` : ""}
+      </div>
+      <div class="pt-2">
+        <div class="flex items-center gap-3 mb-1 flex-wrap">
+          <h1 class="font-syne text-4xl font-extrabold">${escapeHtml(c.name)}</h1>
+          <span class="px-3 py-1 rounded-full text-[10px] font-black ${meta.cls} border tracking-[0.2em]">${meta.label} LEAD</span>
+        </div>
+        <p class="font-syne text-xl text-on-surface-variant font-medium">${escapeHtml(c.title || "No title on file")}${c.company ? ` at <span class="text-fire-accent">${escapeHtml(c.company)}</span>` : ""}</p>
+        <div class="flex gap-2 mt-4 flex-wrap">
+          ${c.tags.map(tag => `<span class="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold text-on-surface-variant border border-white/5">${escapeHtml(tag)}</span>`).join("") || `<span class="text-xs text-on-surface-variant/30 italic">No tags yet</span>`}
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-col gap-3 min-w-[200px]">
+      <button id="callActionBtn" class="fire-gradient-bg shimmer text-white px-6 py-3 rounded-xl fire-glow flex items-center justify-center gap-2 group hover:scale-[1.02] active:scale-95 transition-all">
+        <span class="material-symbols-outlined">call</span>
+        <span class="text-sm font-bold">Call ${escapeHtml(c.name.split(' ')[0])}</span>
+      </button>
+      <div class="flex gap-2">
+        <button id="emailActionBtn" class="flex-1 bg-white/5 border border-white/10 px-4 py-3 rounded-xl text-xs font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-lg">mail</span> Email
+        </button>
+        <button id="noteActionBtn" class="flex-1 bg-white/5 border border-white/10 px-4 py-3 rounded-xl text-xs font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-lg">edit_note</span> Note
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- END: ProfileHeader -->
+
+  <!-- BEGIN: Stats -->
+  <div class="grid grid-cols-3 gap-4">
+    <div class="glass-card p-4 rounded-2xl border-white/10 text-center">
+      <p class="font-syne text-2xl font-bold">${c.callCount}</p>
+      <p class="text-[10px] text-on-surface-variant/50 uppercase tracking-widest">Total Calls</p>
+    </div>
+    <div class="glass-card p-4 rounded-2xl border-white/10 text-center">
+      <p class="font-syne text-2xl font-bold ${c.dealValue ? 'text-fire-accent' : ''}">${c.dealValue ? '$' + (c.dealValue / 1000).toFixed(1).replace('.0', '') + 'k' : '$0'}</p>
+      <p class="text-[10px] text-on-surface-variant/50 uppercase tracking-widest">Deal Value</p>
+    </div>
+    <div class="glass-card p-4 rounded-2xl border-white/10 text-center">
+      <p class="font-syne text-2xl font-bold">${missing.length}</p>
+      <p class="text-[10px] text-on-surface-variant/50 uppercase tracking-widest">Missing Fields</p>
+    </div>
+  </div>
+  <!-- END: Stats -->
+
+  <!-- BEGIN: MainDetailGrid -->
+  <div class="grid grid-cols-12 gap-6">
+    ${missingBanner}
+    <!-- Profile Details Block -->
+    <div class="col-span-12 lg:col-span-8 space-y-6">
+      <div class="glass-card p-8 rounded-3xl space-y-8">
+        <h3 class="font-syne text-xl font-bold">Profile Details</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div class="space-y-2">
+            <label class="text-[10px] font-black text-on-surface-variant/40 uppercase tracking-widest">Professional Bio</label>
+            <p class="text-sm text-on-surface-variant leading-relaxed">${c.bio ? escapeHtml(c.bio) : '<span class="italic text-on-surface-variant/40">No bio on file.</span>'}</p>
+          </div>
+          <div class="space-y-4">
+            ${infoRowHTML(c, "email", "mail", c.email, "Not provided")}
+            ${infoRowHTML(c, "phone", "phone", c.phone, "Not provided")}
+            ${c.linkedin
+              ? `<div class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+                  <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-[#0077B5]" style="font-variation-settings: 'FILL' 1;">link</span>
+                    <span class="text-sm font-mono-data truncate max-w-[180px]">${escapeHtml(c.linkedin)}</span>
+                  </div>
+                  <span class="material-symbols-outlined text-on-surface-variant/40 text-sm">open_in_new</span>
+                </div>`
+              : infoRowHTML(c, "linkedin", "link", "", "No LinkedIn linked")}
+          </div>
+        </div>
+        <div class="pt-8 border-t border-white/5">
+          <h4 class="font-bold text-sm mb-6 flex items-center gap-2">
+            <span class="material-symbols-outlined text-lg">history</span> Recent Timeline
+          </h4>
+          <div class="space-y-6">${timelineHTML}</div>
+        </div>
+      </div>
+    </div>
+    <!-- Right Sidebar Info -->
+    <div class="col-span-12 lg:col-span-4 space-y-6">
+      <div class="glass-card p-6 rounded-3xl border-white/10">
+        <h3 class="font-bold text-sm mb-4">Deal Activity</h3>
+        <div class="space-y-4">
+          <div class="p-4 rounded-2xl bg-fire-accent/10 border border-fire-accent/20">
+            <p class="text-[10px] text-fire-accent font-black uppercase tracking-widest mb-1">Current Opportunity</p>
+            <p class="font-syne text-2xl font-bold text-on-surface">${formatMoney(c.dealValue)}</p>
+            <p class="text-xs text-on-surface-variant/60">Stage: ${c.dealStage || "—"}</p>
+            <div class="w-full bg-white/10 h-1.5 rounded-full mt-4 overflow-hidden">
+              <div class="bg-fire-accent h-full" style="width:${c.dealProgress || 0}%"></div>
+            </div>
+          </div>
+          <button id="dealActionBtn" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">add_circle</span> Log New Deal
+          </button>
+        </div>
+      </div>
+      <div class="glass-card p-6 rounded-3xl border-white/10">
+        <h3 class="font-bold text-sm mb-4">Contact Tags</h3>
+        <div class="flex flex-wrap gap-2">
+          ${c.tags.map(tag => `<span class="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold text-on-surface-variant/80">${escapeHtml(tag)}</span>`).join("")}
+          <button id="addTagBtn" class="px-3 py-1 border border-fire-accent/30 rounded-lg text-[10px] font-bold text-fire-accent hover:bg-fire-accent/5 transition-colors">+ Add Tag</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- END: MainDetailGrid -->
+  `;
+
+  wireDetailEvents(c);
+}
+
+function wireDetailEvents(c) {
+  const container = document.getElementById("detailPanelContainer");
+
+  container.querySelectorAll(".add-missing-btn").forEach(btn => {
+    btn.addEventListener("click", () => promptEditField(c, btn.dataset.field));
+  });
+  container.querySelectorAll(".edit-field-btn").forEach(btn => {
+    btn.addEventListener("click", () => startInlineEdit(c, btn.dataset.field));
+  });
+
+  document.getElementById("callActionBtn").addEventListener("click", () => logCall(c));
+  document.getElementById("emailActionBtn").addEventListener("click", () => openEmailClient(c));
+  document.getElementById("noteActionBtn").addEventListener("click", () => addNote(c));
+  document.getElementById("dealActionBtn").addEventListener("click", () => logDeal(c));
+
+  const addTagBtn = document.getElementById("addTagBtn");
+  if (addTagBtn) {
+    addTagBtn.addEventListener("click", () => {
+      const tag = prompt("New tag name:");
+      if (tag && tag.trim()) {
+        c.tags.push(tag.trim());
+        renderDetail();
+      }
+    });
+  }
+}
+
+/* ------------------------- Inline field editing ------------------------- */
+
+const fieldLabels = { email: "Email", phone: "Phone", title: "Title", company: "Company", linkedin: "LinkedIn URL" };
+
+function promptEditField(c, field) {
+  const label = fieldLabels[field] || field;
+  const val = prompt(`Enter ${label} for ${c.name}:`, c[field] || "");
+  if (val === null) return;
+  c[field] = val.trim();
+  renderDetail();
+  renderList();
+}
+
+function startInlineEdit(c, field) {
+  const row = document.querySelector(`[data-field-row="${field}"]`);
+  if (!row) return promptEditField(c, field);
+  const display = row.querySelector(".field-display");
+  const currentVal = c[field] || "";
+
+  row.innerHTML = `
+    <div class="flex items-center gap-3 flex-1">
+      <span class="material-symbols-outlined text-fire-accent">${field === 'email' ? 'mail' : field === 'phone' ? 'phone' : 'link'}</span>
+      <input type="text" class="inline-edit-input bg-white/10 border border-fire-accent/40 rounded-lg px-2 py-1 text-sm font-mono-data w-full outline-none text-on-surface" value="${escapeHtml(currentVal)}" />
+    </div>
+    <div class="flex gap-1 shrink-0">
+      <button class="inline-save-btn text-tertiary hover:bg-white/10 p-1 rounded"><span class="material-symbols-outlined text-lg">check</span></button>
+      <button class="inline-cancel-btn text-on-surface-variant/50 hover:bg-white/10 p-1 rounded"><span class="material-symbols-outlined text-lg">close</span></button>
+    </div>
+  `;
+  const input = row.querySelector(".inline-edit-input");
+  input.focus();
+  input.select();
+
+  const save = () => {
+    c[field] = input.value.trim();
+    renderDetail();
+    renderList();
+  };
+  const cancel = () => renderDetail();
+
+  row.querySelector(".inline-save-btn").addEventListener("click", save);
+  row.querySelector(".inline-cancel-btn").addEventListener("click", cancel);
+  input.addEventListener("keydown", e => {
+    if (e.key === "Enter") save();
+    if (e.key === "Escape") cancel();
+  });
+}
+
+/* ------------------------- Contact Actions ------------------------- */
+
+function logCall(c) {
+  c.callCount += 1;
+  c.calls.unshift({ type: "call", title: "Outbound call logged", label: "via DialForge Dialer", time: "Just now" });
+  renderDetail();
+  renderList();
+}
+
+function openEmailClient(c) {
+  if (!c.email) {
+    const val = prompt(`No email on file for ${c.name}. Enter an email address to continue:`, "");
+    if (!val || !val.trim()) return;
+    c.email = val.trim();
+    renderList();
+  }
+  const subject = encodeURIComponent(`Following up, ${c.name.split(" ")[0]}`);
+  const body = encodeURIComponent(`Hi ${c.name.split(" ")[0]},\n\n`);
+  window.location.href = `mailto:${c.email}?subject=${subject}&body=${body}`;
+  renderDetail();
+}
+
+function addNote(c) {
+  const note = prompt(`Add a note for ${c.name}:`);
+  if (!note || !note.trim()) return;
+  c.calls.unshift({ type: "note", title: "Note added", label: note.trim(), time: "Just now" });
+  renderDetail();
+}
+
+function logDeal(c) {
+  const amountStr = prompt(`Deal value for ${c.name} (USD):`, c.dealValue || "");
+  if (amountStr === null) return;
+  const amount = parseInt(amountStr.replace(/[^0-9]/g, ""), 10);
+  if (isNaN(amount)) return;
+  const stage = prompt("Deal stage (e.g. Discovery, Proposal, Negotiation, Closed Won):", c.dealStage || "Discovery") || c.dealStage;
+  c.dealValue = amount;
+  c.dealStage = stage;
+  const stageProgress = { "Discovery": 25, "Proposal": 55, "Negotiation": 80, "Closed Won": 100 };
+  c.dealProgress = stageProgress[stage] !== undefined ? stageProgress[stage] : 40;
+  c.calls.unshift({ type: "deal", title: "Deal updated", label: `${stage} • $${amount.toLocaleString()}`, time: "Just now" });
+  renderDetail();
+  renderList();
+}
+
+/* ------------------------- New Contact ------------------------- */
+
+function createNewContact() {
+  const name = prompt("Full name:");
+  if (!name || !name.trim()) return;
+  const title = prompt("Job title (optional):", "") || "";
+  const company = prompt("Company (optional):", "") || "";
+  const email = prompt("Email (optional):", "") || "";
+  const phone = prompt("Phone (optional):", "") || "";
+
+  const newContact = {
+    id: Math.max(0, ...contacts.map(c => c.id)) + 1,
+    name: name.trim(),
+    title: title.trim(),
+    company: company.trim(),
+    avatarUrl: "",
+    status: "cold",
+    dealValue: 0,
+    dealStage: "",
+    dealProgress: 0,
+    callCount: 0,
+    email: email.trim(),
+    phone: phone.trim(),
+    linkedin: "",
+    bio: "",
+    tags: [],
+    calls: []
+  };
+  contacts.unshift(newContact);
+  selectedId = newContact.id;
+  renderList();
+  renderDetail();
+  bumpContactCount(1);
+}
+
+/* ------------------------- HubSpot Sync Simulation ------------------------- */
+
+let syncedSecondsAgo = 4 * 60;
+let hubspotContactCount = 2402;
+
+function bumpContactCount(n) {
+  hubspotContactCount += n;
+  document.getElementById("hubspotContactCount").textContent = hubspotContactCount.toLocaleString("en-US");
+}
+
+function formatAgo(seconds) {
+  if (seconds < 60) return "just now";
+  const mins = Math.floor(seconds / 60);
+  if (mins < 60) return `${mins} minute${mins === 1 ? "" : "s"} ago`;
+  const hrs = Math.floor(mins / 60);
+  return `${hrs} hour${hrs === 1 ? "" : "s"} ago`;
+}
+
+function updateSyncStatusText() {
+  const el = document.getElementById("hubspotSyncStatus");
+  el.innerHTML = `Last synced ${formatAgo(syncedSecondsAgo)} • <span id="hubspotContactCount">${hubspotContactCount.toLocaleString("en-US")}</span> contacts`;
+}
+
+function runManualSync() {
+  const btn = document.getElementById("hubspotSyncBtn");
+  const icon = document.getElementById("hubspotSyncIcon");
+  if (btn.disabled) return;
+  btn.disabled = true;
+  btn.classList.add("opacity-50", "cursor-wait");
+  icon.classList.add("animate-spin");
+  btn.querySelector("span:last-child") && (btn.lastChild.textContent = " Syncing...");
+
+  setTimeout(() => {
+    syncedSecondsAgo = 0;
+    hubspotContactCount += Math.floor(Math.random() * 3);
+    updateSyncStatusText();
+    icon.classList.remove("animate-spin");
+    btn.classList.remove("opacity-50", "cursor-wait");
+    btn.disabled = false;
+    btn.lastChild.textContent = " Sync Now";
+  }, 1400);
+}
+
+setInterval(() => {
+  syncedSecondsAgo += 60;
+  updateSyncStatusText();
+}, 60000);
+
+/* ------------------------- View / Filter / Search Controls ------------------------- */
+
+function setViewMode(mode) {
+  viewMode = mode;
+  const listBtn = document.getElementById("viewListBtn");
+  const gridBtn = document.getElementById("viewGridBtn");
+  const active = "p-2 bg-fire-accent/15 text-fire-accent rounded-lg border border-fire-accent/30 hover:bg-white/10 transition-colors";
+  const inactive = "p-2 bg-white/5 rounded-lg border border-white/5 hover:bg-white/10 transition-colors text-on-surface-variant/60";
+  listBtn.className = mode === "list" ? active : inactive;
+  gridBtn.className = mode === "grid" ? active : inactive;
+  renderList();
+}
+
+function setStatusFilter(status) {
+  statusFilter = status;
+  document.querySelectorAll(".filter-option .status-check").forEach(chk => chk.classList.add("opacity-0"));
+  const activeBtn = document.querySelector(`.filter-option[data-status="${status}"] .status-check`);
+  if (activeBtn) activeBtn.classList.remove("opacity-0");
+  const filterBtnIcon = document.querySelector("#filterBtn .material-symbols-outlined");
+  document.getElementById("filterBtn").classList.toggle("text-fire-accent", status !== "all");
+  renderList();
+}
+
+/* ------------------------- Init ------------------------- */
+
+function init() {
+  renderList();
+  renderDetail();
+  updateSyncStatusText();
+
+  document.getElementById("viewListBtn").addEventListener("click", () => setViewMode("list"));
+  document.getElementById("viewGridBtn").addEventListener("click", () => setViewMode("grid"));
+
+  const filterBtn = document.getElementById("filterBtn");
+  const filterMenu = document.getElementById("filterMenu");
+  filterBtn.addEventListener("click", e => {
+    e.stopPropagation();
+    filterMenu.classList.toggle("hidden");
+  });
+  document.addEventListener("click", () => filterMenu.classList.add("hidden"));
+  filterMenu.querySelectorAll(".filter-option").forEach(opt => {
+    opt.addEventListener("click", e => {
+      e.stopPropagation();
+      setStatusFilter(opt.dataset.status);
+      filterMenu.classList.add("hidden");
+    });
+  });
+  setStatusFilter("all");
+
+  document.getElementById("companySearchInput").addEventListener("input", e => {
+    companyQuery = e.target.value;
+    renderList();
+  });
+
+  document.getElementById("newContactBtn").addEventListener("click", createNewContact);
+  document.getElementById("hubspotSyncBtn").addEventListener("click", runManualSync);
+}
+
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", init);
+
+  </script>
+
+
+
+<script data-purpose="incoming-call-and-timer">
+  (function () {
+    // ---------------------------------------------------------------------
+    // CALL state object — single source of truth for the header timer and
+    // the active call bar. Nothing else in the app should create a second
+    // setInterval for the timer; everyone reads/writes this object.
+    // ---------------------------------------------------------------------
+    const CALL = {
+      status: 'idle',        // idle | ringing | active | hold | ended
+      caller: null,          // { name, company, number, avatar }
+      elapsedSeconds: 0,      // accumulated *active* talk time (hold time excluded)
+      tickHandle: null,      // setInterval handle — guarded so we never duplicate it
+    direction: 'inbound'   // inbound | outbound
+    };
+    window.CALL = CALL; // exposed for debugging / future screens
+
+    const SAMPLE_CALLERS = [
+      { name: 'Jordan Blake', company: 'Meridian Capital Partners', number: '+1 (415) 555-0148', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE' },
+      { name: 'Priya Anand', company: 'Nova Fintech Group', number: '+1 (312) 555-0199', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCcIsQXOEfl9RPSSkYicZMQ5sZEXB_YEaWoTeRrnAo1-nAKuvFvlT46sDnAWOA7VkquKxtVzp5yjZv4DNj2NUZgU4etcHIroG96_E4yWdR_osy9rpoyTTuryFKuIyfkcTnf9FFhG2oA-M-U6JuX6WdWCZu-SM5MrrHJaNQJ4ZCYaNTHQs0TL6BH3YXV0DqvhDq1Vuw4n1-NjhNdDgGvmF4YaY0FVQlMxtXxQWjSXkpodrsqF8olnkV-WKEzTNiCPTtXW-yghBOX-jQ' },
+      { name: 'Marcus Feld', company: 'Ironclad Logistics', number: '+1 (206) 555-0121', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDxpGJ4Ipzimbxj3HtSBAli7TjUBzI2_5jjspz16beTbPyfWRo4lyp0H-rao99dlnU47rfKmrSl5Ypolg02PBuRqcpau7OiaZM_vaP30nvyBffUQ73WPhJ5rNNh743XfSRDHe9arWVzaIzIYC4iwT7FLP4rjkGJ5LeJjetwtF2qmuRIjoV9VT5p5Rjt9gmq3gPKohuev805CdvWmVD8dLVE2ZrGgqxkGjCXUgVqEBVoieyHd78ep4o2yrNlx8WjNlSrm-MMwDrKxRc' }
+    ];
+
+    // ---- Element references -------------------------------------------------
+    const overlay = document.getElementById('incomingCallOverlay');
+    const avatarEl = document.getElementById('incomingCallAvatar');
+    const nameEl = document.getElementById('incomingCallName');
+    const companyEl = document.getElementById('incomingCallCompany');
+    const numberEl = document.getElementById('incomingCallNumber');
+
+    const acceptBtn = document.getElementById('acceptCallBtn');
+    const declineBtn = document.getElementById('declineCallBtn');
+    const voicemailBtn = document.getElementById('voicemailCallBtn');
+    const testInboundBtn = document.getElementById('testInboundBtn');
+
+    const activeBar = document.getElementById('activeCallBar');
+    const activeName = document.getElementById('activeCallName');
+    const activeCompany = document.getElementById('activeCallCompany');
+    const activeStatusLabel = document.getElementById('activeCallStatusLabel');
+    const activeDuration = document.getElementById('activeCallDuration');
+    const holdBtn = document.getElementById('holdCallBtn');
+    const endBtn = document.getElementById('endCallBtn');
+
+    const timerDot = document.getElementById('callTimerDot');
+    const timerText = document.getElementById('callTimerText');
+    const historyBody = document.getElementById('recentActivityBody');
+        const newCallBtn = document.getElementById('newCallBtn');
+    const newCallModal = document.getElementById('newCallModal');
+    const cancelCallBtn = document.getElementById('cancelCallBtn');
+    const cancelCallSecondaryBtn = document.getElementById('cancelCallSecondaryBtn');
+    const startCallBtn = document.getElementById('startCallBtn');
+    const callContactSelect = document.getElementById('callContactSelect');
+    const callNumberInput = document.getElementById('callNumberInput');
+
+    // ---- Helpers --------------------------------------------------------
+    function formatTime(totalSeconds) {
+      const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+      const s = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function randomCaller() {
+      return SAMPLE_CALLERS[Math.floor(Math.random() * SAMPLE_CALLERS.length)];
+    }
+
+    // Renders CALL.elapsedSeconds + CALL.status into the header timer pill
+    // and (if visible) the active call bar. This is the ONLY place that
+    // touches those DOM nodes, so there is exactly one render path.
+    function renderTimer() {
+      timerText.textContent = formatTime(CALL.elapsedSeconds);
+      activeDuration.textContent = formatTime(CALL.elapsedSeconds);
+
+      timerDot.classList.remove('bg-white/20', 'bg-tertiary', 'active-orb', 'bg-fire-accent');
+      if (CALL.status === 'active') {
+        timerDot.classList.add('bg-tertiary', 'active-orb');
+      } else if (CALL.status === 'hold') {
+        timerDot.classList.add('bg-fire-accent');
+      } else {
+        timerDot.classList.add('bg-white/20');
+      }
+    }
+
+    // Single interval, guarded against duplicates. It only advances
+    // elapsedSeconds while status === 'active' — on hold it keeps running
+    // but simply skips incrementing, so resuming continues seamlessly.
+    function ensureTicking() {
+      if (CALL.tickHandle !== null) return; // already ticking, never duplicate
+      CALL.tickHandle = setInterval(() => {
+        if (CALL.status === 'active') {
+          CALL.elapsedSeconds += 1;
+        }
+        renderTimer();
+      }, 1000);
+    }
+
+    function stopTicking() {
+      if (CALL.tickHandle !== null) {
+        clearInterval(CALL.tickHandle);
+        CALL.tickHandle = null;
+      }
+    }
+
+    function populateCallContacts() {
+      if (!callContactSelect) return;
+      callContactSelect.innerHTML = '<option value="">Manual entry</option>';
+      SAMPLE_CALLERS.forEach((caller) => {
+        const option = document.createElement('option');
+        option.value = caller.number;
+        option.dataset.name = caller.name;
+        option.dataset.company = caller.company;
+        option.dataset.avatar = caller.avatar;
+        option.textContent = `${caller.name} • ${caller.company}`;
+        callContactSelect.appendChild(option);
+      });
+    }
+
+    function addHistoryRow({ type, icon, iconColor, name, company, status, statusClasses, duration, revenue, revenueClasses }) {
+      if (!historyBody) return;
+      const row = document.createElement('tr');
+      row.className = 'border-b border-white/5 hover:bg-white/5 transition-colors group';
+      row.innerHTML = `
+        <td class="py-5 px-2">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined ${iconColor}">${icon}</span>
+            <span class="text-white/80 font-medium">${type}</span>
+          </div>
+        </td>
+        <td class="py-5 px-2">
+          <div class="text-white font-bold">${company}</div>
+          <div class="text-[10px] text-on-surface-variant/60 font-bold">${name}</div>
+        </td>
+        <td class="py-5 px-2">
+          <span class="px-3 py-1 ${statusClasses} text-[10px] rounded-full font-extrabold">${status}</span>
+        </td>
+        <td class="py-5 px-2 font-mono-data text-on-surface-variant/80">${duration}</td>
+        <td class="py-5 px-2 text-right font-mono-data font-bold ${revenueClasses}">${revenue}</td>
+      `;
+      historyBody.insertBefore(row, historyBody.firstChild);
+    }
+
+    // ---- Incoming call widget --------------------------------------------
+    function showIncomingCall() {
+      const caller = randomCaller();
+      CALL.caller = caller;
+      CALL.status = 'ringing';
+
+      avatarEl.src = caller.avatar;
+      avatarEl.alt = caller.name;
+      nameEl.textContent = caller.name;
+      companyEl.textContent = caller.company;
+      numberEl.textContent = caller.number;
+
+      overlay.classList.remove('hidden');
+    }
+
+    function hideIncomingCall() {
+      overlay.classList.add('hidden');
+    }
+
+    function acceptCall() {
+      hideIncomingCall();
+      CALL.status = 'active';
+      CALL.direction = 'inbound';
+      CALL.elapsedSeconds = 0; // fresh timer for the new call
+
+      activeName.textContent = CALL.caller.name;
+      activeCompany.textContent = CALL.caller.company;
+      activeStatusLabel.textContent = 'Active Call';
+      holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">pause</span>Hold';
+      activeBar.classList.remove('hidden');
+
+      renderTimer();
+      ensureTicking(); // starts the live, once-only interval
+    }
+
+    function declineCall() {
+      hideIncomingCall();
+      CALL.status = 'idle';
+      CALL.caller = null;
+      // Decline simply dismisses the widget — no history entry, no timer.
+    }
+
+    function sendToVoicemail() {
+      const caller = CALL.caller;
+      hideIncomingCall();
+      CALL.status = 'idle';
+      CALL.caller = null;
+
+      addHistoryRow({
+        type: 'Inbound',
+        icon: 'voicemail',
+        iconColor: 'text-on-surface-variant/60',
+        name: caller.name,
+        company: caller.company,
+        status: 'VOICEMAIL',
+        statusClasses: 'bg-white/5 text-on-surface-variant/60 border border-white/10',
+        duration: '00:00',
+        revenue: '$0',
+        revenueClasses: 'text-on-surface-variant/40'
+      });
+    }
+
+    // ---- Active call controls ---------------------------------------------
+    function toggleHold() {
+      if (CALL.status === 'active') {
+        CALL.status = 'hold';
+        activeStatusLabel.textContent = 'On Hold';
+        holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">play_arrow</span>Resume';
+      } else if (CALL.status === 'hold') {
+        CALL.status = 'active';
+        activeStatusLabel.textContent = 'Active Call';
+        holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">pause</span>Hold';
+      }
+      renderTimer();
+    }
+
+    function endCall() {
+      if (CALL.status === 'idle' || CALL.status === 'ended') return;
+
+      const caller = CALL.caller;
+      const finalDuration = formatTime(CALL.elapsedSeconds);
+      const isOutbound = CALL.direction === 'outbound';
+
+      stopTicking();
+
+      if (caller) {
+        addHistoryRow({
+          type: isOutbound ? 'Outbound' : 'Inbound',
+          icon: isOutbound ? 'call_made' : 'call_received',
+          iconColor: isOutbound ? 'text-tertiary' : 'text-fire-accent',
+          name: caller.name,
+          company: caller.company,
+          status: 'COMPLETED',
+          statusClasses: 'bg-tertiary/10 text-tertiary border border-tertiary/20',
+          duration: finalDuration,
+          revenue: '$0',
+          revenueClasses: 'text-on-surface-variant/40'
+        });
+      }
+
+      // Reset CALL for the next call.
+      CALL.status = 'idle';
+      CALL.caller = null;
+      CALL.elapsedSeconds = 0;
+      CALL.direction = 'inbound';
+
+      activeBar.classList.add('hidden');
+      renderTimer();
+    }
+
+    function openNewCallModal() {
+      if (!newCallModal) return;
+      populateCallContacts();
+      callNumberInput.value = '';
+      callContactSelect.value = '';
+      newCallModal.classList.remove('hidden');
+      callNumberInput.focus();
+    }
+
+    function closeNewCallModal() {
+      if (!newCallModal) return;
+      newCallModal.classList.add('hidden');
+    }
+
+    function startOutboundCall() {
+      const selectedOption = callContactSelect.selectedOptions[0];
+      const manualNumber = callNumberInput.value.trim();
+      const hasSelection = Boolean(selectedOption && selectedOption.value);
+      const number = hasSelection ? selectedOption.value : manualNumber;
+
+      if (!number) return;
+
+      const caller = hasSelection
+        ? {
+            name: selectedOption.dataset.name || 'Contact',
+            company: selectedOption.dataset.company || 'Saved Contact',
+            number: selectedOption.value,
+            avatar: selectedOption.dataset.avatar || 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE'
+          }
+        : {
+            name: 'New Contact',
+            company: 'Manual Entry',
+            number,
+            avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE'
+          };
+
+      closeNewCallModal();
+
+      CALL.status = 'active';
+      CALL.direction = 'outbound';
+      CALL.elapsedSeconds = 0;
+      CALL.caller = caller;
+
+      activeName.textContent = caller.name;
+      activeCompany.textContent = caller.company;
+      activeStatusLabel.textContent = 'Active Call';
+      holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">pause</span>Hold';
+      activeBar.classList.remove('hidden');
+
+      renderTimer();
+      ensureTicking();
+    }
+    
+    function applyTheme(theme) {
+      if (!themeToggle || !themeIcon) return;
+      const nextTheme = theme || 'dark';
+      document.documentElement.setAttribute('data-theme', nextTheme);
+      document.documentElement.classList.toggle('dark', nextTheme === 'dark');
+      document.documentElement.classList.toggle('light', nextTheme === 'light');
+      localStorage.setItem('dialforge-theme', nextTheme);
+      themeIcon.textContent = nextTheme === 'light' ? 'dark_mode' : 'light_mode';
+    }
+
+    function setInitialTheme() {
+      const storedTheme = localStorage.getItem('dialforge-theme');
+      const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+      const theme = storedTheme || (prefersLight ? 'light' : 'dark');
+      applyTheme(theme);
+    }
+
+    // ---- Wire up events -----------------------------------------------
+    testInboundBtn.addEventListener('click', showIncomingCall);
+    acceptBtn.addEventListener('click', acceptCall);
+    declineBtn.addEventListener('click', declineCall);
+    voicemailBtn.addEventListener('click', sendToVoicemail);
+    holdBtn.addEventListener('click', toggleHold);
+    endBtn.addEventListener('click', endCall);
+    newCallBtn?.addEventListener('click', openNewCallModal);
+    cancelCallBtn?.addEventListener('click', closeNewCallModal);
+    cancelCallSecondaryBtn?.addEventListener('click', closeNewCallModal);
+    startCallBtn?.addEventListener('click', startOutboundCall);
+    callContactSelect?.addEventListener('change', () => {
+      const selected = callContactSelect.selectedOptions[0];
+      if (selected?.value) callNumberInput.value = selected.value;
+    });
+    themeToggle?.addEventListener('click', () => {
+      const nextTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      applyTheme(nextTheme);
+    });
+
+    setInitialTheme();
+
+    // Initial paint: idle timer at 00:00.
+    renderTimer();
+  })();
+</script>
+
+
+
+<script data-purpose="crm-panel">
+  (function () {
+    const panel = document.getElementById('crmPanel');
+    const toggleButtons = [document.getElementById('crmPanelToggle'), document.getElementById('crmPanelToggleRail')];
+    const panelIcon = document.getElementById('crmPanelToggleRailIcon');
+    const recentCallsList = document.getElementById('crmRecentCalls');
+    const topDealsList = document.getElementById('crmTopDeals');
+    const suggestionsList = document.getElementById('crmSuggestions');
+    const storageKey = 'dialforge-crm-panel-open';
+
+    const recentCalls = [
+      { name: 'Jordan Blake', time: '8m ago', outcome: 'Qualified' },
+      { name: 'Priya Anand', time: '24m ago', outcome: 'Follow-up' },
+      { name: 'Marcus Feld', time: '1h ago', outcome: 'Voicemail' },
+      { name: 'Alicia Gomez', time: '2h ago', outcome: 'Booked demo' },
+      { name: 'Noah Park', time: '3h ago', outcome: 'Closed' }
+    ];
+
+    const topDeals = [
+      { name: 'Northwind Labs', value: '$142k', stage: 'Negotiation' },
+      { name: 'BrightPath AI', value: '$96k', stage: 'Proposal' },
+      { name: 'Redline Ops', value: '$84k', stage: 'Discovery' }
+    ];
+
+    function getActiveScreenName() {
+      const label = document.querySelector('header [data-purpose="page-title"] h1')?.textContent?.trim();
+      if (label) return label;
+      const headerScreen = document.querySelector('header .text-sm.font-bold.text-white.whitespace-nowrap')?.textContent?.trim();
+      return headerScreen || 'Dashboard';
+    }
+
+    function getSuggestions(screenName) {
+      const suggestionsByScreen = {
+        Dashboard: [
+          'Prioritize high-intent leads from today\'s inbound queue.',
+          'Re-engage the largest open opportunities before noon.'
+        ],
+        'Active Call': [
+          'Capture the next-step commitment before ending the call.',
+          'Log a follow-up note while the context is still fresh.'
+        ],
+        Queue: [
+          'Rebalance call volume across the busiest reps.',
+          'Move stalled leads into a next-step follow-up.'
+        ],
+        Coaching: [
+          'Review the most recent talk track wins from this week.',
+          'Share a coaching note with the team before the next shift.'
+        ],
+        Dialer: [
+          'Focus on numbers that have not been attempted today.',
+          'Promote the best-fit contacts to the next call block.'
+        ],
+        Pipeline: [
+          'Prioritize deals approaching their decision date.',
+          'Surface stalled opportunities that need a re-engagement.'
+        ],
+        History: [
+          'Spot the call patterns behind your strongest conversions.',
+          'Flag repeat objections that need a tailored playbook.'
+        ],
+        Contacts: [
+          'Refresh contact notes for your top accounts.',
+          'Link new conversations to the right account owner.'
+        ]
+      };
+      return suggestionsByScreen[screenName] || suggestionsByScreen.Dashboard;
+    }
+
+    function renderPanel() {
+      if (!recentCallsList || !topDealsList || !suggestionsList) return;
+
+      recentCallsList.innerHTML = recentCalls.map((call) => `
+        <li class="rounded-xl border border-white/10 bg-surface-container-lowest/70 px-3 py-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-sm font-bold text-white">${call.name}</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">${call.time}</span>
+          </div>
+          <div class="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-tertiary">${call.outcome}</div>
+        </li>
+      `).join('');
+
+      topDealsList.innerHTML = topDeals.map((deal) => `
+        <li class="rounded-xl border border-white/10 bg-surface-container-lowest/70 px-3 py-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-sm font-bold text-white">${deal.name}</span>
+            <span class="text-[10px] font-bold text-fire-accent">${deal.value}</span>
+          </div>
+          <div class="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/60">${deal.stage}</div>
+        </li>
+      `).join('');
+
+      const suggestions = getSuggestions(getActiveScreenName());
+      suggestionsList.innerHTML = suggestions.map((suggestion) => `
+        <li class="rounded-xl border border-white/10 bg-surface-container-lowest/70 px-3 py-2 text-sm text-on-surface-variant">
+          ${suggestion}
+        </li>
+      `).join('');
+    }
+
+    function setPanelState(isOpen) {
+      if (!panel) return;
+      panel.classList.toggle('is-collapsed', !isOpen);
+      toggleButtons.forEach((button) => {
+        if (button) button.setAttribute('aria-expanded', String(isOpen));
+      });
+      if (panelIcon) {
+        panelIcon.textContent = isOpen ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left';
+      }
+      localStorage.setItem(storageKey, String(isOpen));
+    }
+
+    function syncPanelVisibility() {
+      if (!panel) return;
+      if (window.innerWidth < 900) {
+        panel.classList.add('hidden');
+        return;
+      }
+
+      panel.classList.remove('hidden');
+      const stored = localStorage.getItem(storageKey);
+      const shouldOpen = stored === null ? true : stored === 'true';
+      setPanelState(shouldOpen);
+    }
+
+    toggleButtons.forEach((button) => {
+      button?.addEventListener('click', () => {
+        if (!panel) return;
+        const isOpen = !panel.classList.contains('is-collapsed');
+        setPanelState(!isOpen);
+      });
+    });
+
+    window.addEventListener('resize', syncPanelVisibility);
+
+    renderPanel();
+    syncPanelVisibility();
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body></html>

@@ -1,0 +1,1661 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DialForge | Call Coaching</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Typography -->
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&amp;family=DM+Sans:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#ffb4a2",
+            "fire-gradient": "#FF7A1C",
+            "fire-accent": "#FFAD1C",
+            "surface": "#12131a",
+            "surface-container": "#1e1f27",
+            "surface-variant": "#33343d",
+            "on-surface": "#e3e1ec",
+            "on-surface-variant": "#e5beb4",
+            "teal-support": "#00D4C8",
+            "ember-alert": "#FF2200",
+            "ai-purple": "#9B6DFF"
+          },
+          fontFamily: {
+            "syne": ["Syne", "sans-serif"],
+            "dm-sans": ["DM Sans", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-effects">
+
+.active-glow {
+    filter: drop-shadow(0 0 8px #FF7A1C)
+    }
+    .glass-card {
+    background: rgba(30, 31, 39, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1)
+    }
+.fire-glow {
+    box-shadow: 0 0 50px rgba(255, 122, 28, 0.15)
+    }
+.noise-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.02;
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuAjBgxhjjpbQ1X6hvaeggcEsORm0cusjq8KmhkMIem9paSnZ7_7H4035tguD8hQF_wyJfO0-xi5zinWRn5KCM4dsf9akf-ZEUIsx8r2p38OT_3LwtrA_hw0Bqp7LEHGHhjXR6QSfhiz5U0QWGx-RgUC23zQ_gXBKToAxBg8Gydr2pnyjVJzW_LFuaMzmeu54c7PrLK77yNnBemFzvrQWsOo-ahwjnkRQn0xqS8r25dnS6iz5_tsV9azzSv_REk-2thWjE9T9bosd9s)
+    }
+::-webkit-scrollbar {
+    width: 4px
+    }
+::-webkit-scrollbar-track {
+    background: transparent
+    }
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px
+    }
+
+
+    body {
+      background-color: #12131a;
+      color: #e3e1ec;
+      background-image: radial-gradient(circle at 50% 50%, rgba(255, 122, 28, 0.03) 0%, transparent 100%);
+    }
+    .glass-card {
+      background: rgba(30, 31, 39, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .waveform-bar {
+      transition: height 0.3s ease, background-color 0.3s ease;
+    }
+    .fire-glow {
+      box-shadow: 0 0 30px rgba(255, 122, 28, 0.1);
+    }
+    .pulse-dot {
+      animation: pulse 2s infinite;
+    }
+
+    
+        .crm-panel {
+      width: 18rem;
+      transition: width 240ms ease, transform 240ms ease, opacity 240ms ease;
+      transform: translateX(0);
+    }
+    .crm-panel.is-collapsed {
+      width: 4.5rem;
+    }
+    .crm-panel .panel-body {
+      opacity: 1;
+      transform: translateX(0);
+      transition: opacity 220ms ease, transform 220ms ease;
+    }
+    .crm-panel.is-collapsed .panel-body {
+      opacity: 0;
+      transform: translateX(8px);
+      pointer-events: none;
+    }
+    @media (max-width: 899px) {
+      .crm-panel {
+        display: none !important;
+      }
+    }
+
+
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.2); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="font-dm-sans overflow-x-hidden selection:bg-fire-accent/30">
+  
+
+
+<!-- BEGIN: IncomingCallWidget -->
+<div id="incomingCallOverlay" class="hidden fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
+  <div class="modal-in glass-card fire-glow w-full max-w-sm rounded-2xl p-8 flex flex-col items-center text-center">
+    <span class="text-[10px] font-extrabold text-tertiary uppercase tracking-widest mb-6">Incoming Call</span>
+    <div class="relative w-24 h-24 mb-5">
+      <span class="ringing-pulse"></span>
+      <span class="ringing-pulse delay-1"></span>
+      <span class="ringing-pulse delay-2"></span>
+      <img id="incomingCallAvatar" alt="Caller avatar" class="relative w-24 h-24 rounded-full object-cover border-2 border-tertiary z-10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE">
+    </div>
+    <span id="incomingCallName" class="font-section-header text-xl text-white mb-1">Jordan Blake</span>
+    <span id="incomingCallCompany" class="text-xs font-bold text-on-surface-variant/60 mb-1">Meridian Capital Partners</span>
+    <span id="incomingCallNumber" class="font-mono-data text-sm text-fire-accent mb-8">+1 (415) 555-0148</span>
+    <div class="flex items-center gap-3 mb-3 w-full">
+      <span class="material-symbols-outlined text-fire-accent ringing-icon">ring_volume</span>
+      <span class="text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest">Ringing…</span>
+    </div>
+    <div class="grid grid-cols-3 gap-3 w-full">
+      <button id="declineCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-error-red/10 border border-error-red/30 text-error-red hover:bg-error-red/20 transition-all">
+        <span class="material-symbols-outlined">call_end</span>
+        <span class="text-[9px] font-extrabold uppercase tracking-wider">Decline</span>
+      </button>
+      <button id="acceptCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-tertiary/10 border border-tertiary/40 text-tertiary hover:bg-tertiary/20 transition-all">
+        <span class="material-symbols-outlined">call</span>
+        <span class="text-[9px] font-extrabold uppercase tracking-wider">Accept</span>
+      </button>
+      <button id="voicemailCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-surface-container-high/60 border border-white/10 text-on-surface-variant hover:text-white transition-all">
+        <span class="material-symbols-outlined">voicemail</span>
+        <span class="text-[9px] font-extrabold uppercase tracking-wider">Voicemail</span>
+      </button>
+    </div>
+  </div>
+</div>
+<!-- END: IncomingCallWidget -->
+ <div id="newCallModal" class="hidden fixed inset-0 z-[120] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
+  <div class="modal-in glass-card w-full max-w-lg rounded-3xl p-6 shadow-2xl">
+    <div class="flex items-start justify-between gap-4 mb-6">
+      <div>
+        <p class="text-[10px] font-extrabold uppercase tracking-[0.3em] text-fire-accent">New Call</p>
+        <h3 class="text-xl font-section-header text-white">Start a conversation</h3>
+      </div>
+      <button id="cancelCallBtn" type="button" class="rounded-full p-2 text-on-surface-variant/70 hover:bg-white/10 hover:text-white transition-all">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <label for="callContactSelect" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Contact</label>
+        <select id="callContactSelect" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none ring-0 focus:border-fire-accent">
+          <option value="">Manual entry</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="callNumberInput" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Phone number</label>
+        <input id="callNumberInput" type="tel" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none placeholder:text-on-surface-variant/40 focus:border-fire-accent" placeholder="Enter a phone number" />
+      </div>
+
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button id="cancelCallSecondaryBtn" type="button" class="rounded-xl border border-white/10 px-4 py-2 text-sm font-bold text-on-surface-variant hover:bg-white/10 hover:text-white transition-all">Cancel</button>
+        <button id="startCallBtn" type="button" class="flex items-center gap-2 rounded-xl bg-fire-gradient px-4 py-2 text-sm font-bold text-on-primary shadow-lg transition-all hover:brightness-110">
+          <span class="material-symbols-outlined text-sm">call</span>
+          Start Call
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BEGIN: ActiveCallBar -->
+<div id="activeCallBar" class="hidden fixed top-16 left-0 lg:left-20 right-0 z-40 bg-tertiary-container/95 backdrop-blur-xl border-b border-tertiary/30 px-6 py-3 flex items-center justify-between">
+  <div class="flex items-center gap-3">
+    <span class="w-2 h-2 rounded-full bg-white active-orb"></span>
+    <span id="activeCallStatusLabel" class="text-[10px] font-extrabold text-white uppercase tracking-widest">Active Call</span>
+    <span class="text-white/50">•</span>
+    <span id="activeCallName" class="text-sm font-bold text-white">Jordan Blake</span>
+    <span id="activeCallCompany" class="text-xs text-white/70 font-bold">Meridian Capital Partners</span>
+  </div>
+  <div class="flex items-center gap-2 xl:pr-16">
+    <span id="activeCallDuration" class="font-mono-data text-sm font-bold text-white">00:00</span>
+    <button id="holdCallBtn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all">
+      <span class="material-symbols-outlined text-sm">pause</span>
+      Hold
+    </button>
+    <button id="endCallBtn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-error-red text-white text-xs font-bold hover:brightness-110 transition-all">
+      <span class="material-symbols-outlined text-sm">call_end</span>
+      End
+    </button>
+  </div>
+</div>
+<!-- END: ActiveCallBar -->
+
+
+
+
+
+<!-- BEGIN: MainHeader -->
+<header class="fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-xl border-b border-white/10 flex justify-between items-center px-6 h-16">
+<div class="flex items-center gap-8">
+<span class="font-hero-h1 text-2xl font-extrabold text-white">Dial<span class="text-fire-gradient">Forge</span></span>
+<div class="h-8 w-px bg-white/10 hidden lg:block"></div>
+  <div class="flex flex-col justify-center">
+    <h2 class="text-xs font-bold text-on-surface-variant/60 uppercase tracking-widest leading-none mb-1">Page</h2>
+    <span class="text-sm font-bold text-white whitespace-nowrap">Call Coaching</span>
+  </div>
+
+</div>
+
+<div class="flex items-center gap-4">
+  <!-- Usage Pill -->
+  <div class="hidden md:flex items-center gap-3 bg-surface-container-high/40 border border-white/5 rounded-full px-3 py-1.5 relative overflow-hidden">
+    <div class="absolute inset-0 bg-fire-gradient/10 w-[84%]"></div>
+    <span class="material-symbols-outlined text-fire-accent text-sm relative z-10">hourglass_empty</span>
+    <span class="text-[10px] font-bold text-white relative z-10">842 / 1,000 mins</span>
+  </div>
+
+  <!-- Live Timer -->
+   <div id="callTimerContainer" class="flex items-center gap-2 bg-surface-container-lowest/50 border border-white/5 rounded-lg px-3 py-1.5">
+    <span id="callTimerDot" class="w-1.5 h-1.5 rounded-full bg-white/20"></span>
+    <span id="callTimerText" class="font-mono-data text-sm font-bold text-white">00:00</span>
+  </div>
+
+  <div class="h-8 w-px bg-white/10 mx-2"></div>
+
+  <!-- Action Buttons -->
+  <div class="flex items-center gap-2">
+    <button id="testInboundBtn" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-high/50 border border-white/10 text-on-surface-variant hover:text-white transition-all text-xs font-bold">
+      <span class="material-symbols-outlined text-sm">ring_volume</span>
+      Test Inbound
+    </button>
+    <button id="newCallBtn" type="button" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-fire-gradient text-on-primary font-bold text-xs hover:brightness-110 transition-all shadow-lg">
+      <span class="material-symbols-outlined text-sm">add</span>
+      New Call
+    </button>
+  </div>
+
+  <div class="h-8 w-px bg-white/10 mx-2"></div>
+
+  <!-- Utility Icons -->
+  <div class="flex items-center gap-1">
+    <button class="p-2 text-on-surface-variant/60 hover:text-white transition-colors">
+      <span class="material-symbols-outlined">dark_mode</span>
+    </button>
+    <button id="crmPanelToggle" type="button" class="p-2 text-on-surface-variant/60 hover:text-white transition-colors">
+      <span class="material-symbols-outlined">side_navigation</span>
+    </button>
+  </div>
+</div>
+</header>
+<!-- END: MainHeader -->
+
+
+
+
+
+<!-- BEGIN: LeftSidebar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex flex-col bg-surface-container-low/78 backdrop-blur-xl border-r border-white/5 items-center py-6 gap-8 z-40">
+<div class="flex flex-col items-center gap-4 w-full overflow-y-auto flex-1">
+  <a href="./Dashboard.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">dashboard</span>
+    <span class="text-[8px] uppercase font-bold">Dashboard</span>
+  
+  <a href="./activeCall.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">call</span>
+    <span class="text-[8px] uppercase font-bold">Call</span>
+  </a>
+  <a href="./supportQueue.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">queue</span>
+    <span class="text-[8px] uppercase font-bold">Queue</span>
+  </a>
+ <a href="./callCoaching.html" class="block w-full">
+    <button class="group relative flex flex-col items-center gap-1 w-full py-3 bg-primary-container/20 text-fire-accent border-l-4 border-fire-accent shadow-[0_0_20px_rgba(255,122,28,0.2)]" >
+      <span class="material-symbols-outlined">graphic_eq</span>
+      <span class="text-[8px] uppercase font-bold">Coaching</span>
+    </button>
+  </a>
+  <a href="./powerDialer.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">dialer_sip</span>
+    <span class="text-[8px] uppercase font-bold">Dialer</span>
+  </a>
+  <a href="./salesPipeline.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">view_kanban</span>
+    <span class="text-[8px] uppercase font-bold">Pipeline</span>
+  </a>
+  <a href="./callHistory.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">history</span>
+      <span class="text-[8px] uppercase font-bold">History</span>
+    </button>
+  </a>
+  <a href="./contacts.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">group</span>
+    <span class="text-[8px] uppercase font-bold">Contacts</span>
+  </a>
+  <a href="./integrationsHub.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">apps</span>
+    <span class="text-[8px] uppercase font-bold">Integrations</span>
+  </a>
+  <a href="./numbers.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">123</span>
+    <span class="text-[8px] uppercase font-bold">Numbers</span>
+  </a>
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <a href="./billingSubscription.html" class="flex flex-col items-center gap-1 w-full h-full text-inherit no-underline">
+      <span class="material-symbols-outlined">payments</span>
+      <span class="text-[8px] uppercase font-bold">Billing</span>
+    </a>
+  </button>
+  <a href="./teamGovernance.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">groups</span>
+      <span class="text-[8px] uppercase font-bold">Team</span>
+    </button>
+  </a>
+</div>
+<div class="flex flex-col items-center gap-4 w-full pb-4">
+  <button class="material-symbols-outlined text-on-surface-variant/60 hover:text-white">help_center</button>
+</div>
+</aside>
+<!-- END: LeftSidebar -->
+
+
+
+
+
+<!-- BEGIN: CRM       -->
+<div id="taskModal" class="hidden fixed inset-0 z-[120] bg-black/70 backdrop-blur-sm px-4 py-10">
+  <div class="mx-auto flex max-w-lg flex-col rounded-2xl border border-white/10 bg-surface-container-low/95 p-6 shadow-2xl">
+    <div class="mb-6 flex items-start justify-between gap-3">
+      <div>
+        <p class="text-[10px] font-extrabold uppercase tracking-[0.3em] text-fire-accent">Planning</p>
+        <h4 class="text-lg font-section-header text-white">Add Task</h4>
+      </div>
+      <button id="closeTaskModalBtn" type="button" class="rounded-full border border-white/10 bg-surface-container-high/70 p-2 text-on-surface-variant transition-all hover:bg-white/10 hover:text-white" aria-label="Close task modal">
+        <span class="material-symbols-outlined text-base">close</span>
+      </button>
+    </div>
+    <form id="taskForm" class="space-y-4">
+      <label class="block">
+        <span class="mb-2 block text-[11px] font-extrabold uppercase tracking-[0.2em] text-on-surface-variant/70">Task title</span>
+        <input id="taskTitleInput" name="title" type="text" required class="w-full rounded-xl border border-white/10 bg-surface-container-high/60 px-3 py-3 text-sm text-white outline-none ring-0 placeholder:text-on-surface-variant/40" placeholder="Follow up with the team" />
+      </label>
+      <label class="block">
+        <span class="mb-2 block text-[11px] font-extrabold uppercase tracking-[0.2em] text-on-surface-variant/70">Description</span>
+        <textarea id="taskDescriptionInput" name="description" rows="3" class="w-full rounded-xl border border-white/10 bg-surface-container-high/60 px-3 py-3 text-sm text-white outline-none ring-0 placeholder:text-on-surface-variant/40" placeholder="Optional notes"></textarea>
+      </label>
+      <div class="grid gap-4 md:grid-cols-2">
+        <label class="block">
+          <span class="mb-2 block text-[11px] font-extrabold uppercase tracking-[0.2em] text-on-surface-variant/70">Due time</span>
+          <input id="taskDueInput" name="dueTime" type="time" class="w-full rounded-xl border border-white/10 bg-surface-container-high/60 px-3 py-3 text-sm text-white outline-none ring-0" />
+        </label>
+        <label class="block">
+          <span class="mb-2 block text-[11px] font-extrabold uppercase tracking-[0.2em] text-on-surface-variant/70">Priority</span>
+          <select id="taskPriorityInput" name="priority" class="w-full rounded-xl border border-white/10 bg-surface-container-high/60 px-3 py-3 text-sm text-white outline-none ring-0">
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+          </select>
+        </label>
+      </div>
+      <div class="flex justify-end gap-3 pt-2">
+        <button id="cancelTaskBtn" type="button" class="rounded-full border border-white/10 bg-surface-container-high/70 px-4 py-2 text-[10px] font-extrabold uppercase tracking-[0.2em] text-on-surface-variant transition-all hover:bg-white/10 hover:text-white">Cancel</button>
+        <button type="submit" class="rounded-full bg-fire-gradient px-4 py-2 text-[10px] font-extrabold uppercase tracking-[0.2em] text-on-primary shadow-lg">Save Task</button>
+      </div>
+    </form>
+  </div>
+</div>
+ <aside id="crmPanel" class="crm-panel fixed top-16 right-0 z-[45] h-[calc(100vh-64px)] border-l border-white/10 bg-surface-container-low/95 backdrop-blur-xl shadow-2xl overflow-hidden">
+  <div class="flex h-full">
+    <div class="w-16 flex-shrink-0 border-r border-white/10 bg-surface-container-lowest/60 flex flex-col items-center justify-between py-4">
+      <button id="crmPanelToggleRail" type="button" class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-surface-container-high/70 text-on-surface-variant transition-all hover:bg-white/10 hover:text-white" aria-label="Toggle CRM panel" aria-expanded="true">
+        <span id="crmPanelToggleRailIcon" class="material-symbols-outlined">keyboard_double_arrow_right</span>
+      </button>
+      <div class="flex flex-col items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/70">
+        <span class="material-symbols-outlined text-base">insights</span>
+        <span>CRM</span>
+      </div>
+    </div>
+
+    <div class="panel-body flex-1 overflow-y-auto px-4 py-4">
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <p class="text-[10px] font-extrabold uppercase tracking-[0.3em] text-fire-accent">Right CRM</p>
+          <h3 class="text-sm font-section-header text-white">Context Hub</h3>
+        </div>
+        <span class="rounded-full border border-tertiary/20 bg-tertiary/10 px-2 py-1 text-[10px] font-bold text-tertiary">Live</span>
+      </div>
+
+      <div class="space-y-4">
+        <section class="rounded-2xl border border-white/10 bg-surface-container-high/30 p-3">
+          <div class="mb-3 flex items-center gap-2">
+            <span class="material-symbols-outlined text-fire-accent">history</span>
+            <h4 class="text-sm font-bold text-white">Recent Calls</h4>
+          </div>
+          <ul id="crmRecentCalls" class="space-y-2"></ul>
+        </section>
+
+        <section class="rounded-2xl border border-white/10 bg-surface-container-high/30 p-3">
+          <div class="mb-3 flex items-center gap-2">
+            <span class="material-symbols-outlined text-tertiary">workspace_premium</span>
+            <h4 class="text-sm font-bold text-white">Top Deals</h4>
+          </div>
+          <ul id="crmTopDeals" class="space-y-2"></ul>
+        </section>
+
+        <section class="rounded-2xl border border-white/10 bg-surface-container-high/30 p-3">
+          <div class="mb-3 flex items-center gap-2">
+            <span class="material-symbols-outlined text-ai-purple">auto_awesome</span>
+            <h4 class="text-sm font-bold text-white">AI Suggestions</h4>
+          </div>
+          <ul id="crmSuggestions" class="space-y-2"></ul>
+        </section>
+      </div>
+    </div>
+  </div>
+</aside>
+<!--End CRM-->
+
+
+
+
+
+
+      
+  <main class="pl-[240px] pt-16 min-h-screen">
+<div class="max-w-[1440px] mx-auto p-8 space-y-8">
+<!-- BEGIN: Header Section -->
+<section class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4" data-purpose="call-header">
+<div>
+<div class="flex items-center gap-3 mb-2">
+<h1 class="text-3xl font-syne font-extrabold text-white" id="call-title">Call with Alex Rivera</h1>
+<span class="flex items-center gap-1.5 px-3 py-1 bg-fire-accent/10 border border-fire-accent/20 rounded-full text-[10px] font-bold text-fire-accent uppercase tracking-wider" id="call-status-badge">
+<span class="w-2 h-2 rounded-full bg-fire-accent pulse-dot"></span> <span id="call-status-text">In Review</span>
+          </span>
+</div>
+<p class="text-on-surface-variant text-sm flex items-center gap-2" id="call-meta">
+<span class="material-symbols-outlined text-base">calendar_today</span> <span id="call-date">Oct 24, 2023</span>
+          <span class="text-white/20">•</span> <span id="call-duration-label">14:22 mins</span>
+          <span class="text-white/20">•</span> <span id="call-deal">Enterprise SaaS Package</span>
+        </p>
+</div>
+<div class="flex gap-3">
+<button class="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-semibold text-white flex items-center gap-2 hover:bg-white/10 transition-colors" id="share-btn">
+<span class="material-symbols-outlined text-lg">share</span> Share Call
+        </button>
+<button class="px-6 py-2 bg-gradient-to-r from-fire-gradient to-fire-accent rounded-lg text-sm font-bold text-surface shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center gap-2" id="export-btn">
+<span class="material-symbols-outlined text-lg">download</span> Export Insights
+        </button>
+</div>
+</section>
+<!-- END: Header Section -->
+
+<!-- BEGIN: Past Calls Row -->
+<section class="glass-card rounded-2xl p-5" data-purpose="past-calls">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.2em]">Past Connected Calls</h2>
+<span class="text-[10px] text-on-surface-variant/60">Tap a call to load its coaching data</span>
+</div>
+<div class="flex gap-3 overflow-x-auto pb-1" id="call-chip-list">
+<!-- Populated by script -->
+</div>
+</section>
+<!-- END: Past Calls Row -->
+
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- BEGIN: Player Column -->
+<div class="lg:col-span-8 space-y-8">
+<!-- BEGIN: Call Replay Area -->
+<div class="glass-card rounded-2xl p-8 fire-glow relative" data-purpose="player-container">
+<div class="flex items-center justify-between mb-10">
+<div class="flex items-center gap-4">
+<button class="w-14 h-14 rounded-full bg-fire-gradient flex items-center justify-center text-white shadow-xl hover:scale-105 transition-transform active:scale-95" id="play-btn">
+<span class="material-symbols-outlined text-3xl" id="play-icon">play_arrow</span>
+</button>
+<div>
+<div class="text-lg font-mono tracking-tight">
+<span class="text-white" id="time-current">00:00</span> <span class="text-white/30">/ <span id="time-total">14:22</span></span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="bg-surface-variant/30 p-1 rounded-lg flex text-[10px] font-bold" id="speed-controls">
+<button class="px-3 py-1.5 bg-white/10 rounded text-white shadow-sm" data-speed="1">1x</button>
+<button class="px-3 py-1.5 text-on-surface-variant hover:text-white" data-speed="1.5">1.5x</button>
+<button class="px-3 py-1.5 text-on-surface-variant hover:text-white" data-speed="2">2x</button>
+</div>
+<button class="text-on-surface-variant hover:text-white"><span class="material-symbols-outlined">volume_up</span></button>
+</div>
+</div>
+<!-- Waveform Simulation -->
+<div class="h-32 flex items-end justify-between gap-[2px] mb-6" id="waveform">
+<!-- Populated via script -->
+</div>
+<!-- Progress Bar -->
+<div class="relative h-1 w-full bg-white/5 rounded-full overflow-hidden group cursor-pointer" id="progress-bar">
+<div class="absolute left-0 top-0 h-full bg-fire-gradient w-[0%] z-10" id="progress-fill"></div>
+<div class="absolute left-0 top-0 h-full bg-white/10 w-[60%] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</div>
+</div>
+<!-- END: Call Replay Area -->
+<!-- BEGIN: Key Moments -->
+<div class="glass-card rounded-2xl p-6" data-purpose="moments-list">
+<div class="flex justify-between items-center mb-6">
+<h2 class="text-xl font-syne font-bold text-white">Key Moments</h2>
+<button class="text-[11px] font-bold text-fire-accent uppercase tracking-widest flex items-center gap-2 hover:gap-3 transition-all" id="toggle-transcript-btn">
+              View Full Transcript <span class="material-symbols-outlined text-sm" id="toggle-transcript-icon">arrow_forward</span>
+</button>
+</div>
+<div class="space-y-3" id="moments-container">
+<!-- Populated by script -->
+</div>
+</div>
+<!-- END: Key Moments -->
+<!-- BEGIN: Full Transcript -->
+<div class="glass-card rounded-2xl p-6 hidden" data-purpose="full-transcript" id="full-transcript-card">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-fire-accent">description</span>
+<h2 class="text-xl font-syne font-bold text-white">Full Transcript</h2>
+</div>
+<div class="space-y-4 max-h-[480px] overflow-y-auto pr-2" id="transcript-container">
+<!-- Populated by script -->
+</div>
+</div>
+<!-- END: Full Transcript -->
+</div>
+<!-- END: Player Column -->
+<!-- BEGIN: Sidebar Analysis Column -->
+<div class="lg:col-span-4 space-y-8">
+<!-- BEGIN: AI Score Card -->
+<div class="glass-card rounded-2xl p-6 border-l-4 border-fire-accent relative overflow-hidden" data-purpose="ai-score">
+<div class="absolute -top-4 -right-4 opacity-5">
+<span class="material-symbols-outlined text-[120px]">smart_toy</span>
+</div>
+<h3 class="text-[10px] font-bold text-fire-accent uppercase tracking-[0.2em] mb-6">AI Score Performance</h3>
+<div class="flex items-end gap-2 mb-10">
+<span class="text-7xl font-syne font-extrabold text-white leading-none" id="ai-score-total">88</span>
+<span class="text-2xl text-on-surface-variant font-syne font-bold pb-1">/100</span>
+</div>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between items-center mb-2">
+<span class="text-xs text-on-surface-variant">Talk Ratio</span>
+<span class="text-xs font-mono text-white" id="score-talkratio-value">92%</span>
+</div>
+<div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-teal-support shadow-[0_0_10px_rgba(0,212,200,0.4)]" id="score-talkratio-bar" style="width: 92%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2">
+<span class="text-xs text-on-surface-variant">Patience</span>
+<span class="text-xs font-mono text-white" id="score-patience-value">75%</span>
+</div>
+<div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-fire-accent shadow-[0_0_10px_rgba(255,173,28,0.4)]" id="score-patience-bar" style="width: 75%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2">
+<span class="text-xs text-on-surface-variant">Objection Handling</span>
+<span class="text-xs font-mono text-white" id="score-objections-value">80%</span>
+</div>
+<div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-ai-purple shadow-[0_0_10px_rgba(155,109,255,0.4)]" id="score-objections-bar" style="width: 80%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2">
+<span class="text-xs text-on-surface-variant">Close Signals</span>
+<span class="text-xs font-mono text-white" id="score-close-value">98%</span>
+</div>
+<div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-teal-support shadow-[0_0_10px_rgba(0,212,200,0.4)]" id="score-close-bar" style="width: 98%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- END: AI Score Card -->
+<!-- BEGIN: Coaching Notes -->
+<div class="glass-card rounded-2xl p-6" data-purpose="coaching-notes">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-fire-accent">psychology</span>
+<h3 class="text-lg font-syne font-bold text-white">Coaching Notes</h3>
+</div>
+<div class="space-y-4" id="notes-container">
+<!-- Populated by script -->
+</div>
+<button class="w-full mt-6 py-3 border border-white/10 rounded-xl text-xs font-bold text-white hover:bg-white/5 transition-all" id="add-note-btn">
+            Add Manual Note
+          </button>
+</div>
+<!-- END: Coaching Notes -->
+</div>
+<!-- END: Sidebar Analysis Column -->
+</div>
+<!-- BEGIN: Footer Bento Grid -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-8" data-purpose="metrics-bento">
+<div class="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-3">
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Customer Mood</span>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-4xl text-teal-support" id="mood-icon" style="font-variation-settings: &quot;FILL&quot; 1;">sentiment_very_satisfied</span>
+<span class="text-2xl font-syne font-extrabold text-white" id="mood-text">Positive</span>
+</div>
+</div>
+<div class="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-3">
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Talk/Listen Ratio</span>
+<div class="flex items-center gap-6 w-full max-w-[240px]">
+<div class="flex-1 text-right">
+<span class="block text-xl font-mono font-bold text-white" id="talk-you-pct">65%</span>
+<span class="text-[8px] uppercase text-on-surface-variant">You</span>
+</div>
+<!-- Simple SVG Circular Ratio -->
+<div class="relative w-16 h-16 shrink-0">
+<svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+<circle cx="18" cy="18" fill="none" r="16" stroke="rgba(0,212,200,1)" stroke-dasharray="100, 100" stroke-width="3"></circle>
+<circle cx="18" cy="18" fill="none" r="16" stroke="rgba(255,122,28,1)" stroke-dasharray="65, 100" stroke-width="3" id="talk-listen-circle"></circle>
+</svg>
+</div>
+<div class="flex-1 text-left">
+<span class="block text-xl font-mono font-bold text-white" id="talk-them-pct">35%</span>
+<span class="text-[8px] uppercase text-on-surface-variant">Them</span>
+</div>
+</div>
+</div>
+<div class="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-3">
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Confidence Level</span>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-4xl text-fire-accent" style="font-variation-settings: &quot;FILL&quot; 1;">shield_with_heart</span>
+<span class="text-2xl font-syne font-extrabold text-white" id="confidence-value">94%</span>
+</div>
+</div>
+</section>
+<!-- END: Footer Bento Grid -->
+</div>
+</main>
+
+<!-- BEGIN: Toast -->
+<div class="fixed bottom-6 right-6 z-[100] flex flex-col gap-2 items-end pointer-events-none" id="toast-stack"></div>
+<!-- END: Toast -->
+
+
+
+
+
+
+
+
+
+
+
+
+<script data-purpose="incoming-call-and-timer">
+  (function () {
+    // ---------------------------------------------------------------------
+    // CALL state object — single source of truth for the header timer and
+    // the active call bar. Nothing else in the app should create a second
+    // setInterval for the timer; everyone reads/writes this object.
+    // ---------------------------------------------------------------------
+    const CALL = {
+      status: 'idle',        // idle | ringing | active | hold | ended
+      caller: null,          // { name, company, number, avatar }
+      elapsedSeconds: 0,      // accumulated *active* talk time (hold time excluded)
+      tickHandle: null,      // setInterval handle — guarded so we never duplicate it
+    direction: 'inbound'   // inbound | outbound
+    };
+    window.CALL = CALL; // exposed for debugging / future screens
+
+    const SAMPLE_CALLERS = [
+      { name: 'Jordan Blake', company: 'Meridian Capital Partners', number: '+1 (415) 555-0148', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE' },
+      { name: 'Priya Anand', company: 'Nova Fintech Group', number: '+1 (312) 555-0199', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCcIsQXOEfl9RPSSkYicZMQ5sZEXB_YEaWoTeRrnAo1-nAKuvFvlT46sDnAWOA7VkquKxtVzp5yjZv4DNj2NUZgU4etcHIroG96_E4yWdR_osy9rpoyTTuryFKuIyfkcTnf9FFhG2oA-M-U6JuX6WdWCZu-SM5MrrHJaNQJ4ZCYaNTHQs0TL6BH3YXV0DqvhDq1Vuw4n1-NjhNdDgGvmF4YaY0FVQlMxtXxQWjSXkpodrsqF8olnkV-WKEzTNiCPTtXW-yghBOX-jQ' },
+      { name: 'Marcus Feld', company: 'Ironclad Logistics', number: '+1 (206) 555-0121', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDxpGJ4Ipzimbxj3HtSBAli7TjUBzI2_5jjspz16beTbPyfWRo4lyp0H-rao99dlnU47rfKmrSl5Ypolg02PBuRqcpau7OiaZM_vaP30nvyBffUQ73WPhJ5rNNh743XfSRDHe9arWVzaIzIYC4iwT7FLP4rjkGJ5LeJjetwtF2qmuRIjoV9VT5p5Rjt9gmq3gPKohuev805CdvWmVD8dLVE2ZrGgqxkGjCXUgVqEBVoieyHd78ep4o2yrNlx8WjNlSrm-MMwDrKxRc' }
+    ];
+
+    // ---- Element references -------------------------------------------------
+    const overlay = document.getElementById('incomingCallOverlay');
+    const avatarEl = document.getElementById('incomingCallAvatar');
+    const nameEl = document.getElementById('incomingCallName');
+    const companyEl = document.getElementById('incomingCallCompany');
+    const numberEl = document.getElementById('incomingCallNumber');
+
+    const acceptBtn = document.getElementById('acceptCallBtn');
+    const declineBtn = document.getElementById('declineCallBtn');
+    const voicemailBtn = document.getElementById('voicemailCallBtn');
+    const testInboundBtn = document.getElementById('testInboundBtn');
+
+    const activeBar = document.getElementById('activeCallBar');
+    const activeName = document.getElementById('activeCallName');
+    const activeCompany = document.getElementById('activeCallCompany');
+    const activeStatusLabel = document.getElementById('activeCallStatusLabel');
+    const activeDuration = document.getElementById('activeCallDuration');
+    const holdBtn = document.getElementById('holdCallBtn');
+    const endBtn = document.getElementById('endCallBtn');
+
+    const timerDot = document.getElementById('callTimerDot');
+    const timerText = document.getElementById('callTimerText');
+    const historyBody = document.getElementById('recentActivityBody');
+        const newCallBtn = document.getElementById('newCallBtn');
+    const newCallModal = document.getElementById('newCallModal');
+    const cancelCallBtn = document.getElementById('cancelCallBtn');
+    const cancelCallSecondaryBtn = document.getElementById('cancelCallSecondaryBtn');
+    const startCallBtn = document.getElementById('startCallBtn');
+    const callContactSelect = document.getElementById('callContactSelect');
+    const callNumberInput = document.getElementById('callNumberInput');
+
+    // ---- Helpers --------------------------------------------------------
+    function formatTime(totalSeconds) {
+      const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+      const s = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function randomCaller() {
+      return SAMPLE_CALLERS[Math.floor(Math.random() * SAMPLE_CALLERS.length)];
+    }
+
+    // Renders CALL.elapsedSeconds + CALL.status into the header timer pill
+    // and (if visible) the active call bar. This is the ONLY place that
+    // touches those DOM nodes, so there is exactly one render path.
+    function renderTimer() {
+      timerText.textContent = formatTime(CALL.elapsedSeconds);
+      activeDuration.textContent = formatTime(CALL.elapsedSeconds);
+
+      timerDot.classList.remove('bg-white/20', 'bg-tertiary', 'active-orb', 'bg-fire-accent');
+      if (CALL.status === 'active') {
+        timerDot.classList.add('bg-tertiary', 'active-orb');
+      } else if (CALL.status === 'hold') {
+        timerDot.classList.add('bg-fire-accent');
+      } else {
+        timerDot.classList.add('bg-white/20');
+      }
+    }
+
+    // Single interval, guarded against duplicates. It only advances
+    // elapsedSeconds while status === 'active' — on hold it keeps running
+    // but simply skips incrementing, so resuming continues seamlessly.
+    function ensureTicking() {
+      if (CALL.tickHandle !== null) return; // already ticking, never duplicate
+      CALL.tickHandle = setInterval(() => {
+        if (CALL.status === 'active') {
+          CALL.elapsedSeconds += 1;
+        }
+        renderTimer();
+      }, 1000);
+    }
+
+    function stopTicking() {
+      if (CALL.tickHandle !== null) {
+        clearInterval(CALL.tickHandle);
+        CALL.tickHandle = null;
+      }
+    }
+
+    function populateCallContacts() {
+      if (!callContactSelect) return;
+      callContactSelect.innerHTML = '<option value="">Manual entry</option>';
+      SAMPLE_CALLERS.forEach((caller) => {
+        const option = document.createElement('option');
+        option.value = caller.number;
+        option.dataset.name = caller.name;
+        option.dataset.company = caller.company;
+        option.dataset.avatar = caller.avatar;
+        option.textContent = `${caller.name} • ${caller.company}`;
+        callContactSelect.appendChild(option);
+      });
+    }
+
+    function addHistoryRow({ type, icon, iconColor, name, company, status, statusClasses, duration, revenue, revenueClasses }) {
+      if (!historyBody) return;
+      const row = document.createElement('tr');
+      row.className = 'border-b border-white/5 hover:bg-white/5 transition-colors group';
+      row.innerHTML = `
+        <td class="py-5 px-2">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined ${iconColor}">${icon}</span>
+            <span class="text-white/80 font-medium">${type}</span>
+          </div>
+        </td>
+        <td class="py-5 px-2">
+          <div class="text-white font-bold">${company}</div>
+          <div class="text-[10px] text-on-surface-variant/60 font-bold">${name}</div>
+        </td>
+        <td class="py-5 px-2">
+          <span class="px-3 py-1 ${statusClasses} text-[10px] rounded-full font-extrabold">${status}</span>
+        </td>
+        <td class="py-5 px-2 font-mono-data text-on-surface-variant/80">${duration}</td>
+        <td class="py-5 px-2 text-right font-mono-data font-bold ${revenueClasses}">${revenue}</td>
+      `;
+      historyBody.insertBefore(row, historyBody.firstChild);
+    }
+
+    // ---- Incoming call widget --------------------------------------------
+    function showIncomingCall() {
+      const caller = randomCaller();
+      CALL.caller = caller;
+      CALL.status = 'ringing';
+
+      avatarEl.src = caller.avatar;
+      avatarEl.alt = caller.name;
+      nameEl.textContent = caller.name;
+      companyEl.textContent = caller.company;
+      numberEl.textContent = caller.number;
+
+      overlay.classList.remove('hidden');
+    }
+
+    function hideIncomingCall() {
+      overlay.classList.add('hidden');
+    }
+
+    function acceptCall() {
+      hideIncomingCall();
+      CALL.status = 'active';
+      CALL.direction = 'inbound';
+      CALL.elapsedSeconds = 0; // fresh timer for the new call
+
+      activeName.textContent = CALL.caller.name;
+      activeCompany.textContent = CALL.caller.company;
+      activeStatusLabel.textContent = 'Active Call';
+      holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">pause</span>Hold';
+      activeBar.classList.remove('hidden');
+
+      renderTimer();
+      ensureTicking(); // starts the live, once-only interval
+    }
+
+    function declineCall() {
+      hideIncomingCall();
+      CALL.status = 'idle';
+      CALL.caller = null;
+      // Decline simply dismisses the widget — no history entry, no timer.
+    }
+
+    function sendToVoicemail() {
+      const caller = CALL.caller;
+      hideIncomingCall();
+      CALL.status = 'idle';
+      CALL.caller = null;
+
+      addHistoryRow({
+        type: 'Inbound',
+        icon: 'voicemail',
+        iconColor: 'text-on-surface-variant/60',
+        name: caller.name,
+        company: caller.company,
+        status: 'VOICEMAIL',
+        statusClasses: 'bg-white/5 text-on-surface-variant/60 border border-white/10',
+        duration: '00:00',
+        revenue: '$0',
+        revenueClasses: 'text-on-surface-variant/40'
+      });
+    }
+
+    // ---- Active call controls ---------------------------------------------
+    function toggleHold() {
+      if (CALL.status === 'active') {
+        CALL.status = 'hold';
+        activeStatusLabel.textContent = 'On Hold';
+        holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">play_arrow</span>Resume';
+      } else if (CALL.status === 'hold') {
+        CALL.status = 'active';
+        activeStatusLabel.textContent = 'Active Call';
+        holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">pause</span>Hold';
+      }
+      renderTimer();
+    }
+
+    function endCall() {
+      if (CALL.status === 'idle' || CALL.status === 'ended') return;
+
+      const caller = CALL.caller;
+      const finalDuration = formatTime(CALL.elapsedSeconds);
+      const isOutbound = CALL.direction === 'outbound';
+
+      stopTicking();
+
+      if (caller) {
+        addHistoryRow({
+          type: isOutbound ? 'Outbound' : 'Inbound',
+          icon: isOutbound ? 'call_made' : 'call_received',
+          iconColor: isOutbound ? 'text-tertiary' : 'text-fire-accent',
+          name: caller.name,
+          company: caller.company,
+          status: 'COMPLETED',
+          statusClasses: 'bg-tertiary/10 text-tertiary border border-tertiary/20',
+          duration: finalDuration,
+          revenue: '$0',
+          revenueClasses: 'text-on-surface-variant/40'
+        });
+      }
+
+      // Reset CALL for the next call.
+      CALL.status = 'idle';
+      CALL.caller = null;
+      CALL.elapsedSeconds = 0;
+      CALL.direction = 'inbound';
+
+      activeBar.classList.add('hidden');
+      renderTimer();
+    }
+
+    function openNewCallModal() {
+      if (!newCallModal) return;
+      populateCallContacts();
+      callNumberInput.value = '';
+      callContactSelect.value = '';
+      newCallModal.classList.remove('hidden');
+      callNumberInput.focus();
+    }
+
+    function closeNewCallModal() {
+      if (!newCallModal) return;
+      newCallModal.classList.add('hidden');
+    }
+
+    function startOutboundCall() {
+      const selectedOption = callContactSelect.selectedOptions[0];
+      const manualNumber = callNumberInput.value.trim();
+      const hasSelection = Boolean(selectedOption && selectedOption.value);
+      const number = hasSelection ? selectedOption.value : manualNumber;
+
+      if (!number) return;
+
+      const caller = hasSelection
+        ? {
+            name: selectedOption.dataset.name || 'Contact',
+            company: selectedOption.dataset.company || 'Saved Contact',
+            number: selectedOption.value,
+            avatar: selectedOption.dataset.avatar || 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE'
+          }
+        : {
+            name: 'New Contact',
+            company: 'Manual Entry',
+            number,
+            avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE'
+          };
+
+      closeNewCallModal();
+
+      CALL.status = 'active';
+      CALL.direction = 'outbound';
+      CALL.elapsedSeconds = 0;
+      CALL.caller = caller;
+
+      activeName.textContent = caller.name;
+      activeCompany.textContent = caller.company;
+      activeStatusLabel.textContent = 'Active Call';
+      holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">pause</span>Hold';
+      activeBar.classList.remove('hidden');
+
+      renderTimer();
+      ensureTicking();
+    }
+    
+    function applyTheme(theme) {
+      if (!themeToggle || !themeIcon) return;
+      const nextTheme = theme || 'dark';
+      document.documentElement.setAttribute('data-theme', nextTheme);
+      document.documentElement.classList.toggle('dark', nextTheme === 'dark');
+      document.documentElement.classList.toggle('light', nextTheme === 'light');
+      localStorage.setItem('dialforge-theme', nextTheme);
+      themeIcon.textContent = nextTheme === 'light' ? 'dark_mode' : 'light_mode';
+    }
+
+    function setInitialTheme() {
+      const storedTheme = localStorage.getItem('dialforge-theme');
+      const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+      const theme = storedTheme || (prefersLight ? 'light' : 'dark');
+      applyTheme(theme);
+    }
+
+    // ---- Wire up events -----------------------------------------------
+    testInboundBtn.addEventListener('click', showIncomingCall);
+    acceptBtn.addEventListener('click', acceptCall);
+    declineBtn.addEventListener('click', declineCall);
+    voicemailBtn.addEventListener('click', sendToVoicemail);
+    holdBtn.addEventListener('click', toggleHold);
+    endBtn.addEventListener('click', endCall);
+    newCallBtn?.addEventListener('click', openNewCallModal);
+    cancelCallBtn?.addEventListener('click', closeNewCallModal);
+    cancelCallSecondaryBtn?.addEventListener('click', closeNewCallModal);
+    startCallBtn?.addEventListener('click', startOutboundCall);
+    callContactSelect?.addEventListener('change', () => {
+      const selected = callContactSelect.selectedOptions[0];
+      if (selected?.value) callNumberInput.value = selected.value;
+    });
+    themeToggle?.addEventListener('click', () => {
+      const nextTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      applyTheme(nextTheme);
+    });
+
+    setInitialTheme();
+
+    // Initial paint: idle timer at 00:00.
+    renderTimer();
+  })();
+</script>
+
+
+
+
+
+
+<script data-purpose="crm-panel">
+  (function () {
+    const panel = document.getElementById('crmPanel');
+    const toggleButtons = [document.getElementById('crmPanelToggle'), document.getElementById('crmPanelToggleRail')];
+    const panelIcon = document.getElementById('crmPanelToggleRailIcon');
+    const recentCallsList = document.getElementById('crmRecentCalls');
+    const topDealsList = document.getElementById('crmTopDeals');
+    const suggestionsList = document.getElementById('crmSuggestions');
+    const storageKey = 'dialforge-crm-panel-open';
+
+    const recentCalls = [
+      { name: 'Jordan Blake', time: '8m ago', outcome: 'Qualified' },
+      { name: 'Priya Anand', time: '24m ago', outcome: 'Follow-up' },
+      { name: 'Marcus Feld', time: '1h ago', outcome: 'Voicemail' },
+      { name: 'Alicia Gomez', time: '2h ago', outcome: 'Booked demo' },
+      { name: 'Noah Park', time: '3h ago', outcome: 'Closed' }
+    ];
+
+    const topDeals = [
+      { name: 'Northwind Labs', value: '$142k', stage: 'Negotiation' },
+      { name: 'BrightPath AI', value: '$96k', stage: 'Proposal' },
+      { name: 'Redline Ops', value: '$84k', stage: 'Discovery' }
+    ];
+
+    function getActiveScreenName() {
+      const label = document.querySelector('header [data-purpose="page-title"] h1')?.textContent?.trim();
+      if (label) return label;
+      const headerScreen = document.querySelector('header .text-sm.font-bold.text-white.whitespace-nowrap')?.textContent?.trim();
+      return headerScreen || 'Dashboard';
+    }
+
+    function getSuggestions(screenName) {
+      const suggestionsByScreen = {
+        Dashboard: [
+          'Prioritize high-intent leads from today\'s inbound queue.',
+          'Re-engage the largest open opportunities before noon.'
+        ],
+        'Active Call': [
+          'Capture the next-step commitment before ending the call.',
+          'Log a follow-up note while the context is still fresh.'
+        ],
+        Queue: [
+          'Rebalance call volume across the busiest reps.',
+          'Move stalled leads into a next-step follow-up.'
+        ],
+        Coaching: [
+          'Review the most recent talk track wins from this week.',
+          'Share a coaching note with the team before the next shift.'
+        ],
+        Dialer: [
+          'Focus on numbers that have not been attempted today.',
+          'Promote the best-fit contacts to the next call block.'
+        ],
+        Pipeline: [
+          'Prioritize deals approaching their decision date.',
+          'Surface stalled opportunities that need a re-engagement.'
+        ],
+        History: [
+          'Spot the call patterns behind your strongest conversions.',
+          'Flag repeat objections that need a tailored playbook.'
+        ],
+        Contacts: [
+          'Refresh contact notes for your top accounts.',
+          'Link new conversations to the right account owner.'
+        ]
+      };
+      return suggestionsByScreen[screenName] || suggestionsByScreen.Dashboard;
+    }
+
+    function renderPanel() {
+      if (!recentCallsList || !topDealsList || !suggestionsList) return;
+
+      recentCallsList.innerHTML = recentCalls.map((call) => `
+        <li class="rounded-xl border border-white/10 bg-surface-container-lowest/70 px-3 py-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-sm font-bold text-white">${call.name}</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">${call.time}</span>
+          </div>
+          <div class="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-tertiary">${call.outcome}</div>
+        </li>
+      `).join('');
+
+      topDealsList.innerHTML = topDeals.map((deal) => `
+        <li class="rounded-xl border border-white/10 bg-surface-container-lowest/70 px-3 py-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-sm font-bold text-white">${deal.name}</span>
+            <span class="text-[10px] font-bold text-fire-accent">${deal.value}</span>
+          </div>
+          <div class="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/60">${deal.stage}</div>
+        </li>
+      `).join('');
+
+      const suggestions = getSuggestions(getActiveScreenName());
+      suggestionsList.innerHTML = suggestions.map((suggestion) => `
+        <li class="rounded-xl border border-white/10 bg-surface-container-lowest/70 px-3 py-2 text-sm text-on-surface-variant">
+          ${suggestion}
+        </li>
+      `).join('');
+    }
+
+    function setPanelState(isOpen) {
+      if (!panel) return;
+      panel.classList.toggle('is-collapsed', !isOpen);
+      toggleButtons.forEach((button) => {
+        if (button) button.setAttribute('aria-expanded', String(isOpen));
+      });
+      if (panelIcon) {
+        panelIcon.textContent = isOpen ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left';
+      }
+      localStorage.setItem(storageKey, String(isOpen));
+    }
+
+    function syncPanelVisibility() {
+      if (!panel) return;
+      if (window.innerWidth < 900) {
+        panel.classList.add('hidden');
+        return;
+      }
+
+      panel.classList.remove('hidden');
+      const stored = localStorage.getItem(storageKey);
+      const shouldOpen = stored === null ? true : stored === 'true';
+      setPanelState(shouldOpen);
+    }
+
+    toggleButtons.forEach((button) => {
+      button?.addEventListener('click', () => {
+        if (!panel) return;
+        const isOpen = !panel.classList.contains('is-collapsed');
+        setPanelState(!isOpen);
+      });
+    });
+
+    window.addEventListener('resize', syncPanelVisibility);
+
+    renderPanel();
+    syncPanelVisibility();
+  })();
+</script>
+
+
+
+
+
+
+
+
+
+<script data-purpose="coaching-app">
+document.addEventListener('DOMContentLoaded', () => {
+
+  /* ---------- Data ---------- */
+  const CALLS = [
+    {
+      id: 'alex-rivera',
+      name: 'Alex Rivera',
+      status: 'In Review',
+      date: 'Oct 24, 2023',
+      durationSec: 862, // 14:22
+      deal: 'Enterprise SaaS Package',
+      score: 88,
+      breakdown: { talkRatio: 92, patience: 75, objections: 80, close: 98 },
+      mood: { icon: 'sentiment_very_satisfied', text: 'Positive', color: 'text-teal-support' },
+      talkListen: { you: 65, them: 35 },
+      confidence: 94,
+      seed: 12,
+      moments: [
+        { time: '02:14', type: 'Discovery', color: 'teal-support', label: 'Customer pain points identified', quote: '"We\'ve been struggling with lead attribution for over six months now..."' },
+        { time: '07:45', type: 'Objection', color: 'ember-alert', label: 'Pricing structure resistance', quote: '"The annual commitment seems quite high given our current budget cycles..."' },
+        { time: '12:30', type: 'Close', color: 'fire-accent', label: 'Agreement on next steps', quote: '"That sounds reasonable. Let\'s schedule the pilot kickoff for next Tuesday."' }
+      ],
+      notes: [
+        { kind: 'strength', title: 'Strength: Empathy Mapping', text: 'Excellent response to the budget objection at 07:45. You validated their concern before pivoting to ROI metrics.' },
+        { kind: 'growth', title: 'Growth: Speaking Ratio', text: 'You spoke for 65% of the discovery phase. Try to ask more open-ended questions to let the prospect lead.' },
+        { kind: 'ai', title: 'AI Suggestion', text: 'Next time, mention the "Flex-Term" billing option immediately after they bring up budget cycles to lower friction.' }
+      ],
+      transcript: [
+        { time: '00:04', speaker: 'You', text: 'Hey Alex, thanks for making time today — how has the lead volume been on your end this quarter?' },
+        { time: '00:22', speaker: 'Alex', text: 'Honestly, volume is fine, it\'s attribution that\'s killing us. We can\'t tell which channel actually closes deals.' },
+        { time: '02:14', speaker: 'Alex', text: 'We\'ve been struggling with lead attribution for over six months now, and it\'s starting to affect budget planning.' },
+        { time: '03:40', speaker: 'You', text: 'That makes total sense. Most teams we work with hit that wall around the same size. Can I show you how attribution rolls up on our side?' },
+        { time: '07:45', speaker: 'Alex', text: 'The annual commitment seems quite high given our current budget cycles, we usually plan quarter to quarter.' },
+        { time: '08:10', speaker: 'You', text: 'Totally fair — a lot of teams start there. Once we map the ROI against your current spend, the annual plan usually pays for itself by month four.' },
+        { time: '12:30', speaker: 'Alex', text: 'That sounds reasonable. Let\'s schedule the pilot kickoff for next Tuesday.' },
+        { time: '13:05', speaker: 'You', text: 'Perfect, I\'ll send an invite and loop in your ops lead so we can get access set up before then.' }
+      ]
+    },
+    {
+      id: 'priya-nair',
+      name: 'Priya Nair',
+      status: 'Reviewed',
+      date: 'Oct 21, 2023',
+      durationSec: 611, // 10:11
+      deal: 'Marketing Suite Renewal',
+      score: 72,
+      breakdown: { talkRatio: 58, patience: 64, objections: 55, close: 70 },
+      mood: { icon: 'sentiment_neutral', text: 'Neutral', color: 'text-fire-accent' },
+      talkListen: { you: 71, them: 29 },
+      confidence: 68,
+      seed: 47,
+      moments: [
+        { time: '01:05', type: 'Discovery', color: 'teal-support', label: 'Renewal timeline confirmed', quote: '"Our contract is up at the end of next month, so timing works."' },
+        { time: '05:20', type: 'Objection', color: 'ember-alert', label: 'Feature gap concern', quote: '"We still don\'t have the reporting dashboard you promised last renewal."' },
+        { time: '09:02', type: 'Close', color: 'fire-accent', label: 'Deferred decision', quote: '"I need to check with my director before signing anything."' }
+      ],
+      notes: [
+        { kind: 'growth', title: 'Growth: Unresolved Objection', text: 'The reporting dashboard gap from 05:20 was never fully addressed — follow up with a written commitment before the next call.' },
+        { kind: 'growth', title: 'Growth: Talk Ratio', text: 'You spoke for 71% of this call. Priya only got short windows to respond — leave more space after objections.' },
+        { kind: 'ai', title: 'AI Suggestion', text: 'Send the dashboard roadmap doc within 24 hours to keep momentum before the internal director conversation.' }
+      ],
+      transcript: [
+        { time: '00:08', speaker: 'You', text: 'Priya, good to catch up — I know renewal is coming up, wanted to check in before the deadline.' },
+        { time: '01:05', speaker: 'Priya', text: 'Our contract is up at the end of next month, so timing works, but I do have some concerns.' },
+        { time: '05:20', speaker: 'Priya', text: 'We still don\'t have the reporting dashboard you promised last renewal. That\'s a real problem for us.' },
+        { time: '05:55', speaker: 'You', text: 'I hear you, that\'s on us. Let me pull up where that stands on the roadmap right now.' },
+        { time: '09:02', speaker: 'Priya', text: 'I need to check with my director before signing anything given that history.' },
+        { time: '09:40', speaker: 'You', text: 'Understood. I\'ll send over the roadmap doc today so you both have something concrete to review.' }
+      ]
+    },
+    {
+      id: 'marcus-chen',
+      name: 'Marcus Chen',
+      status: 'Reviewed',
+      date: 'Oct 18, 2023',
+      durationSec: 452, // 7:32
+      deal: 'SMB Starter Plan',
+      score: 95,
+      breakdown: { talkRatio: 88, patience: 91, objections: 93, close: 99 },
+      mood: { icon: 'sentiment_very_satisfied', text: 'Very Positive', color: 'text-teal-support' },
+      talkListen: { you: 48, them: 52 },
+      confidence: 97,
+      seed: 88,
+      moments: [
+        { time: '00:50', type: 'Discovery', color: 'teal-support', label: 'Immediate need surfaced', quote: '"We need something live before our launch next week."' },
+        { time: '03:12', type: 'Objection', color: 'ember-alert', label: 'Setup time concern', quote: '"How long does onboarding usually take for a small team like ours?"' },
+        { time: '06:40', type: 'Close', color: 'fire-accent', label: 'Verbal commitment', quote: '"Let\'s do it — send the contract over today."' }
+      ],
+      notes: [
+        { kind: 'strength', title: 'Strength: Urgency Matching', text: 'You matched Marcus\'s launch timeline immediately and offered same-week onboarding — this removed the biggest blocker fast.' },
+        { kind: 'strength', title: 'Strength: Balanced Talk Ratio', text: 'A near-even 48/52 split let Marcus fully explain his use case before you pitched, which built trust quickly.' },
+        { kind: 'ai', title: 'AI Suggestion', text: 'This is a strong reference call — consider asking Marcus for a testimonial once the plan is live.' }
+      ],
+      transcript: [
+        { time: '00:12', speaker: 'You', text: 'Marcus, thanks for jumping on — what\'s driving the timeline on your end?' },
+        { time: '00:50', speaker: 'Marcus', text: 'We need something live before our launch next week, so speed really matters here.' },
+        { time: '01:30', speaker: 'You', text: 'Got it. We can get your workspace provisioned same day — let\'s talk through what onboarding looks like.' },
+        { time: '03:12', speaker: 'Marcus', text: 'How long does onboarding usually take for a small team like ours?' },
+        { time: '03:35', speaker: 'You', text: 'For a team your size, typically under 48 hours end to end, including data import.' },
+        { time: '06:40', speaker: 'Marcus', text: 'Let\'s do it — send the contract over today.' }
+      ]
+    },
+    {
+      id: 'jordan-lee',
+      name: 'Jordan Lee',
+      status: 'Flagged',
+      date: 'Oct 15, 2023',
+      durationSec: 734, // 12:14
+      deal: 'Healthcare Vertical Package',
+      score: 64,
+      breakdown: { talkRatio: 45, patience: 40, objections: 38, close: 52 },
+      mood: { icon: 'sentiment_dissatisfied', text: 'Frustrated', color: 'text-ember-alert' },
+      talkListen: { you: 78, them: 22 },
+      confidence: 51,
+      seed: 203,
+      moments: [
+        { time: '01:40', type: 'Discovery', color: 'teal-support', label: 'Compliance requirement raised', quote: '"Everything has to be HIPAA compliant or this is a non-starter."' },
+        { time: '04:55', type: 'Objection', color: 'ember-alert', label: 'Trust concern', quote: '"Your last rep told us something different about data storage."' },
+        { time: '11:20', type: 'Close', color: 'fire-accent', label: 'No decision reached', quote: '"I\'m going to need to loop in legal before we go further."' }
+      ],
+      notes: [
+        { kind: 'growth', title: 'Growth: Interrupting', text: 'You cut in on Jordan three times during the compliance discussion around 04:55 — let objections land fully before responding.' },
+        { kind: 'growth', title: 'Growth: Talk Ratio', text: 'A 78% talk ratio is high for a trust-repair call. Jordan needed more room to voice frustration before hearing solutions.' },
+        { kind: 'ai', title: 'AI Suggestion', text: 'Loop in a solutions engineer for the HIPAA compliance detail next time — specificity will rebuild trust faster than reassurance alone.' }
+      ],
+      transcript: [
+        { time: '00:15', speaker: 'You', text: 'Jordan, thanks for staying on the line — I know last call left some questions open.' },
+        { time: '01:40', speaker: 'Jordan', text: 'Everything has to be HIPAA compliant or this is a non-starter, full stop.' },
+        { time: '02:05', speaker: 'You', text: 'Completely understood, we are compliant across the board and I can walk you through—' },
+        { time: '04:55', speaker: 'Jordan', text: 'Your last rep told us something different about data storage, so forgive me for being skeptical.' },
+        { time: '05:20', speaker: 'You', text: 'That\'s fair, let me get you something in writing from our compliance team directly.' },
+        { time: '11:20', speaker: 'Jordan', text: 'I\'m going to need to loop in legal before we go further.' }
+      ]
+    }
+  ];
+
+  let currentCallIndex = 0;
+  let currentTime = 0;
+  let isPlaying = false;
+  let speed = 1;
+  let playTimer = null;
+  const BAR_COUNT = 100;
+
+  const el = (id) => document.getElementById(id);
+
+  /* ---------- Utilities ---------- */
+  function formatTime(sec) {
+    sec = Math.max(0, Math.floor(sec));
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+
+  function parseTime(str) {
+    const [m, s] = str.split(':').map(Number);
+    return m * 60 + s;
+  }
+
+  function seededRandom(seed) {
+    let s = seed;
+    return function () {
+      s = (s * 9301 + 49297) % 233280;
+      return s / 233280;
+    };
+  }
+
+  function showToast(message, icon) {
+    const stack = el('toast-stack');
+    const toast = document.createElement('div');
+    toast.className = 'pointer-events-auto glass-card rounded-xl px-4 py-3 flex items-center gap-3 text-sm text-white shadow-xl border border-white/10 opacity-0 translate-y-2 transition-all duration-300';
+    toast.innerHTML = `<span class="material-symbols-outlined text-fire-accent text-lg">${icon || 'check_circle'}</span><span>${message}</span>`;
+    stack.appendChild(toast);
+    requestAnimationFrame(() => {
+      toast.classList.remove('opacity-0', 'translate-y-2');
+    });
+    setTimeout(() => {
+      toast.classList.add('opacity-0', 'translate-y-2');
+      setTimeout(() => toast.remove(), 300);
+    }, 3200);
+  }
+
+  /* ---------- Waveform ---------- */
+  function renderWaveform(call) {
+    const container = el('waveform');
+    container.innerHTML = '';
+    const rand = seededRandom(call.seed);
+    for (let i = 0; i < BAR_COUNT; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'waveform-bar flex-1 rounded-full';
+      const height = rand() * 80 + 10;
+      bar.style.height = `${height}%`;
+      bar.dataset.index = i;
+      container.appendChild(bar);
+    }
+    updateWaveformProgress(call);
+  }
+
+  function updateWaveformProgress(call) {
+    const container = el('waveform');
+    const pct = currentTime / call.durationSec;
+    const activeIndex = Math.floor(pct * BAR_COUNT);
+    Array.from(container.children).forEach((bar, i) => {
+      bar.classList.remove('bg-fire-gradient', 'bg-white/20');
+      bar.classList.add(i < activeIndex ? 'bg-fire-gradient' : 'bg-white/20');
+    });
+  }
+
+  el('waveform').addEventListener('mousemove', (e) => {
+    const container = el('waveform');
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const index = Math.floor((x / rect.width) * BAR_COUNT);
+    const bars = container.children;
+    if (bars[index]) {
+      bars[index].style.transform = 'scaleY(1.4)';
+      setTimeout(() => { bars[index].style.transform = ''; }, 400);
+    }
+  });
+
+  el('waveform').addEventListener('click', (e) => {
+    const call = CALLS[currentCallIndex];
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const pct = Math.min(Math.max(x / rect.width, 0), 1);
+    setCurrentTime(pct * call.durationSec);
+  });
+
+  /* ---------- Progress bar ---------- */
+  el('progress-bar').addEventListener('click', (e) => {
+    const call = CALLS[currentCallIndex];
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const pct = Math.min(Math.max(x / rect.width, 0), 1);
+    setCurrentTime(pct * call.durationSec);
+  });
+
+  function setCurrentTime(sec) {
+    const call = CALLS[currentCallIndex];
+    currentTime = Math.min(Math.max(sec, 0), call.durationSec);
+    el('time-current').textContent = formatTime(currentTime);
+    const pct = (currentTime / call.durationSec) * 100;
+    el('progress-fill').style.width = `${pct}%`;
+    updateWaveformProgress(call);
+    highlightActiveEntries();
+  }
+
+  /* ---------- Play / Pause ---------- */
+  function togglePlay() {
+    isPlaying = !isPlaying;
+    el('play-icon').textContent = isPlaying ? 'pause' : 'play_arrow';
+    if (isPlaying) {
+      const call = CALLS[currentCallIndex];
+      playTimer = setInterval(() => {
+        setCurrentTime(currentTime + 0.25 * speed);
+        if (currentTime >= call.durationSec) {
+          isPlaying = false;
+          el('play-icon').textContent = 'play_arrow';
+          clearInterval(playTimer);
+        }
+      }, 250);
+    } else {
+      clearInterval(playTimer);
+    }
+  }
+
+  el('play-btn').addEventListener('click', togglePlay);
+
+  /* ---------- Speed control ---------- */
+  el('speed-controls').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-speed]');
+    if (!btn) return;
+    speed = parseFloat(btn.dataset.speed);
+    Array.from(el('speed-controls').children).forEach((b) => {
+      b.classList.remove('bg-white/10', 'text-white', 'shadow-sm');
+      b.classList.add('text-on-surface-variant');
+    });
+    btn.classList.add('bg-white/10', 'text-white', 'shadow-sm');
+    btn.classList.remove('text-on-surface-variant');
+    showToast(`Playback speed set to ${speed}x`, 'speed');
+  });
+
+  /* ---------- Key Moments ---------- */
+  function renderMoments(call) {
+    const container = el('moments-container');
+    container.innerHTML = '';
+    call.moments.forEach((m) => {
+      const row = document.createElement('div');
+      row.className = 'group flex items-center gap-5 p-4 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 transition-colors cursor-pointer';
+      row.dataset.time = m.time;
+      row.innerHTML = `
+        <div class="w-12 h-12 rounded-lg bg-${m.color}/10 text-${m.color} font-mono text-xs flex items-center justify-center shrink-0">${m.time}</div>
+        <div class="flex-grow">
+          <div class="flex items-center gap-3 mb-1">
+            <span class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 bg-${m.color}/20 text-${m.color} rounded border border-${m.color}/20">${m.type}</span>
+            <span class="text-xs text-on-surface-variant">${m.label}</span>
+          </div>
+          <p class="text-sm text-on-surface font-medium italic">${m.quote}</p>
+        </div>
+        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-white">play_circle</span>
+      `;
+      row.addEventListener('click', () => {
+        setCurrentTime(parseTime(m.time));
+        if (!isPlaying) togglePlay();
+        showToast(`Jumped to ${m.type} moment at ${m.time}`, 'graphic_eq');
+      });
+      container.appendChild(row);
+    });
+  }
+
+  /* ---------- Full Transcript ---------- */
+  function renderTranscript(call) {
+    const container = el('transcript-container');
+    container.innerHTML = '';
+    call.transcript.forEach((line) => {
+      const row = document.createElement('div');
+      row.className = 'flex gap-4 p-3 rounded-lg hover:bg-white/5 transition-colors cursor-pointer';
+      row.dataset.time = line.time;
+      const speakerColor = line.speaker === 'You' ? 'text-fire-accent' : 'text-teal-support';
+      row.innerHTML = `
+        <div class="w-14 shrink-0 text-[11px] font-mono text-on-surface-variant pt-0.5">${line.time}</div>
+        <div class="flex-grow">
+          <span class="text-xs font-bold ${speakerColor}">${line.speaker}</span>
+          <p class="text-sm text-on-surface leading-relaxed">${line.text}</p>
+        </div>
+      `;
+      row.addEventListener('click', () => {
+        setCurrentTime(parseTime(line.time));
+        if (!isPlaying) togglePlay();
+      });
+      container.appendChild(row);
+    });
+  }
+
+  function highlightActiveEntries() {
+    const call = CALLS[currentCallIndex];
+    [el('moments-container'), el('transcript-container')].forEach((container) => {
+      Array.from(container.children).forEach((row) => {
+        const t = parseTime(row.dataset.time);
+        const isActive = Math.abs(t - currentTime) < 3;
+        row.classList.toggle('ring-1', isActive);
+        row.classList.toggle('ring-fire-accent/40', isActive);
+      });
+    });
+  }
+
+  el('toggle-transcript-btn').addEventListener('click', () => {
+    const card = el('full-transcript-card');
+    const icon = el('toggle-transcript-icon');
+    const hidden = card.classList.toggle('hidden');
+    icon.textContent = hidden ? 'arrow_forward' : 'expand_less';
+    if (!hidden) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+
+  /* ---------- AI Score ---------- */
+  function renderScore(call) {
+    el('ai-score-total').textContent = call.score;
+    el('score-talkratio-value').textContent = `${call.breakdown.talkRatio}%`;
+    el('score-talkratio-bar').style.width = `${call.breakdown.talkRatio}%`;
+    el('score-patience-value').textContent = `${call.breakdown.patience}%`;
+    el('score-patience-bar').style.width = `${call.breakdown.patience}%`;
+    el('score-objections-value').textContent = `${call.breakdown.objections}%`;
+    el('score-objections-bar').style.width = `${call.breakdown.objections}%`;
+    el('score-close-value').textContent = `${call.breakdown.close}%`;
+    el('score-close-bar').style.width = `${call.breakdown.close}%`;
+  }
+
+  /* ---------- Coaching Notes ---------- */
+  const NOTE_STYLES = {
+    strength: { icon: 'check_circle', color: 'text-teal-support', box: 'bg-white/5 border border-white/5' },
+    growth: { icon: 'trending_up', color: 'text-fire-accent', box: 'bg-white/5 border border-white/5' },
+    ai: { icon: 'lightbulb', color: 'text-ai-purple', box: 'bg-ai-purple/10 border border-ai-purple/20' },
+    manual: { icon: 'edit_note', color: 'text-white', box: 'bg-white/5 border border-white/5' }
+  };
+
+  function renderNotes(call) {
+    const container = el('notes-container');
+    container.innerHTML = '';
+    call.notes.forEach((n) => {
+      const style = NOTE_STYLES[n.kind] || NOTE_STYLES.manual;
+      const box = document.createElement('div');
+      box.className = `p-4 rounded-xl ${style.box} space-y-2`;
+      box.innerHTML = `
+        <div class="flex items-center gap-2 ${style.color} font-bold text-xs">
+          <span class="material-symbols-outlined text-sm">${style.icon}</span> ${n.title}
+        </div>
+        <p class="text-xs text-on-surface-variant leading-relaxed">${n.text}</p>
+      `;
+      container.appendChild(box);
+    });
+  }
+
+  el('add-note-btn').addEventListener('click', () => {
+    const text = prompt('Add a manual coaching note:');
+    if (!text) return;
+    CALLS[currentCallIndex].notes.push({ kind: 'manual', title: 'Manual Note', text });
+    renderNotes(CALLS[currentCallIndex]);
+    showToast('Manual note added', 'edit_note');
+  });
+
+  /* ---------- Footer Bento ---------- */
+  function renderFooterMetrics(call) {
+    el('mood-icon').textContent = call.mood.icon;
+    el('mood-icon').className = `material-symbols-outlined text-4xl ${call.mood.color}`;
+    el('mood-icon').setAttribute('style', 'font-variation-settings: "FILL" 1;');
+    el('mood-text').textContent = call.mood.text;
+
+    el('talk-you-pct').textContent = `${call.talkListen.you}%`;
+    el('talk-them-pct').textContent = `${call.talkListen.them}%`;
+    el('talk-listen-circle').setAttribute('stroke-dasharray', `${call.talkListen.you}, 100`);
+
+    el('confidence-value').textContent = `${call.confidence}%`;
+  }
+
+  /* ---------- Call chips ---------- */
+  function renderCallChips() {
+    const container = el('call-chip-list');
+    container.innerHTML = '';
+    CALLS.forEach((call, i) => {
+      const chip = document.createElement('button');
+      const active = i === currentCallIndex;
+      chip.className = `shrink-0 flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all text-left ${
+        active
+          ? 'bg-fire-accent/10 border-fire-accent/40 shadow-[0_0_16px_rgba(255,122,28,0.15)]'
+          : 'bg-white/5 border-white/5 hover:bg-white/10'
+      }`;
+      chip.innerHTML = `
+        <div class="w-9 h-9 rounded-full bg-surface-variant/60 flex items-center justify-center text-xs font-bold text-white shrink-0">${call.name.split(' ').map(p => p[0]).join('')}</div>
+        <div class="min-w-[120px]">
+          <div class="text-xs font-bold text-white leading-tight">${call.name}</div>
+          <div class="text-[10px] text-on-surface-variant leading-tight">${call.date} • Score ${call.score}</div>
+        </div>
+      `;
+      chip.addEventListener('click', () => loadCall(i));
+      container.appendChild(chip);
+    });
+  }
+
+  /* ---------- Load call ---------- */
+  function loadCall(index) {
+    currentCallIndex = index;
+    const call = CALLS[index];
+    isPlaying = false;
+    clearInterval(playTimer);
+    el('play-icon').textContent = 'play_arrow';
+    currentTime = 0;
+
+    el('call-title').textContent = `Call with ${call.name}`;
+    el('call-status-text').textContent = call.status;
+    el('call-date').textContent = call.date;
+    el('call-duration-label').textContent = `${formatTime(call.durationSec)} mins`;
+    el('call-deal').textContent = call.deal;
+    el('time-total').textContent = formatTime(call.durationSec);
+    el('time-current').textContent = '00:00';
+    el('progress-fill').style.width = '0%';
+
+    renderWaveform(call);
+    renderMoments(call);
+    renderTranscript(call);
+    renderScore(call);
+    renderNotes(call);
+    renderFooterMetrics(call);
+    renderCallChips();
+  }
+
+  /* ---------- Share / Export ---------- */
+  el('share-btn').addEventListener('click', () => {
+    showToast('Report link copied to clipboard', 'link');
+  });
+  el('export-btn').addEventListener('click', () => {
+    showToast('Preparing insights export…', 'download');
+  });
+
+  /* ---------- Init ---------- */
+  loadCall(0);
+});
+</script>
+
+
+
+
+
+
+</body></html>

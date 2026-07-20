@@ -1,0 +1,591 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DialForge | Claim Your Digital Pulse</title>
+<!-- BEGIN: External Resources -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&amp;family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- END: External Resources -->
+<!-- BEGIN: Tailwind Configuration -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary-fixed": "#ffdbd2",
+            "surface-variant": "#33343d",
+            "surface-container-low": "#1a1b23",
+            "surface-container": "#1e1f27",
+            "surface-dim": "#12131a",
+            "background": "#12131a",
+            "on-surface": "#e3e1ec",
+            "on-surface-variant": "#e5beb4",
+            "fire-accent": "#FFAD1C",
+            "fire-gradient": "#FF7A1C",
+            "ai-purple": "#9B6DFF",
+            "success-green": "#00e478"
+          },
+          fontFamily: {
+            "syne": ["Syne", "sans-serif"],
+            "dm-sans": ["DM Sans", "sans-serif"],
+            "mono-data": ["JetBrains Mono", "monospace"],
+            "hero-h1": ["Syne"],
+            "body-base": ["DM Sans"],
+            "small-label": ["DM Sans"],
+            "button-text": ["DM Sans"],
+            "section-header": ["Syne"],
+          },
+          spacing: {
+            "gap-20": "20px",
+            "gap-16": "16px",
+            "gap-12": "12px",
+            "gap-8": "8px",
+            "margin-standard": "16px",
+          }
+        }
+      }
+    }
+  </script>
+<!-- END: Tailwind Configuration -->
+<!-- BEGIN: Custom Styles -->
+<style data-purpose="layout-effects">
+    :root {
+      --fire-gradient: linear-gradient(135deg, #FF7A1C 0%, #FFAD1C 100%);
+    }
+    body {
+      background-color: #12131a;
+      color: #e3e1ec;
+      overflow-x: hidden;
+    }
+    .glass-card {
+      background: rgba(26, 27, 35, 0.78);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .liquid-button {
+      background: var(--fire-gradient);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 25px -5px rgba(255, 122, 28, 0.4);
+    }
+    .liquid-button::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+      transform: rotate(30deg) translateX(-100%);
+      transition: 0.6s;
+    }
+    .liquid-button:hover::after {
+      transform: rotate(30deg) translateX(100%);
+    }
+    .fire-glow-text {
+      text-shadow: 0 0 20px rgba(255, 122, 28, 0.5);
+    }
+    .noise-overlay {
+      position: fixed;
+      inset: 0;
+      background-image: url("https://www.transparenttextures.com/patterns/carbon-fibre.png");
+      opacity: 0.03;
+      pointer-events: none;
+      z-index: 100;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 122, 28, 0.2);
+      border-radius: 10px;
+    }
+  </style>
+<!-- END: Custom Styles -->
+</head>
+<body class="min-h-screen flex flex-col font-dm-sans bg-background selection:bg-fire-accent selection:text-black">
+<div class="noise-overlay"></div>
+<!-- Atmospheric Background Glows -->
+<div class="fixed top-[-10%] left-[-5%] w-[50%] h-[50%] bg-fire-accent/5 blur-[120px] rounded-full pointer-events-none"></div>
+<div class="fixed bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-primary-container/10 blur-[150px] rounded-full pointer-events-none"></div>
+<!-- BEGIN: Header -->
+<header class="fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-xl border-b border-white/10 px-margin-standard h-16 flex items-center justify-between" data-purpose="main-navigation">
+<div class="flex items-center gap-gap-12">
+<span class="font-hero-h1-mobile text-2xl font-extrabold text-fire-gradient bg-clip-text text-transparent">DialForge</span>
+<span class="hidden md:block h-4 w-[1px] bg-white/20"></span>
+<span class="font-hero-h1 text-2xl font-extrabold text-white">Dial<span class="text-fire-gradient">Forge</span></span>
+</div>
+<div class="flex items-center gap-gap-16">
+<span class="text-on-surface-variant/60 font-button-text text-sm text-button-text tracking-wider font-bold uppercase">Step 4 of 6</span>
+<div class="w-24 h-1.5 bg-white/10 rounded-full overflow-hidden">
+<div class="w-2/3 h-full bg-fire-gradient rounded-full shadow-[0_0_10px_#FF7A1C]"></div>
+</div>
+</div>
+</header>
+<main class="relative z-10 flex-1 flex flex-col items-center justify-center p-6 md:p-12 max-w-7xl mx-auto w-full">
+
+<!-- BEGIN: Main Selection Interface -->
+<section class="glass-card w-full rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row min-h-[650px]" data-purpose="onboarding-container">
+<!-- BEGIN: Sidebar Contextual Info -->
+<aside class="w-full md:w-[35%] p-10 bg-surface-container-low/40 flex flex-col border-b md:border-b-0 md:border-r border-white/5">
+<h1 class="font-syne text-5xl md:text-6xl font-extrabold mb-6 leading-[1.1] tracking-tight">
+          Claim <br>your <br><span class="text-fire-accent">digital</span> <br>pulse.
+        </h1>
+<p class="text-on-surface-variant text-sm mb-12 leading-relaxed max-w-xs">
+          Choose a primary number that resonates with your brand. This will be your main outbound identity and the hub for high-velocity communications.
+        </p>
+<!-- Feature Points -->
+<div class="space-y-8 flex-1">
+<div class="flex items-start gap-4">
+<div class="p-2 rounded-lg bg-fire-accent/10 text-fire-accent">
+<span class="material-symbols-outlined text-2xl">verified_user</span>
+</div>
+<div>
+<h3 class="font-bold text-sm">Verified Presence</h3>
+<p class="text-xs text-on-surface-variant/60">Carrier-grade numbers with built-in SHAKEN/STIR trust.</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="p-2 rounded-lg bg-ai-purple/10 text-ai-purple">
+<span class="material-symbols-outlined text-2xl">auto_awesome</span>
+</div>
+<div>
+<h3 class="font-bold text-sm">AI Porting</h3>
+<p class="text-xs text-on-surface-variant/60">Already have a number? We'll migrate it in minutes later.</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="p-2 rounded-lg bg-success-green/10 text-success-green">
+<span class="material-symbols-outlined text-2xl">check_circle</span>
+</div>
+<div>
+<h3 class="font-bold text-sm">Instant Activation</h3>
+<p class="text-xs text-on-surface-variant/60">Numbers activate in seconds, not days. No hidden fees.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Pricing Note Box -->
+<div class="mt-12 p-5 rounded-2xl bg-fire-accent/5 border border-fire-accent/10">
+<div class="flex items-center gap-2 text-fire-accent mb-2">
+<span class="material-symbols-outlined text-lg">info</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Pricing Note</span>
+</div>
+<p class="text-[11px] leading-relaxed text-on-surface-variant/80">
+            Prices shown are per month and include global inbound routing optimizations. Professional setup fee is waived today.
+          </p>
+</div>
+</aside>
+<!-- END: Sidebar Contextual Info -->
+<!-- BEGIN: Number Selection Panel -->
+<div class="flex-1 flex flex-col p-10 bg-surface-container-lowest/20" data-purpose="selector-panel">
+<!-- Filter Controls -->
+<div class="flex flex-col lg:flex-row gap-4 mb-8">
+<div class="flex-1 relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant/40">search</span>
+<input class="w-full bg-surface-container-low border border-white/5 rounded-2xl pl-12 pr-4 h-14 text-sm focus:ring-fire-accent focus:border-fire-accent transition-all placeholder:text-on-surface-variant/30" id="search-input" placeholder="Search area codes or countries..." type="text">
+</div>
+<div class="flex bg-surface-container-low rounded-2xl p-1.5 border border-white/5">
+<button class="filter-btn px-6 h-11 rounded-xl font-bold text-xs transition-all" data-type="local" aria-pressed="true">Local</button>
+<button class="filter-btn px-6 h-11 rounded-xl font-bold text-xs transition-all" data-type="tollfree" aria-pressed="false">Toll-Free</button>
+<button class="filter-btn px-6 h-11 rounded-xl font-bold text-xs transition-all" data-type="intl" aria-pressed="false">Intl.</button>
+</div>
+</div>
+<!-- Scrollable Grid -->
+<div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 overflow-y-auto max-h-[480px] pr-2 custom-scrollbar" id="numbers-grid">
+<!-- Number Card 1 (Active) -->
+<label class="relative cursor-pointer group number-card" data-type="local" data-country="United States" data-country-code="+1" data-area-code="212" data-phone="+1 (212) 555-0198">
+<input checked="" class="peer hidden" name="number_select" type="radio">
+<div class="h-full p-6 rounded-2xl border-l-4 border-l-fire-accent glass-card border border-white/5 peer-checked:bg-fire-accent/5 peer-checked:border-fire-accent/40 transition-all hover:bg-white/5">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-2">
+<img alt="USA" class="w-6 h-4 object-cover rounded-sm shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoM2tWOHxl4FVzCZE6VWSXw_hmwEBj0GKe4PcGOcCFBYHYxI4VT6baC4WKnM6CjVAsDOWKbys79vGl_u1xmbrPZ2jKtn1YCg_OsnzJ5NRobfHg9r0hJ6u9RcVOThhXnYvk-apeEK_RwI76nzjs3LbcdKiMqD4rNebNTDuImThoQlxrcRNfnMO7Z9iAed8bY5xOjsth1tdnGWJzEy8e-P5F9WaQSHoB6qvOCil3xptK2a_-ssJFNdvUVK6W23Z_Dmh9pHPDVIbSKlY">
+<span class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest">USA • NEW YORK</span>
+</div>
+<div class="text-right">
+<span class="font-mono-data text-fire-accent text-base">$1.50</span>
+<span class="block text-[9px] text-on-surface-variant/40">/MO</span>
+</div>
+</div>
+<div class="font-syne text-2xl font-bold tracking-tight text-on-surface">+1 (212) 555-0198</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-success-green animate-pulse"></span>
+<span class="text-[10px] text-on-surface-variant/70">Ready for instant activation</span>
+</div>
+</div>
+</label>
+<!-- Number Card 2 -->
+<label class="relative cursor-pointer group number-card" data-type="local" data-country="United States" data-country-code="+1" data-area-code="310" data-phone="+1 (310) 902-1142">
+<input class="peer hidden" name="number_select" type="radio">
+<div class="h-full p-6 rounded-2xl border-l-4 border-l-fire-accent glass-card border border-white/5 peer-checked:bg-fire-accent/5 peer-checked:border-fire-accent/40 transition-all hover:bg-white/5">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-2">
+<img alt="USA" class="w-6 h-4 object-cover rounded-sm shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDa-lAgqkJ7fHOsjygXB9YywfRIAJgVv_zQlJii9B8JSfJIrSjYaNmiY4i85YsPcYNNGCAU-F90ggfIR6u6GOGIDVsykVAuCMzn-eJalTh9znTY99MpQmM7YTyivbg9M72B-nOErjhybYErBp5oGrQqM7TAySWcjmzblfsFFf_iNFePpE71PDbTpdOkC9cwcHvF2xqPBARwHyWUlkZCyT-AgCdDAifsh7inXJpeIP16PXrlIBn2zWUMwsSJjTxlTBdisqRqLCYU1js">
+<span class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest">USA • LOS ANGELES</span>
+</div>
+<div class="text-right">
+<span class="font-mono-data text-fire-accent text-base">$2.00</span>
+<span class="block text-[9px] text-on-surface-variant/40">/MO</span>
+</div>
+</div>
+<div class="font-syne text-2xl font-bold tracking-tight text-on-surface">+1 (310) 902-1142</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-success-green animate-pulse"></span>
+<span class="text-[10px] text-on-surface-variant/70">Includes vanity prefix</span>
+</div>
+</div>
+</label>
+<!-- Number Card 3 -->
+<label class="relative cursor-pointer group number-card" data-type="local" data-country="United States" data-country-code="+1" data-area-code="773" data-phone="+1 (773) 482-9901">
+<input class="peer hidden" name="number_select" type="radio">
+<div class="h-full p-6 rounded-2xl border-l-4 border-l-fire-accent glass-card border border-white/5 peer-checked:bg-fire-accent/5 peer-checked:border-fire-accent/40 transition-all hover:bg-white/5">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-2">
+<img alt="USA" class="w-6 h-4 object-cover rounded-sm shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbrBDRl51yXzImjOEQE7hKb8kxCwrMTLVluHAfQUbEyKjJFUa2rfd2LmuF9d7gcymdB91bsh0FRNtg0PNvdKhezt-YyAh93IyJ7r_qSJ1PusQtSzScYF9Cp5nQiA_tLadJXgzZpcAvGfVc08htKjxkWwJ0bQGDCRzHmlOs4iNgQsOXa09S_8ygUpHwbFyi8wCvKEy9FpD8BMiQ_wVvDoNTFqIRNsaN4s7sFKgv6ox_TjfTZJbt-vHN_PxnH35tvYK5d2cngaBoCwk">
+<span class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest">USA • CHICAGO</span>
+</div>
+<div class="text-right">
+<span class="font-mono-data text-fire-accent text-base">$1.50</span>
+<span class="block text-[9px] text-on-surface-variant/40">/MO</span>
+</div>
+</div>
+<div class="font-syne text-2xl font-bold tracking-tight text-on-surface">+1 (773) 482-9901</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-success-green animate-pulse"></span>
+<span class="text-[10px] text-on-surface-variant/70">High availability zone</span>
+</div>
+</div>
+</label>
+<!-- Number Card 4 -->
+<label class="relative cursor-pointer group number-card" data-type="local" data-country="United States" data-country-code="+1" data-area-code="512" data-phone="+1 (512) 660-8273">
+<input class="peer hidden" name="number_select" type="radio">
+<div class="h-full p-6 rounded-2xl border-l-4 border-l-fire-accent glass-card border border-white/5 peer-checked:bg-fire-accent/5 peer-checked:border-fire-accent/40 transition-all hover:bg-white/5">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-2">
+<img alt="USA" class="w-6 h-4 object-cover rounded-sm shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHqrXZd2OuUBM1e5qX9vNXAX1qX6Cw8NriTHIBWUoQbsMqq1ziWUzVwlE8Ty4p7xn9pt5MgyxgGTTjB9zqVcyVJvgOoHVcBE1zRCelV7A9TdRDi3FEOhuSgCLRWHDTc8onevRiScaqrexx026iXu2FCsjpj1b6WfSXHCY6RNCl-R-OA5zdWXedZqhGg-TPyGaEtBkBUILn3qkhz9rPrnYFvzfn4335aHM0N1928XXrK92g-luBXlpC1HlTw5jnpz1X9FcXNU52zg4">
+<span class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest">USA • AUSTIN</span>
+</div>
+<div class="text-right">
+<span class="font-mono-data text-fire-accent text-base">$2.50</span>
+<span class="block text-[9px] text-on-surface-variant/40">/MO</span>
+</div>
+</div>
+<div class="font-syne text-2xl font-bold tracking-tight text-on-surface">+1 (512) 660-8273</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-success-green animate-pulse"></span>
+<span class="text-[10px] text-on-surface-variant/70">Premium Silicon Hills ID</span>
+</div>
+</div>
+</label>
+<!-- Number Card 5 -->
+<label class="relative cursor-pointer group number-card" data-type="local" data-country="United States" data-country-code="+1" data-area-code="786" data-phone="+1 (786) 332-1544">
+<input class="peer hidden" name="number_select" type="radio">
+<div class="h-full p-6 rounded-2xl border-l-4 border-l-fire-accent glass-card border border-white/5 peer-checked:bg-fire-accent/5 peer-checked:border-fire-accent/40 transition-all hover:bg-white/5">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-2">
+<img alt="USA" class="w-6 h-4 object-cover rounded-sm shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSINQ-G_BwedeymJRbqIg1iLmph8jzjRguOuwamZZKFJg1lqiHmcnaFga1APrrRpvHdog_zT7AwiJ7ZUj8XLkZOZ9weh-jslMqiAqug6uAo2b4dAYD_J4ssNGNNBWprqTRQB-ixrQ9CeDEqk9p-3jIQD-6-0plq3QfteLRVaiAX6VYs5-_B3fe-nk2QCyWjU4yVgiYL1Sno1cnFv-7q7bloL08HYa6gqw1t-GVoci-v9cx-B5_nJxZol-9rFfPZec21Ka3WLKLNpM">
+<span class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest">USA • MIAMI</span>
+</div>
+<div class="text-right">
+<span class="font-mono-data text-fire-accent text-base">$1.75</span>
+<span class="block text-[9px] text-on-surface-variant/40">/MO</span>
+</div>
+</div>
+<div class="font-syne text-2xl font-bold tracking-tight text-on-surface">+1 (786) 332-1544</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-success-green animate-pulse"></span>
+<span class="text-[10px] text-on-surface-variant/70">Dynamic routing active</span>
+</div>
+</div>
+</label>
+<!-- Number Card 6 -->
+<label class="relative cursor-pointer group number-card" data-type="local" data-country="United States" data-country-code="+1" data-area-code="206" data-phone="+1 (206) 745-0219">
+<input class="peer hidden" name="number_select" type="radio">
+<div class="h-full p-6 rounded-2xl border-l-4 border-l-fire-accent glass-card border border-white/5 peer-checked:bg-fire-accent/5 peer-checked:border-fire-accent/40 transition-all hover:bg-white/5">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-2">
+<img alt="USA" class="w-6 h-4 object-cover rounded-sm shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBd1DsfQdG6zrg62xjh9wpBzJJji4Mhgb1OHnOroEC1DmP9s9J0xwYVmDTNLYYJBHC7K9Gvc3HWA0GI26Y_2-37J5AdIXvBuCJPEIg0SB9PVSxGIUhoEKLydDfuWhTjRri5cOpzrLRAdP3PgEtu0qgjwNsF87LpMIPkVk3bzvnZngT4kIU6Zxm-SviR0klMkexr9EnsGGFTcd0PgqUDVS2ny52TD0OpAxlcWLxSZZy5kocv0ydi-uKKVtZVyhm8SUDe4YED9FQoTdM">
+<span class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest">USA • SEATTLE</span>
+</div>
+<div class="text-right">
+<span class="font-mono-data text-fire-accent text-base">$1.50</span>
+<span class="block text-[9px] text-on-surface-variant/40">/MO</span>
+</div>
+</div>
+<div class="font-syne text-2xl font-bold tracking-tight text-on-surface">+1 (206) 745-0219</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-success-green animate-pulse"></span>
+<span class="text-[10px] text-on-surface-variant/70">Ready for instant activation</span>
+</div>
+</div>
+</label>
+<!-- Number Card 7 (Toll-Free - 800) -->
+<label class="relative cursor-pointer group number-card" data-type="tollfree" data-country="United States" data-country-code="+1" data-area-code="800" data-phone="1 (800) 555-0147">
+<input class="peer hidden" name="number_select" type="radio">
+<div class="h-full p-6 rounded-2xl border-l-4 border-l-fire-accent glass-card border border-white/5 peer-checked:bg-fire-accent/5 peer-checked:border-fire-accent/40 transition-all hover:bg-white/5">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-2">
+<img alt="USA" class="w-6 h-4 object-cover rounded-sm shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoM2tWOHxl4FVzCZE6VWSXw_hmwEBj0GKe4PcGOcCFBYHYxI4VT6baC4WKnM6CjVAsDOWKbys79vGl_u1xmbrPZ2jKtn1YCg_OsnzJ5NRobfHg9r0hJ6u9RcVOThhXnYvk-apeEK_RwI76nzjs3LbcdKiMqD4rNebNTDuImThoQlxrcRNfnMO7Z9iAed8bY5xOjsth1tdnGWJzEy8e-P5F9WaQSHoB6qvOCil3xptK2a_-ssJFNdvUVK6W23Z_Dmh9pHPDVIbSKlY">
+<span class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest">USA • TOLL-FREE</span>
+</div>
+<div class="text-right">
+<span class="font-mono-data text-fire-accent text-base">$2.00</span>
+<span class="block text-[9px] text-on-surface-variant/40">/MO</span>
+</div>
+</div>
+<div class="font-syne text-2xl font-bold tracking-tight text-on-surface">1 (800) 555-0147</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-success-green animate-pulse"></span>
+<span class="text-[10px] text-on-surface-variant/70">Premium toll-free availability</span>
+</div>
+</div>
+</label>
+<!-- Number Card 8 (Toll-Free - 833) -->
+<label class="relative cursor-pointer group number-card" data-type="tollfree" data-country="United States" data-country-code="+1" data-area-code="833" data-phone="1 (833) 555-0165">
+<input class="peer hidden" name="number_select" type="radio">
+<div class="h-full p-6 rounded-2xl border-l-4 border-l-fire-accent glass-card border border-white/5 peer-checked:bg-fire-accent/5 peer-checked:border-fire-accent/40 transition-all hover:bg-white/5">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-2">
+<img alt="USA" class="w-6 h-4 object-cover rounded-sm shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDa-lAgqkJ7fHOsjygXB9YywfRIAJgVv_zQlJii9B8JSfJIrSjYaNmiY4i85YsPcYNNGCAU-F90ggfIR6u6GOGIDVsykVAuCMzn-eJalTh9znTY99MpQmM7YTyivbg9M72B-nOErjhybYErBp5oGrQqM7TAySWcjmzblfsFFf_iNFePpE71PDbTpdOkC9cwcHvF2xqPBARwHyWUlkZCyT-AgCdDAifsh7inXJpeIP16PXrlIBn2zWUMwsSJjTxlTBdisqRqLCYU1js">
+<span class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest">USA • TOLL-FREE</span>
+</div>
+<div class="text-right">
+<span class="font-mono-data text-fire-accent text-base">$1.99</span>
+<span class="block text-[9px] text-on-surface-variant/40">/MO</span>
+</div>
+</div>
+<div class="font-syne text-2xl font-bold tracking-tight text-on-surface">1 (833) 555-0165</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-success-green animate-pulse"></span>
+<span class="text-[10px] text-on-surface-variant/70">New number line available</span>
+</div>
+</div>
+</label>
+<!-- Number Card 9 (International - UK) -->
+<label class="relative cursor-pointer group number-card" data-type="intl" data-country="United Kingdom" data-country-code="+44" data-area-code="20" data-phone="+44 (20) 7946-0958">
+<input class="peer hidden" name="number_select" type="radio">
+<div class="h-full p-6 rounded-2xl border-l-4 border-l-fire-accent glass-card border border-white/5 peer-checked:bg-fire-accent/5 peer-checked:border-fire-accent/40 transition-all hover:bg-white/5">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-2">
+<img alt="UK" class="w-6 h-4 object-cover rounded-sm shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmUbfDYwhf5JuLq924dMId_n6cNbsWCOWWNinRVxmUJxtoBDU6-gjHKB56skIGn9VpzcN9KBjR1bNv_o4KMHs9YgE-DxsRgqzpSzOTXglTps9xLmE911oKC2nh07Uc1WEQr_kZC-UQtCt6D7VsmgsMghko1NwIvneiFTrPGuTK2hOUzGnIVymwBmIWdNIqo643LdCr4FbeBJ8kSLBnZIX-XNbM_6i2kUzeNhhft9c8x9jcFsvDgm7W9GCrfJTmMatYodkNnqiH_dM"/>
+<span class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest">UK • LONDON</span>
+</div>
+<div class="text-right">
+<span class="font-mono-data text-fire-accent text-base">$2.50</span>
+<span class="block text-[9px] text-on-surface-variant/40">/MO</span>
+</div>
+</div>
+<div class="font-syne text-2xl font-bold tracking-tight text-on-surface">+44 (20) 7946-0958</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-success-green animate-pulse"></span>
+<span class="text-[10px] text-on-surface-variant/70">UK inbound excellence</span>
+</div>
+</div>
+</label>
+<!-- Number Card 10 (International - Australia) -->
+<label class="relative cursor-pointer group number-card" data-type="intl" data-country="Australia" data-country-code="+61" data-area-code="2" data-phone="+61 (2) 9360-0900">
+<input class="peer hidden" name="number_select" type="radio">
+<div class="h-full p-6 rounded-2xl border-l-4 border-l-fire-accent glass-card border border-white/5 peer-checked:bg-fire-accent/5 peer-checked:border-fire-accent/40 transition-all hover:bg-white/5">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-2">
+<img alt="AU" class="w-6 h-4 object-cover rounded-sm shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpz08Ke6mb8naCCkZEaBJeOEm9-2QxarjzbastHnvSzw1-GKbOjM0WxChkf4zqZ15p02UzEhUhm1Uwp7gwugN8LdAbRhJQmDw65YaZ_2-Pwu5dgJZxr_hVck4PQcG_5nhyH6S_2icLCJBMfbHR2-_Zpr3RoEhztAu4ydsWXYZLEzYDaRLSOlkL95lbKx8TlEGvzD0eL-oQxQjglc3FGCALmeCIpmPxq3KTPUxgiw-e7PTALTCdHX9gg2eIREJexGACTdleuk8Ogf8"/>
+<span class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest">AUSTRALIA • SYDNEY</span>
+</div>
+<div class="text-right">
+<span class="font-mono-data text-fire-accent text-base">$2.75</span>
+<span class="block text-[9px] text-on-surface-variant/40">/MO</span>
+</div>
+</div>
+<div class="font-syne text-2xl font-bold tracking-tight text-on-surface">+61 (2) 9360-0900</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-success-green animate-pulse"></span>
+<span class="text-[10px] text-on-surface-variant/70">Asia-Pacific gateway</span>
+</div>
+</div>
+</label>
+<!-- Number Card 11 (International - Germany) -->
+<label class="relative cursor-pointer group number-card" data-type="intl" data-country="Germany" data-country-code="+49" data-area-code="30" data-phone="+49 (30) 2091-2048">
+<input class="peer hidden" name="number_select" type="radio">
+<div class="h-full p-6 rounded-2xl border-l-4 border-l-fire-accent glass-card border border-white/5 peer-checked:bg-fire-accent/5 peer-checked:border-fire-accent/40 transition-all hover:bg-white/5">
+<div class="flex justify-between items-start mb-6">
+<div class="flex items-center gap-2">
+<img alt="Germany" class="w-6 rounded-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuANeoMdaiLV6I0Yk748dk2XaG7w56sOdCAFw4aNps6nVbUNzV2HC41hb_el9qLG8qfZ13LwzEKDo78YOsAtDziWk-XW0rOp2dR24TJRQZF-JItRNQtgEKAPJvwSQS0qXt7jOEG3UdM6FIRYKOaOP-Eln6FgPtykziSPJi1l6t_MsFQ_57Vi1F9XoBmFGf59_TSM_DjEyfBDdbliKOzYmI-rjgUEzRFkgVQyjsXR1S9rOqJppH-wIJzQf-fZoRd5NJ7QXj3ZVUxXfOY"/>
+<span class="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest">GERMANY • BERLIN</span>
+</div>
+<div class="text-right">
+<span class="font-mono-data text-fire-accent text-base">$2.50</span>
+<span class="block text-[9px] text-on-surface-variant/40">/MO</span>
+</div>
+</div>
+<div class="font-syne text-2xl font-bold tracking-tight text-on-surface">+49 (30) 2091-2048</div>
+<div class="mt-3 flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-success-green animate-pulse"></span>
+<span class="text-[10px] text-on-surface-variant/70">EU market coverage</span>
+</div>
+</div>
+</label>
+</div>
+<!-- Empty State Message -->
+<div id="empty-state" class="hidden flex-1 flex items-center justify-center">
+<div class="text-center">
+<span class="material-symbols-outlined text-6xl text-fire-accent/30 block mb-4">phone_disabled</span>
+<p class="text-on-surface-variant text-base font-medium">No phone numbers match your search.</p>
+<p class="text-on-surface-variant/60 text-sm mt-2">Try adjusting your filters or search terms.</p>
+</div>
+</div>
+<!-- Panel Actions -->
+<div class="mt-auto pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
+<button class="text-xs font-bold text-on-surface-variant hover:text-on-surface transition-colors tracking-widest uppercase" onclick="window.location.href='onboardingStep5.html'">
+            Skip for now
+          </button>
+<button class="liquid-button h-16 px-12 rounded-2xl flex items-center justify-center gap-3 text-black font-bold text-sm group w-full md:w-auto" onclick="window.location.href='onboardingStep5.html'">
+            Continue to Integrations
+            <span class="material-symbols-outlined transition-transform group-hover:translate-x-1">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- END: Number Selection Panel -->
+</section>
+<!-- END: Main Selection Interface -->
+<!-- BEGIN: Trust Badges -->
+<footer class="mt-12 flex items-center gap-8 opacity-40 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-700" data-purpose="footer-badges">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-xl">security</span>
+<span class="text-[9px] font-bold uppercase tracking-[0.2em]">AES-256 Encrypted</span>
+</div>
+<div class="w-px h-3 bg-white/20"></div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-xl">public</span>
+<span class="text-[9px] font-bold uppercase tracking-[0.2em]">PCI Compliant</span>
+</div>
+</footer>
+<!-- END: Trust Badges -->
+</main>
+<!-- BEGIN: Interactive Behavior Scripts -->
+<script data-purpose="comprehensive-filtering">
+  /**
+   * DialForge Phone Number Filtering System
+   * Handles combined filtering by type + real-time search
+   * Performance: Minimal DOM reflows, efficient filtering logic
+   */
+  
+  // Cache DOM elements
+  const searchInput = document.getElementById('search-input');
+  const filterButtons = document.querySelectorAll('.filter-btn');
+  const numberCards = document.querySelectorAll('.number-card');
+  const numbersGrid = document.getElementById('numbers-grid');
+  const emptyState = document.getElementById('empty-state');
+  
+  // State
+  let activeFilter = 'local';
+  let searchTerm = '';
+  
+  /**
+   * Determine if a phone number matches the search query
+   * Supports: country name, country code, area code, phone number (partial)
+   */
+  function matchesSearch(card, term) {
+    if (!term) return true;
+    
+    const country = card.getAttribute('data-country').toLowerCase();
+    const countryCode = card.getAttribute('data-country-code').toLowerCase();
+    const areaCode = card.getAttribute('data-area-code').toLowerCase();
+    const phone = card.getAttribute('data-phone').toLowerCase();
+    
+    return (
+      country.includes(term) ||
+      countryCode.includes(term) ||
+      areaCode.includes(term) ||
+      phone.includes(term)
+    );
+  }
+  
+  /**
+   * Apply combined filters (type + search) and update UI
+   * Only reflows once at the end
+   */
+  function applyFilters() {
+    let visibleCount = 0;
+    
+    numberCards.forEach(card => {
+      const cardType = card.getAttribute('data-type');
+      const typeMatches = cardType === activeFilter;
+      const searchMatches = matchesSearch(card, searchTerm.toLowerCase());
+      const shouldShow = typeMatches && searchMatches;
+      
+      card.style.display = shouldShow ? '' : 'none';
+      if (shouldShow) visibleCount++;
+    });
+    
+    // Show/hide empty state
+    const hasResults = visibleCount > 0;
+    emptyState.classList.toggle('hidden', hasResults);
+  }
+  
+  /**
+   * Update filter button visual states (tab-like behavior)
+   * Only one button active at a time
+   */
+  function updateFilterButtons() {
+    filterButtons.forEach(btn => {
+      const isActive = btn.getAttribute('data-type') === activeFilter;
+      btn.setAttribute('aria-pressed', isActive.toString());
+      
+      if (isActive) {
+        btn.classList.add('bg-fire-accent', 'text-black', 'shadow-lg', 'shadow-fire-accent/20');
+        btn.classList.remove('text-on-surface-variant', 'hover:text-on-surface');
+      } else {
+        btn.classList.remove('bg-fire-accent', 'text-black', 'shadow-lg', 'shadow-fire-accent/20');
+        btn.classList.add('text-on-surface-variant', 'hover:text-on-surface');
+      }
+    });
+  }
+  
+  /**
+   * Handle filter button clicks
+   */
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeFilter = btn.getAttribute('data-type');
+      updateFilterButtons();
+      applyFilters();
+    });
+  });
+  
+  /**
+   * Handle search input (real-time, debounce-free for instant results)
+   */
+  searchInput.addEventListener('input', (e) => {
+    searchTerm = e.target.value.trim();
+    applyFilters();
+  });
+  
+  /**
+   * Initialize: set active filter visual state
+   */
+  updateFilterButtons();
+  
+  /**
+   * Preserve selection feedback on number card selection
+   */
+  const radios = document.querySelectorAll('input[name="number_select"]');
+  const reserveBtn = document.querySelector('.liquid-button');
+  
+  radios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      // Visual pop animation for the button when a new selection is made
+      reserveBtn.classList.add('scale-105');
+      setTimeout(() => reserveBtn.classList.remove('scale-105'), 150);
+    });
+  });
+</script>
+<!-- END: Interactive Behavior Scripts -->
+
+</body></html>

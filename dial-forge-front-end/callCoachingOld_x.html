@@ -1,0 +1,471 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DialForge | Call Coaching</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Typography -->
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&amp;family=DM+Sans:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#ffb4a2",
+            "fire-gradient": "#FF7A1C",
+            "fire-accent": "#FFAD1C",
+            "surface": "#12131a",
+            "surface-container": "#1e1f27",
+            "surface-variant": "#33343d",
+            "on-surface": "#e3e1ec",
+            "on-surface-variant": "#e5beb4",
+            "teal-support": "#00D4C8",
+            "ember-alert": "#FF2200",
+            "ai-purple": "#9B6DFF"
+          },
+          fontFamily: {
+            "syne": ["Syne", "sans-serif"],
+            "dm-sans": ["DM Sans", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-effects">
+
+.active-glow {
+    filter: drop-shadow(0 0 8px #FF7A1C)
+    }
+    .glass-card {
+    background: rgba(30, 31, 39, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1)
+    }
+.fire-glow {
+    box-shadow: 0 0 50px rgba(255, 122, 28, 0.15)
+    }
+.noise-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.02;
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuAjBgxhjjpbQ1X6hvaeggcEsORm0cusjq8KmhkMIem9paSnZ7_7H4035tguD8hQF_wyJfO0-xi5zinWRn5KCM4dsf9akf-ZEUIsx8r2p38OT_3LwtrA_hw0Bqp7LEHGHhjXR6QSfhiz5U0QWGx-RgUC23zQ_gXBKToAxBg8Gydr2pnyjVJzW_LFuaMzmeu54c7PrLK77yNnBemFzvrQWsOo-ahwjnkRQn0xqS8r25dnS6iz5_tsV9azzSv_REk-2thWjE9T9bosd9s)
+    }
+::-webkit-scrollbar {
+    width: 4px
+    }
+::-webkit-scrollbar-track {
+    background: transparent
+    }
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px
+    }
+
+
+    body {
+      background-color: #12131a;
+      color: #e3e1ec;
+      background-image: radial-gradient(circle at 50% 50%, rgba(255, 122, 28, 0.03) 0%, transparent 100%);
+    }
+    .glass-card {
+      background: rgba(30, 31, 39, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .waveform-bar {
+      transition: height 0.3s ease, background-color 0.3s ease;
+    }
+    .fire-glow {
+      box-shadow: 0 0 30px rgba(255, 122, 28, 0.1);
+    }
+    .pulse-dot {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.2); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="font-dm-sans overflow-x-hidden selection:bg-fire-accent/30">
+<!-- BEGIN: TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-white/10 h-16 flex items-center justify-between px-6">
+<div class="flex items-center gap-8">
+<div class="text-2xl font-extrabold font-syne bg-gradient-to-r from-fire-gradient to-fire-accent bg-clip-text text-transparent">DialForge</div>
+<nav class="hidden md:flex gap-6 text-sm font-medium">
+<a class="text-on-surface-variant hover:text-white transition-colors" href="#">Analytics</a>
+<a class="text-primary border-b-2 border-primary pb-1" href="#">Coaching</a>
+<a class="text-on-surface-variant hover:text-white transition-colors" href="#">Team</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+<input class="bg-surface-variant/40 border border-white/5 rounded-full pl-10 pr-4 py-1.5 text-xs w-48 focus:ring-1 focus:ring-fire-accent focus:outline-none transition-all" placeholder="Search calls..." type="text">
+</div>
+<div class="flex items-center gap-2">
+<a href="notifications.html" class="block"><button class="p-2 hover:bg-white/5 rounded-xl transition-colors"><span class="material-symbols-outlined text-gray-400">notifications</span></button></a>
+<a href="settingsGeneral.html" class="block"><button class="p-2 hover:bg-white/5 rounded-xl transition-colors"><span class="material-symbols-outlined text-gray-400">settings</span></button></a>
+
+<div class="w-8 h-8 rounded-full overflow-hidden border border-white/20 ml-2">
+<div class="h-10 w-10 rounded-full overflow-hidden border-2 border-white/10">
+<a href="profile.html" class="block w-full h-full cursor-pointer"><img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs"></a>
+</div>
+</div>
+</div>
+</header>
+<!-- END: TopAppBar -->
+
+
+
+
+<!-- BEGIN: LeftSidebar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex flex-col bg-surface-container-low/78 backdrop-blur-xl border-r border-white/5 items-center py-6 gap-8 z-40">
+<div class="flex flex-col items-center gap-4 w-full overflow-y-auto flex-1">
+  <a href="Dashboard.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">dashboard</span>
+    <span class="text-[8px] uppercase font-bold">Dashboard</span>
+  
+  <a href="activeCall.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">call</span>
+    <span class="text-[8px] uppercase font-bold">Call</span>
+  </a>
+  <a href="supportQueue.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">queue</span>
+    <span class="text-[8px] uppercase font-bold">Queue</span>
+  </a>
+ <a href="callCoaching.html" class="block w-full">
+    <button class="group relative flex flex-col items-center gap-1 w-full py-3 bg-primary-container/20 text-fire-accent border-l-4 border-fire-accent shadow-[0_0_20px_rgba(255,122,28,0.2)]" >
+      <span class="material-symbols-outlined">graphic_eq</span>
+      <span class="text-[8px] uppercase font-bold">Coaching</span>
+    </button>
+  </a>
+  <a href="powerDialer.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">dialer_sip</span>
+    <span class="text-[8px] uppercase font-bold">Dialer</span>
+  </a>
+  <a href="salesPipeline.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">view_kanban</span>
+    <span class="text-[8px] uppercase font-bold">Pipeline</span>
+  </a>
+  <a href="callHistory.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">history</span>
+      <span class="text-[8px] uppercase font-bold">History</span>
+    </button>
+  </a>
+  <a href="contacts.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">group</span>
+    <span class="text-[8px] uppercase font-bold">Contacts</span>
+  </a>
+  <a href="integrationsHub.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">apps</span>
+    <span class="text-[8px] uppercase font-bold">Integrations</span>
+  </a>
+  <a href="numbers.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">123</span>
+    <span class="text-[8px] uppercase font-bold">Numbers</span>
+  </a>
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <a href="billingSubscription.html" class="flex flex-col items-center gap-1 w-full h-full text-inherit no-underline">
+      <span class="material-symbols-outlined">payments</span>
+      <span class="text-[8px] uppercase font-bold">Billing</span>
+    </a>
+  </button>
+  <a href="teamGovernance.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">groups</span>
+      <span class="text-[8px] uppercase font-bold">Team</span>
+    </button>
+  </a>
+</div>
+<div class="flex flex-col items-center gap-4 w-full pb-4">
+  <button class="material-symbols-outlined text-on-surface-variant/60 hover:text-white">help_center</button>
+</div>
+</aside>
+<!-- END: LeftSidebar -->
+      
+  <main class="pl-[240px] pt-16 min-h-screen">
+<div class="max-w-[1440px] mx-auto p-8 space-y-8">
+<!-- BEGIN: Header Section -->
+<section class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4" data-purpose="call-header">
+<div>
+<div class="flex items-center gap-3 mb-2">
+<h1 class="text-3xl font-syne font-extrabold text-white">Call with Alex Rivera</h1>
+<span class="flex items-center gap-1.5 px-3 py-1 bg-fire-accent/10 border border-fire-accent/20 rounded-full text-[10px] font-bold text-fire-accent uppercase tracking-wider">
+<span class="w-2 h-2 rounded-full bg-fire-accent pulse-dot"></span> In Review
+          </span>
+</div>
+<p class="text-on-surface-variant text-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-base">calendar_today</span> Oct 24, 2023 
+          <span class="text-white/20">•</span> 14:22 mins 
+          <span class="text-white/20">•</span> Enterprise SaaS Package
+        </p>
+</div>
+<div class="flex gap-3">
+<button class="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm font-semibold text-white flex items-center gap-2 hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-lg">share</span> Share Call
+        </button>
+<button class="px-6 py-2 bg-gradient-to-r from-fire-gradient to-fire-accent rounded-lg text-sm font-bold text-surface shadow-lg hover:brightness-110 active:scale-95 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">download</span> Export Insights
+        </button>
+</div>
+</section>
+<!-- END: Header Section -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- BEGIN: Player Column -->
+<div class="lg:col-span-8 space-y-8">
+<!-- BEGIN: Call Replay Area -->
+<div class="glass-card rounded-2xl p-8 fire-glow relative" data-purpose="player-container">
+<div class="flex items-center justify-between mb-10">
+<div class="flex items-center gap-4">
+<button class="w-14 h-14 rounded-full bg-fire-gradient flex items-center justify-center text-white shadow-xl hover:scale-105 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-3xl">play_arrow</span>
+</button>
+<div>
+<div class="text-lg font-mono tracking-tight">
+<span class="text-white">04:12</span> <span class="text-white/30">/ 14:22</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="bg-surface-variant/30 p-1 rounded-lg flex text-[10px] font-bold">
+<button class="px-3 py-1.5 bg-white/10 rounded text-white shadow-sm">1x</button>
+<button class="px-3 py-1.5 text-on-surface-variant hover:text-white">1.5x</button>
+<button class="px-3 py-1.5 text-on-surface-variant hover:text-white">2x</button>
+</div>
+<button class="text-on-surface-variant hover:text-white"><span class="material-symbols-outlined">volume_up</span></button>
+</div>
+</div>
+<!-- Waveform Simulation -->
+<div class="h-32 flex items-end justify-between gap-[2px] mb-6" id="waveform">
+<!-- Populated via script for fidelity -->
+<div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 21.6223%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 83.6458%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 32.5192%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 87.7886%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 37.0916%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 65.9981%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 64.8574%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 55.814%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 45.4392%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 36.9785%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 68.565%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 11.6087%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 16.4382%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 46.5405%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 79.7434%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 27.353%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 22.7291%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 44.8452%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 71.9307%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 59.7757%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 61.8307%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 25.4019%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 64.0631%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 64.9474%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 24.9619%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 30.0635%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 57.9804%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 56.3595%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 81.6711%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 15.0785%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 52.5629%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 77.5505%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 47.9615%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 33.0835%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 55.7578%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 10.8253%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 88.9138%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 84.2851%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 72.7003%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 57.2867%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 47.2796%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 42.1377%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 74.8673%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 36.2722%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 39.4212%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 10.127%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 41.0105%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 75.6863%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 73.9639%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 38.3144%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 65.3279%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 71.2384%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 80.1324%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 16.1032%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 20.2048%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 78.6571%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 38.8466%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 74.2491%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 43.8491%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 10.5859%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 34.8618%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 64.2302%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 40.1508%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 86.072%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 64.4469%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 74.9822%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 68.1593%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 12.3478%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 76.1566%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 12.1072%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 35.5884%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 75.7298%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 47.2659%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 82.3136%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 54.2759%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 54.3813%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 51.9817%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 43.0157%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 61.3754%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 27.7243%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 14.7066%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 80.237%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 18.9369%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 73.3167%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 29.8043%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 14.4658%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 81.1195%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 35.8802%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 19.7594%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 53.9462%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 84.2935%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 27.4379%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 72.3663%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 60.0907%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 53.5549%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 66.7513%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 49.7461%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 62.4166%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 82.0802%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 38.7778%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 37.619%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 61.0006%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 51.0827%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 25.2976%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 27.3343%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 33.5409%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 40.4771%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 72.4081%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 84.8717%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 84.2276%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 88.9587%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 20.1981%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 38.2712%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 80.9973%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 39.1694%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 59.8091%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 47.2162%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 14.5124%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 69.5381%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 32.6864%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 35.4079%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 14.1874%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 66.1592%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 38.7142%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 17.2353%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 71.6194%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 80.205%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 73.5455%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 22.8811%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 63.7814%;"></div><div class="waveform-bar flex-1 rounded-full bg-fire-gradient" style="height: 72.6384%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 69.6572%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 77.292%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 37.5691%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 42.1145%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 85.3411%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 63.4173%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 29.1783%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 46.7056%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 10.555%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 10.7555%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 52.9701%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 66.9071%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 86.9052%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 32.5746%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 30.413%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 10.4753%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 45.8621%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 55.5194%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 40.4325%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 23.2437%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 49.9128%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 10.5382%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 17.7374%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 26.6402%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 77.5493%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 56.9424%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 45.2371%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 57.9642%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 16.529%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 71.6042%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 60.8827%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 14.8505%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 65.1761%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 65.6199%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 69.1527%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 16.8003%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 82.7824%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 23.4158%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 67.6205%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 87.9143%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 49.2567%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 43.2673%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 41.6645%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 86.0286%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 17.9441%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 13.739%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 28.6882%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 83.8235%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 11.8815%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 74.1711%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 21.2623%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 66.4529%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 79.1876%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 85.3754%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 13.6692%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 89.1782%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 77.7104%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 47.4468%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 69.3039%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 72.2873%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 33.6109%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 62.1482%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 43.693%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 46.806%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 81.9089%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 66.6441%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 85.0936%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 75.7577%;"></div><div class="waveform-bar flex-1 rounded-full bg-white/20" style="height: 12.1414%;"></div></div>
+<!-- Progress Bar -->
+<div class="relative h-1 w-full bg-white/5 rounded-full overflow-hidden group cursor-pointer">
+<div class="absolute left-0 top-0 h-full bg-fire-gradient w-[31%] z-10"></div>
+<div class="absolute left-0 top-0 h-full bg-white/10 w-[60%] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</div>
+</div>
+<!-- END: Call Replay Area -->
+<!-- BEGIN: Key Moments -->
+<div class="glass-card rounded-2xl p-6" data-purpose="moments-list">
+<div class="flex justify-between items-center mb-6">
+<h2 class="text-xl font-syne font-bold text-white">Key Moments</h2>
+<button class="text-[11px] font-bold text-fire-accent uppercase tracking-widest flex items-center gap-2 hover:gap-3 transition-all">
+              View Full Transcript <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+<div class="space-y-3">
+<!-- Discovery Moment -->
+<div class="group flex items-center gap-5 p-4 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 transition-colors cursor-pointer">
+<div class="w-12 h-12 rounded-lg bg-teal-support/10 text-teal-support font-mono text-xs flex items-center justify-center shrink-0">02:14</div>
+<div class="flex-grow">
+<div class="flex items-center gap-3 mb-1">
+<span class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 bg-teal-support/20 text-teal-support rounded border border-teal-support/20">Discovery</span>
+<span class="text-xs text-on-surface-variant">Customer pain points identified</span>
+</div>
+<p class="text-sm text-on-surface font-medium italic">"We've been struggling with lead attribution for over six months now..."</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-white">play_circle</span>
+</div>
+<!-- Objection Moment -->
+<div class="group flex items-center gap-5 p-4 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 transition-colors cursor-pointer">
+<div class="w-12 h-12 rounded-lg bg-ember-alert/10 text-ember-alert font-mono text-xs flex items-center justify-center shrink-0">07:45</div>
+<div class="flex-grow">
+<div class="flex items-center gap-3 mb-1">
+<span class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 bg-ember-alert/20 text-ember-alert rounded border border-ember-alert/20">Objection</span>
+<span class="text-xs text-on-surface-variant">Pricing structure resistance</span>
+</div>
+<p class="text-sm text-on-surface font-medium italic">"The annual commitment seems quite high given our current budget cycles..."</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-white">play_circle</span>
+</div>
+<!-- Close Moment -->
+<div class="group flex items-center gap-5 p-4 bg-white/5 border border-white/5 rounded-xl hover:bg-white/10 transition-colors cursor-pointer">
+<div class="w-12 h-12 rounded-lg bg-fire-accent/10 text-fire-accent font-mono text-xs flex items-center justify-center shrink-0">12:30</div>
+<div class="flex-grow">
+<div class="flex items-center gap-3 mb-1">
+<span class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 bg-fire-accent/20 text-fire-accent rounded border border-fire-accent/20">Close</span>
+<span class="text-xs text-on-surface-variant">Agreement on next steps</span>
+</div>
+<p class="text-sm text-on-surface font-medium italic">"That sounds reasonable. Let's schedule the pilot kickoff for next Tuesday."</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-white">play_circle</span>
+</div>
+</div>
+</div>
+<!-- END: Key Moments -->
+</div>
+<!-- END: Player Column -->
+<!-- BEGIN: Sidebar Analysis Column -->
+<div class="lg:col-span-4 space-y-8">
+<!-- BEGIN: AI Score Card -->
+<div class="glass-card rounded-2xl p-6 border-l-4 border-fire-accent relative overflow-hidden" data-purpose="ai-score">
+<div class="absolute -top-4 -right-4 opacity-5">
+<span class="material-symbols-outlined text-[120px]">smart_toy</span>
+</div>
+<h3 class="text-[10px] font-bold text-fire-accent uppercase tracking-[0.2em] mb-6">AI Score Performance</h3>
+<div class="flex items-end gap-2 mb-10">
+<span class="text-7xl font-syne font-extrabold text-white leading-none">88</span>
+<span class="text-2xl text-on-surface-variant font-syne font-bold pb-1">/100</span>
+</div>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between items-center mb-2">
+<span class="text-xs text-on-surface-variant">Tone</span>
+<span class="text-xs font-mono text-white">92%</span>
+</div>
+<div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-teal-support shadow-[0_0_10px_rgba(0,212,200,0.4)]" style="width: 92%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2">
+<span class="text-xs text-on-surface-variant">Pace</span>
+<span class="text-xs font-mono text-white">75%</span>
+</div>
+<div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-fire-accent shadow-[0_0_10px_rgba(255,173,28,0.4)]" style="width: 75%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2">
+<span class="text-xs text-on-surface-variant">Close Signals</span>
+<span class="text-xs font-mono text-white">98%</span>
+</div>
+<div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-teal-support shadow-[0_0_10px_rgba(0,212,200,0.4)]" style="width: 98%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- END: AI Score Card -->
+<!-- BEGIN: Coaching Notes -->
+<div class="glass-card rounded-2xl p-6" data-purpose="coaching-notes">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-fire-accent">psychology</span>
+<h3 class="text-lg font-syne font-bold text-white">Coaching Notes</h3>
+</div>
+<div class="space-y-4">
+<!-- Note: Strength -->
+<div class="p-4 rounded-xl bg-white/5 border border-white/5 space-y-2">
+<div class="flex items-center gap-2 text-teal-support font-bold text-xs">
+<span class="material-symbols-outlined text-sm">check_circle</span> Strength: Empathy Mapping
+              </div>
+<p class="text-xs text-on-surface-variant leading-relaxed">Excellent response to the budget objection at 07:45. You validated their concern before pivoting to ROI metrics.</p>
+</div>
+<!-- Note: Growth -->
+<div class="p-4 rounded-xl bg-white/5 border border-white/5 space-y-2">
+<div class="flex items-center gap-2 text-fire-accent font-bold text-xs">
+<span class="material-symbols-outlined text-sm">trending_up</span> Growth: Speaking Ratio
+              </div>
+<p class="text-xs text-on-surface-variant leading-relaxed">You spoke for 65% of the discovery phase. Try to ask more open-ended questions to let the prospect lead.</p>
+</div>
+<!-- Note: AI Tip -->
+<div class="p-4 rounded-xl bg-ai-purple/10 border border-ai-purple/20 space-y-2">
+<div class="flex items-center gap-2 text-ai-purple font-bold text-xs">
+<span class="material-symbols-outlined text-sm">lightbulb</span> AI Suggestion
+              </div>
+<p class="text-xs text-on-surface-variant leading-relaxed">Next time, mention the "Flex-Term" billing option immediately after they bring up budget cycles to lower friction.</p>
+</div>
+</div>
+<button class="w-full mt-6 py-3 border border-white/10 rounded-xl text-xs font-bold text-white hover:bg-white/5 transition-all">
+            Add Manual Note
+          </button>
+</div>
+<!-- END: Coaching Notes -->
+</div>
+<!-- END: Sidebar Analysis Column -->
+</div>
+<!-- BEGIN: Footer Bento Grid -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-8" data-purpose="metrics-bento">
+<div class="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-3">
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Customer Mood</span>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-4xl text-teal-support" style="font-variation-settings: &quot;FILL&quot; 1;">sentiment_very_satisfied</span>
+<span class="text-2xl font-syne font-extrabold text-white">Positive</span>
+</div>
+</div>
+<div class="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-3">
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Talk/Listen Ratio</span>
+<div class="flex items-center gap-6 w-full max-w-[240px]">
+<div class="flex-1 text-right">
+<span class="block text-xl font-mono font-bold text-white">65%</span>
+<span class="text-[8px] uppercase text-on-surface-variant">You</span>
+</div>
+<!-- Simple SVG Circular Ratio -->
+<div class="relative w-16 h-16 shrink-0">
+<svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+<circle cx="18" cy="18" fill="none" r="16" stroke="rgba(0,212,200,1)" stroke-dasharray="100, 100" stroke-width="3"></circle>
+<circle cx="18" cy="18" fill="none" r="16" stroke="rgba(255,122,28,1)" stroke-dasharray="65, 100" stroke-width="3"></circle>
+</svg>
+</div>
+<div class="flex-1 text-left">
+<span class="block text-xl font-mono font-bold text-white">35%</span>
+<span class="text-[8px] uppercase text-on-surface-variant">Them</span>
+</div>
+</div>
+</div>
+<div class="glass-card rounded-2xl p-6 flex flex-col items-center justify-center text-center gap-3">
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Confidence Level</span>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-4xl text-fire-accent" style="font-variation-settings: &quot;FILL&quot; 1;">shield_with_heart</span>
+<span class="text-2xl font-syne font-extrabold text-white">94%</span>
+</div>
+</div>
+</section>
+<!-- END: Footer Bento Grid -->
+</div>
+</main>
+<script data-purpose="waveform-renderer">
+  document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('waveform');
+    const barCount = 100;
+    
+    for (let i = 0; i < barCount; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'waveform-bar flex-1 rounded-full';
+      
+      // Random height logic
+      const height = Math.random() * 80 + 10;
+      bar.style.height = `${height}%`;
+      
+      // Playhead logic (31% mark)
+      if (i < 31) {
+        bar.classList.add('bg-fire-gradient');
+      } else {
+        bar.classList.add('bg-white/20');
+      }
+      
+      container.appendChild(bar);
+    }
+    
+    // Waveform Micro-interaction
+    container.addEventListener('mousemove', (e) => {
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const index = Math.floor((x / rect.width) * barCount);
+      
+      const bars = container.children;
+      if (bars[index]) {
+        bars[index].style.transform = 'scaleY(1.4)';
+        bars[index].style.backgroundColor = '#FFAD1C';
+        setTimeout(() => {
+          bars[index].style.transform = '';
+          if (index >= 31) bars[index].style.backgroundColor = '';
+          else bars[index].style.backgroundColor = '';
+        }, 400);
+      }
+    });
+  });
+</script>
+
+
+</body></html>

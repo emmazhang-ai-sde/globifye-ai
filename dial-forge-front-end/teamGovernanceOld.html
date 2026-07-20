@@ -1,0 +1,379 @@
+<!DOCTYPE html><html class="dark" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DialForge | Team Governance</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Syne, DM Sans, JetBrains Mono, Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&amp;family=DM+Sans:wght@400;500;700&amp;family=JetBrains+Mono:wght@400&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "background": "#12131a",
+            "surface": "#12131a",
+            "surface-container": "#1e1f27",
+            "surface-container-low": "#1a1b23",
+            "surface-container-high": "#292932",
+            "surface-container-highest": "#33343d",
+            "primary": "#ffb4a2",
+            "primary-container": "#ff562a",
+            "fire-gradient": "#FF7A1C",
+            "fire-accent": "#FFAD1C",
+            "on-background": "#e3e1ec",
+            "on-surface": "#e3e1ec",
+            "on-surface-variant": "#e5beb4",
+            "tertiary": "#00e478",
+          },
+          fontFamily: {
+            "syne": ["Syne", "sans-serif"],
+            "dm-sans": ["DM Sans", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"],
+          }
+        },
+      },
+    }
+  </script>
+<style data-purpose="liquid-glass-effects">
+    /* Glassmorphism Styles */
+    .glass-card {
+      background: rgba(26, 27, 35, 0.4);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    }
+    
+    .glass-hi {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s ease, background 0.3s ease;
+    }
+
+    /* Fire Gradient Utilities */
+    .bg-fire-gradient {
+      background: linear-gradient(135deg, #FF7A1C 0%, #FF2200 100%);
+    }
+    
+    .text-fire-gradient {
+      background: linear-gradient(135deg, #FF7A1C 0%, #FF2200 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .glow-fire {
+      box-shadow: 0 0 30px rgba(255, 122, 28, 0.2), 0 0 60px rgba(255, 34, 0, 0.1);
+    }
+
+    /* Noise Texture Overlay */
+    .noise-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.02;
+      z-index: 9999;
+      background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuADSjexkZhJlvrHxUGNtHaOGC-gCyJNfUtJxcXcTNkL67rWUqZQqfJpBdpvM4EtoPbdOIQ7_TQc414pVVqCz98okAfjnYscdTFxVWy_zS0SIwtcJJDzPRuN_mYdFtFiZmzGNXZ1615MN4EXSwv5tGjA20JIt9fc3C8kpB7N_Ft9d6hfYervzPpOZL0fUxulCddz51nD20Am9Hdgx2r7vrXUiCYEDrR3k061-7MfK5oTymIm8d7t4vCjo8558UFOivWj_8XCoktLxm8);
+    }
+
+    /* Ambient Background Glows */
+    .ambient-glow {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(255, 122, 28, 0.08) 0%, rgba(255, 34, 0, 0) 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    @keyframes pulse-status {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .animate-pulse-status {
+      animation: pulse-status 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-dm-sans selection:bg-fire-gradient selection:text-white">
+<!-- BEGIN: Decoration -->
+<div class="noise-overlay"></div>
+<div class="ambient-glow top-[-200px] left-[-100px]"></div>
+<div class="ambient-glow bottom-[-200px] right-[-100px]"></div>
+<!-- END: Decoration -->
+<!-- BEGIN: TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-xl border-b border-white/10 h-16 flex items-center justify-between px-6">
+<div class="flex items-center gap-10">
+<div class="flex items-center gap-2">
+<span class="font-syne text-2xl font-extrabold text-fire-gradient">DialForge</span>
+</div>
+<nav class="hidden md:flex gap-6">
+<a class="text-on-surface-variant hover:text-white transition-colors text-sm font-semibold" href="#">Performance</a>
+<a class="text-white relative text-sm font-bold after:content-[''] after:absolute after:-bottom-5 after:left-0 after:w-full after:h-0.5 after:bg-primary" href="#">Team</a>
+<a class="text-on-surface-variant hover:text-white transition-colors text-sm font-semibold" href="#">Campaigns</a>
+</nav>
+</div>
+<div class="flex items-center gap-5">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-white transition-colors">notifications</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-white transition-colors">settings</button>
+<div class="w-8 h-8 rounded-full border border-white/20 overflow-hidden">
+<img alt="Admin Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9j8lW7jpNxxLoKfM9Ab0LzNHQpcrslIvEFsRJQ3hbvydC1lNAVAxcXC7zoBvh5_uIsUWv_MYrguu5KR7psOG2wtxaxKUk5beB-RDdDBOD0u-F7HdYcjNpDkmncnQUWHiPbA1FxvOTBaBo57D6TJmZPbaKZfC3jFsEj0Wd2jzaxCWZ_sittbne3NP96qPVjKo7a-D7Ry2BFwZ6dSHoKALXrTr2Q3OEN7zPCYeLY_TR7nplCzbZyGWVAfQDFgHtIK_xwgAyZIApjk0">
+</div>
+</div>
+</header>
+<!-- END: TopAppBar -->
+<!-- BEGIN: SideNav -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-surface-container-low/50 backdrop-blur-2xl border-r border-white/5 flex flex-col py-6 gap-4 z-40 overflow-y-auto">
+<div class="flex flex-col gap-6 items-center w-full"><button class="flex items-center gap-4 px-6 py-3 group text-on-surface-variant hover:text-white transition-all w-full"><span class="material-symbols-outlined text-2xl">dashboard</span><span class="text-sm font-bold uppercase tracking-tighter">Dashboard</span></button><button class="flex items-center gap-4 px-6 py-3 group text-on-surface-variant hover:text-white transition-all w-full"><span class="material-symbols-outlined text-2xl">call</span><span class="text-sm font-bold uppercase tracking-tighter">Call</span></button><button class="flex items-center gap-4 px-6 py-3 group text-on-surface-variant hover:text-white transition-all w-full"><span class="material-symbols-outlined text-2xl">queue</span><span class="text-sm font-bold uppercase tracking-tighter">Queue</span></button><button class="flex items-center gap-4 px-6 py-3 group text-on-surface-variant hover:text-white transition-all w-full"><span class="material-symbols-outlined text-2xl">school</span><span class="text-sm font-bold uppercase tracking-tighter">Coaching</span></button><button class="flex items-center gap-4 px-6 py-3 group text-on-surface-variant hover:text-white transition-all w-full"><span class="material-symbols-outlined text-2xl">dialpad</span><span class="text-sm font-bold uppercase tracking-tighter">Dialer</span></button><button class="flex items-center gap-4 px-6 py-3 group text-on-surface-variant hover:text-white transition-all w-full"><span class="material-symbols-outlined text-2xl">view_kanban</span><span class="text-sm font-bold uppercase tracking-tighter">Pipeline</span></button><button class="flex items-center gap-4 px-6 py-3 group text-on-surface-variant hover:text-white transition-all w-full"><span class="material-symbols-outlined text-2xl">history</span><span class="text-sm font-bold uppercase tracking-tighter">History</span></button><button class="flex items-center gap-4 px-6 py-3 group text-on-surface-variant hover:text-white transition-all w-full"><span class="material-symbols-outlined text-2xl">contacts</span><span class="text-sm font-bold uppercase tracking-tighter">Contacts</span></button><button class="flex items-center gap-4 px-6 py-3 group text-on-surface-variant hover:text-white transition-all w-full"><span class="material-symbols-outlined text-2xl">extension</span><span class="text-sm font-bold uppercase tracking-tighter">Integrations</span></button><button class="flex items-center gap-4 px-6 py-3 group text-on-surface-variant hover:text-white transition-all w-full"><span class="material-symbols-outlined text-2xl">pin</span><span class="text-sm font-bold uppercase tracking-tighter">Numbers</span></button><button class="flex items-center gap-4 px-6 py-3 group text-on-surface-variant hover:text-white transition-all w-full"><span class="material-symbols-outlined text-2xl">payments</span><span class="text-sm font-bold uppercase tracking-tighter">Billing</span></button><button class="flex items-center gap-4 px-6 py-3 group w-full relative bg-primary-container/20 text-fire-accent border-l-4 border-fire-accent"><span class="material-symbols-outlined text-2xl">groups</span><span class="text-sm font-bold uppercase tracking-tighter">Team</span></button></div>
+<div class="mt-auto flex flex-col items-center gap-6 pb-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-white">contact_support</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-white">account_circle</button>
+</div>
+</aside>
+<!-- END: SideNav -->
+<!-- BEGIN: MainContent -->
+<main class="pt-24 pl-72 pr-8 pb-12 min-h-screen max-w-[1600px] mx-auto">
+<!-- BEGIN: PageHeader -->
+<section class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 mb-10" data-purpose="header-section">
+<div>
+<h1 class="font-syne text-5xl font-extrabold text-white mb-3">Team Governance</h1>
+<p class="text-on-surface-variant max-w-2xl leading-relaxed">
+          Orchestrate your high-velocity sales force. Manage permissions, monitor real-time output, and scale your operations with precision.
+        </p>
+</div>
+<div class="flex gap-3">
+<button class="px-5 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all font-bold text-xs flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">security</span>
+          Permission Matrix
+        </button>
+<button class="px-6 py-3 rounded-xl bg-fire-gradient text-white font-bold text-xs shadow-lg glow-fire hover:scale-105 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">person_add</span>
+          Invite Member
+        </button>
+</div>
+</section>
+<!-- END: PageHeader -->
+<div class="grid grid-cols-12 gap-6">
+<!-- BEGIN: LeftSidebar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex flex-col bg-surface-container-low/78 backdrop-blur-xl border-r border-white/5 items-center py-6 gap-8 z-40">
+<div class="flex flex-col items-center gap-4 w-full overflow-y-auto flex-1">
+  <button class="group relative flex flex-col items-center gap-1 w-full py-3 bg-primary-container/20 text-fire-accent border-l-4 border-fire-accent shadow-[0_0_20px_rgba(255,122,28,0.2)]">
+    <span class="material-symbols-outlined">dashboard</span>
+    <span class="text-[8px] uppercase font-bold">Dashboard</span>
+  </button>
+  <a href="activeCall.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">call</span>
+    <span class="text-[8px] uppercase font-bold">Call</span>
+  </a>
+  <a href="supportQueue.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">queue</span>
+    <span class="text-[8px] uppercase font-bold">Queue</span>
+  </a>
+  <a href="callCoaching.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">graphic_eq</span>
+      <span class="text-[8px] uppercase font-bold">Coaching</span>
+    </button>
+  </a>
+  <a href="powerDialer.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">dialer_sip</span>
+    <span class="text-[8px] uppercase font-bold">Dialer</span>
+  </a>
+  <a href="salesPipeline.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">view_kanban</span>
+    <span class="text-[8px] uppercase font-bold">Pipeline</span>
+  </a>
+  <a href="callHistory.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">history</span>
+      <span class="text-[8px] uppercase font-bold">History</span>
+    </button>
+  </a>
+  <a href="contacts.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">group</span>
+    <span class="text-[8px] uppercase font-bold">Contacts</span>
+  </a>
+  <a href="integrationsHub.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">apps</span>
+    <span class="text-[8px] uppercase font-bold">Integrations</span>
+  </a>
+  <a href="numbers.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">123</span>
+    <span class="text-[8px] uppercase font-bold">Numbers</span>
+  </a>
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <a href="billingSubscription.html" class="flex flex-col items-center gap-1 w-full h-full text-inherit no-underline">
+      <span class="material-symbols-outlined">payments</span>
+      <span class="text-[8px] uppercase font-bold">Billing</span>
+    </a>
+  </button>
+  <a href="teamGovernance.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">groups</span>
+      <span class="text-[8px] uppercase font-bold">Team</span>
+    </button>
+  </a>
+</div>
+<div class="flex flex-col items-center gap-4 w-full pb-4">
+  <button class="material-symbols-outlined text-on-surface-variant/60 hover:text-white">help_center</button>
+</div>
+</aside>
+<!-- END: LeftSidebar -->
+<!-- BEGIN: MemberTableContainer -->
+<div class="col-span-12 lg:col-span-9 flex flex-col gap-4">
+<!-- Table Header Labels -->
+<div class="hidden lg:grid grid-cols-12 px-6 py-2 text-[10px] font-extrabold text-on-surface-variant uppercase tracking-widest">
+<div class="col-span-4">Team Member</div>
+<div class="col-span-2">Department</div>
+<div class="col-span-2">Role</div>
+<div class="col-span-1 text-center">Calls</div>
+<div class="col-span-1 text-center">AI Score</div>
+<div class="col-span-2 text-right">Activity</div>
+</div>
+<!-- Member Row 1 -->
+<div class="glass-card glass-hi p-6 rounded-2xl hover:bg-surface-container-low/70 transition-all cursor-pointer group" data-purpose="member-row">
+<div class="grid grid-cols-1 lg:grid-cols-12 items-center gap-4 lg:gap-0">
+<!-- Profile -->
+<div class="col-span-1 lg:col-span-4 flex items-center gap-4">
+<div class="relative">
+<img alt="Elena Rodriguez" class="w-12 h-12 rounded-xl object-cover border border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDAQz8xQkCi0iTPDW_GDKcyOqCMRUfhDqruuthbuDLcIcFB2pRJKN2Ek72YeLHYCQDeGRH1khR1EazU-fAT0OOavJmdMBVmMqAUarZ7L_dZY4M9vsdTNv9u8MH5ydZucDFmhRgHGH_Xtv0awtxm6eJhUtN54vN-8SL7pSd1YyNnJyYnIVtaZs7pn45aEFJIK0yj4Srt8KEzAK0a4GVulCxMZzhBWGNDU7vlk9TdvKFPRJq8vSDfJLST01G40ZwlPa6zN4aFMgSQDlQ">
+<div class="absolute -bottom-1 -right-1 w-4 h-4 bg-tertiary border-4 border-background rounded-full animate-pulse-status"></div>
+</div>
+<div>
+<h4 class="text-white font-bold">Elena Rodriguez</h4>
+<p class="text-xs text-on-surface-variant">elena.r@dialforge.pro</p>
+</div>
+</div>
+<!-- Department -->
+<div class="col-span-1 lg:col-span-2">
+<span class="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold text-primary-container">Strategic Sales</span>
+</div>
+<!-- Role -->
+<div class="col-span-1 lg:col-span-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-fire-accent text-lg">verified_user</span>
+<span class="text-sm text-white">Superadmin</span>
+</div>
+<!-- Calls -->
+<div class="col-span-1 lg:col-span-1 text-center">
+<span class="font-mono text-white font-bold">142</span>
+</div>
+<!-- AI Score -->
+<div class="col-span-1 lg:col-span-1 flex justify-center">
+<div class="w-10 h-10 rounded-lg bg-tertiary/10 border border-tertiary/20 flex items-center justify-center">
+<span class="text-tertiary font-bold font-mono">98</span>
+</div>
+</div>
+<!-- Activity -->
+<div class="col-span-1 lg:col-span-2 text-right">
+<p class="text-sm font-bold text-white">In a Call</p>
+<p class="text-[10px] text-tertiary">Active now</p>
+</div>
+</div>
+</div>
+<!-- Member Row 2 -->
+<div class="glass-card glass-hi p-6 rounded-2xl hover:bg-surface-container-low/70 transition-all cursor-pointer group" data-purpose="member-row">
+<div class="grid grid-cols-1 lg:grid-cols-12 items-center gap-4 lg:gap-0">
+<div class="col-span-1 lg:col-span-4 flex items-center gap-4">
+<div class="relative">
+<img alt="Marcus Thorne" class="w-12 h-12 rounded-xl object-cover border border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDK1U_VRAmXCfnYyeTSDepaK4Fg7zqszu-oph512KEZyhfDT1iJOSn315B_VN1kBtuFUxo2v9Fkci4wj6xt8sVUo6-HIUdf8u0p6zxJmyYUj_5eREMBS8KthuubZbhhT3glr1Itma1_tguoXqqj3Fid6zH5VblJgc4HenVH43kCPL0Iy7fIPPW4I4A15hl25BgLsYBH-wd1GDUSEJgl4oZ42ZnAhrfxcp84ditmLzefzmiVcxNv269qema-9tXj80OH6xfhgcsvQWE">
+<div class="absolute -bottom-1 -right-1 w-4 h-4 bg-on-surface-variant border-4 border-background rounded-full"></div>
+</div>
+<div>
+<h4 class="text-white font-bold">Marcus Thorne</h4>
+<p class="text-xs text-on-surface-variant">m.thorne@dialforge.pro</p>
+</div>
+</div>
+<div class="col-span-1 lg:col-span-2">
+<span class="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold text-on-surface-variant">Mid-Market</span>
+</div>
+<div class="col-span-1 lg:col-span-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-lg">admin_panel_settings</span>
+<span class="text-sm text-white">Admin</span>
+</div>
+<div class="col-span-1 lg:col-span-1 text-center">
+<span class="font-mono text-white font-bold">89</span>
+</div>
+<div class="col-span-1 lg:col-span-1 flex justify-center">
+<div class="w-10 h-10 rounded-lg bg-fire-accent/10 border border-fire-accent/20 flex items-center justify-center">
+<span class="text-fire-accent font-bold font-mono">84</span>
+</div>
+</div>
+<div class="col-span-1 lg:col-span-2 text-right">
+<p class="text-sm font-bold text-on-surface-variant">Offline</p>
+<p class="text-[10px] text-on-surface-variant">Last active 12m ago</p>
+</div>
+</div>
+</div>
+<!-- Member Row 3 -->
+<div class="glass-card glass-hi p-6 rounded-2xl hover:bg-surface-container-low/70 transition-all cursor-pointer group" data-purpose="member-row" style="transform: perspective(1000px) rotateX(0deg) rotateY(0deg);">
+<div class="grid grid-cols-1 lg:grid-cols-12 items-center gap-4 lg:gap-0">
+<div class="col-span-1 lg:col-span-4 flex items-center gap-4">
+<div class="relative">
+<img alt="Julian Chen" class="w-12 h-12 rounded-xl object-cover border border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD32BihA98X700Z6mZXEBr6MzMDkPOSqkNVQ8pokq5qr6VxxgyAVFTHvdjJNQ3rD_3f46_IYKE_HBJnNN0afoAIQypuUASBwQPDAsRLUWAVySNpR17nGtIz7jXBogaOrPtHvzT8t8gSnZnnxq2--iKsmcf4NrgSESV4N4py04rkzGPRVEf0HFRHzU5sMlijLc6ZYPOY4fuqwXbzHejDXzDarPrMkxvwtffVyG3AWsp0n40NyMVLd41ZhkBYHvdJOMlWjnWeKlMWT_Q">
+<div class="absolute -bottom-1 -right-1 w-4 h-4 bg-tertiary border-4 border-background rounded-full"></div>
+</div>
+<div>
+<h4 class="text-white font-bold">Julian Chen</h4>
+<p class="text-xs text-on-surface-variant">j.chen@dialforge.pro</p>
+</div>
+</div>
+<div class="col-span-1 lg:col-span-2">
+<span class="px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold text-on-surface-variant">Support Eng</span>
+</div>
+<div class="col-span-1 lg:col-span-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-on-surface-variant text-lg">person</span>
+<span class="text-sm text-white">Member</span>
+</div>
+<div class="col-span-1 lg:col-span-1 text-center">
+<span class="font-mono text-white font-bold">215</span>
+</div>
+<div class="col-span-1 lg:col-span-1 flex justify-center">
+<div class="w-10 h-10 rounded-lg bg-tertiary/10 border border-tertiary/20 flex items-center justify-center">
+<span class="text-tertiary font-bold font-mono">92</span>
+</div>
+</div>
+<div class="col-span-1 lg:col-span-2 text-right">
+<p class="text-sm font-bold text-white">Available</p>
+<p class="text-[10px] text-on-surface-variant">Active now</p>
+</div>
+</div>
+</div>
+</div>
+<!-- END: MemberTableContainer -->
+</div>
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: FAB -->
+<div class="fixed bottom-10 right-10 z-50">
+<button class="bg-fire-gradient text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl glow-fire hover:scale-110 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-3xl">add_call</span>
+</button>
+</div>
+<!-- END: FAB -->
+<script data-purpose="micro-interactions">
+    // Tilt effect for glass cards
+    document.querySelectorAll('.glass-hi').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        const rotateX = (y - centerY) / 50;
+        const rotateY = (centerX - x) / 50;
+        
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      });
+      
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+      });
+    });
+  </script>
+
+
+</body></html>

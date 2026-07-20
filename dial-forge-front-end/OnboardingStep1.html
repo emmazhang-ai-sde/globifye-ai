@@ -1,0 +1,400 @@
+<!DOCTYPE html><html class="dark" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>DialForge · Choose Your Persona</title>
+<!-- BEGIN: External Assets -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&amp;family=Syne:wght@400..800&amp;family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- END: External Assets -->
+<!-- BEGIN: Tailwind Configuration -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "secondary": "#a8c8ff",
+            "on-background": "#e3e1ec",
+            "on-primary-container": "#550f00",
+            "on-secondary": "#003062",
+            "on-primary": "#611200",
+            "surface-container": "#1e1f27",
+            "surface-container-lowest": "#0d0e15",
+            "surface-container-low": "#1a1b23",
+            "fire-gradient": "#FF7A1C",
+            "background": "#12131a",
+            "surface": "#12131a",
+            "primary": "#ffb4a2",
+            "fire-accent": "#FFAD1C",
+            "teal-support": "#00D4C8",
+            "tertiary": "#00e478",
+            "secondary-container": "#3791ff",
+            "on-surface-variant": "#e5beb4",
+          },
+          fontFamily: {
+            "mono-data": ["JetBrains Mono"],
+            "hero-h1": ["Syne"],
+            "body-base": ["DM Sans"],
+            "small-label": ["DM Sans"],
+            "button-text": ["DM Sans"],
+            "section-header": ["Syne"],
+          },
+          fontSize: {
+            "hero-h1": ["70px", {"lineHeight": "1.1", "letterSpacing": "-2.5px", "fontWeight": "800"}],
+            "body-base": ["14px", {"lineHeight": "1.6", "fontWeight": "400"}],
+            "small-label": ["10px", {"lineHeight": "1", "letterSpacing": "0.5px", "fontWeight": "700"}],
+            "button-text": ["12.5px", {"lineHeight": "1", "fontWeight": "600"}],
+            "section-header": ["42px", {"lineHeight": "1.2", "letterSpacing": "-1.2px", "fontWeight": "800"}],
+            "hero-h1-mobile": ["34px", {"lineHeight": "1.1", "letterSpacing": "-1.5px", "fontWeight": "800"}]
+          },
+          spacing: {
+            "gap-20": "20px",
+            "gap-16": "16px",
+            "gap-12": "12px",
+            "gap-8": "8px",
+            "margin-standard": "16px",
+          }
+        },
+      },
+    }
+  </script>
+<!-- END: Tailwind Configuration -->
+<!-- BEGIN: Custom Styles -->
+<style data-purpose="glass-effects">
+    .liquid-glass {
+      background: rgba(30, 31, 39, 0.78);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: inset 1px 1px 0 0 rgba(255, 255, 255, 0.1);
+      transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    
+    .persona-card {
+      cursor: pointer;
+    }
+
+    .persona-card:hover {
+      transform: translateY(-8px) scale(1.02);
+    }
+
+    .persona-card.selected {
+      transform: scale(1.05) translateY(-12px);
+      box-shadow: 0 0 40px rgba(255, 122, 28, 0.25), inset 0 0 20px rgba(255, 122, 28, 0.1);
+    }
+
+    .persona-card.selected.sales {
+      border-color: rgba(255, 122, 28, 0.8);
+      box-shadow: 0 0 40px rgba(255, 122, 28, 0.25), inset 0 0 20px rgba(255, 122, 28, 0.1);
+    }
+
+    .persona-card.selected.support {
+      border-color: rgba(55, 145, 255, 0.8);
+      box-shadow: 0 0 40px rgba(55, 145, 255, 0.25), inset 0 0 20px rgba(55, 145, 255, 0.1);
+    }
+
+    .persona-card.selected.solo {
+      border-color: rgba(0, 228, 120, 0.8);
+      box-shadow: 0 0 40px rgba(0, 228, 120, 0.25), inset 0 0 20px rgba(0, 228, 120, 0.1);
+    }
+
+    .glow-fire:hover {
+      box-shadow: 0 0 40px rgba(255, 122, 28, 0.15), 0 0 80px rgba(255, 122, 28, 0.08);
+    }
+
+    .glow-support:hover {
+      box-shadow: 0 0 40px rgba(55, 145, 255, 0.15), 0 0 80px rgba(55, 145, 255, 0.08);
+    }
+
+    .glow-solo:hover {
+      box-shadow: 0 0 40px rgba(0, 228, 120, 0.15), 0 0 80px rgba(0, 228, 120, 0.08);
+    }
+
+    .fractal-noise {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.03;
+      pointer-events: none;
+      z-index: 100;
+      background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuB09-fbA1sYJEtPNEEny_WMtUqCKBP77j8GpYtuKr37lpes5Ma986C2fxRWScAZfNWzu2i24VEsEcLCwLwXMzoVcTaquiJhKJ2lfJiNQLxA29qtAWeI6O-1FeYS5iKyqre8fzX2bKArGQMWDZTReXY7Z1vVZDOZ9elex-HVRrIXcsLZmfuMTaiZjs-VigD035Z9D0HW8ub87nPIAD1hIZpqSiXx8UE1TO_skDeihv79C1wXa805vKfDEw1S2mAp4e7Hd7k7cg2BPQA);
+    }
+
+    .active-orb {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 77, 28, 0.4); }
+      70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 77, 28, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 77, 28, 0); }
+    }
+
+    .selection-indicator {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .persona-card.selected .selection-indicator {
+      opacity: 1;
+    }
+  </style>
+<!-- END: Custom Styles -->
+</head>
+<body class="bg-background text-on-background font-body-base text-body-base selection:bg-fire-accent/30 overflow-x-hidden">
+<div class="fractal-noise"></div>
+<!-- BEGIN: Header -->
+<header class="fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-xl border-b border-white/10 px-margin-standard h-16 flex items-center justify-between" data-purpose="main-navigation">
+<div class="flex items-center gap-gap-12">
+<span class="font-hero-h1-mobile text-2xl font-extrabold text-fire-gradient bg-clip-text text-transparent">DialForge</span>
+<span class="hidden md:block h-4 w-[1px] bg-white/20"></span>
+<span class="font-hero-h1 text-2xl font-extrabold text-white">Dial<span class="text-fire-gradient">Forge</span></span>
+</div>
+<div class="flex items-center gap-gap-16">
+<span class="text-on-surface-variant/60 font-button-text text-sm text-button-text tracking-wider font-bold uppercase">Step 1 of 6</span>
+<div class="w-24 h-1.5 bg-white/10 rounded-full overflow-hidden">
+<div class="w-1/6 h-full bg-fire-gradient rounded-full shadow-[0_0_10px_#FF7A1C]"></div>
+</div>
+</div>
+</header>
+<!-- END: Header -->
+<main class="min-h-screen pt-32 pb-20 px-margin-standard max-w-7xl mx-auto flex flex-col items-center relative z-10">
+<!-- BEGIN: Hero Section -->
+<section class="text-center mb-gap-20 max-w-3xl" data-purpose="hero">
+<h1 class="font-hero-h1 text-4xl md:text-7xl text-on-background mb-4">Choose your <span class="text-fire-gradient">battleground</span></h1>
+<p class="text-on-surface-variant font-body-base text-lg opacity-80">
+        Welcome to DialForge. To provide the best experience, we need to know who's behind the headset. Select the persona that matches your workflow.
+      </p>
+</section>
+<!-- END: Hero Section -->
+<!-- BEGIN: Persona Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gap-20 w-full mt-gap-12" data-purpose="persona-selection">
+<!-- Persona 1: Sales Team -->
+<button data-persona="sales" class="group persona-card sales liquid-glass rounded-xl p-gap-20 flex flex-col items-start text-left relative overflow-hidden glow-fire border-fire-accent/20 hover:border-fire-accent/50 ring-2 ring-offset-4 ring-offset-background ring-fire-accent" onclick="selectPersona(event, 'sales')" style="background: radial-gradient(circle at 63.2031% 98.8281%, rgba(255, 255, 255, 0.05) 0%, rgba(30, 31, 39, 0.78) 100%);">
+<div class="absolute -top-12 -right-12 w-32 h-32 bg-fire-gradient/10 rounded-full blur-3xl group-hover:bg-fire-gradient/20 transition-colors"></div>
+<div class="w-12 h-12 rounded-lg bg-fire-gradient/20 flex items-center justify-center mb-gap-16 border border-fire-accent/30">
+<span class="material-symbols-outlined text-fire-accent text-3xl">rocket_launch</span>
+</div>
+<h3 class="font-section-header text-2xl text-white mb-2">Sales Team</h3>
+<p class="text-on-surface-variant/70 font-body-base mb-gap-20 flex-grow">
+          High-velocity outreach for teams focused on closing deals. Dominate your pipeline with aggressive power dialing.
+        </p>
+<div class="flex flex-wrap gap-gap-8 mb-gap-20">
+<span class="px-3 py-1 bg-fire-accent/10 border border-fire-accent/20 rounded-full text-fire-accent font-small-label text-[10px]">Power Dialer</span>
+<span class="px-3 py-1 bg-fire-accent/10 border border-fire-accent/20 rounded-full text-fire-accent font-small-label text-[10px]">AI Coach</span>
+<span class="px-3 py-1 bg-fire-accent/10 border border-fire-accent/20 rounded-full text-fire-accent font-small-label text-[10px]">Leaderboards</span>
+</div>
+<div class="w-full flex items-center justify-between mt-auto pt-gap-16 border-t border-white/5">
+<span class="text-fire-accent font-button-text text-button-text group-hover:translate-x-1 transition-transform">Create Account →</span>
+<div class="active-orb bg-fire-accent shadow-[0_0_10px_#FF7A1C]"></div>
+</div>
+</button>
+<!-- Persona 2: Support Team -->
+<button data-persona="support" class="group persona-card support liquid-glass rounded-xl p-gap-20 flex flex-col items-start text-left relative overflow-hidden glow-support border-secondary-container/20 hover:border-secondary-container/50 ring-2 ring-offset-4 ring-offset-background ring-secondary-container" onclick="selectPersona(event, 'support')" style="background: radial-gradient(circle at 63.2031% 98.8281%, rgba(255, 255, 255, 0.05) 0%, rgba(30, 31, 39, 0.78) 100%);">
+<div class="absolute -top-12 -right-12 w-32 h-32 bg-secondary-container/10 rounded-full blur-3xl group-hover:bg-secondary-container/20 transition-colors"></div>
+<div class="w-12 h-12 rounded-lg bg-secondary-container/20 flex items-center justify-center mb-gap-16 border border-secondary-container/30">
+<span class="material-symbols-outlined text-secondary-container text-3xl">support_agent</span>
+</div>
+<h3 class="font-section-header text-2xl text-white mb-2">Support Team</h3>
+<p class="text-on-surface-variant/70 font-body-base mb-gap-20 flex-grow">
+          Reliable incoming call management. Optimize your customer experience with intelligent IVR and queue routing.
+        </p>
+<div class="flex flex-wrap gap-gap-8 mb-gap-20">
+<span class="px-3 py-1 bg-secondary-container/10 border border-secondary-container/20 rounded-full text-secondary-container font-small-label text-[10px]">IVR Design</span>
+<span class="px-3 py-1 bg-secondary-container/10 border border-secondary-container/20 rounded-full text-secondary-container font-small-label text-[10px]">Queues</span>
+<span class="px-3 py-1 bg-secondary-container/10 border border-secondary-container/20 rounded-full text-secondary-container font-small-label text-[10px]">Satisfaction</span>
+</div>
+<div class="w-full flex items-center justify-between mt-auto pt-gap-16 border-t border-white/5">
+<span class="text-secondary-container font-button-text text-button-text group-hover:translate-x-1 transition-transform">Create Account →</span>
+<div class="w-2 h-2 rounded-full bg-secondary-container/40"></div>
+</div>
+</button>
+<!-- Persona 3: Solopreneur -->
+<button data-persona="solo" class="group persona-card solo liquid-glass rounded-xl p-gap-20 flex flex-col items-start text-left relative overflow-hidden glow-solo border-tertiary/20 hover:border-tertiary/50 ring-2 ring-offset-4 ring-offset-background ring-tertiary" onclick="selectPersona(event, 'solo')" style="background: radial-gradient(circle at 63.2031% 98.8281%, rgba(255, 255, 255, 0.05) 0%, rgba(30, 31, 39, 0.78) 100%);">
+<div class="absolute -top-12 -right-12 w-32 h-32 bg-tertiary/10 rounded-full blur-3xl group-hover:bg-tertiary/20 transition-colors"></div>
+<div class="w-12 h-12 rounded-lg bg-tertiary/20 flex items-center justify-center mb-gap-16 border border-tertiary/30">
+<span class="material-symbols-outlined text-tertiary text-3xl">person</span>
+</div>
+<h3 class="font-section-header text-2xl text-white mb-2">Solopreneur</h3>
+<p class="text-on-surface-variant/70 font-body-base mb-gap-20 flex-grow">
+          Clean, simple, and effective. All the power of a pro dialer without the complexity of team management.
+        </p>
+<div class="flex flex-wrap gap-gap-8 mb-gap-20">
+<span class="px-3 py-1 bg-tertiary/10 border border-tertiary/20 rounded-full text-tertiary font-small-label text-[10px]">Simple CRM</span>
+<span class="px-3 py-1 bg-tertiary/10 border border-tertiary/20 rounded-full text-tertiary font-small-label text-[10px]">Voicemail Drop</span>
+<span class="px-3 py-1 bg-tertiary/10 border border-tertiary/20 rounded-full text-tertiary font-small-label text-[10px]">Mobile App</span>
+</div>
+<div class="w-full flex items-center justify-between mt-auto pt-gap-16 border-t border-white/5">
+<span class="text-tertiary font-button-text text-button-text group-hover:translate-x-1 transition-transform">Create Account →</span>
+<div class="w-2 h-2 rounded-full bg-tertiary/40"></div>
+</div>
+</button>
+</div>
+<!-- END: Persona Grid -->
+<!-- BEGIN: Footer -->
+<footer class="mt-24 w-full flex flex-col items-center gap-gap-16" data-purpose="form-footer">
+<div class="flex items-center gap-gap-12 text-on-surface-variant/40 font-small-label">
+<span class="material-symbols-outlined text-sm">lock</span>
+<span class="">SECURE CONFIGURATION ENVIRONMENT</span>
+</div>
+<p class="font-body-base text-sm opacity-50">Already have an account? <a class="text-fire-accent hover:underline" href="./login.html">Log in</a></p>
+</footer>
+<!-- END: Footer -->
+</main>
+<!-- BEGIN: Visual Accents -->
+<div class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none" data-purpose="background-glows">
+<div class="absolute top-[10%] left-[5%] w-[40vw] h-[40vw] bg-fire-accent/5 rounded-full blur-[120px]"></div>
+<div class="absolute bottom-[10%] right-[5%] w-[30vw] h-[30vw] bg-secondary-container/5 rounded-full blur-[100px]"></div>
+</div>
+<!-- Decorative Bottom Image -->
+<div class="fixed bottom-0 left-0 w-full h-64 -z-20 opacity-30 grayscale contrast-125 overflow-hidden" data-purpose="decorative-liquid">
+<img alt="DialForge Abstract Branding" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBz369tcqpkg6N3WuwF-oM9i4BkIsGxZi4ARRXsoJ3TNOeSfTbODIwcImLntCD8Dd5OOIAI-uVg9lLBoX_AbiXxnEERzdjQO2g7KQjBtX2Na9gCVM0y4kzz0SB3p4bYemvkrmuYWToaVFr1X18nVR8ijTjrOq6ebshdMlhKiZFrWdp1fcCauutaWJsUczTVKJupXwiSs98nowRIdi8tmjJhiKss0vOnDSXprwFzn7eyzsD0i-yb3XaKeH5m0-8Ze3VqZ7jQG5ryO-I">
+</div>
+<!-- END: Visual Accents -->
+<!-- BEGIN: Interactive Scripts -->
+<script data-purpose="persona-interaction-and-state">
+  // State management object (mirroring landing page)
+  const appState = {
+    selectedPersona: null
+  };
+
+  // Load state from localStorage
+  function loadState() {
+    try {
+      const saved = localStorage.getItem('dialforgeState');
+      if (saved) {
+        const state = JSON.parse(saved);
+        appState.selectedPersona = state.selectedPersona || null;
+      }
+    } catch (e) {
+      console.log('Could not load state:', e);
+    }
+  }
+
+  // Save state to localStorage
+  function saveState() {
+    try {
+      localStorage.setItem('dialforgeState', JSON.stringify({
+        selectedPersona: appState.selectedPersona
+      }));
+    } catch (e) {
+      console.log('Could not save state:', e);
+    }
+  }
+
+  // Select persona from card
+    function selectPersona(event, type) {
+      event.preventDefault();
+      const cards = document.querySelectorAll('.persona-card');
+      
+      // Visual feedback for selection
+        cards.forEach(card => {
+          card.classList.remove('selected');
+        });
+      
+      
+      const selectedCard = event.currentTarget;
+      selectedCard.classList.add('selected');
+
+      // Update state
+    appState.selectedPersona = type;
+    saveState();
+
+      // selectedCard.style.opacity = '1';
+      // selectedCard.style.filter = 'none';
+      // selectedCard.style.transform = 'scale(1.05) translateY(-12px)';
+      // selectedCard.classList.add('ring-2', 'ring-offset-4', 'ring-offset-background');
+
+      // // Dynamic ring color
+      // if(type === 'sales') selectedCard.classList.add('ring-fire-accent');
+      // if(type === 'support') selectedCard.classList.add('ring-secondary-container');
+      // if(type === 'solo') selectedCard.classList.add('ring-tertiary');
+
+      console.log('Selected Persona:', type);
+      
+      // Navigate to next step after selection animation
+    setTimeout(() => {
+      window.location.href = 'OnboardingStep2.html';
+    }, 600);
+    }
+
+    // Glass reflection mouse tracking
+    document.addEventListener('mousemove', (e) => {
+      const cards = document.querySelectorAll('.liquid-glass');
+      const x = e.clientX / window.innerWidth;
+      const y = e.clientY / window.innerHeight;
+      
+      cards.forEach(card => {
+        card.style.background = `radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(255,255,255,0.05) 0%, rgba(30, 31, 39, 0.78) 100%)`;
+      });
+    });
+    // Initialize: Load state and preselect persona if available
+  function initializePersonaSelection() {
+    loadState();
+    
+    if (appState.selectedPersona) {
+      // Find and select the preselected persona card
+      const preselectedCard = document.querySelector(`[data-persona="${appState.selectedPersona}"]`);
+      if (preselectedCard) {
+        preselectedCard.classList.add('selected');
+        console.log('Preselected persona from state:', appState.selectedPersona);
+      }
+    }
+  }
+
+  // Run initialization when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializePersonaSelection);
+  } else {
+    initializePersonaSelection();
+  }
+  </script>
+<!-- END: Interactive Scripts -->
+
+<!-- <script data-purpose="persona-persistence">
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedPersona = localStorage.getItem('selectedPersona');
+      if (savedPersona) {
+        // Find the button corresponding to the saved persona type
+        let selector = '';
+        if (savedPersona === 'sales') selector = 'button[onclick*="sales"]';
+        else if (savedPersona === 'support') selector = 'button[onclick*="support"]';
+        else if (savedPersona === 'solo') selector = 'button[onclick*="solo"]';
+
+        const targetButton = document.querySelector(selector);
+        if (targetButton) {
+          // Create a mock event object for the existing selectPersona function
+          const mockEvent = { currentTarget: targetButton };
+          // The existing selectPersona function uses 'event.currentTarget'
+          // We need to temporarily set window.event or call it in a way that works
+          window.event = mockEvent;
+          selectPersona(savedPersona);
+        }
+      }
+    });
+  </script> -->
+
+<a href="./onboardingStep2.html"><div class="fixed bottom-0 left-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-t border-white/10 p-gap-20 flex items-center justify-center px-margin-standard">
+  <button class="group flex items-center gap-gap-8 bg-fire-gradient text-white font-button-text text-button-text px-6 py-3 rounded-xl shadow-[0_0_20px_rgba(255,122,28,0.3)] hover:shadow-[0_0_30px_rgba(255,122,28,0.5)] transition-all transform hover:-translate-y-0.5 active:scale-95">
+    <span class="">Create Account</span>
+    <span class="material-symbols-outlined text-lg group-hover:translate-x-1 transition-transform">arrow_forward</span>
+  </button>
+</div></a>
+
+
+</body></html>

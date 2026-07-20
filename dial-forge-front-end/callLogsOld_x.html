@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DialForge | Call Logs</title>
+<!-- Tailwind CSS CDN with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&amp;family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface": "#0d0e12",
+            "surface-container": "#15161c",
+            "surface-variant": "#1e1f26",
+            "on-surface": "#e3e1ec",
+            "on-surface-variant": "#9495a5",
+            "primary": "#ff7a1c",
+            "fire-orange": "#FF7A1C",
+            "fire-red": "#FF2200",
+            "connected-green": "#00e478",
+            "missed-red": "#FF3B30",
+            "voicemail-blue": "#3791ff",
+            "ai-purple": "#9B6DFF",
+            "gold": "#F5C518"
+          },
+          fontFamily: {
+            "syne": ["Syne", "sans-serif"],
+            "dm-sans": ["DM Sans", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-effects">
+    .fire-gradient-bg {
+      background: linear-gradient(135deg, #FF7A1C 0%, #FF2200 100%);
+    }
+    .text-fire-gradient {
+      background: linear-gradient(135deg, #FFAD1C 0%, #FF7A1C 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .glass-card {
+      background: rgba(21, 22, 28, 0.7);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .liquid-shimmer {
+      position: relative;
+      overflow: hidden;
+    }
+    .liquid-shimmer::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.05), transparent);
+      transform: rotate(45deg);
+      transition: 0.6s;
+    }
+    .liquid-shimmer:hover::after {
+      left: 100%;
+      top: 100%;
+    }
+    .noise-overlay {
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      opacity: 0.02;
+      pointer-events: none;
+    }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 122, 28, 0.2); border-radius: 10px; }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-dm-sans min-h-screen overflow-hidden">
+<div class="fixed inset-0 noise-overlay z-0"></div>
+<!-- BEGIN: TopAppBar -->
+<header class="fixed top-0 w-full z-50 h-16 border-b border-white/5 glass-card flex items-center justify-between px-6">
+<div class="flex items-center gap-12">
+<div class="flex items-center gap-2">
+<span class="font-syne text-2xl font-extrabold text-fire-gradient tracking-tighter">DialForge</span>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-on-surface-variant hover:text-white transition-colors text-sm font-medium" href="#">Overview</a>
+<a class="text-fire-orange border-b-2 border-fire-orange px-1 py-4 text-sm font-bold" href="#">Call Logs</a>
+<a class="text-on-surface-variant hover:text-white transition-colors text-sm font-medium" href="#">Performance</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">search</span>
+<input class="bg-white/5 border border-white/10 rounded-full py-1.5 pl-10 pr-4 text-sm focus:ring-1 focus:ring-fire-orange outline-none w-64 transition-all" placeholder="Search interactions..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<a href="notifications.html" class="block"><button class="p-2 hover:bg-white/5 rounded-xl transition-colors"><span class="material-symbols-outlined text-gray-400">notifications</span></button></a>
+<a href="settingsGeneral.html" class="block"><button class="p-2 hover:bg-white/5 rounded-xl transition-colors"><span class="material-symbols-outlined text-gray-400">settings</span></button></a>
+
+<div class="w-8 h-8 rounded-full overflow-hidden border border-white/20 ml-2">
+<div class="h-10 w-10 rounded-full overflow-hidden border-2 border-white/10">
+<a href="profile.html" class="block w-full h-full cursor-pointer"><img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs"></a>
+</div>
+</div>
+</div>
+</header>
+<!-- END: TopAppBar -->
+
+      <!-- BEGIN: LeftSidebar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex flex-col bg-surface-container-low/78 backdrop-blur-xl border-r border-white/5 items-center py-6 gap-8 z-40">
+<div class="flex flex-col items-center gap-4 w-full overflow-y-auto flex-1">
+  <a href="Dashboard.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">dashboard</span>
+    <span class="text-[8px] uppercase font-bold">Dashboard</span>
+  
+  <a href="activeCall.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">call</span>
+    <span class="text-[8px] uppercase font-bold">Call</span>
+  </a>
+  
+  <a href="supportQueue.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">queue</span>
+    <span class="text-[8px] uppercase font-bold">Queue</span>
+  </a>
+ <a href="callCoaching.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">graphic_eq</span>
+      <span class="text-[8px] uppercase font-bold">Coaching</span>
+    </button>
+  </a>
+
+  <a href="powerDialer.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">dialer_sip</span>
+    <span class="text-[8px] uppercase font-bold">Dialer</span>
+  </a>
+  <a href="salesPipeline.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">view_kanban</span>
+    <span class="text-[8px] uppercase font-bold">Pipeline</span>
+  </a>
+  <a href="callHistory.html" class="group relative flex flex-col items-center gap-1 w-full py-3 bg-primary-container/20 text-fire-accent border-l-4 border-fire-accent shadow-[0_0_20px_rgba(255,122,28,0.2)]" >
+      <span class="material-symbols-outlined">history</span>
+      <span class="text-[8px] uppercase font-bold">History</span>
+    </button>
+  </a>
+  <a href="contacts.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">group</span>
+    <span class="text-[8px] uppercase font-bold">Contacts</span>
+  </a>
+  <a href="integrationsHub.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">apps</span>
+    <span class="text-[8px] uppercase font-bold">Integrations</span>
+  </a>
+  <a href="numbers.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <span class="material-symbols-outlined">123</span>
+    <span class="text-[8px] uppercase font-bold">Numbers</span>
+  </a>
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <a href="billingSubscription.html" class="flex flex-col items-center gap-1 w-full h-full text-inherit no-underline">
+      <span class="material-symbols-outlined">payments</span>
+      <span class="text-[8px] uppercase font-bold">Billing</span>
+    </a>
+  </button>
+  <a href="teamGovernance.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+      <span class="material-symbols-outlined">groups</span>
+      <span class="text-[8px] uppercase font-bold">Team</span>
+    </button>
+  </a>
+</div>
+<div class="flex flex-col items-center gap-4 w-full pb-4">
+  <button class="material-symbols-outlined text-on-surface-variant/60 hover:text-white">help_center</button>
+</div>
+</aside>
+<!-- END: LeftSidebar -->
+
+<!-- BEGIN: MainContent -->
+<main class="ml-20 mt-16 p-8 h-[calc(100vh-64px)] flex flex-col overflow-hidden relative z-10">
+<!-- BEGIN: HeaderSection -->
+<section class="flex flex-col gap-6 mb-8">
+<div class="flex justify-between items-end">
+<div>
+<h1 class="font-syne text-5xl font-extrabold text-white tracking-tight">Call logs</h1>
+<p class="text-on-surface-variant mt-2">Review team interactions and AI scoring performance.</p>
+</div>
+<div class="flex gap-3">
+<button class="px-5 py-2.5 rounded-xl border border-white/10 hover:bg-white/5 transition-all text-sm font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">download</span> Export CSV
+          </button>
+<button class="liquid-shimmer fire-gradient-bg px-5 py-2.5 rounded-xl text-white text-sm font-bold flex items-center gap-2 shadow-lg shadow-fire-orange/10 hover:scale-[1.02] active:scale-95 transition-all">
+<span class="material-symbols-outlined text-lg">settings_input_antenna</span> Live Session
+          </button>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex p-1 bg-surface-variant rounded-full border border-white/5">
+<button class="px-6 py-1.5 rounded-full text-sm font-bold bg-fire-orange text-white shadow-md">All</button>
+<button class="px-6 py-1.5 rounded-full text-sm font-medium text-on-surface-variant hover:text-white">Connected</button>
+<button class="px-6 py-1.5 rounded-full text-sm font-medium text-on-surface-variant hover:text-white">Missed</button>
+<button class="px-6 py-1.5 rounded-full text-sm font-medium text-on-surface-variant hover:text-white">Voicemail</button>
+</div>
+<div class="h-6 w-px bg-white/10"></div>
+<div class="flex gap-2">
+<button class="flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs font-bold text-on-surface hover:border-white/20">
+<span class="material-symbols-outlined text-sm">call_received</span> Inbound
+          </button>
+<button class="flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs font-bold text-on-surface hover:border-white/20">
+<span class="material-symbols-outlined text-sm">call_made</span> Outbound
+          </button>
+</div>
+<div class="ml-auto flex items-center gap-2 text-xs">
+<span class="text-on-surface-variant uppercase tracking-widest font-bold">Sort By:</span>
+<button class="text-white font-bold flex items-center gap-1">Newest First <span class="material-symbols-outlined text-base">expand_more</span></button>
+</div>
+</div>
+</section>
+<!-- END: HeaderSection -->
+<!-- BEGIN: DataTable -->
+<section class="flex-1 glass-card rounded-2xl overflow-hidden flex flex-col mb-8">
+<!-- Table Header -->
+<div class="grid grid-cols-[2fr_1.5fr_0.6fr_1fr_1.5fr_1.5fr_1fr] px-6 py-4 border-b border-white/5 bg-white/[0.02]">
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Name</span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Phone Number</span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest text-center">Dir</span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Status</span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Duration &amp; Date</span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">AI Score</span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest text-right">Actions</span>
+</div>
+<!-- Table Body -->
+<div class="flex-1 overflow-y-auto divide-y divide-white/5">
+<!-- Row 1: Alex Johnson -->
+<div class="grid grid-cols-[2fr_1.5fr_0.6fr_1fr_1.5fr_1.5fr_1fr] px-6 py-5 items-center hover:bg-white/[0.03] transition-all group">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border-2 border-fire-orange/30 p-0.5">
+<img alt="Alex J" class="w-full h-full rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOE-CEnYbczReeHsCA5IccneDKPz5lA4esf1XKpnzNeW0w6SYF4BCHDdvCZCcCTE9z_K3fRZ2vfp1YnuTrfp4y00YSPU1eoOGSmtMJBL2LuRPpbt1pebOoqz8ZsXPMxKdcS_ySjPCm9Y8EqeVGK2JV9xJwiF0adax7SYfG-bILe6hoRE3RDw2z7ED2W_EjYTieT0kIOa92R5S6Ap250KCu_d0_9JyLUoYKWt79InIBVoCqnyar1tXhg9ntQecsvC_n0q2UO6KUaZQ"/>
+</div>
+<div>
+<p class="font-syne font-bold text-white text-sm">Alex Johnson</p>
+<p class="text-xs text-on-surface-variant">Enterprise Lead</p>
+</div>
+</div>
+<span class="font-mono text-xs text-on-surface-variant">+1 (555) 234-8902</span>
+<div class="flex justify-center">
+<div class="w-8 h-8 rounded-full bg-connected-green/10 flex items-center justify-center text-connected-green">
+<span class="material-symbols-outlined text-[18px]">call_received</span>
+</div>
+</div>
+<div>
+<span class="bg-connected-green/10 text-connected-green border border-connected-green/20 px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-tighter">CONNECTED</span>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-white">12m 45s</span>
+<span class="text-[11px] text-on-surface-variant">Today, 2:45 PM</span>
+</div>
+<div class="pr-8">
+<div class="flex justify-between items-center mb-1 text-[11px]">
+<span class="font-mono text-connected-green font-bold">94%</span>
+<span class="text-on-surface-variant/60">Excellent</span>
+</div>
+<div class="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+<div class="h-full fire-gradient-bg" style="width: 94%"></div>
+</div>
+</div>
+<div class="flex justify-end opacity-0 group-hover:opacity-100 transition-all">
+<button class="w-8 h-8 flex items-center justify-center rounded-lg bg-fire-orange text-white hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-sm">call</span>
+</button>
+</div>
+</div>
+<!-- Row 2: Sarah Kovic -->
+<div class="grid grid-cols-[2fr_1.5fr_0.6fr_1fr_1.5fr_1.5fr_1fr] px-6 py-5 items-center hover:bg-white/[0.03] transition-all group">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border-2 border-white/5 p-0.5">
+<img alt="Sarah K" class="w-full h-full rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_ry0xi26QtC3v5Ki0y1dc14BmoJrljbfwgdSqAfbQZd6-ZfB45QzM4P2xHaTFMh1CLElzjzRDnY8g53PUfuaekBiijjENUojAaSdAQ3zpvho2P0q6ilLj_Br2iPQ1O9ed2XaEi2bWaOHO8iHXchRzfzVGov7HwubD6_5p8ja777HrosTtGudcS3O8Fgx4eqli0VYVatgDxdCUVtIcO_EWRS5FSqEgEDlX3KgA_idkjVYWD_MaKXcRMjxonbfjVYZchHR5YgPjvv0"/>
+</div>
+<div>
+<p class="font-syne font-bold text-white text-sm">Sarah Kovic</p>
+<p class="text-xs text-on-surface-variant">Mid-Market</p>
+</div>
+</div>
+<span class="font-mono text-xs text-on-surface-variant">+1 (415) 882-1093</span>
+<div class="flex justify-center">
+<div class="w-8 h-8 rounded-full bg-fire-orange/10 flex items-center justify-center text-fire-orange">
+<span class="material-symbols-outlined text-[18px]">call_made</span>
+</div>
+</div>
+<div>
+<span class="bg-missed-red/10 text-missed-red border border-missed-red/20 px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-tighter">MISSED</span>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-white/50">--</span>
+<span class="text-[11px] text-on-surface-variant">Today, 1:12 PM</span>
+</div>
+<div class="pr-8">
+<span class="text-xs text-on-surface-variant/40 font-mono italic">N/A</span>
+</div>
+<div class="flex justify-end opacity-0 group-hover:opacity-100 transition-all">
+<button class="w-8 h-8 flex items-center justify-center rounded-lg bg-fire-orange text-white hover:scale-110">
+<span class="material-symbols-outlined text-sm">call</span>
+</button>
+</div>
+</div>
+<!-- Row 3: Dominic Waters -->
+<div class="grid grid-cols-[2fr_1.5fr_0.6fr_1fr_1.5fr_1.5fr_1fr] px-6 py-5 items-center hover:bg-white/[0.03] transition-all group">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border-2 border-white/5 p-0.5">
+<img alt="Dominic W" class="w-full h-full rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnYeMh0E7KlgPTlkAktHmG0dvm-iCC-ZzwohaqieWDQ-nU_0plRtJXRxaopVwxEMrTdablmeLJJWHXmt2o8XaryA8JEZ3k1sHUQfEr5hEvv78Zuu0p-S2LHnCNQ_KOmXZ6R7dD2wpPPhcvNIL3rP0GYugDDGd9gLyzBFS_dl6Wv25rsXM7ZvHWMFiqxDNDRHJrfzUDb_ZUtnPeX3NzdKmEZj5qEKgjEQIYFKloz_jTUNXX3-ivgIwBkg1OytO2w5AWwADMOgebfVo"/>
+</div>
+<div>
+<p class="font-syne font-bold text-white text-sm">Dominic Waters</p>
+<p class="text-xs text-on-surface-variant">SMB Segment</p>
+</div>
+</div>
+<span class="font-mono text-xs text-on-surface-variant">+44 20 7946 0122</span>
+<div class="flex justify-center">
+<div class="w-8 h-8 rounded-full bg-connected-green/10 flex items-center justify-center text-connected-green">
+<span class="material-symbols-outlined text-[18px]">call_received</span>
+</div>
+</div>
+<div>
+<span class="bg-voicemail-blue/10 text-voicemail-blue border border-voicemail-blue/20 px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-tighter">VOICEMAIL</span>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-white">1m 02s</span>
+<span class="text-[11px] text-on-surface-variant">Today, 10:33 AM</span>
+</div>
+<div class="pr-8">
+<div class="flex justify-between items-center mb-1 text-[11px]">
+<span class="font-mono text-gold font-bold">68%</span>
+<span class="text-on-surface-variant/60">Average</span>
+</div>
+<div class="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-gold" style="width: 68%"></div>
+</div>
+</div>
+<div class="flex justify-end opacity-0 group-hover:opacity-100 transition-all">
+<button class="w-8 h-8 flex items-center justify-center rounded-lg bg-fire-orange text-white hover:scale-110">
+<span class="material-symbols-outlined text-sm">call</span>
+</button>
+</div>
+</div>
+<!-- Row 4: Elena Rodriguez -->
+<div class="grid grid-cols-[2fr_1.5fr_0.6fr_1fr_1.5fr_1.5fr_1fr] px-6 py-5 items-center hover:bg-white/[0.03] transition-all group">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border-2 border-fire-orange/30 p-0.5">
+<img alt="Elena R" class="w-full h-full rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRt_N07OFOPO0fWF8b8Q_mUKehhbSXHY1BRiLsFOKS6nMaX33lwlYnsDNyj_g7e0ix8YPOzgaiKkKO7lA-mgsm_KVCkTUq5mpj59PFOLtLrfqK1psjBYbMii8xQDOjfPQ9h9ISsYduVAAh5nY4IwTwFcX_52Aymx_v2IWXvkaGcePRPhTU1vg75WKWR4nOGvlO-uWhY61NImzxMzVGn_6I5GGtFMUNWIOoe5ywSoAH0cv8bGc2Rj8J_FX5tmcFFvUe13fKRPC1ACE"/>
+</div>
+<div>
+<p class="font-syne font-bold text-white text-sm">Elena Rodriguez</p>
+<p class="text-xs text-on-surface-variant">Key Account</p>
+</div>
+</div>
+<span class="font-mono text-xs text-on-surface-variant">+1 (212) 555-0198</span>
+<div class="flex justify-center">
+<div class="w-8 h-8 rounded-full bg-fire-orange/10 flex items-center justify-center text-fire-orange">
+<span class="material-symbols-outlined text-[18px]">call_made</span>
+</div>
+</div>
+<div>
+<span class="bg-connected-green/10 text-connected-green border border-connected-green/20 px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-tighter">CONNECTED</span>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-white">45m 12s</span>
+<span class="text-[11px] text-on-surface-variant">Yesterday, 4:50 PM</span>
+</div>
+<div class="pr-8">
+<div class="flex justify-between items-center mb-1 text-[11px]">
+<span class="font-mono text-connected-green font-bold">89%</span>
+<span class="text-on-surface-variant/60">Strong</span>
+</div>
+<div class="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-connected-green" style="width: 89%"></div>
+</div>
+</div>
+<div class="flex justify-end opacity-0 group-hover:opacity-100 transition-all">
+<button class="w-8 h-8 flex items-center justify-center rounded-lg bg-fire-orange text-white hover:scale-110">
+<span class="material-symbols-outlined text-sm">call</span>
+</button>
+</div>
+</div>
+<!-- Row 5: Marcus Vance -->
+<div class="grid grid-cols-[2fr_1.5fr_0.6fr_1fr_1.5fr_1.5fr_1fr] px-6 py-5 items-center hover:bg-white/[0.03] transition-all group">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full border-2 border-white/5 p-0.5">
+<img alt="Marcus V" class="w-full h-full rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuByybGvM9JVPRZBbn1fS2sJ9BlSHAAflqwLl0L_lWcGfUzzDBEtImzdgm8vYfVLQ_zdwWkKycL_plNdquny69vnRNOhkkpZ9G79mcdhK15WJ61EGS8a8b3VjKOJ5Hb-rXWWITfpawAdwycCbMNhWKCv7lSJ3H3LsY1dfStAY0u6zld79OVRH4Ar8mu28pqjW7jcIBJ7EbqudjeFqOzcdfc3yI6eAFGAvtHnvMalCMcIYqIsS8qfM1ZgHUkpULEl3PQoBygQZA-Qr84"/>
+</div>
+<div>
+<p class="font-syne font-bold text-white text-sm">Marcus Vance</p>
+<p class="text-xs text-on-surface-variant">Strategic Partner</p>
+</div>
+</div>
+<span class="font-mono text-xs text-on-surface-variant">+1 (800) 902-1200</span>
+<div class="flex justify-center">
+<div class="w-8 h-8 rounded-full bg-connected-green/10 flex items-center justify-center text-connected-green">
+<span class="material-symbols-outlined text-[18px]">call_received</span>
+</div>
+</div>
+<div>
+<span class="bg-connected-green/10 text-connected-green border border-connected-green/20 px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-tighter">CONNECTED</span>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-white">08m 22s</span>
+<span class="text-[11px] text-on-surface-variant">Yesterday, 2:15 PM</span>
+</div>
+<div class="pr-8">
+<div class="flex justify-between items-center mb-1 text-[11px]">
+<span class="font-mono text-missed-red font-bold">42%</span>
+<span class="text-on-surface-variant/60">Critical</span>
+</div>
+<div class="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-missed-red" style="width: 42%"></div>
+</div>
+</div>
+<div class="flex justify-end opacity-0 group-hover:opacity-100 transition-all">
+<button class="w-8 h-8 flex items-center justify-center rounded-lg bg-fire-orange text-white hover:scale-110">
+<span class="material-symbols-outlined text-sm">call</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Table Footer / Pagination -->
+<div class="px-6 py-4 bg-white/[0.02] border-t border-white/5 flex justify-between items-center">
+<span class="text-xs text-on-surface-variant/60">Showing 1-12 of 1,284 interactions</span>
+<div class="flex items-center gap-2">
+<button class="w-8 h-8 rounded-lg border border-white/10 flex items-center justify-center text-on-surface-variant hover:bg-white/5"><span class="material-symbols-outlined text-lg">chevron_left</span></button>
+<button class="w-8 h-8 rounded-lg fire-gradient-bg text-white text-xs font-bold">1</button>
+<button class="w-8 h-8 rounded-lg border border-white/10 text-on-surface-variant text-xs font-bold hover:bg-white/5">2</button>
+<button class="w-8 h-8 rounded-lg border border-white/10 text-on-surface-variant text-xs font-bold hover:bg-white/5">3</button>
+<button class="w-8 h-8 rounded-lg border border-white/10 flex items-center justify-center text-on-surface-variant hover:bg-white/5"><span class="material-symbols-outlined text-lg">chevron_right</span></button>
+</div>
+</div>
+</section>
+<!-- END: DataTable -->
+<!-- BEGIN: StatsFooter -->
+<section class="grid grid-cols-1 md:grid-cols-4 gap-6 pb-4">
+<div class="glass-card p-5 rounded-2xl flex items-center gap-5 border-l-4 border-fire-orange group cursor-pointer hover:bg-white/[0.08] transition-all">
+<div class="w-12 h-12 rounded-xl fire-gradient-bg flex items-center justify-center shadow-lg shadow-fire-orange/20">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1">trending_up</span>
+</div>
+<div>
+<p class="text-[10px] font-black uppercase tracking-widest text-fire-orange">Team Efficiency</p>
+<p class="font-syne text-2xl font-extrabold text-white">+12.4%</p>
+</div>
+</div>
+<div class="glass-card p-5 rounded-2xl flex items-center gap-5 group cursor-pointer hover:bg-white/[0.08] transition-all">
+<div class="w-12 h-12 rounded-xl bg-connected-green/10 flex items-center justify-center text-connected-green">
+<span class="material-symbols-outlined">forum</span>
+</div>
+<div>
+<p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Avg. Sentiment</p>
+<p class="font-syne text-2xl font-extrabold text-white">82/100</p>
+</div>
+</div>
+<div class="glass-card p-5 rounded-2xl flex items-center gap-5 group cursor-pointer hover:bg-white/[0.08] transition-all">
+<div class="w-12 h-12 rounded-xl bg-voicemail-blue/10 flex items-center justify-center text-voicemail-blue">
+<span class="material-symbols-outlined">schedule</span>
+</div>
+<div>
+<p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">Missed Today</p>
+<p class="font-syne text-2xl font-extrabold text-white">14</p>
+</div>
+</div>
+<div class="glass-card p-5 rounded-2xl flex items-center gap-5 group cursor-pointer hover:bg-white/[0.08] transition-all">
+<div class="w-12 h-12 rounded-xl bg-ai-purple/10 flex items-center justify-center text-ai-purple">
+<span class="material-symbols-outlined">psychology</span>
+</div>
+<div>
+<p class="text-[10px] font-black uppercase tracking-widest text-on-surface-variant">AI Insights</p>
+<p class="font-syne text-2xl font-extrabold text-white">Active</p>
+</div>
+</div>
+</section>
+<!-- END: StatsFooter -->
+</main>
+<!-- END: MainContent -->
+<script data-purpose="interaction">
+    // Add micro-interactions for table rows
+    document.querySelectorAll('.group').forEach(row => {
+      row.addEventListener('mouseenter', () => {
+        row.style.transform = 'translateY(-1px)';
+      });
+      row.addEventListener('mouseleave', () => {
+        row.style.transform = 'translateY(0)';
+      });
+    });
+  </script>
+</body></html>
