@@ -571,10 +571,13 @@ current_ext_channel_id = None
 # channels/bridges. Track our own externalMedia channel IDs so their
 # StasisStart is recognized and skipped, not treated as a new call. ---
 _external_media_channel_ids = set()
+_sales_channel_ids = set()
 
+# near your other channel-tracking globals
+current_sales_channel_id = None
 
 def bridge_call_to_external_media(caller_channel_id):
-    global current_bridge_id, current_ext_channel_id
+    global current_bridge_id, current_ext_channel_id, current_sales_channel_id
     bridge = ari_post("/bridges", type="mixing")
     bridge_id = bridge["id"]
     ari_post(f"/bridges/{bridge_id}/addChannel", channel=caller_channel_id)
@@ -587,10 +590,24 @@ def bridge_call_to_external_media(caller_channel_id):
     )
     _external_media_channel_ids.add(ext_channel["id"])
     ari_post(f"/bridges/{bridge_id}/addChannel", channel=ext_channel["id"])
-    # Remember them so StasisEnd can tear them down instead of leaking.
+
     current_bridge_id = bridge_id
     current_ext_channel_id = ext_channel["id"]
     log("CALL", f"bridged {caller_channel_id} + externalMedia {ext_channel['id']} into bridge {bridge_id}")
+
+    # --- TRANSFER (increment 1): originate the salesperson leg into the SAME
+    # bridge, muted. Ringing/answer is async -- the actual addChannel + mute
+    # happen when this channel's StasisStart fires (handled below). Tracked in
+    # _sales_channel_ids so its StasisStart is NOT treated as a new caller. ---
+    sales = ari_post(
+        "/channels",
+        endpoint="PJSIP/sales-endpoint",
+        app=APP_NAME,
+        callerId="Sales",
+    )
+    _sales_channel_ids.add(sales["id"])
+    current_sales_channel_id = sales["id"]
+    log("SALES", f"originating sales leg {sales['id']} (ringing, will join muted)")
 
 
 # --- STEP 3 ADDITION: the container's sounds dir may not exist yet --
@@ -604,7 +621,7 @@ def ensure_sounds_dir():
 
 def ari_event_loop():
     global current_channel_id, current_company, current_voice, conversation_history
-    global current_bridge_id, current_ext_channel_id
+    global current_bridge_id, current_ext_channel_id, current_sales_channel_id
 
     ws_url = f"ws://{ARI_HOST}/ari/events?api_key={ARI_USER}:{ARI_PASSWORD}&app={APP_NAME}"
     log("ARI", f"connecting to ws://{ARI_HOST}/ari/events?api_key=***:***&app={APP_NAME}")
@@ -629,6 +646,17 @@ def ari_event_loop():
                 if channel_id in _external_media_channel_ids:
                     # Our own externalMedia channel entering Stasis, not a new
                     # call -- already bridged inside bridge_call_to_external_media().
+                    continue
+
+                if channel_id in _sales_channel_ids:
+                    # Our own salesperson leg answered -- add to the active bridge, muted.
+                    ari_post(f"/bridges/{current_bridge_id}/addChannel", channel=channel_id)
+                    requests.post(
+                        f"http://{ARI_HOST}/ari/channels/{channel_id}/mute",
+                        params={"direction": "in"},
+                        auth=(ARI_USER, ARI_PASSWORD),
+                    )
+                    log("SALES", f"joined bridge muted: {channel_id}")
                     continue
 
                 # --- MULTI-COMPANY: pick the company from the Stasis argument the
@@ -659,18 +687,27 @@ def ari_event_loop():
 
             elif event_type == "StasisEnd":
                 channel_id = event["channel"]["id"]
+
+                # Our own sales/externalMedia legs ending -- just untrack, no teardown cascade.
+                if channel_id in _sales_channel_ids:
+                    _sales_channel_ids.discard(channel_id)
+                    continue
+
                 if channel_id == current_channel_id:
                     log("CALL", f"ended: {channel_id}", blank_before=2)
                     current_channel_id = None
-                    # --- BUGFIX (2026-07-13): tear down this call's bridge +
-                    # externalMedia channel so they don't leak into the Stasis app. ---
                     if current_ext_channel_id:
                         ari_delete(f"/channels/{current_ext_channel_id}")
                     if current_bridge_id:
                         ari_delete(f"/bridges/{current_bridge_id}")
+                    # --- TRANSFER: also hang up + untrack the sales leg ---
+                    if current_sales_channel_id:
+                        ari_delete(f"/channels/{current_sales_channel_id}")
+                        _sales_channel_ids.discard(current_sales_channel_id)
                     _external_media_channel_ids.discard(current_ext_channel_id)
                     current_ext_channel_id = None
                     current_bridge_id = None
+                    current_sales_channel_id = None
         except Exception as e:
             log("ARI", f"error handling event ({type(e).__name__}: {e}); call skipped, bridge still up")
 
