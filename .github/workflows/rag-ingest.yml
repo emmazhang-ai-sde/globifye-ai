@@ -1,8 +1,11 @@
-# RAG Step 5 - keep the vector DB fresh automatically.
+# RAG Step 5 - keep the vector DB fresh automatically, then guard retrieval quality.
 # Three triggers: daily safety net, instant on KB edits, manual button.
-# Fails safe: if a run breaks, the previous vectors stay in place and live
-# calls are unaffected (ingest is entirely off the call path).
-# Doc: design-docs-rag/rag-build-step-by-step/step5-ingest-github-action.md
+# Two steps: (1) ingest the corpus into the vector DB; (2) run the Step 4 eval as
+# a quality gate - the build fails if document-level recall@3 regresses.
+# Fails safe: ingest itself is off the call path, so a broken run leaves the
+# previous vectors in place and live calls are unaffected.
+# Docs: design-docs-rag/rag-build-step-by-step/step5-ingest-github-action.md
+#       design-docs-rag/rag-build-step-by-step/step4-retrieval-eval.md
 
 name: RAG ingest
 
@@ -23,9 +26,9 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12" # the script needs only stdlib + requests
+          python-version: "3.12" # stdlib + requests (ingest) + pyyaml (eval test set)
 
-      - run: pip install requests
+      - run: pip install requests pyyaml
 
       - name: Run the ingest
         env:
@@ -33,3 +36,14 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python -u dial-forge-ai/rag/ingest.py
+
+      - name: Guard retrieval quality (Step 4 eval)
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        # Document-level recall@3 is 100% for both companies today; 0.8 is a
+        # regression floor with headroom. Exits 1 (fails the build) if any
+        # company drops below it, so a KB or chunking change that quietly breaks
+        # retrieval surfaces here instead of on a live call.
+        run: python -u dial-forge-ai/rag/eval.py --min-hit-rate 0.8

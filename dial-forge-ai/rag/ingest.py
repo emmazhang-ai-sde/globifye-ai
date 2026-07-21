@@ -16,12 +16,15 @@ Design doc: ../design-docs-sip/... -> see
 Step doc:   design-docs-rag/rag-build-step-by-step/step2-ingest-job.md
 Schema:     sip/rag/rag-schema.sql (RAG Step 1 -- must be applied first)
 
-CORE vs DETAIL (decision recorded in the step doc, "Decision 1"):
-  The corpus folders hold only *detail* content. The playbook (`core`) stays
-  static in the agent code + single-file KB and is injected every turn, so this
-  job writes only `detail` rows today. The tagger still marks a section `core`
-  if a playbook section ever lands in the corpus, so the machinery is ready with
-  no code change. See tag_kind().
+CORE vs DETAIL (decision recorded in the step doc, "Decision 1"; updated 2026-07-21):
+  Each company folder holds a `sales-playbook.md` whose four sections (sales
+  pipeline, qualifying questions, objection handling, when-you-don't-know) the
+  tagger marks `core`; every other corpus file is `detail`. So this job writes
+  both: `core` rows (the always-injected playbook) and `detail` rows (the
+  retrieved facts). Decision 1 was originally detail-only with the playbook static
+  in code; it moved to a per-folder playbook doc (Option 3) once each company
+  needed its own `core` in the DB for call-time retrieval (Step 3 fetches
+  kind='core'). See tag_kind().
 
 Zero heavy deps: stdlib + `requests` only (no openai / supabase SDK), matching
 the SIP scripts. Keys load from ai-pipeline/.env.local, falling back to the
@@ -69,7 +72,8 @@ CHARS_PER_TOKEN = 4                                  # rough estimate (no tiktok
 
 # A chunk is `core` iff its section title matches one of the playbook markers.
 # These are the shared-KB-template playbook titles from the design doc (section
-# 2.1). Corpus folders contain none of these today, so every row is `detail`.
+# 2.1). Each company's sales-playbook.md carries exactly these titles, so its
+# sections tag `core`; every other corpus file tags `detail`.
 CORE_TITLE_MARKERS = (
     "sales pipeline",
     "qualifying question",

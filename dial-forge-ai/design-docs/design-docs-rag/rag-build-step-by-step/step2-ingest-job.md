@@ -31,31 +31,31 @@ A live ingest needed two things. Both were unmet on 2026-07-15 and both were ope
 
 ## 2. The technical decisions, and why
 
-### Decision 1: the DB holds `detail` only; the playbook (`core`) stays static
+### Decision 1: a per-company playbook doc lives in the corpus as `core` (updated 2026-07-21)
 
 **This is the one real design choice in the whole build, so the reasoning is recorded in full.**
 
 **Requirement.** The agent is a sales rep, not an FAQ bot. Every single turn its prompt needs the **playbook**: the five pipeline stages, qualifying questions, common objections, and the "when you don't know" fallback rule. That text drives the conversation and must never be dropped. Separately, it needs **detail** (products, cuts, pricing, specs), but only the parts relevant to what the caller just asked.
 
-**The tension we hit.** The corpus folders that RAG ingests contain *only detail content*. The playbook lives in the single-file KB and in the agent code, **not** in the folders. So a naive "ingest the folder, tag playbook sections `core`" produces **zero** `core` chunks. The design doc's own open question flagged this as unresolved. Three ways to resolve it:
+**The tension we hit.** At the start, the corpus folders contained *only detail content* — the playbook lived in the single-file KB and in the agent code, **not** in the folders — so a naive "ingest the folder, tag playbook sections `core`" produced **zero** `core` chunks. The design doc's own open question flagged this as unresolved. Three ways to resolve it:
 
 | Option | What lands in the DB | Where the playbook lives | Cost taken on |
 |---|---|---|---|
-| **1. Detail-only (chosen)** | detail chunks only | static, in code + single-file KB, injected every turn (as today) | none; no new content, matches today's design |
+| 1. Detail-only | detail chunks only | static, in code + single-file KB, injected every turn | none; no new content — the original choice |
 | 2. Also ingest the playbook | detail + core rows | in the DB, parsed out of the single-file KB | the single file also holds detail sections that would duplicate the folder docs, so a dedup rule is needed; the playbook still also sits in code |
-| 3. A playbook doc per folder | detail + core rows | a new authored file in each folder | new files to write and keep in sync with the code |
+| **3. A playbook doc per folder (chosen 2026-07-21)** | detail + core rows | a new authored `sales-playbook.md` in each folder | one authored file per company, kept in sync with the agent's behavior rules |
 
 > **Why the playbook does not belong in a vector DB:**
 > A vector DB earns its keep by letting you retrieve a *few relevant chunks out of many*. The playbook is the opposite: small, fixed, the same shape for every company, and needed on *every* turn no matter what the caller says. Putting it in the DB adds machinery (a dedup rule, a second source file) and buys nothing, because you would just fetch all of it every time anyway. Retrieval is for the *detail that grows into catalogs*. That is the part worth narrowing.
 
-**The choice: Option 1.** The reasoning chain:
+**The choice: originally Option 1, moved to Option 3 on 2026-07-21.** The build first shipped Option 1 (detail-only; the playbook static in code), then moved to Option 3 the moment call-time retrieval (Step 3) needed a *per-company* playbook as `core` in the DB — each company runs a different sale, so one in-code playbook could not serve both Pacific Beef and GlobiFYE. We authored one `sales-playbook.md` per company folder; the tagger promotes its four sections to `core` with no code change — exactly the "reachable later" path Option 1 had reserved. The reasoning, and why the move stayed cheap:
 
-1. RAG's whole job here is to narrow the detail. The playbook is not a retrieval target and never will be.
-2. It is the smallest, lowest-risk change: RAG swaps "inject *all* the detail every turn" for "retrieve the *relevant* detail." The playbook keeps working exactly as it does today. Nothing on the live call path changes shape.
-3. It forecloses nothing. The `core`/`detail` tagging machinery is built now; the `core` rows are simply empty. The day a company's playbook needs to live in the corpus (a customer uploads their own), dropping a playbook document into the folder makes the tagger mark it `core` automatically - Option 3, reachable later with zero code change.
-4. Options 2 and 3 solve "make the DB the single source for the playbook too," which only matters once the playbook becomes UI-editable or customer-owned. That rollout signal is not met. Build each piece when its signal fires.
+1. RAG's whole job here is to narrow the detail. The playbook is still not a retrieval target — `core` rows are fetched whole by `kind='core'`, never through similarity search.
+2. Option 1 was the smallest first step: RAG swapped "inject *all* the detail every turn" for "retrieve the *relevant* detail," and nothing on the live call path changed shape.
+3. Option 1 foreclosed nothing. The `core`/`detail` tagging machinery was built from day one with the `core` rows empty; authoring a playbook doc per folder simply filled them — Option 3, reached with zero code change, just as planned.
+4. The move was triggered by a real signal: per-company playbooks feeding Step 3's fetch of `kind='core'`. Until that signal fired, keeping the playbook in code was right; once it fired, the DB became the cleaner single home.
 
-**Why keep the `core`/`detail` machinery at all, if everything is `detail` today?** Because it costs nothing and it is already proven correct: run the same chunker on the single-file KB (which *does* contain the playbook) and all four playbook sections come back tagged `core` (see the checkpoint log). Dormant, not absent.
+**The `core`/`detail` machinery is now active, not dormant.** Since 2026-07-21 the ingest writes real `core` rows — nine of them (five for Pacific Beef, four for GlobiFYE), one `sales-playbook.md` per company — alongside the 109 `detail` rows. The tagger had been proven correct before it had live input (the same chunker run on the playbook returns exactly the four playbook sections tagged `core`), so switching it on was a content change, not a code change.
 
 ### Decision 2: cut along the document's own structure, never through a table
 
@@ -106,7 +106,7 @@ Commands and the verification SQL: appendix.
 **2026-07-15 - chunk/tag pipeline verified, embed/write still gated.**
 
 - Dry-run over the real corpus: 20 files -> 109 chunks, all `detail`, each carrying its document + section title inside the chunk text.
-- **The tagger is proven, not just idle:** running the same chunker on the single-file KB (which *does* contain the playbook) returns exactly the four playbook sections tagged `core` and the rest `detail`. This is the evidence behind Decision 1: `core` is dormant, not broken.
+- **The tagger is proven, not just idle:** running the same chunker on the single-file KB (which *does* contain the playbook) returns exactly the four playbook sections tagged `core` and the rest `detail`. This was the evidence behind Decision 1 while `core` was still empty; since 2026-07-21 each company's `sales-playbook.md` is ingested, so `core` now holds 9 real rows.
 - **A real chunker bug, found and fixed here:** the first splitter only cut at blank lines, so a run-on block with no blank lines (the FAQ) came out as one oversized chunk. Fixed by adding finer split levels that still keep tables whole. After the fix, no chunk exceeds the size budget.
 - **Both gates were discovered by checking reality first,** not by a failed run: a direct database read proved the table was absent, and a structural check of the env file proved the key line was present but empty. Both were recorded up front so the live run was never attempted blind.
 
