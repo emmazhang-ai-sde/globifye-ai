@@ -141,7 +141,7 @@
 <div class="space-y-2">
 <div class="flex justify-between items-center ml-1">
 <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">Password</label>
-<a class="text-[10px] font-bold text-fire-orange hover:text-fire-red transition-colors uppercase tracking-wider" href="./#">Forgot password?</a>
+<a class="text-[10px] font-bold text-fire-orange hover:text-fire-red transition-colors uppercase tracking-wider" href="#">Forgot password?</a>
 </div>
 <div class="relative">
 <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">lock</span>
@@ -168,7 +168,7 @@
         </button>
 <!-- Footer Link -->
 <div class="mt-10 text-center">
-<p class="text-sm text-on-surface-variant">Need to switch roles? <a class="text-fire-orange font-bold hover:underline underline-offset-4 ml-1" href="./{{DATA:SCREEN:SCREEN_61}}">Sign Up</a></p>
+<p class="text-sm text-on-surface-variant">Need to switch roles? <button onclick="clearPersonaAndNavigate('./OnboardingStep1.html')" class="text-fire-orange font-bold hover:underline underline-offset-4 ml-1">Sign Up</button></p>
 </div>
 </section>
 <!-- END: Sign In Section -->
@@ -176,9 +176,9 @@
 <!-- END: Glass Login Card -->
 <!-- BEGIN: System Footer Links -->
 <footer class="mt-8 flex justify-center gap-6 opacity-40 hover:opacity-60 transition-opacity">
-<a class="text-[10px] font-bold uppercase tracking-widest hover:text-white" href="./#">Privacy Policy</a>
-<a class="text-[10px] font-bold uppercase tracking-widest hover:text-white" href="./#">Terms of Service</a>
-<a class="text-[10px] font-bold uppercase tracking-widest hover:text-white" href="./#">System Status</a>
+<a class="text-[10px] font-bold uppercase tracking-widest hover:text-white" href="#">Privacy Policy</a>
+<a class="text-[10px] font-bold uppercase tracking-widest hover:text-white" href="#">Terms of Service</a>
+<a class="text-[10px] font-bold uppercase tracking-widest hover:text-white" href="#">System Status</a>
 </footer>
 <!-- END: System Footer Links -->
 </main>
@@ -218,11 +218,62 @@
   </script>
 <!-- END: Interactivity Script -->
 
+<script data-purpose="persona-state-management">
+  // State management object
+  const appState = {
+    selectedPersona: null,
+    tempPersona: null
+  };
 
+  // Load state from localStorage if available
+  function loadState() {
+    try {
+      const saved = localStorage.getItem('dialforgeState');
+      if (saved) {
+        const state = JSON.parse(saved);
+        appState.selectedPersona = state.selectedPersona || null;
+      }
+    } catch (e) {
+      console.log('Could not load state:', e);
+    }
+  }
 
+  // Save state to localStorage
+  function saveState() {
+    try {
+      localStorage.setItem('dialforgeState', JSON.stringify({
+        selectedPersona: appState.selectedPersona
+      }));
+    } catch (e) {
+      console.log('Could not save state:', e);
+    }
+  }
 
+  // Select persona from persona card and navigate to onboarding
+  function selectPersonaAndNavigate(persona, url) {
+    appState.selectedPersona = persona;
+    appState.tempPersona = null;
+    saveState();
+    window.location.href = url;
+  }
 
+  // Navigate to onboarding without selecting a persona (CTA buttons)
+  function clearPersonaAndNavigate(url) {
+    appState.selectedPersona = null;
+    appState.tempPersona = null;
+    try {
+      localStorage.setItem('dialforgeState', JSON.stringify({
+        selectedPersona: null
+      }));
+    } catch (e) {
+      console.log('Could not clear state:', e);
+    }
+    window.location.href = url;
+  }
 
+  // Initialize state on page load
+  loadState();
+</script>
 
 
 </body></html>

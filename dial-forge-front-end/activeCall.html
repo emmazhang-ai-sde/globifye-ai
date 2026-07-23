@@ -172,6 +172,37 @@
       0% { opacity: 0; transform: translateY(16px) scale(0.97); }
       100% { opacity: 1; transform: translateY(0) scale(1); }
     }
+    /* Toast Notification Styles */
+    @keyframes toast-in {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes toast-out {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+    }
+    .toast-notification {
+      animation: toast-in 0.3s ease-out forwards;
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      z-index: 9998;
+    }
+    .toast-notification.out {
+      animation: toast-out 0.3s ease-in forwards;
+    }
     .modal-in {
       animation: modal-in 0.25s ease-out forwards;
     }
@@ -897,150 +928,9 @@ animation: fade-in 0.3s ease-out;
 
 <!--Models-->
 
-<!-- Mute Modal
-<div id="mute-modal" class="modal-overlay">
-<div class="modal-content relative">
-<button class="absolute top-4 right-4 text-gray-400 hover:text-white" id="mute-close">
-<span class="material-symbols-outlined">close</span>
-</button>
-<h2 class="font-syne text-lg font-bold mb-4">Microphone Settings</h2>
-<div class="space-y-5">
-<div>
-<label class="text-[11px] font-bold uppercase text-gray-500 block mb-2">Microphone Status</label>
-<div class="flex items-center gap-2 p-3 bg-white/5 rounded-lg border border-white/10">
-<span class="w-2 h-2 rounded-full bg-tertiary"></span>
-<span class="text-sm">Microphone Active</span>
-</div>
-</div>
-<div>
-<label class="text-[11px] font-bold uppercase text-gray-500 block mb-2">Input Device</label>
-<select class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:border-fire-accent/50 focus:outline-none">
-<option>Built-in Microphone</option>
-<option>External USB Mic</option>
-<option>Headset Microphone</option>
-</select>
-</div>
-<div>
-<label class="text-[11px] font-bold uppercase text-gray-500 block mb-2">Microphone Sensitivity</label>
-<input type="range" min="0" max="100" value="75" class="w-full"/>
-<div class="text-[10px] text-gray-500 mt-1">75%</div>
-</div>
-<div class="space-y-2">
-<label class="flex items-center gap-2 cursor-pointer">
-<input type="checkbox" checked class="rounded"/>
-<span class="text-sm">Noise Suppression</span>
-</label>
-<label class="flex items-center gap-2 cursor-pointer">
-<input type="checkbox" checked class="rounded"/>
-<span class="text-sm">Echo Cancellation</span>
-</label>
-</div>
-</div>
-<div class="flex gap-3 mt-6">
-<button class="flex-1 px-4 py-2 bg-fire-gradient hover:opacity-90 text-white rounded-lg font-bold transition-all" id="mute-apply">Apply</button>
-<button class="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg font-bold transition-all" id="mute-dismiss">Close</button>
-</div>
-</div>
-</div>
-</div>
-
-<- Hold Modal ->
-<div id="hold-modal" class="modal-overlay">
-<div class="modal-content relative">
-<button class="absolute top-4 right-4 text-gray-400 hover:text-white" id="hold-close">
-<span class="material-symbols-outlined">close</span>
-</button>
-<h2 class="font-syne text-lg font-bold mb-4">Call Hold</h2>
-<div class="space-y-5">
-<div class="p-4 bg-fire-accent/10 rounded-lg border border-fire-accent/20">
-<p class="text-[13px]">Call is currently <span class="font-bold text-fire-accent">on hold</span></p>
-</div>
-<div>
-<label class="text-[11px] font-bold uppercase text-gray-500 block mb-2">Hold Duration</label>
-<p class="text-2xl font-syne font-bold" id="hold-timer">00:45</p>
-</div>
-<p class="text-[11px] text-gray-500">The customer cannot hear you while the call is on hold.</p>
-</div>
-<div class="flex gap-3 mt-6">
-<button class="flex-1 px-4 py-2 bg-tertiary hover:opacity-90 text-surface rounded-lg font-bold transition-all" id="hold-resume">Resume Call</button>
-<button class="flex-1 px-4 py-2 bg-error-red hover:opacity-90 text-white rounded-lg font-bold transition-all" id="hold-end">End Call</button>
-</div>
-</div>
-</div>
-</div>
-
-<- Record Modal ->
-<div id="record-modal" class="modal-overlay">
-<div class="modal-content relative">
-<button class="absolute top-4 right-4 text-gray-400 hover:text-white" id="record-close">
-<span class="material-symbols-outlined">close</span>
-</button>
-<h2 class="font-syne text-lg font-bold mb-4">Recording Settings</h2>
-<div class="space-y-5">
-<div class="flex items-center gap-3 p-4 bg-red-500/10 rounded-lg border border-red-500/20">
-<span class="material-symbols-outlined text-red-500" style="font-variation-settings: 'FILL' 1;">fiber_manual_record</span>
-<div>
-<p class="text-[11px] font-bold text-red-500 uppercase">Recording Active</p>
-<p class="text-[10px] text-gray-500">This call is being recorded</p>
-</div>
-</div>
-<div>
-<label class="text-[11px] font-bold uppercase text-gray-500 block mb-2">Recording Time</label>
-<p class="text-2xl font-syne font-bold" id="record-timer">03:45</p>
-</div>
-<div>
-<label class="text-[11px] font-bold uppercase text-gray-500 block mb-2">Recording Quality</label>
-<select class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:border-fire-accent/50">
-<option>HD (48 kHz)</option>
-<option>Standard (16 kHz)</option>
-<option>Low (8 kHz)</option>
-</select>
-</div>
-</div>
-<div class="flex gap-3 mt-6">
-<button class="flex-1 px-4 py-2 bg-tertiary hover:opacity-90 text-surface rounded-lg font-bold transition-all" id="record-stop">Stop Recording</button>
-<button class="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg font-bold transition-all" id="record-dismiss">Close</button>
-</div>
-</div>
-</div>
-
-<- Add Note Modal ->
-<div id="note-modal" class="modal-overlay">
-<div class="modal-content relative">
-<button class="absolute top-4 right-4 text-gray-400 hover:text-white" id="note-close">
-<span class="material-symbols-outlined">close</span>
-</button>
-<h2 class="font-syne text-lg font-bold mb-4">Add Note</h2>
-<div class="space-y-4">
-<div>
-<label class="text-[11px] font-bold uppercase text-gray-500 block mb-2">Note Title</label>
-<input type="text" id="note-title" placeholder="Brief summary..." class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:border-fire-accent/50 focus:outline-none"/>
-</div>
-<div>
-<label class="text-[11px] font-bold uppercase text-gray-500 block mb-2">Note</label>
-<textarea id="note-content" placeholder="Write your note here..." class="w-full h-32 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm resize-none focus:border-fire-accent/50 focus:outline-none"></textarea>
-</div>
-<div>
-<label class="text-[11px] font-bold uppercase text-gray-500 block mb-2">Category</label>
-<select id="note-category" class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:border-fire-accent/50">
-<option>General</option>
-<option>Follow-up</option>
-<option>Objection</option>
-<option>Pricing Discussion</option>
-<option>Next Steps</option>
-</select>
-</div>
-</div>
-<div class="flex gap-3 mt-6">
-<button class="flex-1 px-4 py-2 bg-fire-gradient hover:opacity-90 text-white rounded-lg font-bold transition-all" id="note-save">Save Note</button>
-<button class="flex-1 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg font-bold transition-all" id="note-cancel">Cancel</button>
-</div>
-</div>
-</div> -->
-
 <!-- Camera Configuration Modal -->
 <div id="camera-modal-overlay" class="modal-overlay hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center" onclick="closeCameraModal(event)">
-<div class="modal-content liquid-glass rounded-3xl w-full max-w-2xl mx-4 p-10 relative overflow-hidden" onclick="event.stopPropagation()">
+<div class="modal-content liquid-glass rounded-3xl w-full max-w-2xl mx-4 p-10 relative overflow-auto" onclick="event.stopPropagation()">
 <!-- Close Button -->
 <button onclick="closeCameraModal()" class="absolute top-6 right-6 p-2 hover:bg-white/10 rounded-full transition-colors" title="Close (Esc)">
 <span class="material-symbols-outlined text-gray-300">close</span>
@@ -1112,7 +1002,7 @@ Start Camera
 
 <!-- Screen Share Modal -->
 <div id="screen-share-modal-overlay" class="modal-overlay hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center" onclick="closeScreenShareModal(event)">
-<div class="modal-content liquid-glass rounded-3xl w-full max-w-3xl mx-4 p-10 relative overflow-hidden" onclick="event.stopPropagation()">
+<div class="modal-content liquid-glass rounded-3xl w-full max-w-3xl mx-4 p-10 relative overflow-auto" onclick="event.stopPropagation()">
 <!-- Close Button -->
 <button onclick="closeScreenShareModal()" class="absolute top-6 right-6 p-2 hover:bg-white/10 rounded-full transition-colors" title="Close (Esc)">
 <span class="material-symbols-outlined text-gray-300">close</span>
@@ -1178,7 +1068,7 @@ Start Sharing
 
 <!-- Transfer Modal -->
 <div id="transfer-modal-overlay" class="modal-overlay hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center" onclick="closeTransferModal(event)">
-<div class="modal-content liquid-glass rounded-3xl w-full max-w-3xl mx-4 p-10 relative overflow-hidden" onclick="event.stopPropagation()">
+<div class="modal-content liquid-glass rounded-3xl w-full max-w-3xl mx-4 p-10 relative overflow-auto" onclick="event.stopPropagation()">
 <!-- Close Button -->
 <button onclick="closeTransferModal()" class="absolute top-6 right-6 p-2 hover:bg-white/10 rounded-full transition-colors" title="Close (Esc)">
 <span class="material-symbols-outlined text-gray-300">close</span>
@@ -1239,7 +1129,7 @@ Start Transfer
 
 <!-- VM Studio Modal -->
 <div id="vm-studio-modal-overlay" class="modal-overlay hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center" onclick="closeVMStudioModal(event)">
-<div class="modal-content liquid-glass rounded-3xl w-full max-w-3xl mx-4 p-10 relative overflow-hidden" onclick="event.stopPropagation()">
+<div class="modal-content liquid-glass rounded-3xl w-full max-w-3xl mx-4 p-10 relative overflow-auto" onclick="event.stopPropagation()">
 <!-- Close Button -->
 <button onclick="closeVMStudioModal()" class="absolute top-6 right-6 p-2 hover:bg-white/10 rounded-full transition-colors" title="Close (Esc)">
 <span class="material-symbols-outlined text-gray-300">close</span>
@@ -1265,6 +1155,7 @@ Start Transfer
 <p class="text-xs text-gray-500">0:42 • Oct 12, 2023</p>
 </div>
 <button class="p-2 hover:bg-fire-accent/10 rounded transition-colors" title="Play"><span class="material-symbols-outlined text-gray-400 group-hover:text-fire-accent">play_circle</span></button>
+<button class="p-2 hover:bg-tertiary-fixed/10 rounded transition-colors" title="Drop" onclick="dropVoicemail('Follow-up: Real Estate Lead')"><span class="material-symbols-outlined text-gray-400 group-hover:text-tertiary-fixed">phone_in_talk</span></button>
 <button class="p-2 hover:bg-error-red/10 rounded transition-colors" title="Delete"><span class="material-symbols-outlined text-gray-400 group-hover:text-error-red">delete</span></button>
 </div>
 <div class="p-4 bg-surface-container/60 rounded-lg border-l-4 border-fire-accent transition-all group flex items-center gap-4">
@@ -1277,6 +1168,7 @@ Start Transfer
 </div>
 <span class="px-2 py-0.5 bg-fire-accent/20 text-[10px] font-bold text-fire-accent rounded">Active</span>
 <button class="p-2 hover:bg-fire-accent/10 rounded transition-colors" title="Play"><span class="material-symbols-outlined text-gray-400 group-hover:text-fire-accent">play_circle</span></button>
+<button class="p-2 hover:bg-tertiary-fixed/10 rounded transition-colors" title="Drop" onclick="dropVoicemail('Aggressive Intro - Direct Dial')"><span class="material-symbols-outlined text-gray-400 group-hover:text-tertiary-fixed">phone_in_talk</span></button>
 <button class="p-2 hover:bg-error-red/10 rounded transition-colors" title="Delete"><span class="material-symbols-outlined text-gray-400 group-hover:text-error-red">delete</span></button>
 </div>
 <div class="p-4 bg-surface-container-low/50 rounded-lg border border-glass-border hover:border-fire-accent/50 transition-all group flex items-center gap-4">
@@ -1288,6 +1180,7 @@ Start Transfer
 <p class="text-xs text-gray-500">0:26 • Oct 08, 2023</p>
 </div>
 <button class="p-2 hover:bg-fire-accent/10 rounded transition-colors" title="Play"><span class="material-symbols-outlined text-gray-400 group-hover:text-fire-accent">play_circle</span></button>
+<button class="p-2 hover:bg-tertiary-fixed/10 rounded transition-colors" title="Drop" onclick="dropVoicemail('No Answer: Second Touch')"><span class="material-symbols-outlined text-gray-400 group-hover:text-tertiary-fixed">phone_in_talk</span></button>
 <button class="p-2 hover:bg-error-red/10 rounded transition-colors" title="Delete"><span class="material-symbols-outlined text-gray-400 group-hover:text-error-red">delete</span></button>
 </div>
 </div>
@@ -1349,6 +1242,9 @@ Save & Sync
 </div>
 </div>
 </div>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
 
 <script data-purpose="state-management">
 // ===== APPLICATION STATE =====
@@ -1804,6 +1700,61 @@ function startVMRecording() {
   saveState();
 }
 
+// ===== DROP FUNCTIONALITY =====
+function dropVoicemail(voicemailName) {
+  // Check if there's an active call (simulation assumes there is)
+  const isActiveCall = true; // In a real implementation, check actual call state
+  
+  if (!isActiveCall) {
+    showToast('No active call. Drop requires an active call.', 'error');
+    return;
+  }
+  
+  // Simulate dropping the voicemail
+  showToast(`Voicemail dropped successfully: "${voicemailName}"`, 'success');
+  
+  // Close the VM Studio modal after successful drop
+  setTimeout(() => {
+    closeVMStudioModal();
+  }, 500);
+}
+
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast-notification';
+  
+  // Determine styling based on type
+  let bgColor = 'bg-tertiary-fixed';
+  let textColor = 'text-white';
+  let iconName = 'check_circle';
+  
+  if (type === 'error') {
+    bgColor = 'bg-error-red';
+    iconName = 'error';
+  } else if (type === 'info') {
+    bgColor = 'bg-secondary-container';
+    iconName = 'info';
+  }
+  
+  toast.innerHTML = `
+    <div class="flex items-center gap-3 px-6 py-4 ${bgColor} ${textColor} rounded-lg shadow-lg glass-card">
+      <span class="material-symbols-outlined">${iconName}</span>
+      <span class="font-medium text-sm">${message}</span>
+    </div>
+  `;
+  
+  container.appendChild(toast);
+  
+  // Auto-remove after 3 seconds
+  setTimeout(() => {
+    toast.classList.add('out');
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }, 3000);
+}
+
 // ===== QUICK NOTE FUNCTIONS =====
 function openQuickNoteFlow() {
   S.quickNoteModalOpen = true;
@@ -2007,16 +1958,6 @@ window.addEventListener('beforeunload', function() {
 </script>
 
 <script data-purpose="interface-interactivity">
-    // Example: Toggle control button active state
-    // document.querySelectorAll('.control-bar button').forEach(btn => {
-    //   btn.addEventListener('click', function() {
-    //     if (!this.classList.contains('bg-error-red')) {
-    //       this.classList.toggle('bg-fire-accent/20');
-    //       this.classList.toggle('text-fire-accent');
-    //       this.classList.toggle('border-fire-accent/30');
-    //     }
-    //   });
-    // });
    
     // ==================== AI COACH ROTATION ====================
 const coachingSuggestions = [
@@ -2077,185 +2018,6 @@ function stopCoachRotation() {
 
 startCoachRotation();
 
-// ==================== MODAL SYSTEM ====================
-// const modals = {
-//   mute: { overlay: 'mute-modal', closeBtn: 'mute-close', dismissBtn: 'mute-dismiss', applyBtn: 'mute-apply' },
-//   hold: { overlay: 'hold-modal', closeBtn: 'hold-close', resumeBtn: 'hold-resume', endBtn: 'hold-end' },
-//   record: { overlay: 'record-modal', closeBtn: 'record-close', stopBtn: 'record-stop', dismissBtn: 'record-dismiss' },
-//   note: { overlay: 'note-modal', closeBtn: 'note-close', saveBtn: 'note-save', cancelBtn: 'note-cancel' }
-// };
-
-// function openModal(modalName) {
-//   const overlay = document.getElementById(modals[modalName].overlay);
-//   if (overlay) overlay.classList.add('active');
-// }
-
-// function closeModal(modalName) {
-//   const overlay = document.getElementById(modals[modalName].overlay);
-//   if (overlay) overlay.classList.remove('active');
-// }
-
-// // Close modals on escape key
-// document.addEventListener('keydown', (e) => {
-//   if (e.key === 'Escape') {
-//     Object.keys(modals).forEach(key => closeModal(key));
-//     closeScreenShareModal();
-//     closeCameraModal();
-//   }
-// });
-
-// // Close modals on outside click
-// Object.keys(modals).forEach(modalName => {
-//   const overlay = document.getElementById(modals[modalName].overlay);
-//   if (overlay) {
-//     overlay.addEventListener('click', (e) => {
-//       if (e.target === overlay) closeModal(modalName);
-//     });
-//   }
-// });
-
-// // ==================== MUTE MODAL ====================
-// const muteBtn = document.getElementById('mic-btn');
-// if (muteBtn) {
-//   muteBtn.addEventListener('click', () => openModal('mute'));
-// }
-
-// document.getElementById('mute-close')?.addEventListener('click', () => closeModal('mute'));
-// document.getElementById('mute-dismiss')?.addEventListener('click', () => closeModal('mute'));
-// document.getElementById('mute-apply')?.addEventListener('click', () => {
-//   alert('Microphone settings applied');
-//   closeModal('mute');
-// });
-
-// // ==================== HOLD MODAL ====================
-// const holdBtn = document.getElementById('hold-btn');
-// if (holdBtn) {
-//   holdBtn.addEventListener('click', () => {
-//     openModal('hold');
-//     startHoldTimer();
-//   });
-// }
-
-// let holdSeconds = 45;
-// let holdInterval = null;
-
-// function startHoldTimer() {
-//   holdSeconds = 45;
-//   if (holdInterval) clearInterval(holdInterval);
-//   holdInterval = setInterval(() => {
-//     holdSeconds++;
-//     const mins = Math.floor(holdSeconds / 60);
-//     const secs = holdSeconds % 60;
-//     document.getElementById('hold-timer').textContent = 
-//       `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-//   }, 1000);
-// }
-
-// document.getElementById('hold-close')?.addEventListener('click', () => {
-//   clearInterval(holdInterval);
-//   closeModal('hold');
-// });
-
-// document.getElementById('hold-resume')?.addEventListener('click', () => {
-//   clearInterval(holdInterval);
-//   alert('Call resumed');
-//   closeModal('hold');
-// });
-
-// document.getElementById('hold-end')?.addEventListener('click', () => {
-//   clearInterval(holdInterval);
-//   alert('Call ended');
-//   closeModal('hold');
-//   window.location.href = 'postCallSummary.html';
-// });
-
-// // ==================== RECORD MODAL ====================
-// const recordBtn = document.getElementById('record-btn');
-// if (recordBtn) {
-//   recordBtn.addEventListener('click', () => {
-//     openModal('record');
-//     startRecordTimer();
-//   });
-// }
-
-// let recordSeconds = 225;
-// let recordInterval = null;
-
-// function startRecordTimer() {
-//   recordSeconds = 225;
-//   if (recordInterval) clearInterval(recordInterval);
-//   recordInterval = setInterval(() => {
-//     recordSeconds++;
-//     const mins = Math.floor(recordSeconds / 60);
-//     const secs = recordSeconds % 60;
-//     document.getElementById('record-timer').textContent = 
-//       `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-//   }, 1000);
-// }
-
-// document.getElementById('record-close')?.addEventListener('click', () => {
-//   clearInterval(recordInterval);
-//   closeModal('record');
-// });
-
-// document.getElementById('record-stop')?.addEventListener('click', () => {
-//   clearInterval(recordInterval);
-//   alert('Recording stopped and saved');
-//   closeModal('record');
-// });
-
-// document.getElementById('record-dismiss')?.addEventListener('click', () => {
-//   clearInterval(recordInterval);
-//   closeModal('record');
-// });
-
-// // ==================== NOTE MODAL ====================
-// const noteBtn = document.getElementById('note-btn');
-// if (noteBtn) {
-//   noteBtn.addEventListener('click', () => openModal('note'));
-// }
-
-// document.getElementById('note-close')?.addEventListener('click', () => closeModal('note'));
-// document.getElementById('note-cancel')?.addEventListener('click', () => closeModal('note'));
-
-// document.getElementById('note-save')?.addEventListener('click', () => {
-//   const title = document.getElementById('note-title').value;
-//   const content = document.getElementById('note-content').value;
-//   const category = document.getElementById('note-category').value;
-  
-//   if (!title || !content) {
-//     alert('Please fill in title and note');
-//     return;
-//   }
-  
-//   // Update call notes textarea
-//   const callNotesEl = document.getElementById('call-notes');
-//   if (callNotesEl) {
-//     const timestamp = new Date().toLocaleTimeString();
-//     const noteText = `[${timestamp}] ${title} (${category})\n${content}\n`;
-//     callNotesEl.value = noteText + callNotesEl.value;
-//   }
-  
-//   alert('Note saved to call');
-//   closeModal('note');
-//   document.getElementById('note-title').value = '';
-//   document.getElementById('note-content').value = '';
-// });
-
-// // ==================== CALL NOTES PERSISTENCE ====================
-// const callNotesEl = document.getElementById('call-notes');
-// if (callNotesEl) {
-//   callNotesEl.addEventListener('blur', () => {
-//     localStorage.setItem('activeCallNotes', callNotesEl.value);
-//   });
-  
-//   // Load saved notes
-//   const savedNotes = localStorage.getItem('activeCallNotes');
-//   if (savedNotes) {
-//     callNotesEl.value = savedNotes;
-//   }
-// }
-
 // ==================== TRANSCRIPT AUTO-SCROLL ====================
 const transcriptFeed = document.getElementById('transcript-feed');
 if (transcriptFeed) {
@@ -2303,137 +2065,7 @@ setInterval(() => {
 }, Math.random() * 4000 + 8000);
 </script>
 
-<!-- <script data-purpose="screen-share-camera-modals">
-// ==================== SCREEN SHARE MODAL ====================
-const screenShareToggleBtn = document.getElementById('screenShareToggleBtn');
-const screenShareModalOverlay = document.getElementById('screenShareModalOverlay');
-const screenShareModalCloseBtn = document.getElementById('screenShareModalCloseBtn');
-const screenShareContainer = document.getElementById('screenShareContainer');
-const screenSharePipCloseBtn = document.getElementById('screenSharePipCloseBtn');
-const screenShareOptions = document.querySelectorAll('.screenShareOption');
-
-let screenShareActive = false;
-
-function openScreenShareModal() {
-  screenShareModalOverlay.classList.add('active');
-}
-
-function closeScreenShareModal() {
-  screenShareModalOverlay.classList.remove('active');
-}
-
-function toggleScreenSharePreview() {
-  if (screenShareActive) {
-    screenShareContainer.classList.add('hidden');
-    screenShareActive = false;
-  } else {
-    screenShareContainer.classList.remove('hidden');
-    screenShareActive = true;
-  }
-}
-
-// Screen share button click handler
-screenShareToggleBtn.addEventListener('click', () => {
-  if (screenShareActive) {
-    toggleScreenSharePreview();
-  } else {
-    openScreenShareModal();
-  }
-});
-
-// Close screen share modal
-screenShareModalCloseBtn.addEventListener('click', closeScreenShareModal);
-
-// Close screen share preview
-screenSharePipCloseBtn.addEventListener('click', () => {
-  screenShareContainer.classList.add('hidden');
-  screenShareActive = false;
-});
-
-// Screen share option selection
-screenShareOptions.forEach(option => {
-  option.addEventListener('click', () => {
-    screenShareOptions.forEach(o => {
-      o.classList.remove('border-fire-accent/50', 'bg-surface-container');
-      o.classList.add('border-glass-border', 'bg-surface-container-low/50');
-    });
-    option.classList.remove('border-glass-border', 'bg-surface-container-low/50');
-    option.classList.add('border-fire-accent/50', 'bg-surface-container');
-    
-    // Simulate screen share start
-    setTimeout(() => {
-      closeScreenShareModal();
-      toggleScreenSharePreview();
-    }, 300);
-  });
-});
-
-// Close on outside click
-screenShareModalOverlay.addEventListener('click', (e) => {
-  if (e.target === screenShareModalOverlay) closeScreenShareModal();
-});
-
-// ==================== CAMERA MODAL ====================
-const cameraToggleBtn = document.getElementById('cameraToggleBtn');
-const cameraModalOverlay = document.getElementById('cameraModalOverlay');
-const cameraModalCloseBtn = document.getElementById('cameraModalCloseBtn');
-const cameraEnableBtn = document.getElementById('cameraEnableBtn');
-const cameraCancelBtn = document.getElementById('cameraCancelBtn');
-const cameraPipContainer = document.getElementById('cameraPipContainer');
-const cameraPipCloseBtn = document.getElementById('cameraPipCloseBtn');
-
-let cameraActive = false;
-
-function openCameraModal() {
-  cameraModalOverlay.classList.add('active');
-}
-
-function closeCameraModal() {
-  cameraModalOverlay.classList.remove('active');
-}
-
-function toggleCameraPreview() {
-  if (cameraActive) {
-    cameraPipContainer.classList.add('hidden');
-    cameraActive = false;
-  } else {
-    cameraPipContainer.classList.remove('hidden');
-    cameraActive = true;
-  }
-}
-
-// Camera button click handler
-cameraToggleBtn.addEventListener('click', () => {
-  if (cameraActive) {
-    toggleCameraPreview();
-  } else {
-    openCameraModal();
-  }
-});
-
-// Close camera modal
-cameraModalCloseBtn.addEventListener('click', closeCameraModal);
-cameraCancelBtn.addEventListener('click', closeCameraModal);
-
-// Enable camera
-cameraEnableBtn.addEventListener('click', () => {
-  closeCameraModal();
-  toggleCameraPreview();
-});
-
-// Close camera preview
-cameraPipCloseBtn.addEventListener('click', () => {
-  cameraPipContainer.classList.add('hidden');
-  cameraActive = false;
-});
-
-// Close on outside click
-cameraModalOverlay.addEventListener('click', (e) => {
-  if (e.target === cameraModalOverlay) closeCameraModal();
-});
-</script> -->
-
-  <script data-purpose="incoming-call-and-timer">
+<script data-purpose="incoming-call-and-timer">
   (function () {
     // ---------------------------------------------------------------------
     // CALL state object — single source of truth for the header timer and
