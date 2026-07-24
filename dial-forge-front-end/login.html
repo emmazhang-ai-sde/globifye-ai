@@ -134,7 +134,7 @@
 <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant ml-1">Work Email</label>
 <div class="relative">
 <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">mail</span>
-<input class="w-full bg-[#1A1B23] border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-sm transition-all focus:ring-0" placeholder="name@company.com" required="" type="email">
+<input class="w-full bg-[#1A1B23] border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-sm transition-all focus:ring-0" placeholder="name@company.com" required="" type="email" id="email" name="email">
 </div>
 </div>
 <!-- Password Field -->
@@ -145,14 +145,15 @@
 </div>
 <div class="relative">
 <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">lock</span>
-<input class="w-full bg-[#1A1B23] border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-sm transition-all focus:ring-0" placeholder="••••••••" required="" type="password">
+<input class="w-full bg-[#1A1B23] border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-sm transition-all focus:ring-0" placeholder="••••••••" required="" type="password" id="password" name="password">
 </div>
 </div>
 <!-- CTA Button -->
-<button class="shimmer-btn w-full mt-2 bg-fire-gradient hover:brightness-110 active:scale-[0.98] py-4 rounded-xl font-bold text-xs text-white uppercase tracking-[0.15em] flex items-center justify-center gap-2 transition-all shadow-lg shadow-fire-red/20" type="submit"><a href="./Dashboard.html" class="flex items-center justify-center gap-2 w-full h-full">
+<button class="shimmer-btn w-full mt-2 bg-fire-gradient hover:brightness-110 active:scale-[0.98] py-4 rounded-xl font-bold text-xs text-white uppercase tracking-[0.15em] flex items-center justify-center gap-2 transition-all shadow-lg shadow-fire-red/20" type="submit">
             Launch Dashboard
             <span class="material-symbols-outlined text-sm font-bold">arrow_forward</span>
-</a></button>
+</button>
+<p id="loginError" class="hidden text-center text-xs font-bold text-error-red mt-3"></p>
 </form>
 <!-- Divider -->
 <div class="flex items-center gap-4 my-8">
@@ -197,23 +198,44 @@
       purpleOrb.style.transform = `translate(${x * -30}px, ${y * -30}px)`;
     });
 
-    // Form Handling Simulation
+    // Real sign-in against the demo server (was a 2s simulation before
+    // 2026-07-24; see demo-ui-frontend-merge-design-doc.md, change table).
     const loginForm = document.getElementById('loginForm');
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const submitBtn = loginForm.querySelector('button[type="submit"]');
+      const errorEl = document.getElementById('loginError');
       const originalContent = submitBtn.innerHTML;
-      
+
       submitBtn.disabled = true;
+      errorEl.classList.add('hidden');
       submitBtn.innerHTML = `
         <span class="material-symbols-outlined animate-spin text-sm">sync</span>
         Authenticating...
       `;
-      
-      setTimeout(() => {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalContent;
-      }, 2000);
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+          }),
+        });
+        if (res.ok) {
+          window.location.href = './Dashboard.html';
+          return;
+        }
+        const data = await res.json().catch(() => ({}));
+        errorEl.textContent = data.error || 'Sign-in failed.';
+        errorEl.classList.remove('hidden');
+      } catch (err) {
+        errorEl.textContent = 'Cannot reach the server. Is demo_ui_server.py running?';
+        errorEl.classList.remove('hidden');
+      }
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalContent;
     });
   </script>
 <!-- END: Interactivity Script -->

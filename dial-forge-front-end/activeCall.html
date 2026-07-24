@@ -696,10 +696,10 @@ animation: fade-in 0.3s ease-out;
 </div>
 </div>
 <div class="text-center">
-<h1 class="font-syne text-5xl font-extrabold mb-3 tracking-tight">Sarah Connor</h1>
+<h1 class="font-syne text-5xl font-extrabold mb-3 tracking-tight" id="contact-name">Sarah Connor</h1>
 <div class="flex items-center justify-center gap-2 text-gray-400">
 <span class="material-symbols-outlined text-sm">location_on</span>
-<span class="text-sm font-medium tracking-wide">Cyberdyne Systems • Palo Alto, CA</span>
+<span class="text-sm font-medium tracking-wide" id="contact-company">Cyberdyne Systems • Palo Alto, CA</span>
 </div>
 </div>
 </div>
@@ -737,7 +737,7 @@ animation: fade-in 0.3s ease-out;
 <button id="btn-quick-note" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Quick Note"><span class="material-symbols-outlined">note_add</span></button>
 </div>
 <div class="w-px h-8 bg-white/10 mx-2"></div>
-<a href="./postCallSummary.html"><button class="px-8 py-3.5 bg-error-red hover:bg-red-600 text-white rounded-full flex items-center gap-3 font-bold transition-all active:scale-95 shadow-[0_0_25px_rgba(255,59,48,0.4)]">
+<a href="./postCallSummary.html" id="endCallLink"><button class="px-8 py-3.5 bg-error-red hover:bg-red-600 text-white rounded-full flex items-center gap-3 font-bold transition-all active:scale-95 shadow-[0_0_25px_rgba(255,59,48,0.4)]">
 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">call_end</span>
 <span class="">End Call</span>
 </button></a>
@@ -1900,12 +1900,12 @@ function initializeApp() {
   registerKeyboardShortcuts();
   setupEventListeners();
   
-  startCallTimer();
+  // startCallTimer() and startAICoachRotation() removed 2026-07-24
+  // (merge design doc, decision E): the page-load timer ticked a "live
+  // call" that did not exist, and the rotating tips overwrote the same
+  // element live coaching output uses. The live layer owns both now.
   updateTimerDisplay();
-  
-  startAICoachRotation();
-  updateAICoachTip();
-  
+
   updateStatusBadges();
   
   // Restore UI state
@@ -2016,7 +2016,9 @@ function stopCoachRotation() {
   if (coachRotationInterval) clearInterval(coachRotationInterval);
 }
 
-startCoachRotation();
+// startCoachRotation() removed 2026-07-24 (merge design doc, decision E):
+// it rotated canned tips into #coach-title / #coach-text on a 14s timer,
+// the same elements live coaching output renders into.
 
 // ==================== TRANSCRIPT AUTO-SCROLL ====================
 const transcriptFeed = document.getElementById('transcript-feed');
@@ -2024,45 +2026,11 @@ if (transcriptFeed) {
   transcriptFeed.scrollTop = transcriptFeed.scrollHeight;
 }
 
-// ==================== SIMULATE LIVE TRANSCRIPT ====================
-const transcriptMessages = [
-  "Let me explain how our deduplication works...",
-  "We use machine learning to identify duplicates across your data sources.",
-  "That's a great question about integration complexity.",
-  "Our integration team handles the implementation for you."
-];
-
-let messageIndex = 0;
-
-function appendTranscriptMessage(isUser = false) {
-  if (messageIndex >= transcriptMessages.length) {
-    messageIndex = 0;
-  }
-  
-  const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-  const speaker = isUser ? 'You' : 'Sarah';
-  const message = transcriptMessages[messageIndex % transcriptMessages.length];
-  
-  const messageEl = document.createElement('div');
-  messageEl.className = 'space-y-2';
-  messageEl.innerHTML = `
-    <div class="flex ${isUser ? 'justify-end' : 'justify-between'} items-center px-1">
-      <span class="text-[10px] text-${isUser ? 'fire-accent/60' : 'gray-500'} font-bold uppercase">${time} • ${speaker}</span>
-    </div>
-    <div class="bg-${isUser ? 'fire-accent/5' : 'white/5'} p-4 rounded-2xl rounded-${isUser ? 'tr' : 'tl'}-none border border-${isUser ? 'fire-accent/10' : 'white/10'} text-sm leading-relaxed">
-      "${message}"
-    </div>
-  `;
-  
-  transcriptFeed?.appendChild(messageEl);
-  transcriptFeed?.scrollTo({ top: transcriptFeed.scrollHeight, behavior: 'smooth' });
-  messageIndex++;
-}
-
-// Simulate messages every 8-12 seconds
-setInterval(() => {
-  appendTranscriptMessage(Math.random() > 0.6);
-}, Math.random() * 4000 + 8000);
+// The live transcript is written by the AI team's live layer
+// (/live/dialforge-live.js) from the real call's event stream. The
+// simulated-message generator that lived here was removed 2026-07-24
+// (merge design doc, decision E): a timer appending invented lines into
+// the same container a real call writes to cannot coexist with live data.
 </script>
 
 <script data-purpose="incoming-call-and-timer">
@@ -2533,4 +2501,7 @@ setInterval(() => {
   })();
 </script>
 
+
+<!-- AI team live layer (merge design doc, decision D): one script line per live screen. -->
+<script src="./live/dialforge-live.js" defer></script>
 </body></html>
