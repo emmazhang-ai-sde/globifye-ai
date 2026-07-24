@@ -57,6 +57,20 @@ HISTORY_DIR = os.path.join(BASE_DIR, "call-history")
 # Shared with the bridge script -- same companies.json + knowledge base files
 KB_DIR = os.path.join(BASE_DIR, "..", "knowledge-base")
 
+# The frontend team's DialForge screens (repo root, next to dial-forge-ai/).
+# Since 2026-07-24 this server serves that folder as the site root; see
+# design-docs/frontend-sync/demo-ui-frontend-merge-design-doc.md, decision B.
+FRONTEND_DIR = os.path.normpath(
+    os.path.join(BASE_DIR, "..", "..", "..", "dial-forge-front-end")
+)
+# The AI team's live layer, injected into the frontend pages (one script tag
+# per live page). Kept in our folder so the frontend files stay theirs.
+LIVE_DIR = os.path.join(BASE_DIR, "live")
+
+# Frontend pages anyone may open without a session. Everything else that is
+# HTML redirects to the sign-in page first.
+PUBLIC_PAGES = {"login.html", "landingPage.html"}
+
 # Same ARI settings as sip/scripts/step2_stt_bridge.py
 ARI_HOST = "localhost:8088"
 ARI_USER = "sip-mvp-user"
@@ -761,6 +775,11 @@ CONTENT_TYPES = {
     ".css": "text/css; charset=utf-8",
     ".js": "application/javascript; charset=utf-8",
     ".svg": "image/svg+xml",
+    ".png": "image/png",
+    ".webp": "image/webp",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".ico": "image/x-icon",
 }
 
 
@@ -782,8 +801,11 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def _send_file(self, name, status=200):
-        path = os.path.join(STATIC_DIR, name)
+    def _send_file(self, name, status=200, base_dir=None):
+        # basename() strips any path components, so a request can never
+        # escape the directory it is served from.
+        name = os.path.basename(name)
+        path = os.path.join(base_dir or STATIC_DIR, name)
         if not os.path.isfile(path):
             self._send_json({"error": "not found"}, 404)
             return
@@ -820,18 +842,20 @@ class Handler(BaseHTTPRequestHandler):
         user = _session_user(self)
 
         if path == "/":
-            self._redirect("/home.html" if user else "/login.html")
-        elif path == "/login.html":
-            self._send_file("login.html")
-        elif path == "/app.html":
-            self._redirect("/sales.html")  # legacy alias
-        elif path in ("/home.html", "/sales.html", "/client.html"):
+            self._redirect("/Dashboard.html" if user else "/login.html")
+        elif path in ("/app.html", "/sales.html", "/home.html"):
+            # Legacy demo-console pages, replaced by the DialForge screens.
+            self._redirect("/Dashboard.html")
+        elif path == "/client.html":
+            # The client phone stays ours (merge doc, decision H).
             if user is None:
                 self._redirect("/login.html")
             else:
-                self._send_file(path.lstrip("/"))
-        elif path in ("/style.css", "/sales.js", "/client.js", "/home.js"):
+                self._send_file("client.html")
+        elif path in ("/style.css", "/client.js"):
             self._send_file(path.lstrip("/"))
+        elif path.startswith("/live/"):
+            self._send_file(path, base_dir=LIVE_DIR)
         elif path == "/api/me":
             if user is None:
                 self._send_json({"error": "not logged in"}, 401)
@@ -883,6 +907,17 @@ class Handler(BaseHTTPRequestHandler):
                             "has_analysis": c.get("analysis") is not None,
                             "dialed_by": c.get("dialed_by"),
                             "company": c.get("company"),
+                            # For the merged call-log screen (2026-07-24):
+                            # its rows carry the record as data-* attributes.
+                            "direction": c.get("direction"),
+                            "caller": c.get("caller"),
+                            "duration_seconds": (
+                                round(c["ended_at"] - c["started_at"])
+                                if c.get("ended_at") and c.get("started_at")
+                                else None
+                            ),
+                            "extension": _EXT_FOR_COMPANY.get(c.get("company")),
+                            "contact_name": c.get("contact_name"),
                         }
                         for c in calls
                     ]
@@ -905,7 +940,14 @@ class Handler(BaseHTTPRequestHandler):
                 return
             self._serve_sse()
         else:
-            self._send_json({"error": "not found"}, 404)
+            # Everything else is the DialForge frontend, served as the site
+            # root. HTML pages need a session (except the public ones);
+            # assets are open.
+            name = os.path.basename(path)
+            if name.endswith(".html") and name not in PUBLIC_PAGES and user is None:
+                self._redirect("/login.html")
+                return
+            self._send_file(name, base_dir=FRONTEND_DIR)
 
     def _serve_sse(self):
         role = urllib.parse.parse_qs(
