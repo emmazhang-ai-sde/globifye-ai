@@ -4,6 +4,8 @@
 **Builds on:** [Step 4, the verified loop](./step4-end-to-end-mvp-verification.md)
 **Status: complete and verified (2026-07-10 through 2026-07-13).**
 
+> **Superseding work in design (2026-07-21):** Danish asked on 7/20 that this console be merged into the frontend team's real product screens, which now live in the shared repo. The design for that is [`design-docs/frontend-sync/demo-ui-frontend-merge-design-doc.md`](../../frontend-sync/demo-ui-frontend-merge-design-doc.md). Nothing below has changed yet; this doc still describes what runs today.
+
 A standalone web console for demoing the loop visually: sign in, place or receive a call from the browser, watch the live transcript, run a post-call analysis on demand. Deliberately not the frontend team's Next.js app (too complex for a demo, and their build is another team's concern). Everything lives in `sip/demo-ui/`.
 
 | Section | What's there |
@@ -30,7 +32,7 @@ The design principle: **the UI renders the same `log()` stream the terminal alre
 ```
 +----------------------------+          +-----------------------------+
 |  step2_stt_bridge.py       |          |  demo_ui_server.py          |
-|  (pipeline + log() hook    |  POST    |  (port 8090)                |
+|  (pipeline + log() hook    |  POST    |  (port 8400)                |
 |   + 10s heartbeat)         | -------> |  /internal/events           |
 +----------------------------+          +-----------------------------+
                                                        |
@@ -155,7 +157,7 @@ venv/bin/python sip/demo-ui/demo_ui_server.py
 Expected output in terminal 2:
 
 ```
-Demo UI running at http://localhost:8090
+Demo UI running at http://localhost:8400
 Waiting for bridge events on POST /internal/events (from step2_stt_bridge.py)
 Supabase mirror: ON -> https://... (or OFF with instructions if keys are missing)
 ```
@@ -181,7 +183,7 @@ Demo accounts (password `demo123` for all), two sales-rep logins per company: `a
 
 ## 7. Auth and users
 
-Demo-only: users live in `demo_users.json` (plaintext passwords), sessions are in-memory cookies, no HTTPS. Each account belongs to one of the two businesses, and the dialer marks that business as "your line". Do not expose port 8090 beyond localhost/LAN. Real authentication and per-role authorization are future work (Step 7).
+Demo-only: users live in `demo_users.json` (plaintext passwords), sessions are in-memory cookies, no HTTPS. Each account belongs to one of the two businesses, and the dialer marks that business as "your line". Do not expose port 8400 beyond localhost/LAN. Real authentication and per-role authorization are future work (Step 7).
 
 ## 8. Debugging log: call dropped the instant the softphone was answered (2026-07-13)
 
