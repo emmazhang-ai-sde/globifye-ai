@@ -108,6 +108,16 @@
       }
     }
 
+    #mainContent {
+      transition: margin-right 240ms ease;
+      margin-right: 18rem; /* matches crm-panel open width by default */
+    }
+    @media (max-width: 899px) {
+      #mainContent {
+        margin-right: 0 !important;
+      }
+    }
+
 
 
 
@@ -443,7 +453,7 @@
 
 
 <!-- BEGIN: MainContent -->
-<main class="ml-20 mt-16 p-8 h-[calc(100vh-64px)] flex flex-col overflow-hidden relative z-10">
+<main id="mainContent" class="ml-20 mt-16 p-8 h-[calc(100vh-64px)] flex flex-col overflow-hidden relative z-10">
 <!-- BEGIN: HeaderSection -->
 <section class="flex flex-col gap-6 mb-8">
 <div class="flex justify-between items-end">
@@ -462,17 +472,17 @@
 </div>
 <div class="flex items-center gap-6">
 <div class="flex p-1 bg-surface-variant rounded-full border border-white/5">
-<button class="filter-chip filter-chip-pill px-6 py-1.5 rounded-full text-sm font-bold bg-fire-orange text-white shadow-md" data-filter="all" onclick="setFilter('all', this)">All</button>
-<button class="filter-chip filter-chip-pill px-6 py-1.5 rounded-full text-sm font-medium text-on-surface-variant hover:text-white" data-filter="connected" onclick="setFilter('connected', this)">Connected</button>
-<button class="filter-chip filter-chip-pill px-6 py-1.5 rounded-full text-sm font-medium text-on-surface-variant hover:text-white" data-filter="missed" onclick="setFilter('missed', this)">Missed</button>
-<button class="filter-chip filter-chip-pill px-6 py-1.5 rounded-full text-sm font-medium text-on-surface-variant hover:text-white" data-filter="voicemail" onclick="setFilter('voicemail', this)">Voicemail</button>
+<button class="filter-chip filter-chip-pill px-6 py-1.5 rounded-full text-sm font-bold bg-fire-orange text-white shadow-md" data-filter="all" onclick="setStatusFilter('all', this)">All</button>
+<button class="filter-chip filter-chip-pill px-6 py-1.5 rounded-full text-sm font-medium text-on-surface-variant hover:text-white" data-filter="connected" onclick="setStatusFilter('connected', this)">Connected</button>
+<button class="filter-chip filter-chip-pill px-6 py-1.5 rounded-full text-sm font-medium text-on-surface-variant hover:text-white" data-filter="missed" onclick="setStatusFilter('missed', this)">Missed</button>
+<button class="filter-chip filter-chip-pill px-6 py-1.5 rounded-full text-sm font-medium text-on-surface-variant hover:text-white" data-filter="voicemail" onclick="setStatusFilter('voicemail', this)">Voicemail</button>
 </div>
 <div class="h-6 w-px bg-white/10"></div>
 <div class="flex gap-2">
-<button class="filter-chip filter-chip-outline flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs font-bold text-on-surface hover:border-white/20" data-filter="inbound" onclick="setFilter('inbound', this)">
+<button class="filter-chip filter-chip-outline flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs font-bold text-on-surface hover:border-white/20" data-filter="inbound" onclick="setDirectionFilter('inbound', this)">
 <span class="material-symbols-outlined text-sm">call_received</span> Inbound
           </button>
-<button class="filter-chip filter-chip-outline flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs font-bold text-on-surface hover:border-white/20" data-filter="outbound" onclick="setFilter('outbound', this)">
+<button class="filter-chip filter-chip-outline flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs font-bold text-on-surface hover:border-white/20" data-filter="outbound" onclick="setDirectionFilter('outbound', this)">
 <span class="material-symbols-outlined text-sm">call_made</span> Outbound
           </button>
 </div>
@@ -703,12 +713,10 @@ No calls match your search or filters.
 <!-- Table Footer / Pagination -->
 <div class="px-6 py-4 bg-white/[0.02] border-t border-white/5 flex justify-between items-center">
 <span class="text-xs text-on-surface-variant/60" id="resultsCount">Showing 1-12 of 1,284 interactions</span>
-<div class="flex items-center gap-2">
-<button class="w-8 h-8 rounded-lg border border-white/10 flex items-center justify-center text-on-surface-variant hover:bg-white/5"><span class="material-symbols-outlined text-lg">chevron_left</span></button>
-<button class="w-8 h-8 rounded-lg fire-gradient-bg text-white text-xs font-bold">1</button>
-<button class="w-8 h-8 rounded-lg border border-white/10 text-on-surface-variant text-xs font-bold hover:bg-white/5">2</button>
-<button class="w-8 h-8 rounded-lg border border-white/10 text-on-surface-variant text-xs font-bold hover:bg-white/5">3</button>
-<button class="w-8 h-8 rounded-lg border border-white/10 flex items-center justify-center text-on-surface-variant hover:bg-white/5"><span class="material-symbols-outlined text-lg">chevron_right</span></button>
+<div class="flex items-center gap-2" id="paginationControls">
+<button id="paginationPrevBtn" class="w-8 h-8 rounded-lg border border-white/10 flex items-center justify-center text-on-surface-variant hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent" onclick="goToPage(currentPage - 1)"><span class="material-symbols-outlined text-lg">chevron_left</span></button>
+<div class="flex items-center gap-2" id="paginationPages"></div>
+<button id="paginationNextBtn" class="w-8 h-8 rounded-lg border border-white/10 flex items-center justify-center text-on-surface-variant hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent" onclick="goToPage(currentPage + 1)"><span class="material-symbols-outlined text-lg">chevron_right</span></button>
 </div>
 </div>
 </section>
@@ -768,8 +776,14 @@ No calls match your search or filters.
   </script>
 <script data-purpose="table-logic">
     // ---------- State ----------
-    let currentFilter = 'all';
+    // Status (All/Connected/Missed/Voicemail) and Direction (Inbound/Outbound)
+    // are independent filter dimensions and must be tracked separately so
+    // picking one doesn't wipe out a selection made in the other group.
+    let currentStatusFilter = 'all';
+    let currentDirectionFilter = null; // null = no direction filter applied
     let currentSort = { key: 'date', dir: 'desc' };
+    let currentPage = 1;
+    const PAGE_SIZE = 4;
 
     const tableBody = document.getElementById('tableBody');
     const noResultsRow = document.getElementById('noResultsRow');
@@ -779,40 +793,47 @@ No calls match your search or filters.
     }
 
     // ---------- Filtering + Search ----------
-    function setFilter(filterValue, btnEl) {
-      currentFilter = filterValue;
-      document.querySelectorAll('.filter-chip').forEach(chip => {
-        const isPill = chip.classList.contains('filter-chip-pill');
+    function setStatusFilter(filterValue, btnEl) {
+      currentStatusFilter = filterValue;
+      document.querySelectorAll('.filter-chip-pill').forEach(chip => {
         if (chip === btnEl) {
-          if (isPill) {
-            chip.classList.add('bg-fire-orange', 'text-white', 'shadow-md');
-            chip.classList.remove('text-on-surface-variant');
-          } else {
-            chip.classList.add('bg-fire-orange/20', 'border-fire-orange', 'text-fire-orange');
-            chip.classList.remove('bg-white/5', 'text-on-surface');
-          }
+          chip.classList.add('bg-fire-orange', 'text-white', 'shadow-md');
+          chip.classList.remove('text-on-surface-variant', 'font-medium');
         } else {
-          if (isPill) {
-            chip.classList.remove('bg-fire-orange', 'text-white', 'shadow-md');
-            chip.classList.add('text-on-surface-variant');
-          } else {
-            chip.classList.remove('bg-fire-orange/20', 'border-fire-orange', 'text-fire-orange');
-            chip.classList.add('bg-white/5', 'text-on-surface');
-          }
+          chip.classList.remove('bg-fire-orange', 'text-white', 'shadow-md');
+          chip.classList.add('text-on-surface-variant');
         }
       });
+      currentPage = 1;
+      applyFilters();
+    }
+
+    function setDirectionFilter(filterValue, btnEl) {
+      const isAlreadyActive = currentDirectionFilter === filterValue;
+
+      // Clear active styling from both direction chips first.
+      document.querySelectorAll('.filter-chip-outline').forEach(chip => {
+        chip.classList.remove('bg-fire-orange/20', 'border-fire-orange', 'text-fire-orange');
+        chip.classList.add('bg-white/5', 'text-on-surface');
+      });
+
+      if (isAlreadyActive) {
+        // Clicking the already-active direction toggles it back off.
+        currentDirectionFilter = null;
+      } else {
+        currentDirectionFilter = filterValue;
+        btnEl.classList.add('bg-fire-orange/20', 'border-fire-orange', 'text-fire-orange');
+        btnEl.classList.remove('bg-white/5', 'text-on-surface');
+      }
+
+      currentPage = 1;
       applyFilters();
     }
 
     function rowMatchesFilter(row) {
-      if (currentFilter === 'all') return true;
-      if (['connected', 'missed', 'voicemail'].includes(currentFilter)) {
-        return row.dataset.status === currentFilter;
-      }
-      if (['inbound', 'outbound'].includes(currentFilter)) {
-        return row.dataset.direction === currentFilter;
-      }
-      return true;
+      const statusOk = currentStatusFilter === 'all' || row.dataset.status === currentStatusFilter;
+      const directionOk = !currentDirectionFilter || row.dataset.direction === currentDirectionFilter;
+      return statusOk && directionOk;
     }
 
     function rowMatchesSearch(row, query) {
@@ -825,19 +846,66 @@ No calls match your search or filters.
     }
 
     function applyFilters() {
-      const query = document.getElementById('searchInput').value;
+      // Guard against there being no search box in this build of the page —
+      // previously this line threw (reading .value of null) and aborted the
+      // rest of applyFilters(), which is why filter clicks appeared to do
+      // nothing at all.
+      const query = document.getElementById('searchInput')?.value || '';
       const rows = getRows();
-      let visibleCount = 0;
-      rows.forEach(row => {
-        const matches = rowMatchesFilter(row) && rowMatchesSearch(row, query);
-        row.style.display = matches ? '' : 'none';
-        if (matches) visibleCount++;
-      });
-      noResultsRow.classList.toggle('hidden', visibleCount !== 0);
+      const matched = rows.filter(row => rowMatchesFilter(row) && rowMatchesSearch(row, query));
+
+      // Hide every row first, then reveal only the rows that belong on the
+      // current page of results.
+      rows.forEach(row => { row.style.display = 'none'; });
+
+      const totalPages = Math.max(1, Math.ceil(matched.length / PAGE_SIZE));
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const start = (currentPage - 1) * PAGE_SIZE;
+      const end = start + PAGE_SIZE;
+      matched.slice(start, end).forEach(row => { row.style.display = ''; });
+
+      noResultsRow.classList.toggle('hidden', matched.length !== 0);
+
       const countLabel = document.getElementById('resultsCount');
       if (countLabel) {
-        countLabel.textContent = `Showing ${visibleCount} of ${visibleCount} interactions`;
+        countLabel.textContent = matched.length === 0
+          ? 'Showing 0 of 0 interactions'
+          : `Showing ${start + 1}-${Math.min(end, matched.length)} of ${matched.length} interactions`;
       }
+
+      renderPagination(totalPages);
+    }
+
+    // ---------- Pagination ----------
+    function renderPagination(totalPages) {
+      const pagesContainer = document.getElementById('paginationPages');
+      const prevBtn = document.getElementById('paginationPrevBtn');
+      const nextBtn = document.getElementById('paginationNextBtn');
+      if (!pagesContainer) return;
+
+      pagesContainer.innerHTML = '';
+      for (let page = 1; page <= totalPages; page++) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = String(page);
+        btn.className = page === currentPage
+          ? 'w-8 h-8 rounded-lg fire-gradient-bg text-white text-xs font-bold'
+          : 'w-8 h-8 rounded-lg border border-white/10 text-on-surface-variant text-xs font-bold hover:bg-white/5';
+        btn.addEventListener('click', () => goToPage(page));
+        pagesContainer.appendChild(btn);
+      }
+
+      if (prevBtn) prevBtn.disabled = currentPage <= 1;
+      if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+    }
+
+    function goToPage(page) {
+      currentPage = page;
+      applyFilters();
+      const section = tableBody.closest('section');
+      if (section) section.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
 
     // ---------- Sorting ----------
@@ -910,6 +978,8 @@ No calls match your search or filters.
       rows.sort((a, b) => compareRows(a, b, currentSort.key, currentSort.dir));
       rows.forEach(row => tableBody.insertBefore(row, noResultsRow));
       updateSortIcons(currentSort.key, currentSort.dir);
+      currentPage = 1;
+      applyFilters();
     }
 
     function sortByDropdown(value) {
@@ -919,6 +989,8 @@ No calls match your search or filters.
       rows.sort((a, b) => compareRows(a, b, currentSort.key, currentSort.dir));
       rows.forEach(row => tableBody.insertBefore(row, noResultsRow));
       updateSortIcons(currentSort.key, currentSort.dir);
+      currentPage = 1;
+      applyFilters();
     }
 
     // ---------- Export CSV ----------
@@ -931,7 +1003,8 @@ No calls match your search or filters.
     }
 
     function exportToCSV() {
-      const rows = getRows().filter(row => row.style.display !== 'none');
+      const query = document.getElementById('searchInput')?.value || '';
+      const rows = getRows().filter(row => rowMatchesFilter(row) && rowMatchesSearch(row, query));
       const header = ['Contact', 'Number', 'Direction', 'Duration', 'Date', 'AI Score', 'Status'];
       const lines = [header.map(csvEscape).join(',')];
       rows.forEach(row => {
@@ -1438,12 +1511,22 @@ No calls match your search or filters.
         panelIcon.textContent = isOpen ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left';
       }
       localStorage.setItem(storageKey, String(isOpen));
+
+      // Keep the main content clear of the fixed-position CRM panel by
+      // shrinking it to match the panel's current width (open vs collapsed),
+      // instead of letting the panel cover/hide content underneath it.
+      const mainContent = document.getElementById('mainContent');
+      if (mainContent && window.innerWidth >= 900) {
+        mainContent.style.marginRight = isOpen ? '18rem' : '4.5rem';
+      }
     }
 
     function syncPanelVisibility() {
       if (!panel) return;
+      const mainContent = document.getElementById('mainContent');
       if (window.innerWidth < 900) {
         panel.classList.add('hidden');
+        if (mainContent) mainContent.style.marginRight = '0';
         return;
       }
 
