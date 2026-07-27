@@ -112,6 +112,15 @@
       0% { opacity: 0; transform: translateY(16px) scale(0.97); }
       100% { opacity: 1; transform: translateY(0) scale(1); }
     }
+    #mainContent {
+      transition: margin-right 240ms ease;
+      margin-right: 18rem; /* matches crm-panel open width by default */
+    }
+    @media (max-width: 899px) {
+      #mainContent {
+        margin-right: 0 !important;
+      }
+    }
     .modal-in {
       animation: modal-in 0.25s ease-out forwards;
     }
@@ -461,7 +470,7 @@
 </aside>
 <!-- END: LeftSidebar -->
 <!-- BEGIN: MainContent -->
-<main class="pt-24 pb-12 md:pl-28 px-4 md:pr-8 max-w-[1400px] mx-auto">
+<main id="mainContent" class="pt-24 pb-12 md:pl-28 px-4 md:pr-8 max-w-[1400px] mx-auto">
 <!-- BEGIN: ProfileHero -->
 <section class="mb-10">
 <div class="glass-card p-8 rounded-3xl flex flex-col md:flex-row items-center md:items-end gap-10 relative overflow-hidden">
@@ -1376,12 +1385,22 @@
         panelIcon.textContent = isOpen ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left';
       }
       localStorage.setItem(storageKey, String(isOpen));
+
+      // Keep the main content clear of the fixed-position CRM panel by
+      // shrinking it to match the panel's current width (open vs collapsed),
+      // instead of letting the panel cover/hide content underneath it.
+      const mainContent = document.getElementById('mainContent');
+      if (mainContent && window.innerWidth >= 900) {
+        mainContent.style.marginRight = isOpen ? '18rem' : '4.5rem';
+      }
     }
 
     function syncPanelVisibility() {
       if (!panel) return;
+      const mainContent = document.getElementById('mainContent');
       if (window.innerWidth < 900) {
         panel.classList.add('hidden');
+        if (mainContent) mainContent.style.marginRight = '0';
         return;
       }
 
