@@ -166,6 +166,15 @@
       0% { opacity: 0; transform: translateY(16px) scale(0.97); }
       100% { opacity: 1; transform: translateY(0) scale(1); }
     }
+    #mainContent {
+      transition: margin-right 240ms ease;
+      margin-right: 18rem; /* matches crm-panel open width by default */
+    }
+    @media (max-width: 899px) {
+      #mainContent {
+        margin-right: 0 !important;
+      }
+    }
     .modal-in {
       animation: modal-in 0.25s ease-out forwards;
     }
@@ -616,7 +625,7 @@
 </div>
 </aside>
 <!-- END: Left Sidebar Navigation -->
-<main class="min-h-screen flex-1 flex flex-col bg-brand-dark relative ml-20 mr-20 mt-20">
+<main id="mainContent" class="min-h-screen flex-1 flex flex-col bg-brand-dark relative ml-20 mr-20 mt-20">
 
 <!-- BEGIN: Workspace Container -->
 <div class="flex flex-1 overflow-y-auto p-6 gap-6">
@@ -983,6 +992,12 @@ DROP VM
               <option>Select column...</option>
               <option>Column A</option>
               <option>Column B</option>
+              <option>Column C</option>
+              <option>Column D</option>
+              <option>Column E</option>
+              <option>Column F</option>
+              <option>Column G</option>
+              <option>Column H</option>
             </select>
           </div>
           <div>
@@ -991,6 +1006,12 @@ DROP VM
               <option>Select column...</option>
               <option>Column A</option>
               <option>Column B</option>
+              <option>Column C</option>
+              <option>Column D</option>
+              <option>Column E</option>
+              <option>Column F</option>
+              <option>Column G</option>
+              <option>Column H</option>
             </select>
           </div>
           <div>
@@ -999,14 +1020,26 @@ DROP VM
               <option>Select column...</option>
               <option>Column A</option>
               <option>Column B</option>
+              <option>Column C</option>
+              <option>Column D</option>
+              <option>Column E</option>
+              <option>Column F</option>
+              <option>Column G</option>
+              <option>Column H</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-bold text-white mb-1">Phone</label>
+            <label class="block text-sm font-bold text-white mb-1">Phone Number</label>
             <select class="w-full bg-[#1a1b23] border border-white/10 rounded-lg px-3 py-2 text-white">
               <option>Select column...</option>
               <option>Column A</option>
               <option>Column B</option>
+              <option>Column C</option>
+              <option>Column D</option>
+              <option>Column E</option>
+              <option>Column F</option>
+              <option>Column G</option>
+              <option>Column H</option>
             </select>
           </div>
           <div>
@@ -1015,6 +1048,12 @@ DROP VM
               <option>Select column...</option>
               <option>Column A</option>
               <option>Column B</option>
+              <option>Column C</option>
+              <option>Column D</option>
+              <option>Column E</option>
+              <option>Column F</option>
+              <option>Column G</option>
+              <option>Column H</option>
             </select>
           </div>
           <div>
@@ -1023,6 +1062,12 @@ DROP VM
               <option>Select column...</option>
               <option>Column A</option>
               <option>Column B</option>
+              <option>Column C</option>
+              <option>Column D</option>
+              <option>Column E</option>
+              <option>Column F</option>
+              <option>Column G</option>
+              <option>Column H</option>
             </select>
           </div>
         </div>
@@ -1265,11 +1310,17 @@ DROP VM
       CALL.caller = caller;
       CALL.status = 'ringing';
 
-      avatarEl.src = caller.avatar;
+      // avatarEl.src = caller.avatar;
       avatarEl.alt = caller.name;
       nameEl.textContent = caller.name;
       companyEl.textContent = caller.company;
       numberEl.textContent = caller.number;
+
+      // Setup avatar with fallback to initials if image fails to load
+      if (caller.avatar) {
+        avatarEl.src = caller.avatar;
+      }
+      setupIncomingCallAvatarFallback(avatarEl, caller.name);
 
       overlay.classList.remove('hidden');
     }
@@ -1553,12 +1604,22 @@ DROP VM
         panelIcon.textContent = isOpen ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left';
       }
       localStorage.setItem(storageKey, String(isOpen));
+
+       // Keep the main content clear of the fixed-position CRM panel by
+      // shrinking it to match the panel's current width (open vs collapsed),
+      // instead of letting the panel cover/hide content underneath it.
+      const mainContent = document.getElementById('mainContent');
+      if (mainContent && window.innerWidth >= 900) {
+        mainContent.style.marginRight = isOpen ? '18rem' : '4.5rem';
+      }
     }
 
     function syncPanelVisibility() {
       if (!panel) return;
+      const mainContent = document.getElementById('mainContent');
       if (window.innerWidth < 900) {
         panel.classList.add('hidden');
+        if (mainContent) mainContent.style.marginRight = '0';
         return;
       }
 
@@ -1600,11 +1661,11 @@ DROP VM
   };
 
   const dialQueue = [
-    { id: 1, name: "Jordan Peterson", company: "Nexus AI", phone: "(415) 555-0100", title: "VP OF OPERATIONS", status: "waiting", priority: "high", duration: 0 },
-    { id: 2, name: "Sarah Jenkins", company: "CloudScale", phone: "(415) 555-0101", title: "HEAD OF IT", status: "waiting", priority: "high", duration: 0 },
-    { id: 3, name: "Michael Chen", company: "Quantum Dynamics", phone: "(415) 555-0102", title: "DIRECTOR", status: "waiting", priority: "medium", duration: 0 },
-    { id: 4, name: "Elena Rodriguez", company: "Skynet Systems", phone: "(415) 555-0103", title: "OPERATIONS", status: "waiting", priority: "medium", duration: 0 },
-    { id: 5, name: "Alex Rivera", company: "InnovateX Global", phone: "(415) 555-0104", title: "CEO", status: "waiting", priority: "low", duration: 0 },
+    { id: 1, name: "Jordan Peterson", company: "Nexus AI", phone: "(415) 555-0100", title: "VP OF OPERATIONS", status: "waiting", priority: "high", duration: 0, avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuABYxrItLWMWQGRhejBqyB4saRkf_yBZ2ZmllBo6Ysg2-S2oSxYvi760KIxyNY8UkVgJatC_jWoDXasuG5xklwUniPfZlvlY_o9VQlJuoaMcv8kfw8EeeXZ7nwhTGI51UxHXH901RTCtXU7kx90bT2-0wl5cl1jlYQkv911G64F6axaT2vgJ6lUv6YAG-2T-9SRvrQU9xEei84H7nTvEeiJCtXnVo2WVA4WWD24Z50_FRHD5j__aHZCZyLkd38Jx720VO4uGhO2zos' || null },
+    { id: 2, name: "Sarah Jenkins", company: "CloudScale", phone: "(415) 555-0101", title: "HEAD OF IT", status: "waiting", priority: "high", duration: 0, avatar: null },
+    { id: 3, name: "Michael Chen", company: "Quantum Dynamics", phone: "(415) 555-0102", title: "DIRECTOR", status: "waiting", priority: "medium", duration: 0, avatar: null },
+    { id: 4, name: "Elena Rodriguez", company: "Skynet Systems", phone: "(415) 555-0103", title: "OPERATIONS", status: "waiting", priority: "medium", duration: 0, avatar: null },
+    { id: 5, name: "Alex Rivera", company: "InnovateX Global", phone: "(415) 555-0104", title: "CEO", status: "waiting", priority: "low", duration: 0, avatar: null },
   ];
 
   const callHistory = [];
@@ -1665,6 +1726,126 @@ DROP VM
   }
 
   // ==================== UI UPDATE FUNCTIONS ====================
+  // ==================== AVATAR UTILITIES ====================
+  function getInitials(name) {
+    if (!name) return 'U';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    }
+    return parts[0].charAt(0).toUpperCase();
+  }
+
+  function createAvatarElement(prospect, isActive = false) {
+    const container = document.createElement('div');
+    container.className = 'relative';
+
+    const borderClass = isActive ? 'border-2 border-orange-500/50' : 'border border-white/10';
+    
+    // Create image element
+    const img = document.createElement('img');
+    img.alt = prospect.name;
+    img.className = `w-12 h-12 rounded-full object-cover ${borderClass}`;
+    img.style.display = prospect.avatar ? 'block' : 'none';
+    
+    // Create initials fallback element
+    const initials = document.createElement('div');
+    initials.className = `w-12 h-12 rounded-full ${borderClass} flex items-center justify-center font-bold text-white text-sm bg-gradient-to-br from-slate-700 to-slate-800`;
+    initials.textContent = getInitials(prospect.name);
+    initials.style.display = prospect.avatar ? 'none' : 'flex';
+
+    // Handle image load success
+    img.addEventListener('load', () => {
+      img.style.display = 'block';
+      initials.style.display = 'none';
+    });
+
+    // Handle image load failure - show initials instead
+    img.addEventListener('error', () => {
+      img.style.display = 'none';
+      initials.style.display = 'flex';
+    });
+
+    // Set image source if available
+    if (prospect.avatar) {
+      img.src = prospect.avatar;
+    }
+
+    container.appendChild(img);
+    container.appendChild(initials);
+    
+    return container;
+  }
+
+  function setupIncomingCallAvatarFallback(imgElement, callerName) {
+    if (!imgElement) return;
+    
+    // Create initials fallback container (positioned absolutely over the image)
+    const initialsContainer = document.createElement('div');
+    initialsContainer.className = 'absolute inset-0 w-24 h-24 rounded-full flex items-center justify-center font-bold text-white text-3xl bg-gradient-to-br from-slate-700 to-slate-800';
+    initialsContainer.textContent = getInitials(callerName);
+    initialsContainer.style.display = 'none';
+    initialsContainer.style.zIndex = '5';
+    
+    // Insert after the image element in the DOM
+    imgElement.parentNode.insertBefore(initialsContainer, imgElement.nextSibling);
+    
+    // Handle image load success
+    imgElement.addEventListener('load', () => {
+      imgElement.style.display = 'block';
+      initialsContainer.style.display = 'none';
+    });
+
+    // Handle image load failure - show initials instead
+    imgElement.addEventListener('error', () => {
+      imgElement.style.display = 'none';
+      initialsContainer.style.display = 'flex';
+    });
+  }
+
+  function setupProspectCardAvatarFallbacks() {
+    // Setup fallbacks for all img elements in static prospect cards
+    document.querySelectorAll('[data-purpose="prospect-list"] img[alt]').forEach(imgElement => {
+      const cardName = imgElement.getAttribute('alt');
+      if (!cardName || cardName === '') return;
+      
+      // Create initials fallback div - positioned absolutely over the image
+      const initialsDiv = document.createElement('div');
+      const currentClass = imgElement.getAttribute('class') || '';
+      initialsDiv.className = currentClass.replace('object-cover', '').trim() + ' absolute inset-0 flex items-center justify-center font-bold text-white text-sm bg-gradient-to-br from-slate-700 to-slate-800';
+      initialsDiv.style.display = 'none';
+      initialsDiv.style.width = '3rem';
+      initialsDiv.style.height = '3rem';
+      initialsDiv.textContent = getInitials(cardName);
+      
+      // Get the relative container
+      const container = imgElement.parentElement;
+      if (container && container.classList.contains('relative')) {
+        container.appendChild(initialsDiv);
+        
+        // Setup event handlers
+        imgElement.addEventListener('load', () => {
+          imgElement.style.display = 'block';
+          initialsDiv.style.display = 'none';
+        });
+        
+        imgElement.addEventListener('error', () => {
+          imgElement.style.display = 'none';
+          initialsDiv.style.display = 'flex';
+        });
+        
+        // Trigger check in case image is already loaded
+        if (imgElement.complete) {
+          if (imgElement.naturalHeight === 0) {
+            imgElement.dispatchEvent(new Event('error'));
+          } else {
+            imgElement.dispatchEvent(new Event('load'));
+          }
+        }
+      }
+    });
+  }
+
   function updateTopStats() {
     const dialedEl = document.querySelector('[data-stat="dialed"]');
     const connectedEl = document.querySelector('[data-stat="connected"]');
@@ -1697,23 +1878,45 @@ DROP VM
 
       const card = document.createElement('div');
       card.className = `glass-card rounded-2xl p-4 flex items-center gap-4 group cursor-pointer transition-all hover:scale-[1.01] ${isActive ? 'active-card' : 'opacity-70 hover:opacity-100'}`;
-      card.innerHTML = `
-        <div class="relative">
-          <img alt="${prospect.name}" class="w-12 h-12 rounded-full border ${isActive ? 'border-2 border-orange-500/50' : 'border border-white/10'}" 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuABYxrItLWMWQGRhejBqyB4saRkf_yBZ2ZmllBo6Ysg2-S2oSxYvi760KIxyNY8UkVgJatC_jWoDXasuG5xklwUniPfZlvlY_o9VQlJuoaMcv8kfw8EeeXZ7nwhTGI51UxHXH901RTCtXU7kx90bT2-0wl5cl1jYQkv911G64F6axaT2vgJ6lUv6YAG-2T-9SRvrQU9xEei84H7nTvEeiJCtXnVo2WVA4WWD24Z50_FRHD5j__aHZCZyLkd38Jx720VO4uGhO2zos">
-          <div class="absolute top-0 right-0 w-2 h-2 rounded-full ${priorityColor}" title="${prospect.priority} priority"></div>
-          ${isActive ? '<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[#12131a] status-pulse"></div>' : ''}
-        </div>
-        <div class="flex-1">
-          <h3 class="font-bold text-white text-lg">${prospect.name}</h3>
-          <p class="text-xs text-gray-500 uppercase tracking-widest">${prospect.title} @ ${prospect.company}</p>
-          <p class="text-xs text-gray-600 font-mono mt-1">${prospect.phone}</p>
-        </div>
-        <div class="text-right">
-          ${isActive ? `<p class="text-orange-500 text-[10px] font-bold uppercase tracking-widest mb-1">NOW CALLING</p>` : ''}
-          <p class="text-[10px] font-bold uppercase tracking-widest ${statusClass}">${prospect.status}</p>
-        </div>
+      
+      // Create avatar container
+      const avatarContainer = document.createElement('div');
+      avatarContainer.appendChild(createAvatarElement(prospect, isActive));
+      
+      // Add priority dot
+      const priorityDot = document.createElement('div');
+      priorityDot.className = `absolute top-0 right-0 w-2 h-2 rounded-full ${priorityColor}`;
+      priorityDot.title = `${prospect.priority} priority`;
+      avatarContainer.querySelector('.relative').appendChild(priorityDot);
+      
+      // Add active status pulse if needed
+      if (isActive) {
+        const statusPulse = document.createElement('div');
+        statusPulse.className = 'absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[#12131a] status-pulse';
+        avatarContainer.querySelector('.relative').appendChild(statusPulse);
+      }
+
+      // Create content area
+      const contentDiv = document.createElement('div');
+      contentDiv.className = 'flex-1';
+      contentDiv.innerHTML = `
+        <h3 class="font-bold text-white text-lg">${prospect.name}</h3>
+        <p class="text-xs text-gray-600 uppercase tracking-widest">${prospect.title} @ ${prospect.company}</p>
+        <p class="text-xs text-gray-600 font-mono mt-1">${prospect.phone}</p>
       `;
+
+      // Create status area
+      const statusDiv = document.createElement('div');
+      statusDiv.className = 'text-right';
+      statusDiv.innerHTML = `
+        ${isActive ? `<p class="text-orange-500 text-[10px] font-bold uppercase tracking-widest mb-1">NOW CALLING</p>` : ''}
+        <p class="text-[10px] font-bold uppercase tracking-widest ${statusClass}">${prospect.status}</p>
+      `;
+
+      card.appendChild(avatarContainer.firstChild);
+      card.appendChild(contentDiv);
+      card.appendChild(statusDiv);
+      
       listEl.appendChild(card);
     });
   }
@@ -1922,13 +2125,280 @@ DROP VM
     }
   }
 
-  // ==================== APPLICATION STATE ====================
+    // ==================== APPLICATION STATE ====================
   const appState = {
     importWizard: {
       selectedFile: null,
-      fileName: null
-    }
+      fileName: null,
+      csvData: null,
+      csvHeaders: [],
+      parsedRows: [],
+      fieldMapping: {},
+      importedCount: 0,
+      skippedCount: 0
+    },
+    contacts: [
+      {
+        id: 1,
+        firstName: 'Jordan',
+        lastName: 'Peterson',
+        fullName: 'Jordan Peterson',
+        company: 'Nexus AI',
+        phone: '(555) 123-4567',
+        email: 'jordan@nexus.ai',
+        title: 'VP of Operations',
+        status: 'ready'
+      },
+      {
+        id: 2,
+        firstName: 'Sarah',
+        lastName: 'Jenkins',
+        fullName: 'Sarah Jenkins',
+        company: 'CloudScale',
+        phone: '(555) 234-5678',
+        email: 'sarah@cloudscale.io',
+        title: 'Head of IT',
+        status: 'ready'
+      },
+      {
+        id: 3,
+        firstName: 'Michael',
+        lastName: 'Chen',
+        fullName: 'Michael Chen',
+        company: 'Quantum Dynamics',
+        phone: '(555) 345-6789',
+        email: 'michael@quantum.com',
+        title: 'Director',
+        status: 'ready'
+      },
+      {
+        id: 4,
+        firstName: 'Elena',
+        lastName: 'Rodriguez',
+        fullName: 'Elena Rodriguez',
+        company: 'Skynet Systems',
+        phone: '(555) 456-7890',
+        email: 'elena@skynet.com',
+        title: 'Operations',
+        status: 'ready'
+      }
+    ]
   };
+
+  // ==================== CSV PARSING ====================
+  function parseCSVContent(csvText) {
+    const lines = csvText.trim().split('\n');
+    if (lines.length < 1) return { headers: [], rows: [] };
+    
+    // Parse header
+    const headers = parseCSVLine(lines[0]);
+    
+    // Parse data rows
+    const rows = [];
+    for (let i = 1; i < lines.length; i++) {
+      if (lines[i].trim()) {
+        const values = parseCSVLine(lines[i]);
+        const row = {};
+        headers.forEach((header, index) => {
+          row[header] = values[index] || '';
+        });
+        rows.push(row);
+      }
+    }
+    
+    return { headers, rows };
+  }
+
+  function parseCSVLine(line) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    
+    result.push(current.trim());
+    return result;
+  }
+
+  function detectFieldMappings(headers) {
+    const mapping = {};
+    const fieldPatterns = {
+      firstName: ['first name', 'first_name', 'firstname', 'given name', 'given_name'],
+      lastName: ['last name', 'last_name', 'lastname', 'surname', 'family name', 'family_name'],
+      fullName: ['name', 'full name', 'full_name', 'fullname', 'contact name'],
+      company: ['company', 'company name', 'organization', 'org', 'business', 'account'],
+      phone: ['phone', 'phone number', 'phone_number', 'telephone', 'tel', 'mobile', 'cell'],
+      email: ['email', 'email address', 'email_address', 'mail', 'e-mail'],
+      title: ['title', 'job title', 'job_title', 'position', 'role', 'job'],
+      location: ['location', 'city', 'state', 'country', 'address', 'location']
+    };
+    
+    headers.forEach(header => {
+      const lowerHeader = header.toLowerCase();
+      for (const [field, patterns] of Object.entries(fieldPatterns)) {
+        if (patterns.some(pattern => lowerHeader.includes(pattern))) {
+          if (!mapping[field]) {
+            mapping[field] = header;
+          }
+        }
+      }
+    });
+    
+    return mapping;
+  }
+
+  function updateFieldMappingUI(headers) {
+    const fieldMapping = detectFieldMappings(headers);
+    const mappingFields = ['First Name', 'Last Name', 'Company', 'Phone', 'Email', 'Title'];
+    const selectElements = document.querySelectorAll('[data-wizard-content="2"] select');
+    
+    selectElements.forEach((select, index) => {
+      select.innerHTML = '<option>Select column...</option>';
+      headers.forEach(header => {
+        const option = document.createElement('option');
+        option.value = header;
+        option.textContent = header;
+        select.appendChild(option);
+      });
+      
+      // Auto-select detected mapping
+      const fieldKey = mappingFields[index].toLowerCase().replace(' ', '');
+      if (fieldMapping[fieldKey]) {
+        select.value = fieldMapping[fieldKey];
+      }
+    });
+    
+    // Store mapping for later use
+    storeFieldMapping();
+  }
+
+  function storeFieldMapping() {
+    const mapping = {};
+    const fieldNames = ['firstName', 'lastName', 'company', 'phone', 'email', 'title'];
+    const selects = document.querySelectorAll('[data-wizard-content="2"] select');
+    
+    selects.forEach((select, index) => {
+      if (select.value !== 'Select column...') {
+        mapping[fieldNames[index]] = select.value;
+      }
+    });
+    
+    appState.importWizard.fieldMapping = mapping;
+  }
+
+  function updatePreviewTable(rows) {
+    const tbody = document.querySelector('[data-wizard-content="3"] tbody');
+    const infoBox = document.querySelector('[data-wizard-content="3"] .bg-blue-500\\/10');
+    
+    if (!tbody) return;
+    
+    // Get mapping
+    storeFieldMapping();
+    const mapping = appState.importWizard.fieldMapping;
+    
+    // Clear existing preview rows
+    tbody.innerHTML = '';
+    
+    // Add preview rows (max 5)
+    const previewRows = rows.slice(0, 5);
+    previewRows.forEach(row => {
+      const tr = document.createElement('tr');
+      tr.className = 'border-b border-white/5';
+      
+      const name = (row[mapping.firstName] || '') + ' ' + (row[mapping.lastName] || '');
+      const company = row[mapping.company] || '';
+      const phone = row[mapping.phone] || '';
+      
+      tr.innerHTML = `
+        <td class="px-3 py-2 text-white">${name.trim()}</td>
+        <td class="px-3 py-2 text-gray-400">${company}</td>
+        <td class="px-3 py-2 text-gray-400">${phone}</td>
+        <td class="px-3 py-2"><span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">Valid</span></td>
+      `;
+      
+      tbody.appendChild(tr);
+    });
+    
+    // Update info box
+    if (infoBox) {
+      const totalRecords = rows.length;
+      infoBox.innerHTML = `
+        <p class="font-bold mb-1">${totalRecords} records ready to import</p>
+        <p>All records have been validated</p>
+      `;
+    }
+    
+    appState.importWizard.importedCount = rows.length;
+  }
+
+  function convertRowToContact(row, index) {
+    const mapping = appState.importWizard.fieldMapping;
+    const nextId = Math.max(...appState.contacts.map(c => c.id), 0) + index + 1;
+    
+    const firstName = row[mapping.firstName] || '';
+    const lastName = row[mapping.lastName] || '';
+    const fullName = (firstName + ' ' + lastName).trim() || row[mapping.fullName] || '';
+    
+    return {
+      id: nextId,
+      firstName: firstName,
+      lastName: lastName,
+      fullName: fullName,
+      company: row[mapping.company] || '',
+      phone: row[mapping.phone] || '',
+      email: row[mapping.email] || '',
+      title: row[mapping.title] || '',
+      status: 'ready'
+    };
+  }
+
+  function performImport() {
+    storeFieldMapping();
+    const rows = appState.importWizard.parsedRows;
+    let imported = 0;
+    let skipped = 0;
+    
+    rows.forEach((row, index) => {
+      // Skip if required fields are missing
+      if (!row[appState.importWizard.fieldMapping.phone]) {
+        skipped++;
+        return;
+      }
+      
+      const contact = convertRowToContact(row, imported);
+      appState.contacts.push(contact);
+      imported++;
+    });
+    
+    appState.importWizard.importedCount = imported;
+    appState.importWizard.skippedCount = skipped;
+    
+    // Update the completion step display
+    updateCompletionStep(imported, skipped, rows.length);
+    
+    // Refresh the prospect queue display
+    updateProspectQueue();
+  }
+
+  function updateCompletionStep(imported, skipped, total) {
+    const stats = document.querySelectorAll('[data-wizard-content="4"] .bg-orange-500\\/10, [data-wizard-content="4"] .bg-green-500\\/10, [data-wizard-content="4"] .bg-yellow-500\\/10');
+    if (stats.length >= 3) {
+      stats[0].innerHTML = `<p class="text-2xl font-bold text-orange-400">${total}</p><p class="text-xs text-gray-400 mt-1">Total Imported</p>`;
+      stats[1].innerHTML = `<p class="text-2xl font-bold text-green-400">${imported}</p><p class="text-xs text-gray-400 mt-1">Successfully Mapped</p>`;
+      stats[2].innerHTML = `<p class="text-2xl font-bold text-yellow-400">${skipped}</p><p class="text-xs text-gray-400 mt-1">Skipped</p>`;
+    }
+  }
 
   // ==================== IMPORT WIZARD FILE UPLOAD ====================
   function validateCSVFile(file) {
@@ -1966,10 +2436,35 @@ DROP VM
     const validation = validateCSVFile(file);
     
     if (validation.valid) {
-      appState.importWizard.selectedFile = file;
-      appState.importWizard.fileName = file.name;
-      displayFileInfo(file.name);
-      updateImportWizardUI();
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const csvText = e.target.result;
+          const parsed = parseCSVContent(csvText);
+          
+          if (parsed.headers.length === 0) {
+            displayFileError('CSV file is empty or invalid');
+            appState.importWizard.selectedFile = null;
+            appState.importWizard.fileName = null;
+            updateImportWizardUI();
+            return;
+          }
+          
+          appState.importWizard.selectedFile = file;
+          appState.importWizard.fileName = file.name;
+          appState.importWizard.csvHeaders = parsed.headers;
+          appState.importWizard.parsedRows = parsed.rows;
+          
+          displayFileInfo(file.name);
+          updateImportWizardUI();
+        } catch (error) {
+          displayFileError('Error parsing CSV file: ' + error.message);
+          appState.importWizard.selectedFile = null;
+          appState.importWizard.fileName = null;
+          updateImportWizardUI();
+        }
+      };
+      reader.readAsText(file);
     } else {
       appState.importWizard.selectedFile = null;
       appState.importWizard.fileName = null;
@@ -1987,7 +2482,6 @@ DROP VM
   }
 
   // ==================== MODAL MANAGEMENT ====================
-
   function openImportModal() {
     const modal = document.querySelector('[data-modal="import-wizard"]');
     if (modal) modal.classList.remove('hidden');
@@ -2000,6 +2494,10 @@ DROP VM
       // Reset import wizard state
       appState.importWizard.selectedFile = null;
       appState.importWizard.fileName = null;
+      appState.importWizard.csvData = null;
+      appState.importWizard.csvHeaders = [];
+      appState.importWizard.parsedRows = [];
+      appState.importWizard.fieldMapping = {};
       const fileInput = document.getElementById('csv-file-input');
       if (fileInput) fileInput.value = '';
       const fileInfo = document.getElementById('wizard-file-info');
@@ -2015,6 +2513,22 @@ DROP VM
   function nextStep() {
     const modal = document.querySelector('[data-modal="import-wizard"]');
     const currentStep = parseInt(modal.dataset.step);
+    
+    if (currentStep === 1) {
+      // Moving from step 1 to 2: update field mapping UI
+      if (appState.importWizard.csvHeaders.length > 0) {
+        updateFieldMappingUI(appState.importWizard.csvHeaders);
+      }
+    } else if (currentStep === 2) {
+      // Moving from step 2 to 3: update preview
+      if (appState.importWizard.parsedRows.length > 0) {
+        updatePreviewTable(appState.importWizard.parsedRows);
+      }
+    } else if (currentStep === 3) {
+      // Moving from step 3 to 4: perform the actual import
+      performImport();
+    }
+    
     if (currentStep < 4) {
       modal.dataset.step = currentStep + 1;
       updateImportWizardUI();
@@ -2054,13 +2568,13 @@ DROP VM
     if (prevBtn) prevBtn.disabled = step === 1;
     if (nextBtn) nextBtn.textContent = step === 4 ? 'FINISH' : 'NEXT';
     
-// On step 1, disable NEXT button if no file is selected
+    // On step 1, disable NEXT button if no file is selected
     if (step === 1 && nextBtn) {
       nextBtn.disabled = !appState.importWizard.selectedFile;
     } else if (nextBtn) {
       nextBtn.disabled = false;
     }
-
+    
     if (step === 4 && nextBtn) {
       nextBtn.onclick = closeImportModal;
     } else if (nextBtn) {
@@ -2068,10 +2582,12 @@ DROP VM
     }
   }
 
+
   // ==================== EVENT LISTENERS ====================
   document.addEventListener('DOMContentLoaded', () => {
     loadState();
     updateTopStats();
+    setupProspectCardAvatarFallbacks();
     updateProspectQueue();
     updateActiveCallCard();
     updateSessionStats();
