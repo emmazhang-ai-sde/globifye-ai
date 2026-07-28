@@ -1,0 +1,2773 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GlobiFYE Backend Documentation</title>
+    <style>
+      :root {
+        --sidebar-bg: #2c3e50;
+        --sidebar-text: #ffffff;
+        --sidebar-hover: #34495e;
+        --content-bg: #f8f9fa;
+        --panel-bg: #ffffff;
+        --text-main: #333333;
+        --text-muted: #666666;
+        --accent-blue: #0056b3;
+        --border-color: #dee2e6;
+        --table-header-bg: #f1f3f5;
+        --pk-badge: #e67e22;
+        --fk-badge: #2ecc71;
+        --glossary-badge: #9b59b6;
+      }
+
+      body {
+        font-family:
+          "Segoe UI",
+          -apple-system,
+          BlinkMacSystemFont,
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        height: 100vh;
+        color: var(--text-main);
+        background-color: var(--content-bg);
+      }
+
+      /* Sidebar Navigation Layout */
+      aside {
+        width: 280px;
+        background-color: var(--sidebar-bg);
+        color: var(--sidebar-text);
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        border-right: 1px solid var(--border-color);
+      }
+
+      .sidebar-header {
+        padding: 1.5rem;
+        background-color: #233241;
+        font-size: 1.1rem;
+        font-weight: bold;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .download-btn-container {
+        padding: 0.75rem 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .download-btn {
+        width: 100%;
+        padding: 0.5rem;
+        background-color: var(--fk-badge);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: background 0.2s;
+      }
+
+      .download-btn:hover {
+        background-color: #27ae60;
+      }
+
+      .sidebar-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        overflow-y: auto;
+        flex-grow: 1;
+      }
+
+      .sidebar-menu li a {
+        display: block;
+        padding: 0.75rem 1.5rem;
+        color: #ecf0f1;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: background 0.2s;
+      }
+
+      .sidebar-menu li a:hover {
+        background-color: var(--sidebar-hover);
+      }
+
+      .sidebar-section-title {
+        padding: 0.75rem 1.5rem 0.25rem 1.5rem;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #7f8c8d;
+        font-weight: bold;
+      }
+
+      /* Main Content Layout */
+      main {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 2.5rem;
+        scroll-behavior: smooth;
+      }
+
+      .card {
+        background: var(--panel-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+
+      h1 {
+        font-size: 2rem;
+        margin-top: 0;
+        color: #2c3e50;
+        font-weight: 600;
+      }
+      h2 {
+        font-size: 1.5rem;
+        color: #2c3e50;
+        border-bottom: 2px solid var(--accent-blue);
+        padding-bottom: 0.3rem;
+        margin-top: 2rem;
+      }
+      h3 {
+        font-size: 1.15rem;
+        color: #34495e;
+        margin-bottom: 0.5rem;
+        margin-top: 1.5rem;
+      }
+
+      .metadata-table {
+        width: 100%;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+      }
+      .metadata-table td {
+        padding: 0.5rem;
+        border-bottom: 1px solid #f1f3f5;
+      }
+      .metadata-table td:first-child {
+        font-weight: 600;
+        width: 25%;
+        color: var(--text-muted);
+      }
+
+      /* Dataedo Style Schema Table */
+      .dictionary-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+      }
+
+      .dictionary-table th,
+      .dictionary-table td {
+        border: 1px solid var(--border-color);
+        padding: 0.6rem 0.8rem;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      .dictionary-table th {
+        background-color: var(--table-header-bg);
+        color: #495057;
+        font-weight: 600;
+      }
+
+      .dictionary-table tr:nth-child(even) {
+        background-color: #f8f9fa;
+      }
+
+      /* Badges for Keys */
+      .badge {
+        display: inline-block;
+        padding: 0.2rem 0.4rem;
+        font-size: 0.75rem;
+        font-weight: bold;
+        color: white;
+        border-radius: 3px;
+        text-transform: uppercase;
+      }
+      .badge-pk {
+        background-color: var(--pk-badge);
+      }
+      .badge-fk {
+        background-color: var(--fk-badge);
+      }
+      .badge-glossary {
+        background-color: var(--glossary-badge);
+      }
+
+      .type-column {
+        font-family: Consolas, Monaco, monospace;
+        color: #c7254e;
+      }
+
+      .relationship-list {
+        margin: 0;
+        padding-left: 1.2rem;
+      }
+
+      /* CRITICAL FIX FOR PRINT AND PDF EXPORT */
+      @media print {
+        html, body {
+          height: auto !important;
+          overflow: visible !important;
+          display: block !important;
+        }
+        
+        aside {
+          display: none !important; /* Hide navigation layout for standard print output */
+        }
+        
+        main {
+          height: auto !important;
+          overflow: visible !important;
+          display: block !important;
+          padding: 0 !important;
+        }
+        
+        .card {
+          box-shadow: none !important;
+          border: none !important;
+          page-break-inside: auto !important; /* Let cards and tables span across pages organically */
+          margin-bottom: 3rem !important;
+        }
+
+        tr {
+          page-break-inside: avoid !important; /* Prevent individual table rows from snapping in half */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <aside>
+      <div class="sidebar-header">GlobiFYE Backend Documentation</div>
+      <div class="download-btn-container">
+          <button class="download-btn" id="btn-download">📄 Download PDF</button>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="#overview">Database Overview</a></li>
+        <li>
+          <a href="#fk-glossary" style="color: #9b59b6; font-weight: bold"
+            >🔑 FK Cross-Reference Glossary</a
+          >
+        </li>
+
+        <li class="sidebar-section-title">Tables</li>
+        <li><a href="#table-users">users</a></li>
+        <li><a href="#table-organizations">organizations</a></li>
+        <li><a href="#table-recordings">call recordings</a></li>
+        <li><a href="#table-call-queue">call queue</a></li>
+        <li><a href="#table-agent-config">agent config</a></li>
+        <li><a href="#table-contacts">contacts</a></li>
+        <li><a href="#table-crm-integrations">crm integrations</a></li>
+        <li><a href="#table-crm-sync">crm sync</a></li>
+        <li><a href="#table-gpu-jobs">gpu jobs</a></li>
+        <li><a href="#table-idempotency-keys">idempotency keys</a></li>
+        <li><a href="#table-invites">invites</a></li>
+        <li><a href="#table-phone-numbers">phone numbers</a></li>
+        <li><a href="#table-subscriptions">subscriptions</a></li>
+        <li><a href="#table-transactions">transactions</a></li>
+        <li><a href="#table-payment-logs">payment logs</a></li>
+        <li><a href="#table-api-keys">api keys</a></li>
+        <li><a href="#table-webhooks">webhooks</a></li>
+        <li><a href="#table-transcript">transcript</a></li>
+        <li><a href="#table-sip-calls">sip calls</a></li>
+        <li><a href="#table-topics">topics</a></li>
+        <li><a href="#table-analysis">analysis</a></li>
+
+        <li class="sidebar-section-title">Views</li>
+        <li><a href="#view-active_subscribers">👁️ v_active_subscribers</a></li>
+
+        <li class="sidebar-section-title">Procedures & Functions</li>
+        <li><a href="#proc-process_payment">⚙️ sp_process_payment</a></li>
+      </ul>
+    </aside>
+
+    <main>
+      <section id="overview" class="card">
+        <h1>Database: GlobiFYE Production Relational Layer</h1>
+        <p>
+          <strong>Description:</strong> Core transactional relational database
+          handling user authentication, organization management, subscription
+          management, and AI usage.
+        </p>
+
+        <h3>Database Metadata</h3>
+        <table class="metadata-table">
+          <tr>
+            <td>DBMS / Engine</td>
+            <td>Supabase - PostgreSQL (v17.6)</td>
+          </tr>
+          <tr>
+            <td>Host Server</td>
+            <td>aws-supa-pool.globifye.internal</td>
+          </tr>
+          <tr>
+            <td>Environment</td>
+            <td>Development</td>
+          </tr>
+          <tr>
+            <td>Documentation Version</td>
+            <td>v0.1</td>
+          </tr>
+          <tr>
+            <td>Last Documented By</td>
+            <td>Backend Team</td>
+          </tr>
+        </table>
+      </section>
+
+      <!-- FOREIGN KEY CROSS REFERENCE GLOSSARY -->
+      <section
+        id="fk-glossary"
+        class="card"
+        style="border-left: 4px solid var(--glossary-badge)"
+      >
+        <h2>🔑 Foreign Key Cross-Reference Glossary</h2>
+        <p>
+          This data-lineage map models upstream primary targets alongside all
+          downstream structural connections within the
+          <strong>GlobiFYE</strong> platform.
+        </p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 25%">Target Parent Table (Origination)</th>
+              <th style="width: 25%">Target Primary Key Column</th>
+              <th>Connected Downstream Tables & Inbound Keys</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>organizations</strong></td>
+              <td><span class="badge badge-pk">id</span> (uuid)</td>
+              <td>
+                <ul class="relationship-list">
+                  <li><code>users.organization_id</code></li>
+                  <li><code>recordings.organization_id</code></li>
+                  <li><code>call_queue.organization_id</code></li>
+                  <li><code>agent_config.organization_id</code></li>
+                  <li><code>contacts.organization_id</code></li>
+                  <li><code>crm_integrations.organization_id</code></li>
+                  <li><code>crm_sync.organization_id</code></li>
+                  <li><code>gpu_jobs.organization_id</code></li>
+                  <li><code>invites.organization_id</code></li>
+                  <li><code>phone_numbers.organization_id</code></li>
+                  <li><code>subscriptions.organization_id</code></li>
+                  <li><code>transactions.organization_id</code></li>
+                  <li><code>payment_logs.organization_id</code></li>
+                  <li><code>api_keys.organization_id</code></li>
+                  <li><code>webhooks.organization_id</code></li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>users</strong></td>
+              <td><span class="badge badge-pk">id</span> (uuid)</td>
+              <td>
+                <ul class="relationship-list">
+                  <li><code>recordings.recorded_by</code></li>
+                  <li><code>agent_config.created_by</code></li>
+                  <li><code>invites.invited_by</code></li>
+                  <li><code>api_keys.created_by</code></li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>contacts</strong></td>
+              <td><span class="badge badge-pk">id</span> (uuid)</td>
+              <td>
+                <ul class="relationship-list">
+                  <li><code>recordings.contact_id</code></li>
+                  <li><code>call_queue.contact_id</code></li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>agent_config</strong></td>
+              <td><span class="badge badge-pk">id</span> (uuid)</td>
+              <td>
+                <ul class="relationship-list">
+                  <li><code>recordings.agent_config_id</code></li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>recordings</strong></td>
+              <td><span class="badge badge-pk">id</span> (uuid)</td>
+              <td>
+                <ul class="relationship-list">
+                  <li><code>crm_sync.recording_id</code></li>
+                  <li><code>gpu_jobs.recording_id</code></li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>subscriptions</strong></td>
+              <td><span class="badge badge-pk">id</span> (uuid)</td>
+              <td>
+                <ul class="relationship-list">
+                  <li><code>transactions.subscription_id</code></li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>transactions</strong></td>
+              <td>
+                <span class="badge badge-pk">transaction_key</span> (text)
+              </td>
+              <td>
+                <ul class="relationship-list">
+                  <li><code>payment_logs.transaction_key</code></li>
+                </ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- USERS -->
+      <section id="table-users" class="card">
+        <h2>Table: users</h2>
+        <p>
+          <strong>Description:</strong> Stores central identity metadata,
+          security hashes, and organization associations.
+        </p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 5%">Key</th>
+              <th style="width: 20%">Column Name</th>
+              <th style="width: 15%">Data Type</th>
+              <th style="width: 10%">Null / Default</th>
+              <th>Description / Documentation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-pk">PK</span></td>
+              <td><strong>id</strong></td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls<br /><small>gen_random_uuid()</small></td>
+              <td>
+                The unique clustering identity key native to this account asset.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>email</td>
+              <td class="type-column">text</td>
+              <td>No Nulls</td>
+              <td>
+                User email lookup identifier. Normalized strictly to lowercase
+                upon insertion sanitization.
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>organization_id</td>
+              <td class="type-column">uuid</td>
+              <td>Nullable</td>
+              <td>
+                The ID of an organization a user belongs to. Links to
+                <code>organizations(id)</code>.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>role</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The specific role of a individual user</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>is_active</td>
+              <td class="type-column">bool</td>
+              <td>No Nulls</td>
+              <td>A boolean that shows whether the user is currently active</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>created_at</td>
+              <td class="type-column">timestamptz</td>
+              <td>No Nulls<br /><small>now()</small></td>
+              <td>
+                System tracking entry capturing exact operational moment of
+                origin.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Foreign Keys</h3>
+        <table class="dictionary-table" style="margin-top: 0.5rem">
+          <thead>
+            <tr>
+              <th>FK Constraint Name</th>
+              <th>Source Column</th>
+              <th>Target Table / Column</th>
+              <th>On Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>fk_users_organizations</td>
+              <td>organization_id</td>
+              <td>organizations (id)</td>
+              <td>SET NULL</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ORGANIZATIONS -->
+      <section id="table-organizations" class="card">
+        <h2>Table: organizations</h2>
+        <p>
+          <strong>Description:</strong> Stores organization-related information
+          and metadata.
+        </p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 5%">Key</th>
+              <th style="width: 20%">Column Name</th>
+              <th style="width: 15%">Data Type</th>
+              <th style="width: 10%">Null / Default</th>
+              <th>Description / Documentation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-pk">PK</span></td>
+              <td><strong>id</strong></td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls<br /><small>gen_random_uuid()</small></td>
+              <td>
+                The unique clustering identity key native to this organization
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>name</td>
+              <td class="type-column">text</td>
+              <td>No Nulls</td>
+              <td>Name of the organization</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>created_at</td>
+              <td class="type-column">timestamptz</td>
+              <td>No Nulls<br /><small>now()</small></td>
+              <td>
+                System tracking entry capturing exact operational moment of
+                origin.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- RECORDINGS -->
+      <section id="table-recordings" class="card">
+        <h2>Table: recordings</h2>
+        <p>
+          <strong>Description:</strong> Holds call recording-related information
+          and metadata.
+        </p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 5%">Key</th>
+              <th style="width: 20%">Column Name</th>
+              <th style="width: 15%">Data Type</th>
+              <th style="width: 10%">Null / Default</th>
+              <th>Description / Documentation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-pk">PK</span></td>
+              <td><strong>id</strong></td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>The primary key for the call.</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>organization_id</td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>The ID of a organization this recording belongs to</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>recorded_by</td>
+              <td class="type-column">uuid</td>
+              <td>Nullable</td>
+              <td>
+                The ID of the sales rep/tenant this recording was created by
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>contact_id</td>
+              <td class="type-column">uuid</td>
+              <td>Nullable</td>
+              <td>Points to the CRM contact record this call was with.</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>did_number</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                The organization's DID number that was used for this call
+                recording
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>caller_number</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The number of the receiving user on the call</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>audio_url</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The url of the audio stream from the call</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>status</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>Call lifecycle: in_progress, completed, or failed</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>duration_seconds</td>
+              <td class="type-column">int4</td>
+              <td>Nullable</td>
+              <td>The duration of the call measured in seconds</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>sip_session_id</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The ID of the SIP session</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>sip_provider</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The SIP platform this call was recorded on</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>agent_config_id</td>
+              <td class="type-column">uuid</td>
+              <td>Nullable</td>
+              <td>The ID of the agent config connected to this call</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>call_mode</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The mode the call was recorded in</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Foreign Keys</h3>
+        <table class="dictionary-table" style="margin-top: 0.5rem">
+          <thead>
+            <tr>
+              <th>FK Constraint Name</th>
+              <th>Source Column</th>
+              <th>Target Table / Column</th>
+              <th>On Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>fk_recordings_organizations</td>
+              <td>organization_id</td>
+              <td>organizations (id)</td>
+              <td>CASCADE</td>
+            </tr>
+            <tr>
+              <td>fk_recordings_users</td>
+              <td>recorded_by</td>
+              <td>users (id)</td>
+              <td>SET NULL</td>
+            </tr>
+            <tr>
+              <td>fk_recordings_contacts</td>
+              <td>contact_id</td>
+              <td>contacts (id)</td>
+              <td>SET NULL</td>
+            </tr>
+            <tr>
+              <td>fk_recordings_agent_config</td>
+              <td>agent_config_id</td>
+              <td>agent_config (id)</td>
+              <td>SET NULL</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- CALL QUEUE -->
+      <section id="table-call-queue" class="card">
+        <h2>Table: call queue</h2>
+        <p>
+          <strong>Description:</strong> Supports the AI auto-dialer — tracks
+          which prospects are scheduled to be called and in what order.
+        </p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 5%">Key</th>
+              <th style="width: 20%">Column Name</th>
+              <th style="width: 15%">Data Type</th>
+              <th style="width: 10%">Null / Default</th>
+              <th>Description / Documentation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-pk">PK</span></td>
+              <td><strong>id</strong></td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>
+                Auto-incrementing operational identifier tracking ledger numbers
+                sequentially.
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>organization_id</td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>The ID of the organization using the auto-dialer.</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>contact_id</td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>The target contact queued up for dialing.</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>scheduled_at</td>
+              <td class="type-column">timestamp</td>
+              <td>Nullable</td>
+              <td>The date and time the call is scheduled to execute.</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>priority</td>
+              <td class="type-column">int4</td>
+              <td>Nullable</td>
+              <td>The dialing execution priority hierarchy level.</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>status</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The status tracking position of the queued job item.</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>call_mode</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>Identifies how the call was initiated.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Foreign Keys</h3>
+        <table class="dictionary-table" style="margin-top: 0.5rem">
+          <thead>
+            <tr>
+              <th>FK Constraint Name</th>
+              <th>Source Column</th>
+              <th>Target Table / Column</th>
+              <th>On Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>fk_call_queue_organizations</td>
+              <td>organization_id</td>
+              <td>organizations (id)</td>
+              <td>CASCADE</td>
+            </tr>
+            <tr>
+              <td>fk_call_queue_contacts</td>
+              <td>contact_id</td>
+              <td>contacts (id)</td>
+              <td>CASCADE</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- AGENT CONFIG -->
+      <section id="table-agent-config" class="card">
+        <h2>Table: agent configs</h2>
+        <p><strong>Description:</strong> Holds agent configuration details.</p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 5%">Key</th>
+              <th style="width: 20%">Column Name</th>
+              <th style="width: 15%">Data Type</th>
+              <th style="width: 10%">Null / Default</th>
+              <th>Description / Documentation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-pk">PK</span></td>
+              <td><strong>id</strong></td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>Identifier tracking configurations uniquely.</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>organization_id</td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>The ID of an organization this config belongs to</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>created_by</td>
+              <td class="type-column">uuid</td>
+              <td>Nullable</td>
+              <td>The ID of a user this recording was created by</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>name</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The name of the config</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>objective</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The goal the agent is supposed to reach during its calls</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>tone</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The tone of voice used by the agent</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>persona</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The personality the agent will use to handle its calls</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>account_type</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>Account tier properties configuration rules context.</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>is_active</td>
+              <td class="type-column">bool</td>
+              <td>Nullable</td>
+              <td>if the agent is currently being used for calls or not</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>created_at</td>
+              <td class="type-column">timestamp</td>
+              <td>Nullable</td>
+              <td>The time this agent config was created at</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Foreign Keys</h3>
+        <table class="dictionary-table" style="margin-top: 0.5rem">
+          <thead>
+            <tr>
+              <th>FK Constraint Name</th>
+              <th>Source Column</th>
+              <th>Target Table / Column</th>
+              <th>On Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>fk_agent_config_organizations</td>
+              <td>organization_id</td>
+              <td>organizations (id)</td>
+              <td>CASCADE</td>
+            </tr>
+            <tr>
+              <td>fk_agent_config_users</td>
+              <td>created_by</td>
+              <td>users (id)</td>
+              <td>SET NULL</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- CONTACTS -->
+      <section id="table-contacts" class="card">
+        <h2>Table: contacts</h2>
+        <p>
+          <strong>Description:</strong> Holds contact information for out of
+          network prospects.
+        </p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 5%">Key</th>
+              <th style="width: 20%">Column Name</th>
+              <th style="width: 15%">Data Type</th>
+              <th style="width: 10%">Null / Default</th>
+              <th>Description / Documentation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-pk">PK</span></td>
+              <td><strong>id</strong></td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>Unique key tracking identity records.</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>organization_id</td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>The ID of an organization this record belongs to</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>apollo_id</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The ID of the apollo account linked to this contact</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>hubspot_id</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The ID of the Hubspot account linked to this contact</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>name</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The name of this contact</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>email</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The email linked to the contact</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>phone</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The phone number linked to the contact</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>company</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The company this contact belongs to</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Foreign Keys</h3>
+        <table class="dictionary-table" style="margin-top: 0.5rem">
+          <thead>
+            <tr>
+              <th>FK Constraint Name</th>
+              <th>Source Column</th>
+              <th>Target Table / Column</th>
+              <th>On Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>fk_contacts_organizations</td>
+              <td>organization_id</td>
+              <td>organizations (id)</td>
+              <td>CASCADE</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- CRM INTEGRATIONS -->
+      <section id="table-crm-integrations" class="card">
+        <h2>Table: crm integrations</h2>
+        <p>
+          <strong>Description:</strong> Stores OAuth tokens per organization per
+          provider — encrypted at rest.
+        </p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 5%">Key</th>
+              <th style="width: 20%">Column Name</th>
+              <th style="width: 15%">Data Type</th>
+              <th style="width: 10%">Null / Default</th>
+              <th>Description / Documentation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-pk">PK</span></td>
+              <td><strong>id</strong></td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>
+                Unique database structural line entry tracking token rows.
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>organization_id</td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>The ID of the organization connecting the CRM asset.</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>provider</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                The targeted platform identifier string (e.g., hubspot,
+                zendesk).
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>access_token</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                The encrypted access token used to authorize external API
+                actions.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>refresh_token</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                The encrypted security credential used to generate updated
+                access tokens.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>token_expires_at</td>
+              <td class="type-column">timestamp</td>
+              <td>Nullable</td>
+              <td>
+                The exact moment token authorization validation breaks down.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>is_active</td>
+              <td class="type-column">bool</td>
+              <td>Nullable</td>
+              <td>
+                Whether this specific integration pipeline engine is running.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Foreign Keys</h3>
+        <table class="dictionary-table" style="margin-top: 0.5rem">
+          <thead>
+            <tr>
+              <th>FK Constraint Name</th>
+              <th>Source Column</th>
+              <th>Target Table / Column</th>
+              <th>On Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>fk_crm_integrations_organizations</td>
+              <td>organization_id</td>
+              <td>organizations (id)</td>
+              <td>CASCADE</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- CRM SYNC LOG -->
+      <section id="table-crm-sync" class="card">
+        <h2>Table: crm sync log</h2>
+        <p>
+          <strong>Description:</strong> Holds synchronization logs for CRM
+          pipelines.
+        </p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 5%">Key</th>
+              <th style="width: 20%">Column Name</th>
+              <th style="width: 15%">Data Type</th>
+              <th style="width: 10%">Null / Default</th>
+              <th>Description / Documentation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-pk">PK</span></td>
+              <td><strong>id</strong></td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>Primary key tracking pipeline execution rows uniquely.</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>organization_id</td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>
+                The ID of an organization this record log context belongs to
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>recording_id</td>
+              <td class="type-column">uuid</td>
+              <td>Nullable</td>
+              <td>
+                The ID of the calling recording source payload record linked to
+                this transaction.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>provider</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                Target upstream systems configuration flag definitions (e.g.,
+                Hubspot).
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>external_record_id</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                The remote identifier matching this data row inside third-party
+                engines.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>sync_type</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The type of sync that was used</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>status</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The status of the sync: completed, pending, or failed</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>error_message</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                The error message received from the sync engine execution
+                failures.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>synced_at</td>
+              <td class="type-column">timestamp</td>
+              <td>Nullable</td>
+              <td>The time when the sync was completed</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Foreign Keys</h3>
+        <table class="dictionary-table" style="margin-top: 0.5rem">
+          <thead>
+            <tr>
+              <th>FK Constraint Name</th>
+              <th>Source Column</th>
+              <th>Target Table / Column</th>
+              <th>On Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>fk_crm_sync_organizations</td>
+              <td>organization_id</td>
+              <td>organizations (id)</td>
+              <td>CASCADE</td>
+            </tr>
+            <tr>
+              <td>fk_crm_sync_recordings</td>
+              <td>recording_id</td>
+              <td>recordings (id)</td>
+              <td>SET NULL</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- GPU JOBS -->
+      <section id="table-gpu-jobs" class="card">
+        <h2>Table: gpu jobs</h2>
+        <p>
+          <strong>Description:</strong> Holds information about GPU jobs
+          processing pipelines and their status.
+        </p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 5%">Key</th>
+              <th style="width: 20%">Column Name</th>
+              <th style="width: 15%">Data Type</th>
+              <th style="width: 10%">Null / Default</th>
+              <th>Description / Documentation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-pk">PK</span></td>
+              <td><strong>id</strong></td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>System identifier tracking unique jobs.</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>organization_id</td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>The ID of an organization this job belongs to</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>recording_id</td>
+              <td class="type-column">uuid</td>
+              <td>Nullable</td>
+              <td>The ID of the recording linked to this job</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>job_type</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                The type of job the gpu was used for: transcription or analysis
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>status</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The status of the job: completed, pending, or failed</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>compute_units</td>
+              <td class="type-column">numeric</td>
+              <td>Nullable</td>
+              <td>
+                The mathematical computational weight factor metrics tracked for
+                processing billing logic.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>cost</td>
+              <td class="type-column">numeric</td>
+              <td>Nullable</td>
+              <td>
+                Dollar valuation tracked contextually against computational
+                resource consumption scales.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>started_at</td>
+              <td class="type-column">timestamp</td>
+              <td>Nullable</td>
+              <td>The time when the job began</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>completed_at</td>
+              <td class="type-column">timestamp</td>
+              <td>Nullable</td>
+              <td>The time when the job ended</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Foreign Keys</h3>
+        <table class="dictionary-table" style="margin-top: 0.5rem">
+          <thead>
+            <tr>
+              <th>FK Constraint Name</th>
+              <th>Source Column</th>
+              <th>Target Table / Column</th>
+              <th>On Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>fk_gpu_jobs_organizations</td>
+              <td>organization_id</td>
+              <td>organizations (id)</td>
+              <td>CASCADE</td>
+            </tr>
+            <tr>
+              <td>fk_gpu_jobs_recordings</td>
+              <td>recording_id</td>
+              <td>recordings (id)</td>
+              <td>SET NULL</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- IDEMPOTENCY KEYS -->
+      <section id="table-idempotency-keys" class="card">
+        <h2>Table: idempotency keys</h2>
+        <p>
+          <strong>Description:</strong> Holds idempotency keys for ensuring safe
+          transaction retry operations handling mechanisms.
+        </p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 5%">Key</th>
+              <th style="width: 20%">Column Name</th>
+              <th style="width: 15%">Data Type</th>
+              <th style="width: 10%">Null / Default</th>
+              <th>Description / Documentation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-pk">PK</span></td>
+              <td><strong>id</strong></td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>Unique metadata primary key grouping identifier tracking.</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>idempotency_key</td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>
+                The unique header key token parameters submitted alongside
+                requests.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>user_id</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The text metadata parameter mapping user references.</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>request_hash</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                The hash signature mapping unique request payload bodies
+                contextually.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>status</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                Processing step lifecycle tracks (e.g., completed, pending).
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>response_body</td>
+              <td class="type-column">json</td>
+              <td>Nullable</td>
+              <td>
+                Cached JSON response data payload objects preserved to safety
+                return duplicate attempts immediately.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>response_code</td>
+              <td class="type-column">int4</td>
+              <td>Nullable</td>
+              <td>
+                HTTP Status verification response patterns context tracking
+                values.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>created_at</td>
+              <td class="type-column">timestamptz</td>
+              <td>Nullable</td>
+              <td>The time when the key was created</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- INVITES -->
+      <section id="table-invites" class="card">
+        <h2>Table: invites</h2>
+        <p>
+          <strong>Description:</strong> Holds organization invitation details
+          for onboarding pipelines.
+        </p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 5%">Key</th>
+              <th style="width: 20%">Column Name</th>
+              <th style="width: 15%">Data Type</th>
+              <th style="width: 10%">Null / Default</th>
+              <th>Description / Documentation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-pk">PK</span></td>
+              <td><strong>id</strong></td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>Unique row data lookup sequence context parameters.</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>organization_id</td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>The ID of an organization this invite belongs to</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>invited_by</td>
+              <td class="type-column">uuid</td>
+              <td>Nullable</td>
+              <td>The ID of a user who sent the invite</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>email</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The email of the invite receiver</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>role</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                The access privileges tier context mapping across structural
+                tables upon onboarding processing.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>token</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>Cryptographic string validation secrets context keys.</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>status</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The status of the invite: accepted, pending, or rejected</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>created_at</td>
+              <td class="type-column">timestamp</td>
+              <td>Nullable</td>
+              <td>The date the invite was created</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Foreign Keys</h3>
+        <table class="dictionary-table" style="margin-top: 0.5rem">
+          <thead>
+            <tr>
+              <th>FK Constraint Name</th>
+              <th>Source Column</th>
+              <th>Target Table / Column</th>
+              <th>On Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>fk_invites_organizations</td>
+              <td>organization_id</td>
+              <td>organizations (id)</td>
+              <td>CASCADE</td>
+            </tr>
+            <tr>
+              <td>fk_invites_users</td>
+              <td>invited_by</td>
+              <td>users (id)</td>
+              <td>CASCADE</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- PHONE NUMBERS -->
+      <section id="table-phone-numbers" class="card">
+        <h2>Table: phone numbers</h2>
+        <p>
+          <strong>Description:</strong> Holds phone number allocation records
+          for tenant platforms.
+        </p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 5%">Key</th>
+              <th style="width: 20%">Column Name</th>
+              <th style="width: 15%">Data Type</th>
+              <th style="width: 10%">Null / Default</th>
+              <th>Description / Documentation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-pk">PK</span></td>
+              <td><strong>id</strong></td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>Primary verification sequence key properties tracking details.</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>organization_id</td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>The ID of an organization this phone number belongs to</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>did_number</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                Direct Inward Dialing parameter routing targets standard context
+                strings.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>is_active</td>
+              <td class="type-column">bool</td>
+              <td>Nullable</td>
+              <td>The status of the number: active or unactivated</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>assigned_at</td>
+              <td class="type-column">timestamp</td>
+              <td>Nullable</td>
+              <td>When the number was assigned to a company</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Foreign Keys</h3>
+        <table class="dictionary-table" style="margin-top: 0.5rem">
+          <thead>
+            <tr>
+              <th>FK Constraint Name</th>
+              <th>Source Column</th>
+              <th>Target Table / Column</th>
+              <th>On Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>fk_phone_numbers_organizations</td>
+              <td>organization_id</td>
+              <td>organizations (id)</td>
+              <td>CASCADE</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- SUBSCRIPTIONS -->
+      <section id="table-subscriptions" class="card">
+        <h2>Table: subscriptions</h2>
+        <p>
+          <strong>Description:</strong> Holds active monetization tier metrics
+          structures.
+        </p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 5%">Key</th>
+              <th style="width: 20%">Column Name</th>
+              <th style="width: 15%">Data Type</th>
+              <th style="width: 10%">Null / Default</th>
+              <th>Description / Documentation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-pk">PK</span></td>
+              <td><strong>id</strong></td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>
+                Clustering record context lookup definitions tracking
+                parameters.
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>organization_id</td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>The ID of an organization the subscription belongs to</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>plan_type</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                The tier associated with the subscription (e.g., Growth,
+                Enterprise).
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>status</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The status of the subscription: active or deactivated</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>gpu_quota</td>
+              <td class="type-column">numeric</td>
+              <td>Nullable</td>
+              <td>The number of compute units a subscription has access to</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>renewal_date</td>
+              <td class="type-column">date</td>
+              <td>Nullable</td>
+              <td>The date the subscription will renew</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>started_at</td>
+              <td class="type-column">timestamp</td>
+              <td>Nullable</td>
+              <td>The date the subscription was first activated</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>cancelled_at</td>
+              <td class="type-column">timestamp</td>
+              <td>Nullable</td>
+              <td>The date the subscription was cancelled</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Foreign Keys</h3>
+        <table class="dictionary-table" style="margin-top: 0.5rem">
+          <thead>
+            <tr>
+              <th>FK Constraint Name</th>
+              <th>Source Column</th>
+              <th>Target Table / Column</th>
+              <th>On Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>fk_subscriptions_organizations</td>
+              <td>organization_id</td>
+              <td>organizations (id)</td>
+              <td>CASCADE</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- TRANSACTIONS -->
+      <section id="table-transactions" class="card">
+        <h2>Table: transactions</h2>
+        <p>
+          <strong>Description:</strong> Captures ledger events pushed via
+          payment gateway webhooks for audit and balance verification tracking.
+        </p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 5%">Key</th>
+              <th style="width: 20%">Column Name</th>
+              <th style="width: 15%">Data Type</th>
+              <th style="width: 10%">Null / Default</th>
+              <th>Description / Documentation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-pk">PK</span></td>
+              <td><strong>transaction_key</strong></td>
+              <td class="type-column">text</td>
+              <td>No Nulls</td>
+              <td>
+                Unique billing identifier pushed by the payment provider gateway
+                asset to drop duplicates.
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>organization_id</td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>
+                The ID of the organization committing the account transaction
+                event.
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>subscription_id</td>
+              <td class="type-column">uuid</td>
+              <td>Nullable</td>
+              <td>
+                Links payment tracking straight back to active plan metadata
+                scopes.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>amount</td>
+              <td class="type-column">numeric</td>
+              <td>No Nulls</td>
+              <td>
+                The monetary calculation aggregate recorded on the billing
+                ledger event.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>currency</td>
+              <td class="type-column">text</td>
+              <td>No Nulls</td>
+              <td>
+                Standardized code syntax tracking asset valuations (e.g., USD).
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>status</td>
+              <td class="type-column">text</td>
+              <td>No Nulls</td>
+              <td>
+                Processing execution layout marker (e.g., succeeded, failed).
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>description</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                Audit descriptions tracking detailed information about invoice
+                line assets.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Foreign Keys</h3>
+        <table class="dictionary-table" style="margin-top: 0.5rem">
+          <thead>
+            <tr>
+              <th>FK Constraint Name</th>
+              <th>Source Column</th>
+              <th>Target Table / Column</th>
+              <th>On Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>fk_transactions_organizations</td>
+              <td>organization_id</td>
+              <td>organizations (id)</td>
+              <td>RESTRICT</td>
+            </tr>
+            <tr>
+              <td>fk_transactions_subscriptions</td>
+              <td>subscription_id</td>
+              <td>subscriptions (id)</td>
+              <td>SET NULL</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- PAYMENT LOGS -->
+      <section id="table-payment-logs" class="card">
+        <h2>Table: payment logs</h2>
+        <p>
+          <strong>Description:</strong> Stores every raw payload event received
+          directly from the payment gateway webhook for audit logging tracking
+          systems.
+        </p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 5%">Key</th>
+              <th style="width: 20%">Column Name</th>
+              <th style="width: 15%">Data Type</th>
+              <th style="width: 10%">Null / Default</th>
+              <th>Description / Documentation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-pk">PK</span></td>
+              <td><strong>id</strong></td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>Unique primary lookup mapping entry identifiers.</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>transaction_key</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                The matching gateway transaction string mapping logs directly
+                into structural billing data rows.
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>organization_id</td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>
+                The ID of the organization tied directly to the audit logging
+                context.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>event_type</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                The exact system hook description cataloging changes (e.g.,
+                invoice.payment_succeeded).
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>raw_payload</td>
+              <td class="type-column">json</td>
+              <td>No Nulls</td>
+              <td>
+                Full unparsed unstructured webhook transmission event details
+                reserved for audit pipelines.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Foreign Keys</h3>
+        <table class="dictionary-table" style="margin-top: 0.5rem">
+          <thead>
+            <tr>
+              <th>FK Constraint Name</th>
+              <th>Source Column</th>
+              <th>Target Table / Column</th>
+              <th>On Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>fk_payment_logs_organizations</td>
+              <td>organization_id</td>
+              <td>organizations (id)</td>
+              <td>CASCADE</td>
+            </tr>
+            <tr>
+              <td>fk_payment_logs_transactions</td>
+              <td>transaction_key</td>
+              <td>transactions (transaction_key)</td>
+              <td>SET NULL</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- API KEYS -->
+      <section id="table-api-keys" class="card">
+        <h2>Table: api keys</h2>
+        <p>
+          <strong>Description:</strong> Manages token authentication assets for
+          automated integrations generated by user request.
+        </p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 5%">Key</th>
+              <th style="width: 20%">Column Name</th>
+              <th style="width: 15%">Data Type</th>
+              <th style="width: 10%">Null / Default</th>
+              <th>Description / Documentation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-pk">PK</span></td>
+              <td><strong>id</strong></td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>Unique operational line parameters index.</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>organization_id</td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>
+                The organization scope isolating asset accessibility boundaries.
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>created_by</td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>
+                The team administrator account asset responsible for token
+                deployment.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>key_hash</td>
+              <td class="type-column">text</td>
+              <td>No Nulls</td>
+              <td>
+                Irreversible security hashing digest validating credentials
+                safely at rest.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>label</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                An arbitrary user-facing text property assigned to catalog
+                credential deployments.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>is_active</td>
+              <td class="type-column">bool</td>
+              <td>No Nulls</td>
+              <td>Toggles routing validation execution checks immediately.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Foreign Keys</h3>
+        <table class="dictionary-table" style="margin-top: 0.5rem">
+          <thead>
+            <tr>
+              <th>FK Constraint Name</th>
+              <th>Source Column</th>
+              <th>Target Table / Column</th>
+              <th>On Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>fk_api_keys_organizations</td>
+              <td>organization_id</td>
+              <td>organizations (id)</td>
+              <td>CASCADE</td>
+            </tr>
+            <tr>
+              <td>fk_api_keys_users</td>
+              <td>created_by</td>
+              <td>users (id)</td>
+              <td>CASCADE</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- WEBHOOKS -->
+      <section id="table-webhooks" class="card">
+        <h2>Table: webhooks</h2>
+        <p>
+          <strong>Description:</strong> Holds outbound developer webhook
+          pipeline triggers configurations and activation states.
+        </p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 5%">Key</th>
+              <th style="width: 20%">Column Name</th>
+              <th style="width: 15%">Data Type</th>
+              <th style="width: 10%">Null / Default</th>
+              <th>Description / Documentation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-pk">PK</span></td>
+              <td><strong>id</strong></td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls</td>
+              <td>
+                Primary verification sequence key properties tracking details.
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>organization_id</td>
+              <td class="type-column">uuid</td>
+              <td>Nullable</td>
+              <td>The id of the organization a webhook is used for</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>event_type</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                The event type associated with a webhook execution pattern
+                routing strategy (e.g., call.completed).
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>target_url</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The url the webhook is attempting to reach</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>secret</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                Signing secret verification token used by downstream clients to
+                reject spoof transactions.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>is_active</td>
+              <td class="type-column">bool</td>
+              <td>Nullable</td>
+              <td>whether the webhook is active or not</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Foreign Keys</h3>
+        <table class="dictionary-table" style="margin-top: 0.5rem">
+          <thead>
+            <tr>
+              <th>FK Constraint Name</th>
+              <th>Source Column</th>
+              <th>Target Table / Column</th>
+              <th>On Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>fk_webhooks_organizations</td>
+              <td>organization_id</td>
+              <td>organizations (id)</td>
+              <td>CASCADE</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <section id="table-transcript" class="card">
+        <h2>Table: transcript</h2>
+        <p>
+          <strong>Description:</strong> Holds individual transcribed speaker
+          segments of recorded calls, containing raw and clean text, timing
+          details, speaker metrics, and sequence tracking.
+        </p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 5%">Key</th>
+              <th style="width: 20%">Column Name</th>
+              <th style="width: 15%">Data Type</th>
+              <th style="width: 10%">Null / Default</th>
+              <th>Description / Documentation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-pk">PK</span></td>
+              <td><strong>id</strong></td>
+              <td class="type-column">int8</td>
+              <td>No Nulls<br /><small>identity</small></td>
+              <td>
+                Auto-incrementing identity key tracking individual transcript
+                segments sequentially.
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>recording_id</td>
+              <td class="type-column">int8</td>
+              <td>No Nulls</td>
+              <td>
+                Reference linking the transcript segment back to its parent call
+                recording.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>speaker</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                Raw speaker channel identifier mapped directly from the
+                transcription engine.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>content_raw</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>The raw, unformatted text transcribed from the segment.</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>content_clean</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                The cleaned text after filler-word sanitization or formatting
+                adjustments.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>sentence_start_sec</td>
+              <td class="type-column">numeric</td>
+              <td>Nullable</td>
+              <td>
+                The start offset of the spoken segment, measured in seconds from
+                the beginning of the call.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>sequence_index</td>
+              <td class="type-column">int4</td>
+              <td>Nullable</td>
+              <td>
+                Chronological ordering index capturing the sequence of spoken
+                segments during the session.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>created_at</td>
+              <td class="type-column">timestamptz</td>
+              <td>No Nulls<br /><small>now()</small></td>
+              <td>
+                System tracking timestamp capturing when the segment was
+                inserted.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>speaker_role</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                Categorized role of the speaker in the conversation (e.g.,
+                agent, prospect).
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>speaker_name</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                The resolved name of the speaker mapped from user profile or
+                contact records.
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>organization_id</td>
+              <td class="type-column">int4</td>
+              <td>Nullable</td>
+              <td>
+                Reference identifying the tenant organization owning this
+                transcription data.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Foreign Keys</h3>
+        <table class="dictionary-table" style="margin-top: 0.5rem">
+          <thead>
+            <tr>
+              <th>FK Constraint Name</th>
+              <th>Source Column</th>
+              <th>Target Table / Column</th>
+              <th>On Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>transcript_recording_id_fkey</td>
+              <td>recording_id</td>
+              <td>recordings (id)</td>
+              <td>CASCADE</td>
+            </tr>
+            <tr>
+              <td>transcript_organization_id_fkey</td>
+              <td>organization_id</td>
+              <td>organizations (id)</td>
+              <td>SET NULL</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Indexes</h3>
+        <table class="dictionary-table" style="margin-top: 0.5rem">
+          <thead>
+            <tr>
+              <th>Index Name</th>
+              <th>Columns</th>
+              <th>Type</th>
+              <th>Unique</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>transcript_recording_id_idx</td>
+              <td>recording_id</td>
+              <td>B-Tree</td>
+              <td>No</td>
+            </tr>
+            <tr>
+              <td>transcript_organization_id_idx</td>
+              <td>organization_id</td>
+              <td>B-Tree</td>
+              <td>No</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <section id="table-sip-calls" class="card">
+        <h2>Table: sip_calls</h2>
+        <p>
+          <strong>Description:</strong> Logs low-level SIP telephony signaling
+          events, tracking individual session lifetimes, directionality, and
+          direct associations back to call recording assets.
+        </p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 5%">Key</th>
+              <th style="width: 20%">Column Name</th>
+              <th style="width: 15%">Data Type</th>
+              <th style="width: 10%">Null / Default</th>
+              <th>Description / Documentation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-pk">PK</span></td>
+              <td><strong>id</strong></td>
+              <td class="type-column">text</td>
+              <td>No Nulls</td>
+              <td>
+                The unique SIP session identifier generated natively by the
+                telephony routing layer.
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>recording_id</td>
+              <td class="type-column">int8</td>
+              <td>Nullable</td>
+              <td>
+                Reference associating this active SIP routing session with its
+                corresponding database recording.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>started_at</td>
+              <td class="type-column">float8</td>
+              <td>Nullable</td>
+              <td>
+                Epoch timestamp capturing the exact millisecond moment the SIP
+                call session initiated.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>ended_at</td>
+              <td class="type-column">float8</td>
+              <td>Nullable</td>
+              <td>
+                Epoch timestamp capturing the exact millisecond moment the SIP
+                call session terminated.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>company</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>Company or tenant context linked to the routing stream.</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>direction</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                Identifies the routing flow direction of the stream (e.g.,
+                inbound, outbound).
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>caller</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                The caller identifier or phone number of the origin source.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>dialed_by</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                Tracks the identity or service handle that executed the dialing
+                action.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>channel_id</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                Underlying channel ID mapped from the SIP gateway/Asterisk
+                trunking protocol.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Foreign Keys</h3>
+        <table class="dictionary-table" style="margin-top: 0.5rem">
+          <thead>
+            <tr>
+              <th>FK Constraint Name</th>
+              <th>Source Column</th>
+              <th>Target Table / Column</th>
+              <th>On Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>sip_calls_recording_id_fkey</td>
+              <td>recording_id</td>
+              <td>recordings (id)</td>
+              <td>SET NULL</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <section id="table-topics" class="card">
+        <h2>Table: topics</h2>
+        <p>
+          <strong>Description:</strong> Logs detected conversation topics,
+          themes, or event markers surfaced during AI analysis of call
+          recordings, complete with chronological ordering and timing offsets.
+        </p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 5%">Key</th>
+              <th style="width: 20%">Column Name</th>
+              <th style="width: 15%">Data Type</th>
+              <th style="width: 10%">Null / Default</th>
+              <th>Description / Documentation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-pk">PK</span></td>
+              <td><strong>id</strong></td>
+              <td class="type-column">uuid</td>
+              <td>No Nulls<br /><small>gen_random_uuid()</small></td>
+              <td>The unique identifier native to this topic marker entry.</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>recording_id</td>
+              <td class="type-column">int8</td>
+              <td>Nullable</td>
+              <td>
+                Reference linking the topic segment directly to the parent call
+                recording.
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>analysis_id</td>
+              <td class="type-column">int8</td>
+              <td>Nullable</td>
+              <td>
+                Reference associating the detected topic with the specific
+                automated call analysis run.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>name</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                The categorized topic name or label identified during
+                transcription analysis (e.g., "pricing", "objection").
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>start_time</td>
+              <td class="type-column">numeric</td>
+              <td>Nullable</td>
+              <td>
+                The offset position in seconds tracking exactly when this topic
+                conversation began.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>sequence_index</td>
+              <td class="type-column">int4</td>
+              <td>Nullable</td>
+              <td>
+                Order index indicating when this topic appeared relative to
+                others in the recording timeline.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>created_at</td>
+              <td class="type-column">timestamptz</td>
+              <td>Nullable<br /><small>now()</small></td>
+              <td>
+                Audit timestamp capturing the exact operational moment the topic
+                record was inserted.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Foreign Keys</h3>
+        <table class="dictionary-table" style="margin-top: 0.5rem">
+          <thead>
+            <tr>
+              <th>FK Constraint Name</th>
+              <th>Source Column</th>
+              <th>Target Table / Column</th>
+              <th>On Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>topics_recording_id_fkey</td>
+              <td>recording_id</td>
+              <td>recordings (id)</td>
+              <td>RESTRICT</td>
+            </tr>
+            <tr>
+              <td>topics_analysis_id_fkey</td>
+              <td>analysis_id</td>
+              <td>analysis (id)</td>
+              <td>RESTRICT</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+      <section id="table-analysis" class="card">
+        <h2>Table: analysis</h2>
+        <p>
+          <strong>Description:</strong> Stores high-level AI analysis results of
+          call recordings, including summaries, structured key topics, objection
+          evaluations, and performance highlights.
+        </p>
+
+        <table class="dictionary-table">
+          <thead>
+            <tr>
+              <th style="width: 5%">Key</th>
+              <th style="width: 20%">Column Name</th>
+              <th style="width: 15%">Data Type</th>
+              <th style="width: 10%">Null / Default</th>
+              <th>Description / Documentation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-pk">PK</span></td>
+              <td><strong>id</strong></td>
+              <td class="type-column">int8</td>
+              <td>No Nulls<br /><small>identity</small></td>
+              <td>
+                Auto-incrementing identity key tracking individual call analysis
+                runs sequentially.
+              </td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-fk">FK</span></td>
+              <td>recording_id</td>
+              <td class="type-column">int8</td>
+              <td>No Nulls</td>
+              <td>
+                Reference linking the AI analysis metrics back to the parent
+                call recording.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>summary</td>
+              <td class="type-column">text</td>
+              <td>Nullable</td>
+              <td>
+                High-level narrative summarizing the key outcomes and flow of
+                the call.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>key_topics</td>
+              <td class="type-column">jsonb</td>
+              <td>Nullable</td>
+              <td>
+                Structured JSON containing key themes, categories, or keywords
+                identified during analysis.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>objection_analysis</td>
+              <td class="type-column">jsonb</td>
+              <td>Nullable</td>
+              <td>
+                Structured evaluation of objections raised by the prospect and
+                how they were handled by the agent.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>what_went_well</td>
+              <td class="type-column">jsonb</td>
+              <td>Nullable</td>
+              <td>
+                Structured positive performance feedback and successful
+                techniques highlighted during the call.
+              </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>created_at</td>
+              <td class="type-column">timestamptz</td>
+              <td>No Nulls<br /><small>now()</small></td>
+              <td>
+                Timestamp logging the moment this analysis record was generated.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Foreign Keys</h3>
+        <table class="dictionary-table" style="margin-top: 0.5rem">
+          <thead>
+            <tr>
+              <th>FK Constraint Name</th>
+              <th>Source Column</th>
+              <th>Target Table / Column</th>
+              <th>On Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>analysis_recording_id_fkey</td>
+              <td>recording_id</td>
+              <td>recordings (id)</td>
+              <td>CASCADE</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Indexes</h3>
+        <table class="dictionary-table" style="margin-top: 0.5rem">
+          <thead>
+            <tr>
+              <th>Index Name</th>
+              <th>Columns</th>
+              <th>Type</th>
+              <th>Unique</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>analysis_recording_id_idx</td>
+              <td>recording_id</td>
+              <td>B Tree</td>
+              <td>No</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+
+    <script>
+        document.getElementById('btn-download').addEventListener('click', () => {
+            window.print();
+        });
+    </script>
+  </body>
+</html>
