@@ -172,7 +172,61 @@
       0% { opacity: 0; transform: translateY(16px) scale(0.97); }
       100% { opacity: 1; transform: translateY(0) scale(1); }
     }
-    /* Toast Notification Styles */
+    #mainContent {
+      transition: margin-right 240ms ease;
+      margin-right: 18rem; /* matches crm-panel open width by default */
+    }
+    @media (max-width: 899px) {
+      #mainContent {
+        margin-right: 0 !important;
+      }
+    }
+    .modal-in {
+      animation: modal-in 0.25s ease-out forwards;
+    }
+    .crm-panel {
+      width: 18rem;
+      transition: width 240ms ease, transform 240ms ease, opacity 240ms ease;
+      transform: translateX(0);
+    }
+    .crm-panel.is-collapsed {
+      width: 4.5rem;
+    }
+    .crm-panel .panel-body {
+      opacity: 1;
+      transform: translateX(0);
+      transition: opacity 220ms ease, transform 220ms ease;
+    }
+    .crm-panel.is-collapsed .panel-body {
+      opacity: 0;
+      transform: translateX(8px);
+      pointer-events: none;
+    }
+    @media (max-width: 899px) {
+      .crm-panel {
+        display: none !important;
+      }
+    }
+::-webkit-scrollbar {
+    width: 6px
+    }
+::-webkit-scrollbar-track {
+    background: transparent
+    }
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px
+    }
+    @keyframes fade-in-out {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; }
+}
+.coach-suggestion-fade {
+    animation: fade-in-out 14s ease-in-out forwards;
+}
+/* Toast Notification Styles */
     @keyframes toast-in {
       from {
         opacity: 0;
@@ -203,51 +257,6 @@
     .toast-notification.out {
       animation: toast-out 0.3s ease-in forwards;
     }
-    .modal-in {
-      animation: modal-in 0.25s ease-out forwards;
-    }
-    .crm-panel {
-      width: 18rem;
-      transition: width 240ms ease, transform 240ms ease, opacity 240ms ease;
-      transform: translateX(0);
-    }
-    .crm-panel.is-collapsed {
-      width: 4.5rem;
-    }
-    .crm-panel .panel-body {
-      opacity: 1;
-      transform: translateX(0);
-      transition: opacity 220ms ease, transform 220ms ease;
-    }
-    .crm-panel.is-collapsed .panel-body {
-      opacity: 0;
-      transform: translateX(8px);
-      pointer-events: none;
-    }
-    @media (max-width: 899px) {
-      .crm-panel {
-        display: none !important;
-      }
-    }
-::-webkit-scrollbar {
-    width: 4px
-    }
-::-webkit-scrollbar-track {
-    background: transparent
-    }
-::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px
-    }
-    @keyframes fade-in-out {
-    0% { opacity: 0; }
-    10% { opacity: 1; }
-    90% { opacity: 1; }
-    100% { opacity: 0; }
-}
-.coach-suggestion-fade {
-    animation: fade-in-out 14s ease-in-out forwards;
-}
 .modal-overlay {
 animation: fade-in 0.3s ease-out;
     display: none;
@@ -531,7 +540,7 @@ animation: fade-in 0.3s ease-out;
 <!-- END: TopAppBar -->
 <!-- BEGIN: SideNav -->
 <aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex flex-col items-center py-6 gap-6 glass-card border-r border-white/5 z-40 overflow-y-auto">
-<div class="flex flex-col gap-4 items-center">
+<div class="flex flex-col gap-4 items-center gap-4 w-full overflow-y-auto flex-1">
     <a href="./Dashboard.html" class="block">
         <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
             <span class="material-symbols-outlined">dashboard</span>
@@ -604,15 +613,15 @@ animation: fade-in 0.3s ease-out;
   </a>
 </div>
 <div class="flex flex-col items-center gap-4 w-full pb-4">
-<a href="./profile.html" class="block w-full h-full cursor-pointer">
-<div class="h-10 w-10 rounded-full overflow-hidden border border-white/10 items-center ml-4">
+  <a href="./profile.html" class="block w-full h-full cursor-pointer">
+    <div class="h-10 w-10 rounded-full overflow-hidden border border-white/10 items-center ml-4">
     <img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs">
   </div>
   </a>
 </div>
 </aside>
 <!-- END: SideNav -->
-<main class="ml-20 mt-16 h-[calc(100vh-64px)] flex xl:pr-20">
+<main id="mainContent" class="ml-20 mt-16 h-[calc(100vh-64px)] flex">
 <!-- BEGIN: LeftPanel_Transcript -->
 <section class="w-80 lg:w-[400px] flex flex-col p-6 border-r border-white/5 bg-surface-container-low/30">
 <div class="flex items-center justify-between mb-6">
@@ -680,7 +689,7 @@ animation: fade-in 0.3s ease-out;
 <div class="absolute inset-0 rounded-full border-2 border-fire-accent/20 animate-pulse-ring"></div>
 <div class="absolute inset-0 rounded-full border-2 border-fire-accent/10 animate-pulse-ring-slow"></div>
 <div class="w-64 h-64 rounded-full border-[8px] border-surface-container-high shadow-2xl overflow-hidden relative fire-glow">
-<img alt="Sarah Connor" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqKguv2lN-Bz17QH9A5oJ04TkQSL4nMLIAKfF9xp4iOEpTKOiZEaEHl--uHjC9vHGXU6qmkQ8SAjrqYN2C5ZC0j0r3BIhBFSbt2mBmxkoGo8qxofHET6kJrC-YmSooHt2JdsXAUudIM2DjBPuGycorYtogSyZEIsTXmimMxi0zwngsa6Xw93Z3U8i9cgKZaiG6k08y-t5t8PWxjLRW4f0Waz8F9OhmRfq8HzPfeCgvHAb8TQZArckHVJ0rmXREH7UOib28r3OKIGk">
+<img id="avatarImage" alt="Contact avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqKguv2lN-Bz17QH9A5oJ04TkQSL4nMLIAKfF9xp4iOEpTKOiZEaEHl--uHjC9vHGXU6qmkQ8SAjrqYN2C5ZC0j0r3BIhBFSbt2mBmxkoGo8qxofHET6kJrC-YmSooHt2JdsXAUudIM2DjBPuGycorYtogSyZEIsTXmimMxi0zwngsa6Xw93Z3U8i9cgKZaiG6k08y-t5t8PWxjLRW4f0Waz8F9OhmRfq8HzPfeCgvHAb8TQZArckHVJ0rmXREH7UOib28r3OKIGk">
 </div>
 <!-- State Badges -->
 <div class="absolute top-8 right-8 flex flex-col gap-2 z-20" id="status-badges">
@@ -696,10 +705,10 @@ animation: fade-in 0.3s ease-out;
 </div>
 </div>
 <div class="text-center">
-<h1 class="font-syne text-5xl font-extrabold mb-3 tracking-tight">Sarah Connor</h1>
+<h1 id="contactName" class="font-syne text-5xl font-extrabold mb-3 tracking-tight">—</h1>
 <div class="flex items-center justify-center gap-2 text-gray-400">
 <span class="material-symbols-outlined text-sm">location_on</span>
-<span class="text-sm font-medium tracking-wide">Cyberdyne Systems • Palo Alto, CA</span>
+<span id="contactLocation" class="text-sm font-medium tracking-wide">—</span>
 </div>
 </div>
 </div>
@@ -748,7 +757,7 @@ animation: fade-in 0.3s ease-out;
 
 
 <!-- BEGIN: RightPanel_CRM -->
-<section class="w-80 lg:w-[350px] flex flex-col p-6 border-l border-white/5 bg-surface-container-low/30 overflow-y-auto">
+<section id="rightCrmPanel" class="w-80 lg:w-[350px] flex flex-col p-6 border-l border-white/5 bg-surface-container-low/30 overflow-y-auto">
 <h2 class="font-syne text-xs uppercase tracking-widest text-fire-accent font-bold mb-6">CRM Insights</h2>
 
 <!-- Contact Information -->
@@ -1008,9 +1017,9 @@ Start Camera
 <span class="material-symbols-outlined text-gray-300">close</span>
 </button>
 <!-- Header -->
-<div class="mb-10">
+<div class="mb-8">
 <h3 class="font-syne text-2xl font-extrabold text-white mb-2">Share your screen</h3>
-<p class="text-gray-400">Select what you'd like to show to Sarah Connor</p>
+<p class="text-gray-400">Select what you'd like to share with the participant</p>
 </div>
 <!-- Selection Grid -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -1248,7 +1257,8 @@ Save & Sync
 
 <script data-purpose="state-management">
 // ===== APPLICATION STATE =====
-const CALL = {
+// Use existing globals if present to avoid redeclaration errors
+window.CALL = window.CALL || {
   isActive: true,
   isMuted: false,
   isOnHold: false,
@@ -1265,7 +1275,7 @@ const CALL = {
   startTime: Date.now(),
 };
 
-const S = {
+window.S = window.S || {
   cameraModalOpen: false,
   screenShareModalOpen: false,
   transferModalOpen: false,
@@ -1957,6 +1967,260 @@ window.addEventListener('beforeunload', function() {
 });
 </script>
 
+<script data-purpose="call-state-and-initialization">
+  // ========== CALL STATE OBJECT ==========
+  // Single source of truth for current contact and call information
+  const CALL = {
+    contact: {
+      name: '',
+      number: '',
+      company: '',
+      jobTitle: '',
+      location: '',
+      avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBqKguv2lN-Bz17QH9A5oJ04TkQSL4nMLIAKfF9xp4iOEpTKOiZEaEHl--uHjC9vHGXU6qmkQ8SAjrqYN2C5ZC0j0r3BIhBFSbt2mBmxkoGo8qxofHET6kJrC-YmSooHt2JdsXAUudIM2DjBPuGycorYtogSyZEIsTXmimMxi0zwngsa6Xw93Z3U8i9cgKZaiG6k08y-t5t8PWxjLRW4f0Waz8F9OhmRfq8HzPfeCgvHAb8TQZArckHVJ0rmXREH7UOib28r3OKIGk',
+      email: '',
+      dealValue: '',
+      pipelineStage: '',
+      recentCalls: [
+        { name: 'Jordan Blake', time: '8m ago', outcome: 'Qualified' },
+        { name: 'Priya Anand', time: '24m ago', outcome: 'Follow-up' },
+        { name: 'Marcus Feld', time: '1h ago', outcome: 'Voicemail' },
+        { name: 'Alicia Gomez', time: '2h ago', outcome: 'Booked demo' },
+        { name: 'Noah Park', time: '3h ago', outcome: 'Closed' }
+      ],
+      topDeals: [
+        { name: 'Northwind Labs', value: '$142k', stage: 'Negotiation' },
+        { name: 'BrightPath AI', value: '$96k', stage: 'Proposal' },
+        { name: 'Redline Ops', value: '$84k', stage: 'Discovery' }
+      ]
+    }
+  };
+
+  // ========== HELPER: UPDATE LARGE AVATAR SECTION ==========
+  function updateAvatarSection(contact) {
+    const nameEl = document.getElementById('contactName');
+    const locationEl = document.getElementById('contactLocation');
+    const avatarEl = document.getElementById('avatarImage');
+
+    if (nameEl) nameEl.textContent = contact.name || '—';
+    if (locationEl) locationEl.textContent = contact.location || '—';
+    if (avatarEl) avatarEl.src = contact.avatar || CALL.contact.avatar;
+  }
+
+  // ========== HELPER: UPDATE CONTACT INFO SECTION (Main Right Panel) ==========
+  function updateContactInfoSection(contact) {
+    // Find the Contact Information section in the main right panel
+    const mainRightPanel = document.getElementById('rightCrmPanel');
+    if (!mainRightPanel) return;
+
+    // Find all .mb-8 divs and locate the Contact Information section
+    const mb8Divs = mainRightPanel.querySelectorAll('.mb-8');
+    if (mb8Divs.length === 0) return;
+
+    const contactInfoDiv = mb8Divs[0]; // First .mb-8 should be Contact Information
+
+    // Get the flex container with the contact details
+    const detailsContainer = contactInfoDiv.querySelector('.space-y-4');
+    if (!detailsContainer) return;
+
+    // Find the name, job title, and company (inside the flex gap-3 div)
+    const contactCard = detailsContainer.querySelector('.flex[class*="gap-3"]');
+    if (contactCard) {
+      const contactTextDiv = contactCard.querySelector('div:nth-child(2)');
+      if (contactTextDiv) {
+        const paragraphs = contactTextDiv.querySelectorAll('p');
+        if (paragraphs[0]) paragraphs[0].textContent = contact.name || '—'; // Name
+        if (paragraphs[1]) paragraphs[1].textContent = contact.jobTitle || '—'; // Job title
+        if (paragraphs[2]) paragraphs[2].textContent = contact.company || '—'; // Company
+      }
+    }
+
+    // Find and update phone, email, deal value, and pipeline stage
+    const contactDetailsDiv = detailsContainer.querySelector('.space-y-2');
+    if (contactDetailsDiv) {
+      const detailDivs = contactDetailsDiv.querySelectorAll('.flex[class*="items-center"][class*="gap-2"]');
+      
+      // Update phone (first detail div)
+      if (detailDivs[0]) {
+        const phoneSpan = detailDivs[0].querySelector('span:last-child');
+        if (phoneSpan) phoneSpan.textContent = contact.number || '—';
+      }
+      
+      // Update email (second detail div)
+      if (detailDivs[1]) {
+        const emailSpan = detailDivs[1].querySelector('span:last-child');
+        if (emailSpan) emailSpan.textContent = contact.email || '—';
+      }
+      
+      // Update deal value (third detail div)
+      if (detailDivs[2]) {
+        const dealSpan = detailDivs[2].querySelector('span:last-child');
+        if (dealSpan) {
+          const dealValue = contact.dealValue ? `$${contact.dealValue}` : '—';
+          dealSpan.textContent = dealValue + (contact.dealValue ? ' Deal Value' : '');
+        }
+      }
+      
+      // Update pipeline stage (fourth detail div)
+      if (detailDivs[3]) {
+        const stageSpan = detailDivs[3].querySelector('span:last-child');
+        if (stageSpan) stageSpan.textContent = contact.pipelineStage || '—';
+      }
+    }
+  }
+
+  // ========== HELPER: UPDATE FINANCIAL/STATS SECTION ==========
+  function updateFinancialSection(contact) {
+    // Find the Financial/Pipeline Stats section
+    const mainRightPanel = document.getElementById('rightCrmPanel');
+    if (!mainRightPanel) return;
+
+    // Find the financial section (the .space-y-6.mb-8 div)
+    const financialSection = mainRightPanel.querySelector('.space-y-6.mb-8');
+    if (!financialSection) return;
+
+    // Find direct child divs (Opportunity Value and Pipeline Stage)
+    const allChildren = financialSection.querySelectorAll(':scope > div');
+
+    // Update Opportunity Value (first div with label and span)
+    if (allChildren[0]) {
+      const valueSpan = allChildren[0].querySelector('span:not([class*="text-"])');
+      if (!valueSpan) {
+        const allSpans = allChildren[0].querySelectorAll('span');
+        if (allSpans.length > 0) {
+          allSpans[allSpans.length - 1].textContent = contact.dealValue 
+            ? `$${Number(contact.dealValue).toLocaleString('en-US')}.00` 
+            : '—';
+        }
+      } else {
+        valueSpan.textContent = contact.dealValue 
+          ? `$${Number(contact.dealValue).toLocaleString('en-US')}.00` 
+          : '—';
+      }
+    }
+
+    // Update Pipeline Stage (second div with badge)
+    if (allChildren[1]) {
+      const stageBadge = allChildren[1].querySelector('[class*="px-3"][class*="py-1"]');
+      if (stageBadge) stageBadge.textContent = contact.pipelineStage || '—';
+    }
+  }
+
+  // ========== HELPER: UPDATE CRM PANEL ==========
+  function updateCrmPanel(contact) {
+    // Update Contact Information section in main right panel
+    updateContactInfoSection(contact);
+
+    // Update Financial/Stats section in main right panel
+    updateFinancialSection(contact);
+
+    // Update collapsible right CRM panel sections
+    const recentCallsList = document.getElementById('crmRecentCalls');
+    const topDealsList = document.getElementById('crmTopDeals');
+    const suggestionsList = document.getElementById('crmSuggestions');
+
+    // Render recent calls from contact
+    if (recentCallsList && contact.recentCalls && contact.recentCalls.length > 0) {
+      recentCallsList.innerHTML = contact.recentCalls.map((call) => `
+        <li class="rounded-xl border border-white/10 bg-surface-container-lowest/70 px-3 py-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-sm font-bold text-white">${call.name}</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">${call.time}</span>
+          </div>
+          <div class="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-tertiary">${call.outcome}</div>
+        </li>
+      `).join('');
+    }
+
+    // Render top deals from contact
+    if (topDealsList && contact.topDeals && contact.topDeals.length > 0) {
+      topDealsList.innerHTML = contact.topDeals.map((deal) => `
+        <li class="rounded-xl border border-white/10 bg-surface-container-lowest/70 px-3 py-2">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-sm font-bold text-white">${deal.name}</span>
+            <span class="text-[10px] font-bold text-fire-accent">${deal.value}</span>
+          </div>
+          <div class="mt-1 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/60">${deal.stage}</div>
+        </li>
+      `).join('');
+    }
+
+    // Render AI suggestions (reuse existing logic)
+    if (suggestionsList) {
+      const suggestions = [
+        'Clarify the specific needs before proposing solutions.',
+        'Ask about their decision timeline and approval process.',
+        'Highlight competitive advantages early in the conversation.'
+      ];
+      suggestionsList.innerHTML = suggestions.map((suggestion) => `
+        <li class="rounded-xl border border-white/10 bg-surface-container-lowest/70 px-3 py-2 text-sm text-on-surface-variant">
+          ${suggestion}
+        </li>
+      `).join('');
+    }
+  }
+
+  // ========== MAIN: START CALL WITH CONTACT ==========
+  function start(contact) {
+    // Update CALL state
+    if (typeof contact === 'string') {
+      // Handle legacy string format (contact name)
+      CALL.contact.name = contact;
+    } else if (typeof contact === 'object') {
+      // Handle object format with full contact info
+      CALL.contact = { ...CALL.contact, ...contact };
+    }
+
+    // Update Large Avatar section
+    updateAvatarSection(CALL.contact);
+
+    // Update CRM panel
+    updateCrmPanel(CALL.contact);
+
+    console.log('Call started with contact:', CALL.contact);
+  }
+
+  // ========== INITIALIZATION: READ URL PARAMETERS ==========
+  function initializeFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const contactName = params.get('contact');
+    const contactNumber = params.get('number');
+
+    if (contactName || contactNumber) {
+      const contact = {
+        name: contactName || '',
+        number: contactNumber || ''
+      };
+      start(contact);
+    }
+  }
+
+  // ========== SYNC WITH INCOMING-CALL-AND-TIMER SCRIPT ==========
+  // Listen for callStarted event from incoming-call-and-timer script
+  // to ensure CRM panel updates whenever a call starts from any source
+  function setupCallStartedListener() {
+    window.addEventListener('callStarted', function(event) {
+      const contact = event.detail.contact;
+      if (contact) {
+        // Merge with existing contact data to preserve dealValue and pipelineStage
+        const enrichedContact = {
+          ...CALL.contact,
+          ...contact
+        };
+        CALL.contact = enrichedContact;
+        // Update the CRM panel with the enriched contact data
+        updateCrmPanel(CALL.contact);
+      }
+    });
+  }
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    setupCallStartedListener();
+    initializeFromUrl();
+  });
+</script>
+
 <script data-purpose="interface-interactivity">
    
     // ==================== AI COACH ROTATION ====================
@@ -2018,6 +2282,8 @@ function stopCoachRotation() {
 
 startCoachRotation();
 
+// ==================== MODAL SYSTEM ====================
+
 // ==================== TRANSCRIPT AUTO-SCROLL ====================
 const transcriptFeed = document.getElementById('transcript-feed');
 if (transcriptFeed) {
@@ -2074,17 +2340,30 @@ setInterval(() => {
     // ---------------------------------------------------------------------
     const CALL = {
       status: 'idle',        // idle | ringing | active | hold | ended
-      caller: null,          // { name, company, number, avatar }
+      contact: null,          // { name, company, number, avatar }
       elapsedSeconds: 0,      // accumulated *active* talk time (hold time excluded)
       tickHandle: null,      // setInterval handle — guarded so we never duplicate it
-    direction: 'inbound'   // inbound | outbound
+    direction: 'inbound',   // inbound | outbound
+    // Single source of truth for starting a call with a contact
+      start: function(contact) {
+        if (!contact) return;
+        this.contact = contact;
+        this.status = 'active';
+        this.elapsedSeconds = 0;
+        this.tickHandle = null;
+        
+        // Dispatch custom event so all UI components can listen and update
+        window.dispatchEvent(new CustomEvent('callStarted', { 
+          detail: { contact: this.contact } 
+        }));
+      }
     };
     window.CALL = CALL; // exposed for debugging / future screens
 
     const SAMPLE_CALLERS = [
-      { name: 'Jordan Blake', company: 'Meridian Capital Partners', number: '+1 (415) 555-0148', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE' },
-      { name: 'Priya Anand', company: 'Nova Fintech Group', number: '+1 (312) 555-0199', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCcIsQXOEfl9RPSSkYicZMQ5sZEXB_YEaWoTeRrnAo1-nAKuvFvlT46sDnAWOA7VkquKxtVzp5yjZv4DNj2NUZgU4etcHIroG96_E4yWdR_osy9rpoyTTuryFKuIyfkcTnf9FFhG2oA-M-U6JuX6WdWCZu-SM5MrrHJaNQJ4ZCYaNTHQs0TL6BH3YXV0DqvhDq1Vuw4n1-NjhNdDgGvmF4YaY0FVQlMxtXxQWjSXkpodrsqF8olnkV-WKEzTNiCPTtXW-yghBOX-jQ' },
-      { name: 'Marcus Feld', company: 'Ironclad Logistics', number: '+1 (206) 555-0121', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDxpGJ4Ipzimbxj3HtSBAli7TjUBzI2_5jjspz16beTbPyfWRo4lyp0H-rao99dlnU47rfKmrSl5Ypolg02PBuRqcpau7OiaZM_vaP30nvyBffUQ73WPhJ5rNNh743XfSRDHe9arWVzaIzIYC4iwT7FLP4rjkGJ5LeJjetwtF2qmuRIjoV9VT5p5Rjt9gmq3gPKohuev805CdvWmVD8dLVE2ZrGgqxkGjCXUgVqEBVoieyHd78ep4o2yrNlx8WjNlSrm-MMwDrKxRc' }
+      { name: 'Jordan Blake', company: 'Meridian Capital Partners', number: '+1 (415) 555-0148', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE', location: 'Meridian Capital • San Francisco, CA' },
+      { name: 'Priya Anand', company: 'Nova Fintech Group', number: '+1 (312) 555-0199', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCcIsQXOEfl9RPSSkYicZMQ5sZEXB_YEaWoTeRrnAo1-nAKuvFvlT46sDnAWOA7VkquKxtVzp5yjZv4DNj2NUZgU4etcHIroG96_E4yWdR_osy9rpoyTTuryFKuIyfkcTnf9FFhG2oA-M-U6JuX6WdWCZu-SM5MrrHJaNQJ4ZCYaNTHQs0TL6BH3YXV0DqvhDq1Vuw4n1-NjhNdDgGvmF4YaY0FVQlMxtXxQWjSXkpodrsqF8olnkV-WKEzTNiCPTtXW-yghBOX-jQ', location: 'Nova Fintech • Chicago, IL' },
+      { name: 'Marcus Feld', company: 'Ironclad Logistics', number: '+1 (206) 555-0121', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDxpGJ4Ipzimbxj3HtSBAli7TjUBzI2_5jjspz16beTbPyfWRo4lyp0H-rao99dlnU47rfKmrSl5Ypolg02PBuRqcpau7OiaZM_vaP30nvyBffUQ73WPhJ5rNNh743XfSRDHe9arWVzaIzIYC4iwT7FLP4rjkGJ5LeJjetwtF2qmuRIjoV9VT5p5Rjt9gmq3gPKohuev805CdvWmVD8dLVE2ZrGgqxkGjCXUgVqEBVoieyHd78ep4o2yrNlx8WjNlSrm-MMwDrKxRc', location: 'Ironclad Logistics • Seattle, WA' }
     ];
 
     // ---- Element references -------------------------------------------------
@@ -2119,6 +2398,11 @@ setInterval(() => {
     const callContactSelect = document.getElementById('callContactSelect');
     const callNumberInput = document.getElementById('callNumberInput');
 
+    // Large Avatar section elements
+    const avatarImage = document.getElementById('avatarImage');
+    const contactName = document.getElementById('contactName');
+    const contactLocation = document.getElementById('contactLocation');
+
     // ---- Helpers --------------------------------------------------------
     function formatTime(totalSeconds) {
       const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
@@ -2129,6 +2413,40 @@ setInterval(() => {
     function randomCaller() {
       return SAMPLE_CALLERS[Math.floor(Math.random() * SAMPLE_CALLERS.length)];
     }
+
+// =====================================================================
+    // UPDATE UI FROM CALL.contact
+    // =====================================================================
+    function updateUIFromContact() {
+      if (!CALL.contact) {
+        contactName.textContent = '—';
+        contactLocation.textContent = '—';
+        avatarImage.src = 'https://lh3.googleusercontent.com/aida-public/AB6AXuBqKguv2lN-Bz17QH9A5oJ04TkQSL4nMLIAKfF9xp4iOEpTKOiZEaEHl--uHjC9vHGXU6qmkQ8SAjrqYN2C5ZC0j0r3BIhBFSbt2mBmxkoGo8qxofHET6kJrC-YmSooHt2JdsXAUudIM2DjBPuGycorYtogSyZEIsTXmimMxi0zwngsa6Xw93Z3U8i9cgKZaiG6k08y-t5t8PWxjLRW4f0Waz8F9OhmRfq8HzPfeCgvHAb8TQZArckHVJ0rmXREH7UOib28r3OKIGk';
+        return;
+      }
+
+      // Update Large Avatar section
+      contactName.textContent = CALL.contact.name || '—';
+      contactLocation.textContent = CALL.contact.location || CALL.contact.company || '—';
+      if (CALL.contact.avatar) {
+        avatarImage.src = CALL.contact.avatar;
+      }
+      avatarImage.alt = CALL.contact.name || 'Contact';
+
+      // Update Active Call Bar
+      if (activeName) activeName.textContent = CALL.contact.name || 'Caller';
+      if (activeCompany) activeCompany.textContent = CALL.contact.company || 'Company';
+    }
+
+    // Listen for call starts and update UI automatically
+    window.addEventListener('callStarted', (event) => {
+      updateUIFromContact();
+      activeBar.classList.remove('hidden');
+      activeStatusLabel.textContent = 'Active Call';
+      holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">pause</span>Hold';
+      renderTimer();
+      ensureTicking();
+    });
 
     // Renders CALL.elapsedSeconds + CALL.status into the header timer pill
     // and (if visible) the active call bar. This is the ONLY place that
@@ -2179,6 +2497,7 @@ setInterval(() => {
         option.dataset.name = caller.name;
         option.dataset.company = caller.company;
         option.dataset.avatar = caller.avatar;
+        option.dataset.location = caller.location;
         option.textContent = `${caller.name} • ${caller.company}`;
         callContactSelect.appendChild(option);
       });
@@ -2231,10 +2550,11 @@ setInterval(() => {
       hideIncomingCall();
       CALL.status = 'active';
       CALL.direction = 'inbound';
+      CALL.start(CALL.contact); // Use CALL.start() for consistency
       CALL.elapsedSeconds = 0; // fresh timer for the new call
 
-      activeName.textContent = CALL.caller.name;
-      activeCompany.textContent = CALL.caller.company;
+      activeName.textContent = CALL.contact.name;
+      activeCompany.textContent = CALL.contact.company;
       activeStatusLabel.textContent = 'Active Call';
       holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">pause</span>Hold';
       activeBar.classList.remove('hidden');
@@ -2246,22 +2566,36 @@ setInterval(() => {
     function declineCall() {
       hideIncomingCall();
       CALL.status = 'idle';
-      CALL.caller = null;
+      CALL.contact = null;
       // Decline simply dismisses the widget — no history entry, no timer.
     }
 
     function sendToVoicemail() {
-      const caller = CALL.caller;
+      const contact = CALL.contact;
       hideIncomingCall();
       CALL.status = 'idle';
-      CALL.caller = null;
+      CALL.contact = null;
 
+      if (contact) {
+        addHistoryRow({
+          type: 'Inbound',
+          icon: 'voicemail',
+          iconColor: 'text-on-surface-variant/60',
+          name: contact.name,
+          company: contact.company,
+          status: 'VOICEMAIL',
+          statusClasses: 'bg-white/5 text-on-surface-variant/60 border border-white/10',
+          duration: '00:00',
+          revenue: '$0',
+          revenueClasses: 'text-on-surface-variant/40'
+        });
+      }
       addHistoryRow({
         type: 'Inbound',
         icon: 'voicemail',
         iconColor: 'text-on-surface-variant/60',
-        name: caller.name,
-        company: caller.company,
+        name: contact.name,
+        company: contact.company,
         status: 'VOICEMAIL',
         statusClasses: 'bg-white/5 text-on-surface-variant/60 border border-white/10',
         duration: '00:00',
@@ -2287,19 +2621,19 @@ setInterval(() => {
     function endCall() {
       if (CALL.status === 'idle' || CALL.status === 'ended') return;
 
-      const caller = CALL.caller;
+      const contact = CALL.contact;
       const finalDuration = formatTime(CALL.elapsedSeconds);
       const isOutbound = CALL.direction === 'outbound';
 
       stopTicking();
 
-      if (caller) {
+      if (contact) {
         addHistoryRow({
           type: isOutbound ? 'Outbound' : 'Inbound',
           icon: isOutbound ? 'call_made' : 'call_received',
           iconColor: isOutbound ? 'text-tertiary' : 'text-fire-accent',
-          name: caller.name,
-          company: caller.company,
+          name: contact.name,
+          company: contact.company,
           status: 'COMPLETED',
           statusClasses: 'bg-tertiary/10 text-tertiary border border-tertiary/20',
           duration: finalDuration,
@@ -2310,7 +2644,7 @@ setInterval(() => {
 
       // Reset CALL for the next call.
       CALL.status = 'idle';
-      CALL.caller = null;
+      CALL.contact = null;
       CALL.elapsedSeconds = 0;
       CALL.direction = 'inbound';
 
@@ -2340,29 +2674,32 @@ setInterval(() => {
 
       if (!number) return;
 
-      const caller = hasSelection
+      const contact = hasSelection
         ? {
             name: selectedOption.dataset.name || 'Contact',
             company: selectedOption.dataset.company || 'Saved Contact',
             number: selectedOption.value,
-            avatar: selectedOption.dataset.avatar || 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE'
+            avatar: selectedOption.dataset.avatar || 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE',
+            location: selectedOption.dataset.location || 'Manual Entry'
           }
         : {
             name: 'New Contact',
             company: 'Manual Entry',
             number,
-            avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE'
+            avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE',
+            location: 'Manual Entry'
           };
 
       closeNewCallModal();
 
       CALL.status = 'active';
       CALL.direction = 'outbound';
+      CALL.start(contact); // Use CALL.start() method - single source of truth
       CALL.elapsedSeconds = 0;
-      CALL.caller = caller;
+      CALL.contact = contact;
 
-      activeName.textContent = caller.name;
-      activeCompany.textContent = caller.company;
+      activeName.textContent = contact.name;
+      activeCompany.textContent = contact.company;
       activeStatusLabel.textContent = 'Active Call';
       holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">pause</span>Hold';
       activeBar.classList.remove('hidden');
@@ -2503,12 +2840,22 @@ setInterval(() => {
         panelIcon.textContent = isOpen ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left';
       }
       localStorage.setItem(storageKey, String(isOpen));
+
+      // Keep the main content clear of the fixed-position CRM panel by
+      // shrinking it to match the panel's current width (open vs collapsed),
+      // instead of letting the panel cover/hide content underneath it.
+      const mainContent = document.getElementById('mainContent');
+      if (mainContent && window.innerWidth >= 900) {
+        mainContent.style.marginRight = isOpen ? '18rem' : '4.5rem';
+      }
     }
 
     function syncPanelVisibility() {
       if (!panel) return;
+      const mainContent = document.getElementById('mainContent');
       if (window.innerWidth < 900) {
         panel.classList.add('hidden');
+        if (mainContent) mainContent.style.marginRight = '0';
         return;
       }
 
