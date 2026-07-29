@@ -323,6 +323,13 @@ def groq_worker():
     while True:
         transcript = transcript_queue.get()
 
+        # --- TRANSFER: human is live -- transcript still logged upstream, but
+        # don't feed the LLM or generate a reply. ---
+        if holder == "human":
+            continue
+
+        turn_epoch = epoch  # stamp this turn; drop it if holder switches mid-turn
+
         conversation_history.append({
             "role": "user",
             "content": transcript
@@ -354,14 +361,14 @@ def groq_worker():
             if SHOW_LLM_STREAM:
                 print(token, end="", flush=True)
 
-            if sentence.endswith(
-                (".", "!", "?")
-            ):
-                tts_queue.put(sentence)
+            if sentence.endswith((".", "!", "?")):
+                if turn_epoch != epoch:   # holder switched -- abandon this turn
+                    break
+                tts_queue.put((sentence, turn_epoch))
                 sentence = ""
 
-        if sentence:
-            tts_queue.put(sentence)
+        if sentence and turn_epoch == epoch:
+            tts_queue.put((sentence, turn_epoch))
 
         if SHOW_LLM_STREAM:
             print()
@@ -377,7 +384,6 @@ def groq_worker():
                 [conversation_history[0]] + conversation_history[-(MAX_HISTORY):]
             )
 
-
 # --- STEP 3 CHANGE: was local playback via sounddevice
 # (`stream = sd.OutputStream(...); stream.write(samples)`). Reply audio is
 # now written to a file, downsampled for Asterisk, copied into the
@@ -386,7 +392,7 @@ _reply_counter = 0
 
 
 def play_deepgram(text):
-    global _reply_counter
+    global _reply_counter, current_playback_id
 
     if current_channel_id is None:
         log("TTS", f"no active call channel, skipping playback for: {text}")
@@ -436,13 +442,16 @@ def play_deepgram(text):
         check=True,
     )
 
-    ari_post(f"/channels/{current_channel_id}/play", media=f"sound:custom/{sound_name}")
+    result = ari_post(f"/channels/{current_channel_id}/play", media=f"sound:custom/{sound_name}")
+    current_playback_id = result["id"] if result else None
     log("TTS played", sound_name, ms=_ms())
 
 # TTS worker - Deepgram Aura
 def tts_worker():
     while True:
-        text = tts_queue.get()
+        text, turn_epoch = tts_queue.get()
+        if turn_epoch != epoch or holder == "human":
+            continue  # stale turn or human took over -- drop silently
         log("TTS gen", text)
         play_deepgram(text)
 
@@ -576,6 +585,15 @@ _sales_channel_ids = set()
 # near your other channel-tracking globals
 current_sales_channel_id = None
 
+# --- TRANSFER (increment 2): holder switch. `holder` decides who is audible;
+# everything (sales mute, LLM gating, TTS suppression) derives from it. `epoch`
+# is bumped on every switch so an in-flight turn started under the old holder
+# is discarded rather than played. `current_playback_id` lets a switch cut off
+# the AI mid-sentence. ---
+holder = "ai"                  # "ai" | "human"
+epoch = 0
+current_playback_id = None
+
 def bridge_call_to_external_media(caller_channel_id):
     global current_bridge_id, current_ext_channel_id, current_sales_channel_id
     bridge = ari_post("/bridges", type="mixing")
@@ -608,6 +626,30 @@ def bridge_call_to_external_media(caller_channel_id):
     _sales_channel_ids.add(sales["id"])
     current_sales_channel_id = sales["id"]
     log("SALES", f"originating sales leg {sales['id']} (ringing, will join muted)")
+
+
+def set_holder(value):
+    """Single derive point for a switch. Never set mute and mode independently
+    elsewhere -- that can desync into 'sales unmuted while AI still generating'."""
+    global holder, epoch, current_playback_id
+    if value == holder:
+        return
+    holder = value
+    epoch += 1  # invalidate any in-flight turn (checked in groq_worker/tts_worker)
+
+    if current_sales_channel_id:
+        action = "unmute" if value == "human" else "mute"
+        requests.post(
+            f"http://{ARI_HOST}/ari/channels/{current_sales_channel_id}/{action}",
+            params={"direction": "in"},
+            auth=(ARI_USER, ARI_PASSWORD),
+        )
+
+    if value == "human" and current_playback_id:
+        ari_delete(f"/playbacks/{current_playback_id}")  # cut AI off mid-sentence
+        current_playback_id = None
+
+    log("HOLDER", value)
 
 
 # --- STEP 3 ADDITION: the container's sounds dir may not exist yet --
@@ -708,6 +750,15 @@ def ari_event_loop():
                     current_ext_channel_id = None
                     current_bridge_id = None
                     current_sales_channel_id = None
+
+            elif event_type == "ChannelDtmfReceived":
+                digit = event.get("digit")
+                ch = event.get("channel", {}).get("id")
+                log("DTMF", f"{digit} from {ch}")  # temporary: confirm events fire
+                if ch == current_sales_channel_id and digit == "1":
+                    set_holder("human" if holder == "ai" else "ai")
+
+                    
         except Exception as e:
             log("ARI", f"error handling event ({type(e).__name__}: {e}); call skipped, bridge still up")
 
