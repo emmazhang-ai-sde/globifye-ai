@@ -73,7 +73,7 @@ def log(tag, text="", ms=None, blank_before=0, blank_after=0):
 # event stream the terminal shows. Decoupled by a queue + daemon sender
 # thread: if the UI server isn't running, each POST fails fast and the event
 # is dropped -- the call loop never blocks or slows down because of the UI. ---
-UI_EVENTS_URL = "http://localhost:8090/internal/events"
+UI_EVENTS_URL = "http://localhost:8400/internal/events"
 _ui_queue = queue.Queue()
 
 
@@ -156,10 +156,18 @@ APP_NAME = "sip-mvp-app"
 # container (bridge network mode), so it pointed at the container's own
 # loopback -- not this host, where rtp_listener() actually binds. Asterisk was
 # sending RTP into its own void; zero packets ever reached UDP 9000 on the
-# host, even with the caller speaking for 30+ seconds. 192.168.65.254
+# host, even with the caller speaking for 30+ seconds. host.docker.internal
 # is Docker Desktop's DNS name for reaching the host from inside a container
 # (confirmed resolvable from asterisk-mvp: `docker exec asterisk-mvp getent
-# hosts 192.168.65.254`). ---
+# hosts host.docker.internal`).
+#
+# NOTE (2026-07-21): on some Docker Desktop setups host.docker.internal
+# resolves IPv6-first to an unreachable address (fdc4:...::254) and Asterisk
+# 500s the externalMedia create with "Could not get our address for sending
+# media". If that happens, verify with:
+#     docker exec asterisk-mvp getent ahostsv4 host.docker.internal
+# and either hardcode the IPv4 it prints (typically 192.168.65.254) or fix
+# the container's resolution. ---
 EXTERNAL_MEDIA_HOST = "192.168.65.254:9000"
 UDP_LISTEN_PORT = 9000
 RTP_HEADER_LEN = 12
@@ -176,8 +184,8 @@ current_channel_id = None
 # --- MULTI-COMPANY ADDITION (2026-07-10): every business GlobiFYE serves has
 # its own knowledge base + TTS voice, chosen per call by the number the caller
 # dialed. The dialplan passes the company key as a Stasis() argument
-# (Stasis(sip-mvp-app,beauty) for 1000, ...,boutique for 2000); see
-# extensions.conf [sip-mvp] and step6 doc section 7. sip/knowledge-base/
+# (Stasis(sip-mvp-app,pacificbeef) for 1000, ...,globifye for 2000); see
+# extensions.conf [sip-mvp] and the step 5 demo-console doc. sip/knowledge-base/
 # companies.json is the shared source of truth -- the demo UI server reads the
 # same file. ---
 _KB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "knowledge-base")
@@ -203,15 +211,28 @@ FALLBACK_LINE = (
 )
 
 
+# The agent is a sales rep. Each company's KB describes its product, pricing,
+# and a five-stage sales pipeline (Prospect, Contact, Demo, Proposal, Closing);
+# the prompt tells the agent to figure out the prospect's stage and move them
+# to the next one. (Making that stage a tracked field on the contact + a
+# post-call analysis output is a proposed follow-up: see step7 roadmap.)
+SALES_PROCESS = (
+    "Work the sales pipeline: figure out where the prospect is (Prospect, Contact, "
+    "Demo, Proposal, Closing) and guide the conversation toward the next stage, using "
+    "the playbook in the knowledge base. Ask the qualifying questions, handle objections "
+    "with the responses provided, and always end with a clear next step."
+)
+
+
 def _build_system_prompt(display_name, kb_text):
     return {
         "role": "system",
         "content": (
-            f"You are the AI phone agent for {display_name}, answering inbound customer calls. "
-            f"{AGENT_RULES} "
-            f"Everything you know about {display_name} is in the knowledge base below. Answer only "
-            f"from it -- never invent prices, policies, hours, products, or availability. "
-            f"If a customer asks something the knowledge base does not cover, reply exactly: "
+            f"You are an AI sales representative for {display_name}, speaking with a prospect on a sales call. "
+            f"{AGENT_RULES} {SALES_PROCESS} "
+            f"Everything you know about {display_name}'s product, pricing, and process is in the knowledge "
+            f"base below. Answer only from it -- never invent prices, product details, or terms. "
+            f"If the prospect asks something the knowledge base does not cover, reply exactly: "
             f"\"{FALLBACK_LINE}\" and then collect their name and phone number.\n\n"
             f"--- {display_name} KNOWLEDGE BASE ---\n{kb_text}"
         ),
@@ -220,20 +241,20 @@ def _build_system_prompt(display_name, kb_text):
 
 def _build_fallback_prompt(display_name):
     """Used when a company has no knowledge base connected yet (no kb_file, or
-    the file is missing/empty). The agent handles greetings and small talk,
+    the file is missing/empty). The agent can greet and qualify at a high level,
     but every detail question gets the fallback line + contact capture.
     Once a KB (or later the RAG library) exists for the company, the loader
     below picks it up automatically and this prompt is not used."""
     return {
         "role": "system",
         "content": (
-            f"You are the AI phone agent for {display_name}, answering inbound customer calls. "
+            f"You are an AI sales representative for {display_name}, speaking with a prospect on a sales call. "
             f"{AGENT_RULES} "
             f"You do not yet have a knowledge base for {display_name}, so you cannot answer any "
-            f"question about prices, products, services, hours, policies, or availability. "
+            f"question about the product, pricing, or terms. "
             f"For any such question, reply exactly: \"{FALLBACK_LINE}\" "
-            f"Then collect the caller's name and phone number, confirm them back, and let the "
-            f"caller know a team member will call back. Never invent details."
+            f"Then collect the prospect's name and phone number, confirm them back, and let them "
+            f"know a team member will follow up. Never invent details."
         ),
     }
 
@@ -261,7 +282,7 @@ def _load_companies():
 
 COMPANIES = _load_companies()
 _EXT_TO_COMPANY = {c["extension"]: key for key, c in COMPANIES.items()}
-DEFAULT_COMPANY = "beauty"
+DEFAULT_COMPANY = "pacificbeef"
 
 # Set per call from StasisStart (single active call only, per MVP scope).
 current_company = DEFAULT_COMPANY
@@ -361,7 +382,9 @@ def groq_worker():
             if SHOW_LLM_STREAM:
                 print(token, end="", flush=True)
 
-            if sentence.endswith((".", "!", "?")):
+            if sentence.endswith(
+                (".", "!", "?")
+            ):
                 if turn_epoch != epoch:   # holder switched -- abandon this turn
                     break
                 tts_queue.put((sentence, turn_epoch))
@@ -383,6 +406,7 @@ def groq_worker():
             conversation_history = (
                 [conversation_history[0]] + conversation_history[-(MAX_HISTORY):]
             )
+
 
 # --- STEP 3 CHANGE: was local playback via sounddevice
 # (`stream = sd.OutputStream(...); stream.write(samples)`). Reply audio is
@@ -442,6 +466,8 @@ def play_deepgram(text):
         check=True,
     )
 
+    # --- TRANSFER (step 2): capture the playback id so set_holder("human") can
+    # DELETE /playbacks/{id} and cut the AI off mid-sentence. ---
     result = ari_post(f"/channels/{current_channel_id}/play", media=f"sound:custom/{sound_name}")
     current_playback_id = result["id"] if result else None
     log("TTS played", sound_name, ms=_ms())
@@ -449,6 +475,8 @@ def play_deepgram(text):
 # TTS worker - Deepgram Aura
 def tts_worker():
     while True:
+        # --- TRANSFER (step 2): tts_queue items are (text, turn_epoch) tuples,
+        # so a switch mid-turn drops stale audio at the last moment before playback. ---
         text, turn_epoch = tts_queue.get()
         if turn_epoch != epoch or holder == "human":
             continue  # stale turn or human took over -- drop silently
@@ -580,19 +608,24 @@ current_ext_channel_id = None
 # channels/bridges. Track our own externalMedia channel IDs so their
 # StasisStart is recognized and skipped, not treated as a new call. ---
 _external_media_channel_ids = set()
-_sales_channel_ids = set()
 
-# near your other channel-tracking globals
+# --- TRANSFER (step 1): same idea for the salesperson leg -- we originate it
+# ourselves into the same mixing bridge, muted. Its StasisStart must be
+# recognized and NOT treated as a new inbound call, so track its channel id
+# in _sales_channel_ids. `current_sales_channel_id` is what set_holder()
+# targets for mute/unmute. ---
+_sales_channel_ids = set()
 current_sales_channel_id = None
 
-# --- TRANSFER (increment 2): holder switch. `holder` decides who is audible;
+# --- TRANSFER (step 2): holder switch. `holder` decides who is audible;
 # everything (sales mute, LLM gating, TTS suppression) derives from it. `epoch`
 # is bumped on every switch so an in-flight turn started under the old holder
 # is discarded rather than played. `current_playback_id` lets a switch cut off
-# the AI mid-sentence. ---
+# the AI mid-sentence via DELETE /playbacks/{id}. ---
 holder = "ai"                  # "ai" | "human"
 epoch = 0
 current_playback_id = None
+
 
 def bridge_call_to_external_media(caller_channel_id):
     global current_bridge_id, current_ext_channel_id, current_sales_channel_id
@@ -608,15 +641,15 @@ def bridge_call_to_external_media(caller_channel_id):
     )
     _external_media_channel_ids.add(ext_channel["id"])
     ari_post(f"/bridges/{bridge_id}/addChannel", channel=ext_channel["id"])
-
+    # Remember them so StasisEnd can tear them down instead of leaking.
     current_bridge_id = bridge_id
     current_ext_channel_id = ext_channel["id"]
     log("CALL", f"bridged {caller_channel_id} + externalMedia {ext_channel['id']} into bridge {bridge_id}")
 
-    # --- TRANSFER (increment 1): originate the salesperson leg into the SAME
-    # bridge, muted. Ringing/answer is async -- the actual addChannel + mute
-    # happen when this channel's StasisStart fires (handled below). Tracked in
-    # _sales_channel_ids so its StasisStart is NOT treated as a new caller. ---
+    # --- TRANSFER (step 1): originate the salesperson leg into the SAME bridge,
+    # muted. Ringing/answer is async -- the actual addChannel + mute happen when
+    # this channel's StasisStart fires (handled in ari_event_loop). Tracked in
+    # _sales_channel_ids so its StasisStart is NOT treated as a new inbound call. ---
     sales = ari_post(
         "/channels",
         endpoint="PJSIP/sales-endpoint",
@@ -629,8 +662,11 @@ def bridge_call_to_external_media(caller_channel_id):
 
 
 def set_holder(value):
-    """Single derive point for a switch. Never set mute and mode independently
-    elsewhere -- that can desync into 'sales unmuted while AI still generating'."""
+    """--- TRANSFER (step 2): single derive point for a switch. Never set mute
+    and mode independently elsewhere -- that can desync into 'sales unmuted
+    while AI still generating', with both talking at once. All four actions of
+    a takeover (mute/unmute, mode flip, playback teardown, epoch bump) happen
+    together here. ---"""
     global holder, epoch, current_playback_id
     if value == holder:
         return
@@ -690,8 +726,9 @@ def ari_event_loop():
                     # call -- already bridged inside bridge_call_to_external_media().
                     continue
 
+                # --- TRANSFER (step 1): our own salesperson leg answered --
+                # add to the active bridge, muted. Not a new inbound call. ---
                 if channel_id in _sales_channel_ids:
-                    # Our own salesperson leg answered -- add to the active bridge, muted.
                     ari_post(f"/bridges/{current_bridge_id}/addChannel", channel=channel_id)
                     requests.post(
                         f"http://{ARI_HOST}/ari/channels/{channel_id}/mute",
@@ -730,7 +767,8 @@ def ari_event_loop():
             elif event_type == "StasisEnd":
                 channel_id = event["channel"]["id"]
 
-                # Our own sales/externalMedia legs ending -- just untrack, no teardown cascade.
+                # --- TRANSFER (step 1): our own sales/externalMedia legs ending
+                # -- just untrack, no teardown cascade. ---
                 if channel_id in _sales_channel_ids:
                     _sales_channel_ids.discard(channel_id)
                     continue
@@ -738,11 +776,13 @@ def ari_event_loop():
                 if channel_id == current_channel_id:
                     log("CALL", f"ended: {channel_id}", blank_before=2)
                     current_channel_id = None
+                    # --- BUGFIX (2026-07-13): tear down this call's bridge +
+                    # externalMedia channel so they don't leak into the Stasis app. ---
                     if current_ext_channel_id:
                         ari_delete(f"/channels/{current_ext_channel_id}")
                     if current_bridge_id:
                         ari_delete(f"/bridges/{current_bridge_id}")
-                    # --- TRANSFER: also hang up + untrack the sales leg ---
+                    # --- TRANSFER (step 1): also hang up + untrack the sales leg. ---
                     if current_sales_channel_id:
                         ari_delete(f"/channels/{current_sales_channel_id}")
                         _sales_channel_ids.discard(current_sales_channel_id)
@@ -751,14 +791,20 @@ def ari_event_loop():
                     current_bridge_id = None
                     current_sales_channel_id = None
 
+            # --- TRANSFER (step 2): DTMF-triggered holder toggle. The salesperson
+            # presses `1` on their softphone to take the call over (holder=human)
+            # or hand it back (holder=ai). Same handler will be reachable from the
+            # dashboard toggle in a later increment (POST /api/holder via a
+            # localhost control hook). The unconditional DTMF log is temporary,
+            # left in for now so we can confirm the events fire; remove once the
+            # UI toggle path is proven and DTMF is no longer the only trigger. ---
             elif event_type == "ChannelDtmfReceived":
                 digit = event.get("digit")
                 ch = event.get("channel", {}).get("id")
-                log("DTMF", f"{digit} from {ch}")  # temporary: confirm events fire
+                log("DTMF", f"{digit} from {ch}")
                 if ch == current_sales_channel_id and digit == "1":
                     set_holder("human" if holder == "ai" else "ai")
 
-                    
         except Exception as e:
             log("ARI", f"error handling event ({type(e).__name__}: {e}); call skipped, bridge still up")
 
