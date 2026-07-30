@@ -224,6 +224,15 @@
       transform: translateX(8px);
       pointer-events: none;
     }
+    #mainContent {
+      transition: margin-right 240ms ease;
+      margin-right: 18rem; /* matches crm-panel open width by default */
+    }
+    @media (max-width: 899px) {
+      #mainContent {
+        margin-right: 0 !important;
+      }
+    }
     .confetti-piece {
             position: absolute;
             width: 8px;
@@ -410,7 +419,7 @@
     <span id="activeCallName" class="text-sm font-bold text-white">Jordan Blake</span>
     <span id="activeCallCompany" class="text-xs text-white/70 font-bold">Meridian Capital Partners</span>
   </div>
-  <div class="flex items-center gap-2 xl:pr-16 mr-16">
+  <div id="activeCallContent" class="flex items-center gap-2 xl:pr-20 mr-16">
     <span id="activeCallDuration" class="font-mono-data text-sm font-bold text-white">00:00</span>
     <button id="holdCallBtn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all">
       <span class="material-symbols-outlined text-sm">pause</span>
@@ -480,7 +489,7 @@
 <!-- END: MainHeader -->
 <!-- BEGIN: SideNavBar -->
 <aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex flex-col items-center py-6 gap-6 glass-card border-r border-white/5 z-40 overflow-y-auto">
-<div class="flex flex-col gap-4 items-center">
+<div class="flex flex-col items-center gap-4 w-full overflow-y-auto flex-1">
     <a href="./Dashboard.html" class="block">
         <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
             <span class="material-symbols-outlined">dashboard</span>
@@ -564,7 +573,7 @@
 <div class="flex-1 flex flex-col z-10 min-h-screen ml-20">
 
 <!-- BEGIN: Main Content Container -->
-<main class="mt-16 p-8 pr-24 xl:pr-32 min-h-screen transition-[padding-right] duration-200">
+<main id="mainContent" class="mt-16 p-8  xl:pr-32 min-h-screen transition-[padding-right] duration-200">
 <!-- BEGIN: Content Header -->
 <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
 <div>
@@ -1363,12 +1372,22 @@ Complete Call
         panelIcon.textContent = isOpen ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left';
       }
       localStorage.setItem(storageKey, String(isOpen));
+       
+      // Keep the main content clear of the fixed-position CRM panel by
+      // shrinking it to match the panel's current width (open vs collapsed),
+      // instead of letting the panel cover/hide content underneath it.
+      const mainContent = document.getElementById('mainContent');
+      if (mainContent && window.innerWidth >= 900) {
+        mainContent.style.marginRight = isOpen ? '18rem' : '4.5rem';
+      }
     }
 
     function syncPanelVisibility() {
       if (!panel) return;
+      const mainContent = document.getElementById('mainContent');
       if (window.innerWidth < 900) {
         panel.classList.add('hidden');
+        if (mainContent) mainContent.style.marginRight = '0';
         return;
       }
 
@@ -1454,6 +1473,22 @@ Complete Call
   // =========================================================================
   // COMPLETE CALL WORKFLOW — Extended functionality
   // =========================================================================
+
+    // Toast Notification Helper (defined here for use in complete-call-workflow)
+  function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+      <span class="material-symbols-outlined text-lg">${type === 'success' ? 'check_circle' : 'info'}</span>
+      <span>${message}</span>
+    `;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add('hide');
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
   
   function formatTime(totalSeconds) {
     const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
@@ -1461,6 +1496,7 @@ Complete Call
     return `${m}:${s}`;
   }
 
+  
   function createCallHistoryEntry() {
     // Create a completed call entry using current CALL state
     const now = new Date();
@@ -1507,25 +1543,58 @@ Complete Call
       usagePillText.textContent = `${APP_STATE.usageMinutes} / ${APP_STATE.maxUsageMinutes} mins`;
     }
   }
+  
+  function getCallDurationForUsage() {
+    // First, try to get duration from synchronized completed call data
+    // This is the post-call summary page's synchronized data from the active call
+    if (window.dialforgeActiveCallData && window.dialforgeActiveCallData.callData) {
+      const syncedDuration = window.dialforgeActiveCallData.callData.duration;
+      if (syncedDuration !== undefined && syncedDuration !== null && syncedDuration > 0) {
+        return syncedDuration; // Return in seconds
+      }
+    }
+    
+    // Fallback to CALL object if no synchronized data is available
+    if (CALL.elapsedSeconds && CALL.elapsedSeconds > 0) {
+      return CALL.elapsedSeconds;
+    }
+    
+    // No duration found
+    return 0;
+  }
 
   function completeCall() {
-    // 1. Create call history entry
+    // Get the call duration from synchronized data (primary source)
+    const callDurationSeconds = getCallDurationForUsage();
+    
+    if (callDurationSeconds === 0) {
+      console.warn('No call duration found for usage tracking');
+      alert('No call duration data available.');
+      return;
+    }
+    
+    // 1. Create call history entry using synchronized duration
     const historyEntry = createCallHistoryEntry();
     
     // 2. Add to call history collection
     APP_STATE.callHistory.push(historyEntry);
     
-    // 3. Update usage statistics
-    updateUsageMinutes(CALL.elapsedSeconds);
+    // 3. Update usage statistics using synchronized call duration
+    updateUsageMinutes(callDurationSeconds);
     
     // 4. Save state
     saveState();
     
     // 5. Show success feedback
+     const minutesUsed = Math.ceil(callDurationSeconds / 60);
     console.log('Call completed and saved to history:', historyEntry);
-    alert(`Call completed!\nDuration: ${historyEntry.durationLabel}\nMinutes used: ${Math.ceil(CALL.elapsedSeconds / 60)}`);
+    console.log(`Usage Minutes updated: +${minutesUsed} min(s). Total: ${APP_STATE.usageMinutes} / ${APP_STATE.maxUsageMinutes} mins`);
     
-    // 6. Reset CALL state for next interaction
+    // 6. Show toast notification instead of alert for better UX
+    const usageMessage = `Call completed! +${minutesUsed} min(s) used. Total: ${APP_STATE.usageMinutes} / ${APP_STATE.maxUsageMinutes} mins`;
+    showToast(usageMessage, 'success');
+    
+    // 7. Reset CALL state for next interaction
     CALL.status = 'idle';
     CALL.caller = null;
     CALL.elapsedSeconds = 0;
@@ -1536,6 +1605,9 @@ Complete Call
   document.addEventListener('DOMContentLoaded', () => {
     const completeCallBtn = document.getElementById('completeCallBtn');
     if (completeCallBtn) {
+      // Remove previous listeners to prevent duplicates
+      completeCallBtn.removeEventListener('click', completeCall);
+      // Add the handler with synchronized call duration support
       completeCallBtn.addEventListener('click', completeCall);
     }
   });
@@ -1563,21 +1635,6 @@ Complete Call
       });
     });
 
-    // Toast Notification Helper
-    function showToast(message, type = 'info') {
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      toast.innerHTML = `
-        <span class="material-symbols-outlined text-lg">${type === 'success' ? 'check_circle' : 'info'}</span>
-        <span>${message}</span>
-      `;
-      document.body.appendChild(toast);
-
-      setTimeout(() => {
-        toast.classList.add('hide');
-        setTimeout(() => toast.remove(), 300);
-      }, 3000);
-    }
 
     // Playback Button
     const playbackBtn = document.getElementById('playbackBtn');
@@ -1603,13 +1660,7 @@ Complete Call
       });
     }
 
-    // Complete Call Button
-    const completeCallBtn = document.getElementById('completeCallBtn');
-    if (completeCallBtn) {
-      completeCallBtn.addEventListener('click', () => {
-        showToast('Call completed successfully', 'success');
-      });
-    }
+    
 
     // Schedule Follow-up Button - Opens Task Modal
     const scheduleFollowupBtn = document.getElementById('scheduleFollowupBtn');
@@ -2051,5 +2102,284 @@ Best regards,`;
   })();
 </script>
 <!-- END: Update Pipeline Modal Script -->
+ 
+<!-- BEGIN: Post-Call Summary Synchronization Script -->
+<script data-purpose="post-call-summary-sync">
+(function() {
+  // Load completed call data from localStorage (set by activeCall.html endCall() function)
+  function syncCompletedCallData() {
+    const completedCallJSON = localStorage.getItem('dialforgeLastCompletedCall');
+    
+    if (!completedCallJSON) {
+      // No call data available, use defaults
+      return;
+    }
+    
+    try {
+      const completedCall = JSON.parse(completedCallJSON);
+      const contact = completedCall.contact || {};
+      const callData = completedCall.callData || {};
+      
+      // ---- SYNCHRONIZE CONTACT CARD ----
+      // Update avatar image
+      const avatarImg = document.querySelector('section.glass-panel img[alt="Sarah Kim"]');
+      if (avatarImg && contact.avatar) {
+        avatarImg.src = contact.avatar;
+        avatarImg.alt = contact.name || 'Contact Avatar';
+      }
+      
+      // Update contact name in card
+      const nameHeading = document.querySelector('section.glass-panel h2.font-headline.text-3xl');
+      if (nameHeading && contact.name) {
+        nameHeading.textContent = contact.name;
+      }
+
+      // Update job title and company in card
+      const jobTitlePara = document.querySelector('section.glass-panel p.text-text-muted.text-lg');
+      if (jobTitlePara) {
+        const jobTitle = contact.jobTitle || '';
+        const company = contact.company || '';
+        const displayText = jobTitle && company ? 
+          `${jobTitle}, ${company}` : 
+          (jobTitle || company || 'Contact Information');
+        jobTitlePara.textContent = displayText;
+      }
+      
+      // Update deal value
+      const dealValueHeading = document.querySelector('section.glass-panel p.font-headline.text-4xl.text-success-green');
+      if (dealValueHeading && contact.dealValue) {
+        dealValueHeading.textContent = contact.dealValue;
+      }
+      
+      // ---- SYNCHRONIZE CALL DURATION IN TIMER ----
+      if (callData.durationFormatted) {
+        // Update the timer display in the header
+        const timerText = document.getElementById('callTimerText');
+        if (timerText) {
+          timerText.textContent = callData.durationFormatted;
+        }
+        
+        // Update the duration in the content header (the "8m 42s" display)
+        const headerDurationDisplay = document.querySelector('div.flex.items-center.space-x-6 > div:first-child');
+        if (headerDurationDisplay) {
+          // Parse raw seconds to MM:SS format
+          const totalSeconds = callData.duration || 0;
+          const minutes = Math.floor(totalSeconds / 60);
+          const seconds = totalSeconds % 60;
+          const formattedDuration = `${minutes}m ${seconds}s`;
+          headerDurationDisplay.textContent = formattedDuration;
+        }
+      }
+
+      // ---- PREFILL PIPELINE MODAL WITH CONTACT DATA ----
+      const opportunityNameInput = document.getElementById('updatePipelineOpportunityName');
+      if (opportunityNameInput) {
+        const defaultName = opportunityNameInput.value;
+        if (!defaultName || defaultName.includes('undefined')) {
+          opportunityNameInput.value = contact.name && contact.company ? 
+            `${contact.name} - ${contact.company}` : 
+            'New Opportunity';
+        }
+      }
+      
+      const stageSelect = document.getElementById('updatePipelineStage');
+      if (stageSelect && contact.pipelineStage) {
+        stageSelect.value = contact.pipelineStage.toLowerCase();
+      }
+      
+      // ---- STORE REFERENCE FOR OTHER MODALS ----
+      // Make the contact data available globally for other scripts
+      window.dialforgeActiveCallData = {
+        contact: contact,
+        callData: callData
+      };
+      
+    } catch (e) {
+      console.error('Error syncing completed call data:', e);
+    }
+  }
+  // Listen for call completion events (if call ends on this page)
+  window.addEventListener('callCompleted', function(event) {
+    syncCompletedCallData();
+  });
+  
+  // Sync on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    syncCompletedCallData();
+  });
+  
+  // Also attempt sync immediately if DOM is already loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', syncCompletedCallData);
+  } else {
+    syncCompletedCallData();
+  }
+})();
+</script>
+<!-- END: Post-Call Summary Synchronization Script -->
+
+<!-- BEGIN: Complete Call Handler Script -->
+<script data-purpose="complete-call-history-update">
+(function() {
+  // Helper function to generate initials from a name
+  function generateInitials(name) {
+    if (!name) return '';
+    return name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  }
+
+  // Helper function to format seconds to MM:SS
+  function formatDuration(totalSeconds) {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}m ${seconds}s`;
+  }
+
+  // Helper function to format date in ISO format
+  function getCurrentTimestamp() {
+    return new Date().toISOString();
+  }
+
+  // Helper function to format date label (e.g., "Today, 2:45 PM")
+  function formatDateLabel(date) {
+    const now = new Date();
+    const today = date.toDateString() === now.toDateString();
+    
+    const timeFormatter = new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+    
+    const timeStr = timeFormatter.format(date);
+    const dateStr = today ? 'Today' : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    
+    return `${dateStr}, ${timeStr}`;
+  }
+
+  // Helper function to generate a random AI score (75-98%)
+  function generateAIScore() {
+    return Math.floor(Math.random() * 24) + 75; // 75-98
+  }
+
+  // Main handler for Complete Call button
+  function handleCompleteCall() {
+    // Read completed call data from localStorage
+    const completedCallJSON = localStorage.getItem('dialforgeLastCompletedCall');
+    if (!completedCallJSON) {
+      console.warn('No completed call data found in localStorage');
+      return;
+    }
+
+    try {
+      const completedCall = JSON.parse(completedCallJSON);
+      const contact = completedCall.contact || {};
+      const callData = completedCall.callData || {};
+
+      // Extract required fields
+      const name = contact.name || 'Unknown';
+      const company = contact.company || 'Unknown';
+      const number = contact.number || '';
+      const direction = callData.direction || 'inbound';
+      const status = 'CONNECTED'; // From post-call summary, status is always connected
+      const duration = callData.duration || 0; // in seconds
+      const durationLabel = formatDuration(duration);
+      const timestamp = getCurrentTimestamp();
+      const dateLabel = formatDateLabel(new Date());
+      const aiScore = generateAIScore();
+
+      // Create the call history entry object
+      const callHistoryEntry = {
+        name: name,
+        number: number,
+        direction: direction,
+        status: status,
+        duration: duration,
+        durationLabel: durationLabel,
+        timestamp: timestamp,
+        dateLabel: dateLabel,
+        score: aiScore,
+        company: company,
+        avatar: contact.avatar || null
+      };
+
+      // Load existing call history from localStorage
+      let callHistory = [];
+      const existingHistoryJSON = localStorage.getItem('dialforgeCallHistory');
+      if (existingHistoryJSON) {
+        try {
+          callHistory = JSON.parse(existingHistoryJSON);
+          if (!Array.isArray(callHistory)) {
+            callHistory = [];
+          }
+        } catch (e) {
+          console.warn('Could not parse existing call history:', e);
+          callHistory = [];
+        }
+      }
+
+      // Append new entry to beginning of array (newest first)
+      callHistory.unshift(callHistoryEntry);
+      // showToast('Call Information added to Call History.', 'success');
+      // Save updated call history back to localStorage
+      localStorage.setItem('dialforgeCallHistory', JSON.stringify(callHistory));
+
+      // Show success feedback
+      showCompleteCallFeedback();
+
+    } catch (e) {
+      console.error('Error handling complete call:', e);
+    }
+  }
+
+  // Show visual feedback that the call was completed
+  function showCompleteCallFeedback() {
+    const button = document.getElementById('completeCallBtn');
+    if (!button) return;
+
+    const originalText = button.textContent;
+    const originalClass = button.className;
+
+    // Change button to success state
+    button.textContent = 'Call added to History ✓';
+    button.style.opacity = '0.8';
+
+    // Reset after 2 seconds
+    setTimeout(() => {
+      button.textContent = originalText;
+      button.className = originalClass;
+      button.style.opacity = '1';
+    }, 2000);
+  }
+
+  // Wire up Complete Call button
+  document.addEventListener('DOMContentLoaded', function() {
+    const completeCallBtn = document.getElementById('completeCallBtn');
+    if (completeCallBtn) {
+      completeCallBtn.addEventListener('click', handleCompleteCall);
+    }
+  });
+
+  // Also attempt to wire up immediately if DOM is already loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      const completeCallBtn = document.getElementById('completeCallBtn');
+      if (completeCallBtn) {
+        completeCallBtn.addEventListener('click', handleCompleteCall);
+      }
+    });
+  } else {
+    const completeCallBtn = document.getElementById('completeCallBtn');
+    if (completeCallBtn) {
+      completeCallBtn.addEventListener('click', handleCompleteCall);
+    }
+  }
+})();
+</script>
+<!-- END: Complete Call Handler Script -->
 
 </body></html>
