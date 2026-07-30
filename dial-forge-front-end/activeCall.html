@@ -463,7 +463,7 @@ animation: fade-in 0.3s ease-out;
     <span id="activeCallName" class="text-sm font-bold text-white">Jordan Blake</span>
     <span id="activeCallCompany" class="text-xs text-white/70 font-bold">Meridian Capital Partners</span>
   </div>
-  <div class="flex items-center gap-2 xl:pr-16">
+  <div id="activeCallContent" class="flex items-center gap-2 mr-16">
     <span id="activeCallDuration" class="font-mono-data text-sm font-bold text-white">00:00</span>
     <button id="holdCallBtn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all">
       <span class="material-symbols-outlined text-sm">pause</span>
@@ -746,10 +746,10 @@ animation: fade-in 0.3s ease-out;
 <button id="btn-quick-note" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Quick Note"><span class="material-symbols-outlined">note_add</span></button>
 </div>
 <div class="w-px h-8 bg-white/10 mx-2"></div>
-<a href="./postCallSummary.html"><button class="px-8 py-3.5 bg-error-red hover:bg-red-600 text-white rounded-full flex items-center gap-3 font-bold transition-all active:scale-95 shadow-[0_0_25px_rgba(255,59,48,0.4)]">
+<button id="endCall" class="px-8 py-3.5 bg-error-red hover:bg-red-600 text-white rounded-full flex items-center gap-3 font-bold transition-all active:scale-95 shadow-[0_0_25px_rgba(255,59,48,0.4)]">
 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">call_end</span>
 <span class="">End Call</span>
-</button></a>
+</button>
 
 </div>
 </section>
@@ -2170,6 +2170,10 @@ window.addEventListener('beforeunload', function() {
       // Handle object format with full contact info
       CALL.contact = { ...CALL.contact, ...contact };
     }
+    
+    // Initialize call timer using existing helper function
+    CALL.duration = 0; // Reset duration to zero
+    startCallTimer(); // Start the timer — single source of truth
 
     // Update Large Avatar section
     updateAvatarSection(CALL.contact);
@@ -2178,6 +2182,134 @@ window.addEventListener('beforeunload', function() {
     updateCrmPanel(CALL.contact);
 
     console.log('Call started with contact:', CALL.contact);
+  }
+  
+  // ========== MAIN: END CALL COMPLETION WORKFLOW ==========
+  // This function handles call completion cleanup and post-call summary synchronization
+  // when called by external workflows (e.g., after incoming-call-and-timer's endCall)
+  function end() {
+    // Get the current contact data (CALL.contact is kept in sync via callStarted event)
+    const currentContact = CALL.contact || {};
+    
+    // ---- CRITICAL: Stop active call timer and display final value
+    stopCallTimer();
+    updateTimerDisplay(); // Ensure final timer value is displayed correctly
+
+    // ---- STEP 1: Stop recording if active
+    if (CALL.isRecording) {
+      CALL.isRecording = false;
+      const recordBtn = document.getElementById('btn-record');
+      if (recordBtn) {
+        recordBtn.classList.remove('bg-error-red/20', 'text-error-red');
+      }
+    }
+
+    // ---- STEP 2: Stop camera preview if active
+    if (CALL.cameraActive) {
+      CALL.cameraActive = false;
+      const cameraPip = document.getElementById('camera-pip');
+      if (cameraPip) {
+        cameraPip.classList.add('hidden');
+      }
+      const cameraBtn = document.getElementById('btn-camera');
+      if (cameraBtn) {
+        cameraBtn.classList.remove('fire-gradient', 'text-fire-accent', 'shadow-lg', 'shadow-fire-gradient/30');
+      }
+    }
+
+    // ---- STEP 3: Stop screen sharing if active
+    if (CALL.screenShareActive) {
+      if (typeof stopScreenShare === 'function') {
+        stopScreenShare();
+      }
+    }
+
+    // ---- STEP 4: Close any active call-related modals by reusing existing helper functions
+    // Camera modal
+    if (typeof closeCameraModal === 'function') {
+      const cameraModalOverlay = document.getElementById('camera-modal-overlay');
+      if (cameraModalOverlay && !cameraModalOverlay.classList.contains('hidden')) {
+        closeCameraModal({ target: { id: 'camera-modal-overlay' } });
+      }
+    }
+
+    // Screen share modal
+    if (typeof closeScreenShareModal === 'function') {
+      const screenShareModalOverlay = document.getElementById('screen-share-modal-overlay');
+      if (screenShareModalOverlay && !screenShareModalOverlay.classList.contains('hidden')) {
+        closeScreenShareModal({ target: { id: 'screen-share-modal-overlay' } });
+      }
+    }
+
+    // Transfer modal
+    if (typeof closeTransferModal === 'function') {
+      const transferModalOverlay = document.getElementById('transfer-modal-overlay');
+      if (transferModalOverlay && !transferModalOverlay.classList.contains('hidden')) {
+        closeTransferModal({ target: { id: 'transfer-modal-overlay' } });
+      }
+    }
+
+    // VM Studio modal
+    if (typeof closeVMStudioModal === 'function') {
+      const vmStudioModalOverlay = document.getElementById('vm-studio-modal-overlay');
+      if (vmStudioModalOverlay && !vmStudioModalOverlay.classList.contains('hidden')) {
+        closeVMStudioModal({ target: { id: 'vm-studio-modal-overlay' } });
+      }
+    }
+
+    // Quick Note modal
+    if (typeof closeQuickNoteModal === 'function') {
+      const quickNoteModalOverlay = document.getElementById('quick-note-modal-overlay');
+      if (quickNoteModalOverlay && !quickNoteModalOverlay.classList.contains('hidden')) {
+        closeQuickNoteModal({ target: { id: 'quick-note-modal-overlay' } });
+      }
+    }
+
+    // ---- STEP 5: Preserve final call duration using CALL.duration as single source of truth
+    const durationSeconds = CALL.duration || 0;
+    const durationMinutes = Math.floor(durationSeconds / 60);
+    const durationSecs = durationSeconds % 60;
+    const durationFormatted = `${String(durationMinutes).padStart(2, '0')}:${String(durationSecs).padStart(2, '0')}`;
+
+    // ---- STEP 6: Prepare completed call data for Post-Call Summary using existing state
+    const completedCallData = {
+      contact: {
+        name: currentContact.name || '',
+        company: currentContact.company || '',
+        number: currentContact.number || '',
+        email: currentContact.email || '',
+        jobTitle: currentContact.jobTitle || '',
+        avatar: currentContact.avatar || '',
+        dealValue: currentContact.dealValue || '',
+        pipelineStage: currentContact.pipelineStage || ''
+      },
+      callData: {
+        duration: durationSeconds,
+        durationFormatted: durationFormatted,
+        timestamp: new Date().toISOString()
+      }
+    };
+
+    // ---- STEP 7: Save completed call data to localStorage for Post-Call Summary
+    try {
+      localStorage.setItem('dialforgeLastCompletedCall', JSON.stringify(completedCallData));
+    } catch (e) {
+      console.error('Error saving completed call data to localStorage:', e);
+    }
+
+    // ---- STEP 8: Update status badges and save application state
+    updateStatusBadges();
+    saveState();
+
+    // ---- STEP 9: Dispatch custom event for Post-Call Summary synchronization
+    window.dispatchEvent(new CustomEvent('callCompleted', {
+      detail: {
+        contact: completedCallData.contact,
+        callData: completedCallData.callData
+      }
+    }));
+
+    console.log('Call ended. Final duration:', durationFormatted, 'Contact:', currentContact.name);
   }
 
   // ========== INITIALIZATION: READ URL PARAMETERS ==========
@@ -2218,6 +2350,24 @@ window.addEventListener('beforeunload', function() {
   document.addEventListener('DOMContentLoaded', function() {
     setupCallStartedListener();
     initializeFromUrl();
+
+    // ========== END CALL COMPLETION WORKFLOW ==========
+    // Wire the End Call button to execute the existing end() function
+    // before navigating to the Post-Call Summary page
+    const endCall = document.getElementById('endCall');
+    if (endCall) {
+      endCall.addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent any default behavior
+        
+        // Execute the existing end() function to save call data and dispatch event
+        end();
+        
+        // After end() completes, navigate to Post-Call Summary
+        setTimeout(() => {
+          window.location.href = './postCallSummary.html';
+        }, 100); // Small delay to ensure localStorage is written
+      });
+    }
   });
 </script>
 
@@ -2550,7 +2700,7 @@ setInterval(() => {
       hideIncomingCall();
       CALL.status = 'active';
       CALL.direction = 'inbound';
-      CALL.start(CALL.contact); // Use CALL.start() for consistency
+      CALL.contact = CALL.caller || CALL.contact; // Use the current caller or existing contact
       CALL.elapsedSeconds = 0; // fresh timer for the new call
 
       activeName.textContent = CALL.contact.name;
