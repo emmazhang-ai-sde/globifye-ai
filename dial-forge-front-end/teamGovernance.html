@@ -18,6 +18,7 @@
             "surface-container-low": "#1a1b23",
             "surface-container-high": "#292932",
             "surface-container-highest": "#33343d",
+            "surface-container-lowest": "#141520",
             "primary": "#ffb4a2",
             "primary-container": "#ff562a",
             "fire-gradient": "#FF7A1C",
@@ -26,6 +27,8 @@
             "on-surface": "#e3e1ec",
             "on-surface-variant": "#e5beb4",
             "tertiary": "#00e478",
+            "surface-high": "#292932",
+            "error-red": "#ef4444",
           },
           fontFamily: {
             "syne": ["Syne", "sans-serif"],
@@ -380,7 +383,7 @@
         <span class="material-symbols-outlined">call</span>
         <span class="text-[9px] font-extrabold uppercase tracking-wider">Accept</span>
       </button>
-      <button id="voicemailCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-surface-container-high/60 border border-white/10 text-on-surface-variant hover:text-white transition-all">
+      <button id="voicemailCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-surface-high/60 border border-white/10 text-on-surface-variant hover:text-white transition-all">
         <span class="material-symbols-outlined">voicemail</span>
         <span class="text-[9px] font-extrabold uppercase tracking-wider">Voicemail</span>
       </button>
@@ -503,12 +506,12 @@
 <!-- END: MainHeader -->
 
 <!-- BEGIN: MainContent -->
-<main class="page-main pt-24 pl-72 pr-8 pb-12 min-h-screen max-w-[1600px] mx-auto">
+<main class="page-main pt-24 pl-28 pr-8 pb-12 min-h-screen max-w-[1600px] mx-auto">
 <!-- BEGIN: PageHeader -->
 <section class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 mb-10" data-purpose="header-section">
 <div>
-<h1 class="font-hero-h1 text-5xl font-extrabold text-white tracking-tight">Team <span class="text-fire-gradient">Governance</span></h1>
-<p class="text-on-surface-variant max-w-2xl leading-relaxed">
+<h1 class="font-syne font-extrabold text-4xl lg:text-5xl text-white mb-4">Team <span class="text-fire-gradient">Governance</span></h1>
+<p class="text-white/60 max-w-2xl leading-relaxed">
           Orchestrate your high-velocity sales force. Manage permissions, monitor real-time output, and scale your operations with precision.
         </p>
 </div>
@@ -552,11 +555,11 @@ Performance
     <span class="material-symbols-outlined">call</span>
     <span class="text-[8px] uppercase font-bold">Call</span>
   </a>
-  <a href="./supportQueue_x" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+  <a href="./supportQueue.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
     <span class="material-symbols-outlined">queue</span>
     <span class="text-[8px] uppercase font-bold">Queue</span>
   </a>
-  <a href="./callHistory" class="block w-full">
+  <a href="./callCoaching.html" class="block w-full">
     <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
       <span class="material-symbols-outlined">graphic_eq</span>
       <span class="text-[8px] uppercase font-bold">Coaching</span>
@@ -740,13 +743,6 @@ Performance
   </div>
 </aside>
 <!-- END: Right CRM Panel -->
-<!-- BEGIN: FAB -->
-<div class="fixed bottom-10 right-10 z-50">
-<button class="bg-fire-gradient text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl glow-fire hover:scale-110 active:scale-95 transition-all" id="fab-add-call-btn">
-<span class="material-symbols-outlined text-3xl">add_call</span>
-</button>
-</div>
-<!-- END: FAB -->
 <script data-purpose="micro-interactions">
     // Tilt effect for glass cards
     document.querySelectorAll('.glass-hi').forEach(card => {
@@ -1961,38 +1957,6 @@ Performance
       '</div>'
     ).join('');
   }
-
-  /* =========================================================
-     FAB: Start a call (kept from base app, now state-driven)
-     ========================================================= */
-  document.getElementById('fab-add-call-btn').addEventListener('click', () => {
-    const activeMembers = STATE.members.filter(m => m.status === 'Active');
-    openModal(
-      closeBtnHtml() +
-      '<div class="flex items-center gap-2 mb-4"><span class="material-symbols-outlined text-fire-accent text-2xl">add_call</span><h3 class="font-syne text-xl font-extrabold text-white">Start a Call</h3></div>' +
-      '<form id="start-call-form" class="space-y-4">' +
-        '<div><label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1.5 block">Assign to</label>' +
-        '<select class="df-field" id="call-assignee">' +
-          activeMembers.map(m => '<option value="' + m.name + '">' + m.name + '</option>').join('') +
-        '</select></div>' +
-        '<div><label class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1.5 block">Phone Number</label>' +
-        '<input required class="df-field font-mono" placeholder="+1 (555) 000-0000" id="call-number"></div>' +
-        '<div class="flex gap-3 pt-2">' +
-          '<button type="button" data-modal-close class="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 text-sm font-bold hover:bg-white/10 transition-all">Cancel</button>' +
-          '<button type="submit" class="flex-1 py-3 rounded-xl bg-fire-gradient text-white text-sm font-bold shadow-lg glow-fire">Start Call</button>' +
-        '</div>' +
-      '</form>'
-    );
-    bindModalClose();
-    document.getElementById('start-call-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const assignee = document.getElementById('call-assignee').value;
-      const number = document.getElementById('call-number').value.trim();
-      if (!number) { toast('Enter a phone number', 'error'); return; }
-      closeModal();
-      toast('Call to ' + number + ' assigned to ' + assignee, 'success');
-    });
-  });
 
   /* =========================================================
      INITIAL RENDER
