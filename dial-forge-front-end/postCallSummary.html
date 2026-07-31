@@ -656,7 +656,7 @@
 </button>
 </div>
 </div>
-<textarea class="w-full h-40 bg-black/20 border border-white/5 rounded-xl p-4 text-text-primary placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-fire-primary/50 transition-all resize-none" placeholder="Add any additional context not captured by AI..."></textarea>
+<textarea id="finalNotesInput" class="w-full h-40 bg-black/20 border border-white/5 rounded-xl p-4 text-text-primary placeholder:text-text-dim focus:outline-none focus:ring-1 focus:ring-fire-primary/50 transition-all resize-none" placeholder="Add any additional context not captured by AI..."></textarea>
 </section>
 <!-- Action Buttons -->
 <div class="flex gap-4 sticky bg-gradient-to-t from-surface-deep to-transparent pt-8 pb-4">
@@ -1648,19 +1648,54 @@ Complete Call
     const nextDialBtn = document.getElementById('nextDialBtn');
     if (nextDialBtn) {
       nextDialBtn.addEventListener('click', () => {
-        showToast('Loading next dial...', 'info');
+        window.location.href = './powerDialer.html';
       });
     }
 
-    // Save Draft Button
+    // Save Draft Button - Enhanced with full draft persistence
     const saveDraftBtn = document.getElementById('saveDraftBtn');
     if (saveDraftBtn) {
-      saveDraftBtn.addEventListener('click', () => {
+      saveDraftBtn.addEventListener('click', function handleSaveDraft() {
+        try {
+          // 1. Get Final Notes from textarea
+          const finalNotesInput = document.getElementById('finalNotesInput');
+          const finalNotes = finalNotesInput ? finalNotesInput.value : '';
+          console.log(finalNotes);
+          // 2. Get Sync to CRM toggle state using class-based detection
+          const crmSyncToggle = document.getElementById('crm-sync-toggle');
+          const syncToCRM = crmSyncToggle ? 
+            crmSyncToggle.classList.contains('bg-fire-primary') : 
+            false;
+          
+          // 3. Get completed call data from localStorage
+          const completedCallJSON = localStorage.getItem('dialforgeLastCompletedCall');
+          const completedCall = completedCallJSON ? JSON.parse(completedCallJSON) : {};
+          
+          // 4. Create draft object combining all current data
+          const draftData = {
+            contact: completedCall.contact || {},
+            callData: completedCall.callData || {},
+            finalNotes: finalNotes,
+            syncToCRM: syncToCRM,
+            savedAt: new Date().toISOString()
+          };
+          
+          // 5. Save draft to localStorage using consistent key
+          localStorage.setItem('dialforgeCallDraft', JSON.stringify(draftData));
+          
+          // 6. Show success notification using existing toast system
         showToast('Call notes saved to draft', 'success');
+
+        // Keep user on current page - no navigation
+        } catch (e) {
+          console.error('Error saving draft:', e);
+          showToast('Error saving draft', 'info');
+        }
       });
     }
 
-    
+
+
 
     // Schedule Follow-up Button - Opens Task Modal
     const scheduleFollowupBtn = document.getElementById('scheduleFollowupBtn');
@@ -1913,6 +1948,184 @@ Best regards,`;
         }
     });
 </script>
+
+<!-- BEGIN: Mark as Won Pipeline Integration Script -->
+<script data-purpose="mark-as-won-pipeline-integration">
+  (function() {
+    // ---- Configuration matching Sales Pipeline ----
+    const PIPELINE_STORAGE_KEY = "dialforge_pipeline_deals_v1";
+    const AVATAR_PALETTE = ["bg-blue-400", "bg-ai-purple", "bg-gold", "bg-fire-accent", "bg-teal-support", "bg-ember-alert"];
+
+    // ---- Helper Functions to Reuse ----
+    function loadPipelineDeals() {
+      try {
+        const raw = localStorage.getItem(PIPELINE_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        console.error('Error loading pipeline deals:', e);
+        return [];
+      }
+    }
+
+    function savePipelineDeals(deals) {
+      try {
+        localStorage.setItem(PIPELINE_STORAGE_KEY, JSON.stringify(deals));
+        return true;
+      } catch (e) {
+        console.error('Error saving pipeline deals:', e);
+        return false;
+      }
+    }
+
+    function generateDealId() {
+      // Match Pipeline's ID generation: "d" + timestamp
+      return 'd' + Date.now();
+    }
+
+    function initialsFromName(name) {
+      if (!name) return 'XX';
+      return name
+        .split(' ')
+        .map(word => word.charAt(0))
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+    }
+
+    // ---- Contact Matching Logic ----
+    function findMatchingOpportunity(contact, deals) {
+      if (!contact || !deals || deals.length === 0) {
+        return null;
+      }
+
+      // Priority 1: Match by Contact ID
+      if (contact.id) {
+        const byId = deals.find(d => d.contactId && d.contactId === contact.id);
+        if (byId) return byId;
+      }
+
+      // Priority 2: Match by Email
+      if (contact.email) {
+        const byEmail = deals.find(d => d.contactEmail && d.contactEmail.toLowerCase() === contact.email.toLowerCase());
+        if (byEmail) return byEmail;
+      }
+
+      // Priority 3: Match by Name + Company
+      if (contact.name && contact.company) {
+        const nameCompanyMatch = deals.find(d => {
+          const dealName = (d.name || '').toLowerCase();
+          const contactFullRef = `${contact.name} - ${contact.company}`.toLowerCase();
+          return dealName === contactFullRef || dealName.includes(contact.name.toLowerCase());
+        });
+        if (nameCompanyMatch) return nameCompanyMatch;
+      }
+
+      // Priority 4: Match by Name only
+      if (contact.name) {
+        const byName = deals.find(d => {
+          const dealName = (d.name || '').toLowerCase();
+          return dealName.includes(contact.name.toLowerCase()) || dealName.startsWith(contact.name.toLowerCase());
+        });
+        if (byName) return byName;
+      }
+
+      return null;
+    }
+    
+    // ---- Create New Opportunity ----
+    function createNewOpportunity(contact, callData) {
+      // Reuse existing opportunity structure from Pipeline
+      const newDeal = {
+        id: generateDealId(),
+        name: contact.name || 'Unknown',
+        company: contact.company || 'Unknown',
+        value: parseInt(contact.dealValue) || 50000, // Use dealValue from contact, default to 50k
+        winProb: 100, // Won deals have 100% win probability
+        stage: 'closing', // Place in Closing stage (final stage before completion)
+        logo: contact.avatar || null, // Include avatar if available
+        // Optional: Store additional call data for context
+        contactId: contact.id,
+        contactEmail: contact.email,
+        contactPhone: contact.number,
+        jobTitle: contact.jobTitle,
+        dateCreated: new Date().toISOString()
+      };
+
+      return newDeal;
+    }
+
+    // ---- Mark as Won Pipeline Handler ----
+    function handleMarkAsWonClick(evt) {
+      // Allow the existing confetti and toast handlers to run
+      // This function is called AFTER the existing handlers are attached
+      
+      // Get synchronized contact data
+      const contactData = window.dialforgeActiveCallData?.contact;
+      const callData = window.dialforgeActiveCallData?.callData;
+      
+      if (!contactData) {
+        console.warn('No synchronized contact data available for Mark as Won');
+        return; // Let existing handlers run without pipeline update
+      }
+
+      // Load current pipeline deals
+      let deals = loadPipelineDeals();
+
+      // Find matching opportunity
+      let matchingOpportunity = findMatchingOpportunity(contactData, deals);
+      
+      if (matchingOpportunity) {
+        // Update the matching opportunity to Closing stage with 100% win probability
+        matchingOpportunity.stage = 'closing';
+        matchingOpportunity.winProb = 100;
+        
+        console.log('Pipeline updated: Existing opportunity marked as Closed Won', {
+          opportunityName: matchingOpportunity.name,
+          company: matchingOpportunity.company,
+          newStage: 'closing'
+        });
+      } else {
+        // Create a new opportunity using synchronized call data
+        const newOpportunity = createNewOpportunity(contactData, callData);
+        deals.push(newOpportunity);
+        
+        console.log('Pipeline updated: New opportunity created from call', {
+          opportunityName: newOpportunity.name,
+          company: newOpportunity.company,
+          stage: 'closing',
+          dealValue: newOpportunity.value
+        });
+      }
+
+      // Save updated pipeline deals
+      if (savePipelineDeals(deals)) {
+        console.log('Pipeline deals saved successfully');
+      } else {
+        console.error('Failed to save pipeline update');
+      }
+    }
+
+    // ---- Wire up the handler ----
+    // Attach after existing handlers to ensure confetti and toast run first
+    document.addEventListener('DOMContentLoaded', () => {
+      const markAsWonBtn = document.getElementById('markAsWonBtn');
+      if (markAsWonBtn) {
+        // Add the pipeline integration handler
+        // This runs AFTER the confetti and toast handlers
+        markAsWonBtn.addEventListener('click', handleMarkAsWonClick);
+      }
+    });
+
+    // Also attach immediately if DOM is already loaded
+    if (document.readyState !== 'loading') {
+      const markAsWonBtn = document.getElementById('markAsWonBtn');
+      if (markAsWonBtn) {
+        markAsWonBtn.addEventListener('click', handleMarkAsWonClick);
+      }
+    }
+  })();
+</script>
+<!-- END: Mark as Won Pipeline Integration Script -->
 
 <!-- BEGIN: Update Pipeline Modal Script -->
 <script data-purpose="update-pipeline-modal">
@@ -2198,21 +2411,72 @@ Best regards,`;
       console.error('Error syncing completed call data:', e);
     }
   }
+  
+  // ---- DRAFT RESTORATION FUNCTION ----
+  // Restore previously saved draft when page loads
+  function restoreDraft() {
+    try {
+      const draftJSON = localStorage.getItem('dialforgeCallDraft');
+      if (!draftJSON) {
+        return; // No draft to restore
+      }
+
+      const draft = JSON.parse(draftJSON);
+
+      // 1. Restore Final Notes textarea
+      if (draft.finalNotes !== undefined) {
+        const finalNotesInput = document.getElementById('finalNotesInput');
+        if (finalNotesInput) {
+          finalNotesInput.value = draft.finalNotes;
+        }
+      }
+
+      // 2. Restore Sync to CRM toggle state using class-based approach
+      if (draft.syncToCRM !== undefined) {
+        const toggle = document.getElementById('crm-sync-toggle');
+        if (toggle) {
+          const knob = toggle.querySelector('div');
+          if (knob) {
+            // Restore state based on draft.syncToCRM
+            if (draft.syncToCRM) {
+              // Active state
+              toggle.classList.remove('bg-surface-container');
+              toggle.classList.add('bg-fire-primary');
+              knob.classList.add('translate-x-5');
+            } else {
+              // Inactive state
+              toggle.classList.remove('bg-fire-primary');
+              toggle.classList.add('bg-surface-container');
+              knob.classList.remove('translate-x-5');
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Error restoring draft:', e);
+    }
+  }
+
   // Listen for call completion events (if call ends on this page)
   window.addEventListener('callCompleted', function(event) {
     syncCompletedCallData();
   });
   
-  // Sync on page load
+  // Sync and restore on page load
   document.addEventListener('DOMContentLoaded', function() {
     syncCompletedCallData();
+    restoreDraft();
   });
   
   // Also attempt sync immediately if DOM is already loaded
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', syncCompletedCallData);
+    document.addEventListener('DOMContentLoaded', function() {
+      syncCompletedCallData();
+      restoreDraft();
+    });
   } else {
     syncCompletedCallData();
+    restoreDraft();
   }
 })();
 </script>
@@ -2330,6 +2594,10 @@ Best regards,`;
 
       // Show success feedback
       showCompleteCallFeedback();
+
+      // Trigger confetti animation on successful completion
+      // Reuses existing initConfetti() function
+      initConfetti();
 
     } catch (e) {
       console.error('Error handling complete call:', e);
