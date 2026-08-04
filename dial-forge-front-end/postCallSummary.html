@@ -564,7 +564,7 @@
 <div class="flex flex-col items-center gap-4 w-full pb-4">
   <a href="./profile.html" class="block w-full h-full cursor-pointer">
     <div class="h-10 w-10 rounded-full overflow-hidden border border-white/10 items-center ml-4">
-    <img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs">
+    <img id="postCallUserAvatar" alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs">
   </div>
   </a>
 </div>
@@ -1600,9 +1600,21 @@ Complete Call
     CALL.elapsedSeconds = 0;
     CALL.direction = 'inbound';
   }
+  
+  // ==================== PROFILE PICTURE LOADING ====================
+  function loadSavedProfilePicture() {
+    const savedProfilePicture = localStorage.getItem('dialforge-profile-picture');
+    if (savedProfilePicture) {
+      const postCallUserAvatar = document.getElementById('postCallUserAvatar');
+      if (postCallUserAvatar) {
+        postCallUserAvatar.src = savedProfilePicture;
+      }
+    }
+  }
 
   // Wire up Complete Call button
   document.addEventListener('DOMContentLoaded', () => {
+    loadSavedProfilePicture();
     const completeCallBtn = document.getElementById('completeCallBtn');
     if (completeCallBtn) {
       // Remove previous listeners to prevent duplicates
@@ -2596,7 +2608,7 @@ Best regards,`;
       showCompleteCallFeedback();
 
       // Trigger confetti animation on successful completion
-      // Reuses existing initConfetti() function
+      // Reuses existing initConfetti() function (no duplication)
       initConfetti();
 
     } catch (e) {
