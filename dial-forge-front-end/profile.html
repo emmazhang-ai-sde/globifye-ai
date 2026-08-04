@@ -464,20 +464,20 @@
 </div>
 <div class="flex flex-col items-center gap-4 w-full pb-4">
   <div class="w-10 h-10 rounded-full border-2 border-fire-accent overflow-hidden ring-2 ring-fire-accent/20">
-<img alt="User" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs"/>
+<img id="sidebarProfileAvatar" alt="User" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs"/>
 </div>
 </div>
 </aside>
 <!-- END: LeftSidebar -->
 <!-- BEGIN: MainContent -->
-<main id="mainContent" class="pt-24 pb-12 md:pl-28 px-4 md:pr-8 max-w-[1400px] mx-auto">
+<main id="mainContent" class="pt-24 pb-12 md:pl-28 px-4 md:pr-8 max-w-[1400px] mx-auto mr-20">
 <!-- BEGIN: ProfileHero -->
 <section class="mb-10">
 <div class="glass-card p-8 rounded-3xl flex flex-col md:flex-row items-center md:items-end gap-10 relative overflow-hidden">
 <div class="absolute top-0 right-0 w-80 h-80 bg-fire-accent/5 rounded-full blur-[100px] -mr-40 -mt-40"></div>
 <div class="relative">
 <div class="w-32 h-32 md:w-44 md:h-44 rounded-3xl border-4 border-white/10 overflow-hidden shadow-2xl relative z-10">
-<img alt="Marcus Thorne" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs"/>
+<img id="profileAvatarImage" alt="Marcus Thorne" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs"/>
 </div>
 <div class="absolute -bottom-2 -right-2 w-10 h-10 bg-tertiary rounded-full border-4 border-surface flex items-center justify-center shadow-lg z-20">
 <span class="material-symbols-outlined text-surface text-lg font-black" style="font-variation-settings: 'FILL' 1;">verified</span>
@@ -491,9 +491,10 @@
 <p class="text-xl text-on-surface-variant/90 font-medium mb-1">Senior Account Executive • Global Sales</p>
 <p class="font-mono text-sm text-on-surface-variant/60">marcus.thorne@dialforge.ai</p>
 </div>
-<div class="flex gap-4 z-10 w-full md:w-auto">
-<button id="editProfileBtn" class="flex-1 md:flex-none px-8 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl font-bold text-sm transition-all active:scale-95">Edit Profile</button>
-<button id="startNewCallBtn" class="flex-1 md:flex-none px-8 py-3.5 fire-gradient text-white rounded-xl font-bold text-sm shadow-xl liquid-glow transition-all active:scale-95 shimmer">Start New Call</button>
+<div class="flex gap-4 z-10 w-full md:w-auto flex-col md:flex-row mr-40">
+  <button id="updateProfilePictureBtn" class="flex-1 md:flex-none px-8 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl font-bold text-sm transition-all active:scale-95">Update Profile Picture</button>
+  <button id="editProfileBtn" class="flex-1 md:flex-none px-8 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl font-bold text-sm transition-all active:scale-95">Edit Profile</button>
+  <button id="startNewCallBtn" class="flex-1 md:flex-none px-8 py-3.5 fire-gradient text-white rounded-xl font-bold text-sm shadow-xl liquid-glow transition-all active:scale-95 shimmer">Start New Call</button>
 </div>
 </div>
 </section>
@@ -788,6 +789,32 @@
 </div>
 </div>
 
+<!-- Update Profile Picture Modal -->
+<div id="updateProfilePictureModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+<div class="glass-card rounded-3xl max-w-md w-full p-8">
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-syne text-2xl font-bold text-white">Update Profile Picture</h2>
+<button id="closeUpdateProfilePictureModal" class="material-symbols-outlined text-on-surface-variant/60 hover:text-white text-2xl">close</button>
+</div>
+<div class="space-y-4 mb-6">
+<div>
+<label class="text-xs font-bold text-on-surface-variant/60 uppercase tracking-wider block mb-2">Choose Profile Picture</label>
+<input id="profilePictureInput" type="file" accept="image/*" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-on-surface-variant/50 focus:outline-none focus:border-fire-accent/50 transition-colors file:bg-fire-accent/20 file:text-fire-accent file:border-0 file:rounded-lg file:px-3 file:py-1.5 file:mr-3 file:text-xs file:font-bold file:cursor-pointer"/>
+</div>
+<div id="profilePicturePreview" class="bg-white/5 border border-white/10 rounded-2xl p-6 flex items-center justify-center">
+<div class="text-center">
+<span class="material-symbols-outlined text-4xl text-on-surface-variant/40 mb-2 block">image</span>
+<p class="text-sm text-on-surface-variant/60">No Image Selected</p>
+</div>
+</div>
+</div>
+<div class="flex gap-3">
+<button id="cancelUpdateProfilePicture" class="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl font-bold text-sm text-on-surface hover:bg-white/10 transition-all">Cancel</button>
+<button id="saveUpdateProfilePicture" class="flex-1 px-4 py-2.5 fire-gradient text-white rounded-xl font-bold text-sm shadow-lg transition-all">Save</button>
+</div>
+</div>
+</div>
+
 <!-- Change Password Modal -->
 <div id="changePasswordModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
 <div class="glass-card rounded-3xl max-w-md w-full p-8">
@@ -906,27 +933,6 @@
 </div>
 <!-- END: Modals -->
 
-<!-- BEGIN: MobileFooter -->
-<footer class="md:hidden fixed bottom-0 w-full bg-surface-container-low/90 backdrop-blur-2xl border-t border-white/5 flex justify-around py-4 z-50">
-<div class="flex flex-col items-center text-on-surface-variant/40">
-<span class="material-symbols-outlined">dashboard</span>
-<span class="text-[8px] font-bold uppercase mt-1">Home</span>
-</div>
-<div class="flex flex-col items-center text-on-surface-variant/40">
-<span class="material-symbols-outlined">call</span>
-<span class="text-[8px] font-bold uppercase mt-1">Calls</span>
-</div>
-<div class="flex flex-col items-center text-fire-accent">
-<div class="bg-fire-accent/20 p-2 rounded-xl mb-1">
-<span class="material-symbols-outlined">person</span>
-</div>
-<span class="text-[8px] font-bold uppercase">Profile</span>
-</div>
-<div class="flex flex-col items-center text-on-surface-variant/40">
-<span class="material-symbols-outlined">settings</span>
-<span class="text-[8px] font-bold uppercase mt-1">Setup</span>
-</div>
-</footer>
 
 <script data-purpose="incoming-call-and-timer">
   (function () {
@@ -1247,6 +1253,21 @@
       applyTheme(theme);
     }
 
+    function loadSavedProfilePicture() {
+      const savedProfilePicture = localStorage.getItem('dialforge-profile-picture');
+      if (savedProfilePicture) {
+        const profileAvatarImage = document.getElementById('profileAvatarImage');
+        if (profileAvatarImage) {
+          profileAvatarImage.src = savedProfilePicture;
+        }
+        
+        const sidebarProfileAvatar = document.getElementById('sidebarProfileAvatar');
+        if (sidebarProfileAvatar) {
+          sidebarProfileAvatar.src = savedProfilePicture;
+        }
+      }
+    }
+
     // ---- Wire up events -----------------------------------------------
     testInboundBtn.addEventListener('click', showIncomingCall);
     acceptBtn.addEventListener('click', acceptCall);
@@ -1268,6 +1289,7 @@
     });
 
     setInitialTheme();
+    loadSavedProfilePicture();
 
     // Initial paint: idle timer at 00:00.
     renderTimer();
@@ -1479,6 +1501,110 @@
     }
 
     // ==========================================
+    // Update Profile Picture Button & Modal
+    // ==========================================
+    const updateProfilePictureBtn = document.getElementById('updateProfilePictureBtn');
+    const closeUpdateProfilePictureModal = document.getElementById('closeUpdateProfilePictureModal');
+    const cancelUpdateProfilePicture = document.getElementById('cancelUpdateProfilePicture');
+    const saveUpdateProfilePicture = document.getElementById('saveUpdateProfilePicture');
+
+    if (updateProfilePictureBtn) {
+      updateProfilePictureBtn.addEventListener('click', () => openModal('updateProfilePictureModal'));
+    }
+    if (closeUpdateProfilePictureModal) {
+      closeUpdateProfilePictureModal.addEventListener('click', () => closeModal('updateProfilePictureModal'));
+    }
+    if (cancelUpdateProfilePicture) {
+      cancelUpdateProfilePicture.addEventListener('click', () => closeModal('updateProfilePictureModal'));
+    }
+    if (saveUpdateProfilePicture) {
+      saveUpdateProfilePicture.addEventListener('click', () => {
+        const previewImg = profilePicturePreview.querySelector('img');
+        
+        if (!previewImg || !previewImg.src) {
+          showToast('Please select an image first', 'error');
+          return;
+        }
+        
+        try {
+          const imageBase64 = previewImg.src;
+          
+          // Save to localStorage
+          localStorage.setItem('dialforge-profile-picture', imageBase64);
+          
+          // Verify that the data was actually written to storage
+          const verifyData = localStorage.getItem('dialforge-profile-picture');
+          if (!verifyData) {
+            showToast('Failed to save picture. Please try again', 'error');
+            return;
+          }
+          
+          // Update the main avatar
+          const profileAvatarImage = document.getElementById('profileAvatarImage');
+          if (profileAvatarImage) {
+            profileAvatarImage.src = imageBase64;
+          }
+          
+          // Update the sidebar avatar if it exists
+          const sidebarProfileAvatar = document.getElementById('sidebarProfileAvatar');
+          if (sidebarProfileAvatar) {
+            sidebarProfileAvatar.src = imageBase64;
+          }
+
+        showToast('Profile picture updated successfully');
+          closeModal('updateProfilePictureModal');
+        } catch (error) {
+          showToast('Error saving picture. Please try again', 'error');
+        }
+      });
+    }
+
+    // Close modal on outside click (Update Profile Picture)
+    const updateProfilePictureModal = document.getElementById('updateProfilePictureModal');
+    if (updateProfilePictureModal) {
+      updateProfilePictureModal.addEventListener('click', (e) => {
+        if (e.target === updateProfilePictureModal) {
+          closeModal('updateProfilePictureModal');
+        }
+      });
+    }
+    
+    // ==========================================
+    // Profile Picture Preview Functionality
+    // ==========================================
+    const profilePictureInput = document.getElementById('profilePictureInput');
+    const profilePicturePreview = document.getElementById('profilePicturePreview');
+
+    const placeholderHTML = `
+      <div class="text-center">
+        <span class="material-symbols-outlined text-4xl text-on-surface-variant/40 mb-2 block">image</span>
+        <p class="text-sm text-on-surface-variant/60">No Image Selected</p>
+      </div>
+    `;
+
+    if (profilePictureInput) {
+      profilePictureInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+
+        if (file) {
+          const reader = new FileReader();
+
+          reader.onload = (event) => {
+            const imageDataUrl = event.target.result;
+
+            profilePicturePreview.innerHTML = `
+              <img src="${imageDataUrl}" alt="Selected profile picture" class="max-w-full max-h-full rounded-xl object-contain" />
+            `;
+          };
+
+          reader.readAsDataURL(file);
+        } else {
+          profilePicturePreview.innerHTML = placeholderHTML;
+        }
+      });
+    }
+
+    // ==========================================
     // Edit Profile Button & Modal
     // ==========================================
     const editProfileBtn = document.getElementById('editProfileBtn');
@@ -1511,6 +1637,22 @@
         }
       });
     }
+    
+    // ==========================================
+    // Load Saved Profile Picture on Page Init
+    // ==========================================
+    const savedProfilePicture = localStorage.getItem('dialforge-profile-picture');
+    if (savedProfilePicture) {
+      const profileAvatarImage = document.getElementById('profileAvatarImage');
+      if (profileAvatarImage) {
+        profileAvatarImage.src = savedProfilePicture;
+      }
+      
+      const sidebarProfileAvatar = document.getElementById('sidebarProfileAvatar');
+      if (sidebarProfileAvatar) {
+        sidebarProfileAvatar.src = savedProfilePicture;
+      }
+    }
 
     // ==========================================
     // Start New Call Button
@@ -1518,7 +1660,7 @@
     const startNewCallBtn = document.getElementById('startNewCallBtn');
     if (startNewCallBtn) {
       startNewCallBtn.addEventListener('click', () => {
-        window.location.href = 'activeCall.html';
+        window.location.href = './powerDialer.html';
       });
     }
 
@@ -1670,6 +1812,7 @@
     // ==========================================
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
+        closeModal('updateProfilePictureModal');
         closeModal('editProfileModal');
         closeModal('changePasswordModal');
         closeModal('twoFactorModal');
