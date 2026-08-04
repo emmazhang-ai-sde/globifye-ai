@@ -615,7 +615,7 @@ animation: fade-in 0.3s ease-out;
 <div class="flex flex-col items-center gap-4 w-full pb-4">
   <a href="./profile.html" class="block w-full h-full cursor-pointer">
     <div class="h-10 w-10 rounded-full overflow-hidden border border-white/10 items-center ml-4">
-    <img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs">
+    <img id="activeCallUserAvatar" alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs">
   </div>
   </a>
 </div>
@@ -2172,7 +2172,7 @@ window.addEventListener('beforeunload', function() {
     }
     
     // Initialize call timer using existing helper function
-    CALL.duration = 0; // Reset duration to zero
+CALL.duration = 0; // Reset duration to zero
     startCallTimer(); // Start the timer — single source of truth
 
     // Update Large Avatar section
@@ -2345,11 +2345,59 @@ window.addEventListener('beforeunload', function() {
       }
     });
   }
+  
+  // ==================== PROFILE PICTURE LOADING ====================
+  function loadSavedProfilePicture() {
+    const savedProfilePicture = localStorage.getItem('dialforge-profile-picture');
+    if (savedProfilePicture) {
+      const activeCallUserAvatar = document.getElementById('activeCallUserAvatar');
+      if (activeCallUserAvatar) {
+        activeCallUserAvatar.src = savedProfilePicture;
+      }
+    }
+  }
 
   // Initialize on page load
   document.addEventListener('DOMContentLoaded', function() {
     setupCallStartedListener();
-    initializeFromUrl();
+    loadSavedProfilePicture();
+        
+    // ========== AUTO-START CALL FROM POWER DIALER ==========
+    // Check for auto-start flag and contact data passed from Power Dialer
+    const autoStartFlag = localStorage.getItem('dialforgeCallAutoStart');
+    const powerDialerProspect = localStorage.getItem('dialforgePowerDialerProspect');
+    
+    if (autoStartFlag === 'true' && powerDialerProspect) {
+      try {
+        const prospect = JSON.parse(powerDialerProspect);
+        // Map Power Dialer prospect to Active Call contact and start call
+        const contact = {
+          name: prospect.name || '',
+          number: prospect.phone || '',
+          company: prospect.company || '',
+          jobTitle: prospect.title || '',
+          location: prospect.company || '',
+          avatar: prospect.avatar || CALL.contact.avatar,
+          email: prospect.email || '',
+          dealValue: prospect.dealValue || '',
+          pipelineStage: prospect.pipelineStage || ''
+        };
+        
+        // Start the call with the prospect's information
+        start(contact);
+        
+        // Clear the auto-start flag to prevent re-starting on reload
+        localStorage.removeItem('dialforgeCallAutoStart');
+        localStorage.removeItem('dialforgePowerDialerProspect');
+      } catch (e) {
+        console.error('Error auto-starting call from Power Dialer:', e);
+        // Fall back to URL parameters if auto-start fails
+        initializeFromUrl();
+      }
+    } else {
+      // Use existing initialization method if not auto-starting from Power Dialer
+      initializeFromUrl();
+    }
 
     // ========== END CALL COMPLETION WORKFLOW ==========
     // Wire the End Call button to execute the existing end() function
