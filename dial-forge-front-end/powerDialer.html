@@ -619,7 +619,7 @@
 <div class="flex flex-col items-center gap-4 w-full pb-4">
 <a href="./profile.html" class="block w-full h-full cursor-pointer">
     <div class="h-10 w-10 rounded-full overflow-hidden border border-white/10 items-center ml-4">
-    <img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs">
+    <img id="powerDialerUserAvatar" alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs">
   </div>
   </a>
 </div>
@@ -2030,6 +2030,60 @@ DROP VM
       startDialing();
     }
   }
+  
+  // ==================== CALL TRANSITION TO ACTIVE CALL ====================
+  function transitionToActiveCall(prospect) {
+    // Reuse existing prospect data to initialize Active Call
+    if (!prospect) return;
+
+    // Map Power Dialer prospect fields to Active Call contact structure
+    const activeCallContact = {
+      name: prospect.name || '',
+      number: prospect.phone || '',
+      company: prospect.company || '',
+      jobTitle: prospect.title || '',
+      location: prospect.company || '', // Use company as location fallback
+      avatar: prospect.avatar || 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE',
+      email: prospect.email || '',
+      dealValue: prospect.dealValue || '',
+      pipelineStage: prospect.pipelineStage || ''
+    };
+
+    // Prepare Active Call state with the connected prospect
+    const activeCallState = {
+      CALL: {
+        contact: activeCallContact,
+        duration: 0,
+        isActive: true,
+        isOnHold: false,
+        isMuted: false,
+        screenShareActive: false,
+        isRecording: false,
+        cameraActive: false,
+        screenShareType: null,
+        transferType: 'warm',
+        selectedTransferee: null,
+        vmTab: 'leave',
+        noteTab: 'general',
+        notes: []
+      },
+      S: {
+        cameraPiPVisible: false,
+        screenSharePreviewVisible: false
+      },
+      callHistory: [],
+      aiCoachIndex: 0
+    };
+
+    // Save Active Call state to localStorage (reusing existing synchronization)
+    localStorage.setItem('dialforgeCallState', JSON.stringify(activeCallState));
+    
+    // Save a flag indicating we're transitioning from Power Dialer
+    localStorage.setItem('dialforgeCallAutoStart', 'true');
+    
+    // Save the original prospect reference for Power Dialer integration
+    localStorage.setItem('dialforgePowerDialerProspect', JSON.stringify(prospect));
+  }
 
   // ==================== CALL ACTIONS ====================
   function markConnected() {
@@ -2051,6 +2105,16 @@ DROP VM
     updateTopStats();
     updateSessionStats();
     saveState();
+    
+    // Transition to Active Call workflow using existing synchronized call state
+    // Reuse the connected prospect's information and existing call-start workflow
+    transitionToActiveCall(current);
+    
+    // Navigate to Active Call page after state is prepared
+    // This simulates answering the call
+    setTimeout(() => {
+      window.location.href = './activeCall.html';
+    }, 100);
   }
 
   function markSkipped() {
@@ -2344,7 +2408,7 @@ DROP VM
 
   function convertRowToContact(row, index) {
     const mapping = appState.importWizard.fieldMapping;
-    const nextId = Math.max(...appState.contacts.map(c => c.id), 0) + index + 1;
+    const nextId = Math.max(...dialQueue.map(c => c.id), 0) + index + 1;
     
     const firstName = row[mapping.firstName] || '';
     const lastName = row[mapping.lastName] || '';
@@ -2352,14 +2416,14 @@ DROP VM
     
     return {
       id: nextId,
-      firstName: firstName,
-      lastName: lastName,
-      fullName: fullName,
+      name: fullName,
       company: row[mapping.company] || '',
       phone: row[mapping.phone] || '',
-      email: row[mapping.email] || '',
       title: row[mapping.title] || '',
-      status: 'ready'
+      status: 'waiting',
+      priority: 'low',
+      duration: 0,
+      avatar: null
     };
   }
 
@@ -2377,7 +2441,7 @@ DROP VM
       }
       
       const contact = convertRowToContact(row, imported);
-      appState.contacts.push(contact);
+      dialQueue.push(contact);
       imported++;
     });
     
@@ -2386,9 +2450,12 @@ DROP VM
     
     // Update the completion step display
     updateCompletionStep(imported, skipped, rows.length);
-    
+
     // Refresh the prospect queue display
     updateProspectQueue();
+
+     // Save the state to localStorage
+    saveState();
   }
 
   function updateCompletionStep(imported, skipped, total) {
@@ -2581,11 +2648,24 @@ DROP VM
       nextBtn.onclick = nextStep;
     }
   }
+  
+
+  // ==================== PROFILE PICTURE LOADING ====================
+  function loadSavedProfilePicture() {
+    const savedProfilePicture = localStorage.getItem('dialforge-profile-picture');
+    if (savedProfilePicture) {
+      const powerDialerUserAvatar = document.getElementById('powerDialerUserAvatar');
+      if (powerDialerUserAvatar) {
+        powerDialerUserAvatar.src = savedProfilePicture;
+      }
+    }
+  }
 
 
   // ==================== EVENT LISTENERS ====================
   document.addEventListener('DOMContentLoaded', () => {
     loadState();
+    loadSavedProfilePicture();
     updateTopStats();
     setupProspectCardAvatarFallbacks();
     updateProspectQueue();
