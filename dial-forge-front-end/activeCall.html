@@ -135,7 +135,7 @@
     inset: 0;
     z-index: 9999;
     pointer-events: none;
-    opacity: 0.02;
+    opacity: 0.00;
     background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuAjBgxhjjpbQ1X6hvaeggcEsORm0cusjq8KmhkMIem9paSnZ7_7H4035tguD8hQF_wyJfO0-xi5zinWRn5KCM4dsf9akf-ZEUIsx8r2p38OT_3LwtrA_hw0Bqp7LEHGHhjXR6QSfhiz5U0QWGx-RgUC23zQ_gXBKToAxBg8Gydr2pnyjVJzW_LFuaMzmeu54c7PrLK77yNnBemFzvrQWsOo-ahwjnkRQn0xqS8r25dnS6iz5_tsV9azzSv_REk-2thWjE9T9bosd9s)
     }
     @keyframes pulse-glow {
@@ -683,7 +683,7 @@ animation: fade-in 0.3s ease-out;
 <!-- Background Ambient Glows -->
 <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-fire-gradient/10 rounded-full blur-[120px] pointer-events-none"></div>
 <!-- Avatar Stage -->
-<div class="relative flex flex-col items-center z-10">
+<div class="relative flex flex-col items-center z-10 mb-14">
 <div class="relative mb-12">
 <!-- Pulse Rings -->
 <div class="absolute inset-0 rounded-full border-2 border-fire-accent/20 animate-pulse-ring"></div>
@@ -1092,13 +1092,14 @@ Start Sharing
 <button class="transfer-tab-btn px-4 py-2 text-sm font-medium text-fire-accent border-b-2 border-fire-accent transition-colors" onclick="switchTransferTab('warm')">Warm Transfer</button>
 <button class="transfer-tab-btn px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors" onclick="switchTransferTab('cold')">Cold Transfer</button>
 <button class="transfer-tab-btn px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors" onclick="switchTransferTab('conference')">Conference</button>
+<button class="transfer-tab-btn px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors" onclick="switchTransferTab('ai')">Transfer to AI</button>
 </div>
-<!-- Search -->
-<div class="mb-6">
+<!-- Search (hidden for AI transfer) -->
+<div id="transfer-search-container" class="mb-6">
 <input type="text" id="transfer-search" placeholder="Search team members..." class="w-full bg-surface-container-high border border-glass-border rounded-lg px-4 py-2 text-sm text-white placeholder:text-gray-500 focus:ring-1 focus:ring-fire-accent outline-none transition-all">
 </div>
-<!-- Team Members List -->
-<div class="space-y-2 mb-8 max-h-64 overflow-y-auto">
+<!-- Team Members List (hidden for AI transfer) -->
+<div id="transfer-team-members-container" class="space-y-2 mb-8 max-h-64 overflow-y-auto">
 <div class="p-4 bg-surface-container-low/50 rounded-lg border border-glass-border hover:border-fire-accent/50 cursor-pointer transition-all group flex items-center gap-4" onclick="selectTeamMember(this, 'Marcus J.', 'Tier 2 Solutions Architect')">
 <div class="w-10 h-10 rounded-full bg-fire-accent/20 flex items-center justify-center flex-shrink-0 text-fire-accent text-sm font-bold group-hover:bg-fire-accent group-hover:text-white">MJ</div>
 <div>
@@ -1124,12 +1125,64 @@ Start Sharing
 <span class="material-symbols-outlined ml-auto text-gray-400 group-hover:text-fire-accent">check_circle</span>
 </div>
 </div>
+
+<!-- Transfer to AI Content (hidden by default) -->
+<div id="transfer-ai-container" class="hidden">
+<!-- AI Assistant Card -->
+<div class="mb-8 p-6 liquid-glass rounded-2xl border border-glass-border">
+<div class="flex items-start gap-4 mb-6">
+<div class="w-14 h-14 rounded-full fire-gradient flex items-center justify-center flex-shrink-0 shadow-lg shadow-fire-gradient/30">
+<span class="material-symbols-outlined text-2xl text-white" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+</div>
+<div class="flex-1">
+<h3 class="text-lg font-bold text-white mb-1">AI Sales Assistant</h3>
+<p class="text-sm text-gray-400">Transfer this conversation to an AI assistant that can continue speaking with the prospect.</p>
+</div>
+</div>
+</div>
+
+<!-- Transfer Options -->
+<div class="mb-8">
+<h4 class="text-sm font-bold text-white mb-4 uppercase tracking-wider">AI Assistant Capabilities</h4>
+<div class="space-y-3">
+<div class="flex items-center gap-3 p-3 bg-surface-container-low/50 rounded-lg border border-glass-border">
+<span class="material-symbols-outlined text-fire-accent flex-shrink-0">check_circle</span>
+<p class="text-sm text-gray-300">Continue qualifying the lead</p>
+</div>
+<div class="flex items-center gap-3 p-3 bg-surface-container-low/50 rounded-lg border border-glass-border">
+<span class="material-symbols-outlined text-fire-accent flex-shrink-0">check_circle</span>
+<p class="text-sm text-gray-300">Answer common product questions</p>
+</div>
+<div class="flex items-center gap-3 p-3 bg-surface-container-low/50 rounded-lg border border-glass-border">
+<span class="material-symbols-outlined text-fire-accent flex-shrink-0">check_circle</span>
+<p class="text-sm text-gray-300">Schedule meetings</p>
+</div>
+<div class="flex items-center gap-3 p-3 bg-surface-container-low/50 rounded-lg border border-glass-border">
+<span class="material-symbols-outlined text-fire-accent flex-shrink-0">check_circle</span>
+<p class="text-sm text-gray-300">Capture notes</p>
+</div>
+<div class="flex items-center gap-3 p-3 bg-surface-container-low/50 rounded-lg border border-glass-border">
+<span class="material-symbols-outlined text-fire-accent flex-shrink-0">check_circle</span>
+<p class="text-sm text-gray-300">Return control to an agent if needed</p>
+</div>
+</div>
+</div>
+
+<!-- Status Section -->
+<div class="mb-8 p-4 rounded-lg bg-tertiary/10 border border-tertiary/30">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-tertiary text-lg">check_circle</span>
+<p class="text-xs font-bold uppercase tracking-widest text-tertiary">Status</p>
+</div>
+<p class="text-sm font-medium text-white">Ready to accept transfer</p>
+</div>
+</div>
 <!-- Action Buttons -->
 <div class="flex gap-4">
 <button onclick="closeTransferModal()" class="flex-1 px-6 py-3 rounded-lg border border-glass-border text-gray-300 hover:text-white hover:bg-white/5 transition-all font-medium">
 Cancel
 </button>
-<button onclick="execTransfer()" class="flex-1 px-6 py-3 rounded-lg fire-gradient text-white font-bold shadow-lg hover:shadow-xl transition-all">
+<button id="transfer-action-btn" onclick="execTransfer()" class="flex-1 px-6 py-3 rounded-lg fire-gradient text-white font-bold shadow-lg hover:shadow-xl transition-all">
 Start Transfer
 </button>
 </div>
@@ -1638,6 +1691,34 @@ function switchTransferTab(tab) {
   });
   event.target.classList.remove('text-gray-400');
   event.target.classList.add('text-fire-accent', 'border-b-2', 'border-fire-accent');
+    
+  // Toggle visibility of search and team members based on tab
+  const searchContainer = document.getElementById('transfer-search-container');
+  const teamMembersContainer = document.getElementById('transfer-team-members-container');
+  const aiContainer = document.getElementById('transfer-ai-container');
+  const actionBtn = document.getElementById('transfer-action-btn');
+  
+  if (tab === 'ai') {
+    // Hide team transfer UI, show AI UI
+    if (searchContainer) searchContainer.classList.add('hidden');
+    if (teamMembersContainer) teamMembersContainer.classList.add('hidden');
+    if (aiContainer) aiContainer.classList.remove('hidden');
+    // Update button text
+    if (actionBtn) {
+      actionBtn.textContent = 'Transfer to AI';
+      actionBtn.onclick = () => execAITransfer();
+    }
+  } else {
+    // Show team transfer UI, hide AI UI
+    if (searchContainer) searchContainer.classList.remove('hidden');
+    if (teamMembersContainer) teamMembersContainer.classList.remove('hidden');
+    if (aiContainer) aiContainer.classList.add('hidden');
+    // Reset button text and onclick
+    if (actionBtn) {
+      actionBtn.textContent = 'Start Transfer';
+      actionBtn.onclick = () => execTransfer();
+    }
+  }
   saveState();
 }
 
@@ -1653,6 +1734,19 @@ function selectTeamMember(element, name, role) {
 function execTransfer() {
   if (!CALL.selectedTransferee) return;
   closeTransferModal();
+  const btn = document.getElementById('btn-transfer');
+  if (btn) {
+    btn.classList.add('fire-gradient', 'text-fire-accent', 'shadow-lg');
+  }
+  updateStatusBadges();
+  saveState();
+}
+
+function execAITransfer() {
+  closeTransferModal();
+  // Show toast notification using existing system
+  showToast('Conversation transferred to AI.', 'success');
+  // Mark transfer button as active
   const btn = document.getElementById('btn-transfer');
   if (btn) {
     btn.classList.add('fire-gradient', 'text-fire-accent', 'shadow-lg');
