@@ -237,10 +237,12 @@
 <div class="flex items-center gap-4">
   <!-- Usage Pill -->
   <div class="hidden md:flex items-center gap-3 bg-surface-container-high/40 border border-white/5 rounded-full px-3 py-1.5 relative overflow-hidden">
-    <div class="absolute inset-0 bg-fire-gradient/10 w-[84%]"></div>
+   <div id="usageProgressBar" class="absolute inset-0 bg-fire-gradient/10 w-[47.8%]"></div>
     <span class="material-symbols-outlined text-fire-accent text-sm relative z-10">hourglass_empty</span>
-    <span class="text-[10px] font-bold text-white relative z-10">842 / 1,000 mins</span>
+    <span id="usagePillText" class="text-[10px] font-bold text-white relative z-10">239 / 500 mins</span>
   </div>
+
+
 
   <!-- Live Timer -->
    <div id="callTimerContainer" class="flex items-center gap-2 bg-surface-container-lowest/50 border border-white/5 rounded-lg px-3 py-1.5">
@@ -280,14 +282,13 @@
 
 
 
-
 <!-- BEGIN: LeftSidebar -->
 <aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex flex-col bg-surface-container-low/78 backdrop-blur-xl border-r border-white/5 items-center py-6 gap-8 z-40">
 <div class="flex flex-col items-center gap-4 w-full overflow-y-auto flex-1">
-  <a href="./Dashboard.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <a href="./Dashboard.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
     <span class="material-symbols-outlined">dashboard</span>
     <span class="text-[8px] uppercase font-bold">Dashboard</span>
-  
+  </button>
   <a href="./activeCall.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
     <span class="material-symbols-outlined">call</span>
     <span class="text-[8px] uppercase font-bold">Call</span>
@@ -296,7 +297,7 @@
     <span class="material-symbols-outlined">queue</span>
     <span class="text-[8px] uppercase font-bold">Queue</span>
   </a>
- <a href="./callCoaching.html" class="block w-full">
+   <a href="./callCoaching.html" class="block w-full">
     <button class="group relative flex flex-col items-center gap-1 w-full py-3 bg-primary-container/20 text-fire-accent border-l-4 border-fire-accent shadow-[0_0_20px_rgba(255,122,28,0.2)]" >
       <span class="material-symbols-outlined">graphic_eq</span>
       <span class="text-[8px] uppercase font-bold">Coaching</span>
@@ -310,7 +311,8 @@
     <span class="material-symbols-outlined">view_kanban</span>
     <span class="text-[8px] uppercase font-bold">Pipeline</span>
   </a>
-  <a href="./callHistory.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+  <a href="./callHistory.html" class="block w-full">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
       <span class="material-symbols-outlined">history</span>
       <span class="text-[8px] uppercase font-bold">History</span>
     </button>
@@ -339,7 +341,7 @@
       <span class="text-[8px] uppercase font-bold">Team</span>
     </button>
   </a>
-  <a href="./settingsGeneral.html" class="block w-full">
+   <a href="./settingsGeneral.html" class="block w-full">
     <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
       <span class="material-symbols-outlined">settings</span>
       <span class="text-[8px] uppercase font-bold">Settings</span>
@@ -352,17 +354,17 @@
     </button>
   </a>
  
+
 </div>
 <div class="flex flex-col items-center gap-4 w-full pb-4">
   <a href="./profile.html" class="block w-full h-full cursor-pointer">
     <div class="h-10 w-10 rounded-full overflow-hidden border border-white/10 items-center ml-4">
-    <img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs">
+    <img id="sidebarProfileAvatar" alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs">
   </div>
   </a>
 </div>
 </aside>
 <!-- END: LeftSidebar -->
-
 
 
 
@@ -1665,14 +1667,71 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast('Preparing insights export…', 'download');
   });
 
+  /* ---------- Saved Profile Picture (shared with profile.html) ---------- */
+  function loadSavedProfileAvatar() {
+    const sidebarProfileAvatar = document.getElementById('sidebarProfileAvatar');
+    if (!sidebarProfileAvatar) return;
+    const savedProfilePicture = localStorage.getItem('dialforge-profile-picture');
+    if (!savedProfilePicture) return;
+    const defaultSrc = sidebarProfileAvatar.src;
+    const testImg = new Image();
+    testImg.onload = () => {
+      sidebarProfileAvatar.src = savedProfilePicture;
+    };
+    testImg.onerror = () => {
+      sidebarProfileAvatar.src = defaultSrc;
+    };
+    testImg.src = savedProfilePicture;
+  }
+
   /* ---------- Init ---------- */
   loadCall(0);
+  loadSavedProfileAvatar();
 });
 </script>
 
 
 
 
+<!-- BEGIN: Usage Minutes Synchronization -->
+<script data-purpose="sync-usage-minutes">
+(function() {
+  // Load the application state from localStorage (set by postCallSummary.html)
+  function loadAndDisplayUsageMinutes() {
+    try {
+      const stored = localStorage.getItem('dialForgeState');
+      if (!stored) return; // No state saved yet, use defaults
+      
+      const appState = JSON.parse(stored);
+      const usageMinutes = appState.usageMinutes || 239;
+      const maxUsageMinutes = appState.maxUsageMinutes || 500;
+      
+      // Update the usage pill text
+      const usagePillText = document.getElementById('usagePillText');
+      if (usagePillText) {
+        usagePillText.textContent = `${usageMinutes} / ${maxUsageMinutes} mins`;
+      }
+      
+      // Update progress bar width
+      const usageProgressBar = document.getElementById('usageProgressBar');
+      if (usageProgressBar) {
+        const percentage = (usageMinutes / maxUsageMinutes) * 100;
+        usageProgressBar.style.width = `${percentage}%`;
+      }
+    } catch (e) {
+      console.error('Error loading usage minutes:', e);
+    }
+  }
+  
+  // Load on DOMContentLoaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadAndDisplayUsageMinutes);
+  } else {
+    loadAndDisplayUsageMinutes();
+  }
+})();
+</script>
+<!-- END: Usage Minutes Synchronization -->
 
 
 </body></html>
