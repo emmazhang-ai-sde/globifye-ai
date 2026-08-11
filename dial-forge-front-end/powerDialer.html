@@ -25,6 +25,8 @@
             "inverse-primary": "#b32a00",
             "tertiary-fixed-dim": "#00e478",
             "surface-container": "#1e1f27",
+            "surface-container-low": "#1a1b23",
+            "surface-container-high": "#292932",
             "on-primary-fixed": "#3c0800",
             "gold": "#F5C518",
             "fire-gradient": "#FF7A1C",
@@ -63,6 +65,7 @@
             "on-error-container": "#ffdad6",
             "ai-purple": "#9B6DFF",
             "on-surface-variant": "#e5beb4",
+            "glass-border": "rgba(255, 255, 255, 0.08)",
             "on-primary-fixed-variant": "#891e00",
             "primary": "#ffb4a2",
             "on-secondary": "#003062",
@@ -113,6 +116,25 @@
       border: 1px solid rgba(255, 255, 255, 0.05);
       box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     }
+        
+    .liquid-glass {
+      background: rgba(26, 27, 35, 0.6);
+      backdrop-filter: blur(40px) saturate(150%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+    
+    .glass-border {
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+    
+    .fire-glow {
+      box-shadow: 0 0 50px rgba(255, 122, 28, 0.15);
+    }
+    
+    .fire-gradient {
+      background: linear-gradient(135deg, #FF7A1C 0%, #FF4D00 100%);
+    }
     
     .active-card {
       border: 2px solid #f97316;
@@ -140,6 +162,46 @@
     .active-orb {
       animation: pulse-glow 2s infinite;
     }
+    .modal-overlay {
+animation: fade-in 0.3s ease-out;
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+}
+.modal-overlay.active {
+    display: flex;
+}
+ .modal-content {
+  animation: scale-in 0.3s ease-out;
+    background: rgba(30, 31, 39, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.modal-content::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
 @keyframes ring-shake {
       0%, 100% { transform: rotate(0deg); }
       10%, 30%, 50%, 70% { transform: rotate(-14deg); }
@@ -299,6 +361,16 @@
     }
     .dial-pad-btn:active {
       transform: scale(0.95);
+    }
+        
+    /* Power Dialer Record Button Recording State */
+    @keyframes recording-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    #powerDialerRecordBtn.recording-active {
+      animation: recording-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
   </style>
 </head>
@@ -496,9 +568,9 @@
 <div class="flex items-center gap-4">
   <!-- Usage Pill -->
   <div class="hidden md:flex items-center gap-3 bg-surface-container-high/40 border border-white/5 rounded-full px-3 py-1.5 relative overflow-hidden">
-    <div class="absolute inset-0 bg-fire-gradient/10 w-[84%]"></div>
+    <div id="usageProgressBar"class="absolute inset-0 bg-fire-gradient/10 w-[47.8%]"></div>
     <span class="material-symbols-outlined text-fire-accent text-sm relative z-10">hourglass_empty</span>
-    <span class="text-[10px] font-bold text-white relative z-10">842 / 1,000 mins</span>
+    <span id="usagePillText"class="text-[10px] font-bold text-white relative z-10">239 / 500 mins</span>
   </div>
 
   <!-- Live Timer -->
@@ -628,7 +700,7 @@
 <main id="mainContent" class="min-h-screen flex-1 flex flex-col bg-brand-dark relative ml-20 mr-20 mt-20">
 
 <!-- BEGIN: Workspace Container -->
-<div class="flex flex-1 overflow-y-auto p-6 gap-6">
+<div class="flex flex-1 overflow-hidden p-6 gap-6">
 <!-- BEGIN: Left Column (Prospect Queue) -->
 <div class="flex-1 flex flex-col gap-6">
 <div class="flex flex-col gap-2">
@@ -662,7 +734,7 @@
 <!-- END: Search and Filter Controls -->
 </div>
 <!-- BEGIN: Prospect List -->
-<div class="flex-1 overflow-y-auto pr-2 space-y-4" data-purpose="prospect-list">
+<div class="overflow-y-auto pr-2 space-y-4 flex-1 min-h-0 max-h-dvh" data-purpose="prospect-list">
 <!-- Card 1: Jordan Peterson (UP NEXT) -->
 <div class="glass-card active-card rounded-2xl p-4 flex items-center gap-4 group cursor-pointer transition-all hover:scale-[1.01]" data-purpose="active-prospect">
 <div class="relative">
@@ -800,9 +872,17 @@
 SKIP
 </button>
 </button>
+<button class="bg-purple-500/10 hover:bg-purple-500/20 text-purple-500 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border border-purple-500/20 transition-colors" id="vmStudioBtn">
+<span class="material-symbols-outlined text-sm">mic</span>
+VM STUDIO
+</button>
 <button class="bg-blue-500/10 hover:bg-blue-500/20 text-blue-500 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border border-blue-500/20 transition-colors" data-action="voicemail">
 <span class="material-symbols-outlined text-sm">voicemail</span>
 DROP VM
+</button>
+<button class="bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-500 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border border-cyan-500/20 transition-colors" id="powerDialerRecordBtn">
+<span class="material-symbols-outlined text-sm">mic</span>
+Record
 </button>
 </div>
 </div>
@@ -1151,6 +1231,102 @@ DROP VM
   </div>
 </div>
 <!-- END: Import Wizard Modal -->
+ 
+<!-- START: VM Studio Modal (Shared Library) -->
+<div id="vm-studio-modal-overlay" class="modal-overlay hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center" onclick="closeVMStudioModal(event)">
+  <div class="modal-content liquid-glass rounded-3xl w-full max-w-3xl mx-4 p-10 relative overflow-auto" onclick="event.stopPropagation()">
+    <!-- Close Button -->
+    <button onclick="closeVMStudioModal()" class="absolute top-6 right-6 p-2 hover:bg-white/10 rounded-full transition-colors" title="Close (Esc)">
+      <span class="material-symbols-outlined text-gray-300">close</span>
+    </button>
+    
+    <!-- Header -->
+    <div class="mb-8">
+      <h3 class="font-syne text-2xl font-extrabold text-white mb-2">VM Studio</h3>
+      <p class="text-gray-400">Record voicemails or browse your voicemail library</p>
+    </div>
+    
+    <!-- Tab Buttons -->
+    <div class="flex gap-3 mb-8 border-b border-glass-border pb-4">
+      <button class="vm-tab-btn px-4 py-2 text-sm font-medium text-fire-accent border-b-2 border-fire-accent transition-colors" onclick="switchVMTab('library')">VM Library</button>
+      <button class="vm-tab-btn px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors" onclick="switchVMTab('record')">Record New</button>
+    </div>
+    
+    <!-- Library Tab Content -->
+    <div id="vm-library-content" class="space-y-2 max-h-96 overflow-y-auto mb-8">
+      <!-- Library items will be dynamically rendered here -->
+    </div>
+    
+    <!-- Record Tab Content (Hidden by default) -->
+    <div id="vm-record-content" class="hidden space-y-6 mb-8">
+      <div class="p-8 bg-surface-container-low/50 rounded-lg border border-glass-border text-center">
+        <div class="w-20 h-20 rounded-full fire-gradient flex items-center justify-center mx-auto mb-4 animate-pulse">
+          <span class="material-symbols-outlined text-3xl text-white">mic</span>
+        </div>
+        <p class="text-sm font-medium text-white mb-2">Ready to record</p>
+        <p class="text-xs text-gray-500 mb-6">Click the mic button to start recording your voicemail</p>
+        
+        <!-- Record input fields -->
+        <div class="space-y-4 mb-6">
+          <input type="text" id="vm-title-input" placeholder="Voicemail title" class="w-full px-4 py-2 bg-surface-container/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-fire-accent">
+          <textarea id="vm-notes-input" placeholder="Notes (optional)" rows="3" class="w-full px-4 py-2 bg-surface-container/50 border border-glass-border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-fire-accent resize-none"></textarea>
+        </div>
+        
+        <button onclick="startVMRecording()" class="px-8 py-3 fire-gradient text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all">
+          <span class="material-symbols-outlined inline mr-2">fiber_manual_record</span>Start Recording
+        </button>
+      </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="flex gap-4">
+      <button onclick="closeVMStudioModal()" class="flex-1 px-6 py-3 rounded-lg border border-glass-border text-gray-300 hover:text-white hover:bg-white/5 transition-all font-medium">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+<!-- END: VM Studio Modal -->
+ 
+<!-- START: VM Drop Modal -->
+<div id="vmDropModal" class="fixed inset-0 z-50 hidden">
+  <!-- Overlay -->
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+  
+  <!-- Modal Container -->
+  <div class="relative z-50 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-surface-container-high/80 backdrop-blur border border-white/10 rounded-2xl w-full max-w-2xl shadow-2xl">
+      <!-- Modal Header -->
+      <div class="p-6 border-b border-white/5">
+        <h2 class="text-2xl font-bold text-white mb-1">Drop Voicemail</h2>
+        <p class="text-gray-400 text-sm">Choose a voicemail to leave for the selected prospect.</p>
+      </div>
+      
+      <!-- Modal Content -->
+      <div class="p-6 max-h-96 overflow-y-auto">
+        <div id="vmDropList" class="space-y-2">
+          <!-- Voicemails will be populated here -->
+        </div>
+        <div id="vmDropEmpty" class="hidden text-center py-8">
+          <span class="material-symbols-outlined text-4xl text-gray-600 mb-2">voicemail</span>
+          <p class="text-gray-400">No voicemails available</p>
+          <p class="text-gray-500 text-sm mt-1">Create voicemails in the VM Studio to use them here.</p>
+        </div>
+      </div>
+      
+      <!-- Modal Footer -->
+      <div class="flex items-center justify-end gap-3 p-6 border-t border-white/5 bg-surface-container/40">
+        <button id="vmDropCancel" class="px-6 py-2 text-white font-bold bg-white/10 hover:bg-white/20 rounded-lg transition-all">
+          CANCEL
+        </button>
+        <button id="vmDropConfirm" class="px-6 py-2 text-white font-bold bg-fire-gradient hover:opacity-90 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+          DROP
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- END: VM Drop Modal -->
 
 <script data-purpose="card-interactions">
   // Subtle mouse follow effect for glass cards to simulate specular highlight
@@ -1480,7 +1656,7 @@ DROP VM
     voicemailBtn.addEventListener('click', sendToVoicemail);
     holdBtn.addEventListener('click', toggleHold);
     endBtn.addEventListener('click', endCall);
-    newCallBtn?.addEventListener('click', openNewCallModal);
+    newCallBtn?.addEventListener('click', () => DialPad.open());
     cancelCallBtn?.addEventListener('click', closeNewCallModal);
     cancelCallSecondaryBtn?.addEventListener('click', closeNewCallModal);
     startCallBtn?.addEventListener('click', startOutboundCall);
@@ -1662,10 +1838,12 @@ DROP VM
 
   const dialQueue = [
     { id: 1, name: "Jordan Peterson", company: "Nexus AI", phone: "(415) 555-0100", title: "VP OF OPERATIONS", status: "waiting", priority: "high", duration: 0, avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuABYxrItLWMWQGRhejBqyB4saRkf_yBZ2ZmllBo6Ysg2-S2oSxYvi760KIxyNY8UkVgJatC_jWoDXasuG5xklwUniPfZlvlY_o9VQlJuoaMcv8kfw8EeeXZ7nwhTGI51UxHXH901RTCtXU7kx90bT2-0wl5cl1jlYQkv911G64F6axaT2vgJ6lUv6YAG-2T-9SRvrQU9xEei84H7nTvEeiJCtXnVo2WVA4WWD24Z50_FRHD5j__aHZCZyLkd38Jx720VO4uGhO2zos' || null },
-    { id: 2, name: "Sarah Jenkins", company: "CloudScale", phone: "(415) 555-0101", title: "HEAD OF IT", status: "waiting", priority: "high", duration: 0, avatar: null },
-    { id: 3, name: "Michael Chen", company: "Quantum Dynamics", phone: "(415) 555-0102", title: "DIRECTOR", status: "waiting", priority: "medium", duration: 0, avatar: null },
-    { id: 4, name: "Elena Rodriguez", company: "Skynet Systems", phone: "(415) 555-0103", title: "OPERATIONS", status: "waiting", priority: "medium", duration: 0, avatar: null },
+    { id: 2, name: "Sarah Jenkins", company: "CloudScale", phone: "(415) 555-0101", title: "HEAD OF IT", status: "waiting", priority: "high", duration: 0, avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDb8J6ekhKRUbnJdwE1ToiBnu-Qx5dgWZaDArXNOOHf0vEHYjdf7CI5XLiP7KFSfHo6Kbfjg51Euqmw3gxRTVT5XnYDhi0ek81FNarrpf95hCDdPTpV6FCLpIt-5QtqM8tL-oXfF6W4RD1eDPAvqsuc_F2mUp1ddbSzYf6BJmveZzxAiEmv5UELC5Fdph_5QJxtBQEKYKcPL-FtanOdFi8CMdwzasv_Ju7OGb9x0llhx3VCeAbioXNjt3gDXZCsmd42ujLmlqINoSY' || null },
+    { id: 3, name: "Michael Chen", company: "Quantum Dynamics", phone: "(415) 555-0102", title: "DIRECTOR", status: "waiting", priority: "medium", duration: 0, avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDPRjSxnvBCe_AJWzrz1Zq3i2ujna5plFUBoFx-iHymRG_X4_VNwPprvw0E91aqPJVkeTBBKUhg-0a3qGwTQ3I1K_Nuvim30781-cO291wCRWvVsn8nRy5mBY40VMtCP0c7XlpLz28QoAkyvpK0MIyqCboXZB5l8GNqELbNROcwBAehK1_c_IqLoZYMiGy1qMdlAZTQWwsNL1T6gguJsFEEyVL3fE78eHb2MteBlHTGC223EbJkggRNPE-uBej-8czghB4xaGdwJew' || null },
+    { id: 4, name: "Elena Rodriguez", company: "Skynet Systems", phone: "(415) 555-0103", title: "OPERATIONS", status: "waiting", priority: "medium", duration: 0, avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAORW2xSfBqFpnbvnYOw5oyWbLWh96Lb-z9RcY5NUupdyLMhP0yfJ5MmIsSCkhPNYNyo5YwQFj3AacVhkvl57wkbemKA3XBZN9jYt6WWgTn6oEI7c65NCZmndGyb2pQscjXrN2E0PB_PZPPNqEIvspImwcpDuN2fAzWvRHldF9_ccksiQCCCImyLOxjqFgMN_qF_jS35o7B-NYx0xiAMQnHEPcWfRPWqPq3PRahz2A0r9T86Jj1lrmWB50LsC2uKxgTxeERpjaCz-w' || null },
     { id: 5, name: "Alex Rivera", company: "InnovateX Global", phone: "(415) 555-0104", title: "CEO", status: "waiting", priority: "low", duration: 0, avatar: null },
+    { id: 6, name: "Emily Carter", company: "Vertex Solutions", phone: "(415) 555-0105", title: "SALES DIRECTOR", status: "waiting", priority: "high", duration: 0, avatar: null },
+    { id: 7, name: "David Morgan", company: "Horizon Analytics", phone: "(415) 555-0106", title: "CHIEF OPERATING OFFICER", status: "waiting", priority: "medium", duration: 0, avatar: null },
   ];
 
   const callHistory = [];
@@ -1864,6 +2042,15 @@ DROP VM
     const avgDuration = sessionStats.connectedCalls > 0 ? Math.round(sessionStats.avgCallDuration / sessionStats.connectedCalls) : 0;
     document.querySelector('[data-session="avg-duration"]').textContent = formatTime(avgDuration);
   }
+  
+  function selectProspect(prospectIndex) {
+    if (prospectIndex < 0 || prospectIndex >= dialQueue.length) return;
+    
+    CALLS.currentProspectIndex = prospectIndex;
+    updateActiveCallCard();
+    updateProspectQueue();
+    saveState();
+  }
 
   function updateProspectQueue() {
     const listEl = document.querySelector('[data-purpose="prospect-list"]');
@@ -1872,7 +2059,8 @@ DROP VM
     const filteredQueue = getFilteredQueue();
     
     filteredQueue.forEach((prospect, idx) => {
-      const isActive = idx === 0 && CALLS.isDialing;
+      const actualIndex = dialQueue.indexOf(prospect);
+      const isActive = actualIndex === CALLS.currentProspectIndex;
       const priorityColor = getPriorityDotColor(prospect.priority);
       const statusClass = getStatusClass(prospect.status);
 
@@ -1916,6 +2104,11 @@ DROP VM
       card.appendChild(avatarContainer.firstChild);
       card.appendChild(contentDiv);
       card.appendChild(statusDiv);
+            
+      // Add click handler to select this prospect
+      card.addEventListener('click', () => {
+        selectProspect(actualIndex);
+      });
       
       listEl.appendChild(card);
     });
@@ -2155,6 +2348,408 @@ DROP VM
     updateSessionStats();
     saveState();
   }
+  
+  // ==================== SHARED VOICEMAIL LIBRARY MANAGEMENT ====================
+  // Storage key - shared between Active Call and Power Dialer
+  const VOICEMAIL_STORAGE_KEY = 'dialforge-voicemails';
+  const ACTIVE_VOICEMAIL_KEY = 'dialforge-active-voicemail';
+  
+  function getVoicemailLibrary() {
+    // Load voicemails from shared localStorage
+    const stored = localStorage.getItem(VOICEMAIL_STORAGE_KEY);
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch (e) {
+        console.error('Error parsing voicemail library:', e);
+        return [];
+      }
+    }
+    
+    // If none exist, return empty array (user can create in VM Studio)
+    return [];
+  }
+    
+  function saveVoicemailLibrary(voicemails) {
+    try {
+      localStorage.setItem(VOICEMAIL_STORAGE_KEY, JSON.stringify(voicemails));
+    } catch (e) {
+      console.error('Error saving voicemail library:', e);
+    }
+  }
+  
+  function getActiveVoicemail() {
+    const stored = localStorage.getItem(ACTIVE_VOICEMAIL_KEY);
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+  
+  function setActiveVoicemail(voicemailIndex) {
+    const voicemails = getVoicemailLibrary();
+    
+    // Remove active flag from all
+    voicemails.forEach(vm => vm.isActive = false);
+    
+    // Set active flag on selected
+    if (voicemailIndex >= 0 && voicemailIndex < voicemails.length) {
+      voicemails[voicemailIndex].isActive = true;
+      localStorage.setItem(ACTIVE_VOICEMAIL_KEY, JSON.stringify(voicemails[voicemailIndex]));
+    }
+    
+    saveVoicemailLibrary(voicemails);
+    renderVMLibrary();
+  }
+  
+  function addVoicemail(title, duration = 0, notes = '') {
+    const voicemails = getVoicemailLibrary();
+    
+    const newVoicemail = {
+      id: Date.now().toString(),
+      title: title || 'Untitled Voicemail',
+      duration: duration,
+      createdAt: new Date().toISOString(),
+      notes: notes,
+      isActive: voicemails.length === 0 // First voicemail is active by default
+    };
+    
+    voicemails.push(newVoicemail);
+    saveVoicemailLibrary(voicemails);
+    
+    // If this is the first one, set it as active
+    if (newVoicemail.isActive) {
+      localStorage.setItem(ACTIVE_VOICEMAIL_KEY, JSON.stringify(newVoicemail));
+    }
+    
+    return newVoicemail;
+  }
+  
+  function deleteVoicemail(voicemailIndex) {
+    const voicemails = getVoicemailLibrary();
+    const deletedVM = voicemails[voicemailIndex];
+    
+    voicemails.splice(voicemailIndex, 1);
+    saveVoicemailLibrary(voicemails);
+    
+    // If deleted voicemail was active, set first one as active
+    if (deletedVM.isActive && voicemails.length > 0) {
+      voicemails[0].isActive = true;
+      saveVoicemailLibrary(voicemails);
+      localStorage.setItem(ACTIVE_VOICEMAIL_KEY, JSON.stringify(voicemails[0]));
+    } else if (voicemails.length === 0) {
+      localStorage.removeItem(ACTIVE_VOICEMAIL_KEY);
+    }
+    
+    renderVMLibrary();
+  }
+  
+  function renderVMLibrary() {
+    const libraryContent = document.getElementById('vm-library-content');
+    if (!libraryContent) return;
+    
+    const voicemails = getVoicemailLibrary();
+    libraryContent.innerHTML = '';
+    
+    if (voicemails.length === 0) {
+      libraryContent.innerHTML = `
+        <div class="p-6 text-center text-gray-400">
+          <p class="text-sm">No voicemails yet. Create your first one in the Record New tab.</p>
+        </div>
+      `;
+      return;
+    }
+    
+    voicemails.forEach((vm, index) => {
+      const duration = vm.duration || 0;
+      const mins = Math.floor(duration / 60);
+      const secs = (duration % 60).toString().padStart(2, '0');
+      const durationStr = `${mins}:${secs}`;
+      
+      const date = new Date(vm.createdAt);
+      const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+      
+      const vmElement = document.createElement('div');
+      vmElement.className = `p-4 rounded-lg border transition-all group flex items-center gap-4 ${
+        vm.isActive 
+          ? 'bg-surface-container/60 border-l-4 border-fire-accent' 
+          : 'bg-surface-container-low/50 border-glass-border hover:border-fire-accent/50'
+      }`;
+      
+      vmElement.innerHTML = `
+        <div class="w-12 h-12 rounded-full ${vm.isActive ? 'fire-gradient' : 'bg-fire-accent/20'} flex items-center justify-center flex-shrink-0 text-${vm.isActive ? 'white' : 'fire-accent'} group-hover:${vm.isActive ? 'bg-fire-accent' : 'bg-fire-accent'} group-hover:text-white transition-all">
+          <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1">play_arrow</span>
+        </div>
+        <div class="flex-1">
+          <div class="flex items-center gap-2 mb-1">
+            <h4 class="font-bold text-sm text-white">${escapeHtml(vm.title)}</h4>
+            ${vm.isActive ? '<span class="px-2 py-0.5 bg-fire-accent/20 text-[10px] font-bold text-fire-accent rounded">Active</span>' : ''}
+          </div>
+          <p class="text-xs text-gray-500">${durationStr} • ${dateStr}</p>
+          ${vm.notes ? `<p class="text-xs text-gray-600 mt-1">${escapeHtml(vm.notes)}</p>` : ''}
+        </div>
+        <button class="p-2 hover:bg-fire-accent/10 rounded transition-colors" title="Play"><span class="material-symbols-outlined text-gray-400 group-hover:text-fire-accent">play_circle</span></button>
+        <button class="p-2 hover:bg-tertiary-fixed/10 rounded transition-colors" title="Set Active"><span class="material-symbols-outlined text-gray-400 group-hover:text-tertiary-fixed">phone_in_talk</span></button>
+        <button class="p-2 hover:bg-error-red/10 rounded transition-colors" title="Delete"><span class="material-symbols-outlined text-gray-400 group-hover:text-error-red">delete</span></button>
+      `;
+      
+      // Wire up action buttons
+      const buttons = vmElement.querySelectorAll('button');
+      buttons[0].addEventListener('click', (e) => {
+        e.stopPropagation();
+        playVoicemail(vm);
+      });
+      buttons[1].addEventListener('click', (e) => {
+        e.stopPropagation();
+        setActiveVoicemail(index);
+      });
+      buttons[2].addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteVoicemail(index);
+      });
+      
+      libraryContent.appendChild(vmElement);
+    });
+  }
+
+  // ==================== VM STUDIO FUNCTIONS ====================
+  function openVMStudioFlow() {
+    const overlay = document.getElementById('vm-studio-modal-overlay');
+    if (overlay) {
+      overlay.classList.remove('hidden');
+      renderVMLibrary();
+      // Reset form fields
+      document.getElementById('vm-title-input').value = '';
+      document.getElementById('vm-notes-input').value = '';
+    }
+  }
+
+  function closeVMStudioModal(event) {
+    if (event && event.target.id !== 'vm-studio-modal-overlay') return;
+    const overlay = document.getElementById('vm-studio-modal-overlay');
+    if (overlay) {
+      overlay.classList.add('hidden');
+    }
+  }
+
+  function switchVMTab(tab) {
+    const libraryContent = document.getElementById('vm-library-content');
+    const recordContent = document.getElementById('vm-record-content');
+    
+    document.querySelectorAll('.vm-tab-btn').forEach(btn => {
+      btn.classList.remove('text-fire-accent', 'border-b-2', 'border-fire-accent');
+      btn.classList.add('text-gray-400');
+    });
+    
+    event.target.classList.remove('text-gray-400');
+    event.target.classList.add('text-fire-accent', 'border-b-2', 'border-fire-accent');
+    
+    if (tab === 'library') {
+      libraryContent.classList.remove('hidden');
+      recordContent.classList.add('hidden');
+      renderVMLibrary();
+    } else {
+      libraryContent.classList.add('hidden');
+      recordContent.classList.remove('hidden');
+    }
+  }
+
+  function startVMRecording() {
+    const title = document.getElementById('vm-title-input').value.trim();
+    const notes = document.getElementById('vm-notes-input').value.trim();
+    
+    if (!title) {
+      alert('Please enter a voicemail title');
+      return;
+    }
+    
+    // Simulate recording - in a real app, would use Web Audio API
+    // For demo, create a voicemail with a random duration between 15-45 seconds
+    const duration = Math.floor(Math.random() * 30) + 15;
+    const vm = addVoicemail(title, duration, notes);
+    
+    // Show success and reset
+    alert(`Voicemail "${title}" recorded (${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')})`);
+    document.getElementById('vm-title-input').value = '';
+    document.getElementById('vm-notes-input').value = '';
+    
+    // Switch to library tab to show new recording
+    switchVMTab('library');
+  }
+
+  function openVMDropModal() {
+    const modal = document.getElementById('vmDropModal');
+    const list = document.getElementById('vmDropList');
+    const empty = document.getElementById('vmDropEmpty');
+    
+    // Load voicemails from library
+    const voicemails = getVoicemailLibrary();
+    
+    // Clear previous selection
+    selectedVoicemail = null;
+    
+    // Populate list
+    list.innerHTML = '';
+    if (voicemails.length === 0) {
+      empty.classList.remove('hidden');
+      document.getElementById('vmDropConfirm').disabled = true;
+    } else {
+      empty.classList.add('hidden');
+      voicemails.forEach((vm, index) => {
+        const row = createVoicemailRow(vm, index);
+        list.appendChild(row);
+      });
+    }
+    
+    // Show modal
+    modal.classList.remove('hidden');
+  }
+
+  function closeVMDropModal() {
+    const modal = document.getElementById('vmDropModal');
+    modal.classList.add('hidden');
+    selectedVoicemail = null;
+  }
+
+  function createVoicemailRow(voicemail, index) {
+    const row = document.createElement('div');
+    row.className = 'p-3 rounded-lg border border-white/5 hover:border-white/10 hover:bg-white/5 cursor-pointer transition-all flex items-center justify-between group';
+    row.dataset.vmIndex = index;
+    
+    // Format duration
+    const duration = voicemail.duration || 0;
+    const mins = Math.floor(duration / 60);
+    const secs = (duration % 60).toString().padStart(2, '0');
+    const durationStr = `${mins}:${secs}`;
+    
+    // Format date
+    const date = new Date(voicemail.createdAt || new Date());
+    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' });
+    
+    row.innerHTML = `
+      <div class="flex-1">
+        <div class="flex items-center gap-2 mb-1">
+          <h4 class="font-medium text-white">${escapeHtml(voicemail.title || 'Untitled')}</h4>
+          ${voicemail.isActive ? '<span class="text-xs bg-orange-500/20 text-orange-400 px-2 py-1 rounded border border-orange-500/30">Active</span>' : ''}
+        </div>
+        <p class="text-xs text-gray-500">${durationStr} • ${dateStr}</p>
+      </div>
+      <button class="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-white/10 rounded-lg">
+        <span class="material-symbols-outlined text-sm text-gray-400 hover:text-white">play_arrow</span>
+      </button>
+    `;
+    
+    // Add click handler to select voicemail
+    row.addEventListener('click', () => selectVoicemailRow(index, row));
+    
+    // Add play button handler
+    const playBtn = row.querySelector('button');
+    playBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      playVoicemail(voicemail);
+    });
+    
+    return row;
+  }
+
+  function selectVoicemailRow(index, rowElement) {
+    // Remove previous selection
+    const previousSelected = document.querySelector('#vmDropList > [data-vm-index].bg-blue-500\\/10');
+    if (previousSelected) {
+      previousSelected.classList.remove('bg-blue-500/10', 'border-blue-500/30');
+      previousSelected.classList.add('border-white/5');
+    }
+    
+    // Add selection to clicked row
+    rowElement.classList.remove('border-white/5');
+    rowElement.classList.add('bg-blue-500/10', 'border-blue-500/30');
+    
+    // Store selected index
+    selectedVoicemail = index;
+    
+    // Enable drop button
+    document.getElementById('vmDropConfirm').disabled = false;
+  }
+
+  function playVoicemail(voicemail) {
+    // Simulate playback - in a real app, this would play audio
+    console.log('Playing voicemail:', voicemail.title);
+    
+    // Show visual feedback
+    const audio = new Audio();
+    audio.onplay = () => console.log('Now playing:', voicemail.title);
+    audio.onerror = () => console.log('Voicemail playback simulated');
+  }
+
+  function dropVoicemail() {
+    if (selectedVoicemail === null) return;
+    
+    const voicemails = getVoicemailLibrary();
+    const vm = voicemails[selectedVoicemail];
+    if (!vm) return;
+    
+    // Close modal
+    closeVMDropModal();
+    
+    // Update current prospect status to voicemail
+    const current = dialQueue[CALLS.currentProspectIndex];
+    if (!current) return;
+    
+    current.status = 'voicemail';
+    sessionStats.voicemails++;
+    
+    // Add to call history
+    callHistory.push({
+      ...current,
+      voicemailAt: new Date().toISOString(),
+      voicemailTitle: vm.title,
+      duration: CALLS.currentTimer
+    });
+    
+    // Show success toast
+    showVMDropToast(`Voicemail "${vm.title}" dropped successfully.`);
+    
+    // Advance to next prospect
+    advanceToNextProspect();
+    
+    // Update UI
+    updateProspectQueue();
+    updateActiveCallCard();
+    updateTopStats();
+    updateSessionStats();
+    saveState();
+  }
+
+  function showVMDropToast(message) {
+    // Create a simple toast notification
+    const toast = document.createElement('div');
+    toast.className = 'fixed bottom-6 right-6 bg-green-500/20 border border-green-500/50 text-green-300 px-4 py-3 rounded-lg z-50 animate-pulse';
+    toast.innerHTML = `
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-sm">check_circle</span>
+        <span>${message}</span>
+      </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  let selectedVoicemail = null;
 
   function markHungUp() {
     const current = dialQueue[CALLS.currentProspectIndex];
@@ -2199,7 +2794,9 @@ DROP VM
       parsedRows: [],
       fieldMapping: {},
       importedCount: 0,
-      skippedCount: 0
+      skippedCount: 0,
+      duplicatesSkipped: 0,
+      invalidSkipped: 0
     },
     contacts: [
       {
@@ -2405,6 +3002,58 @@ DROP VM
     
     appState.importWizard.importedCount = rows.length;
   }
+  
+  // ==================== DUPLICATE DETECTION ====================
+  function normalizePhoneNumber(phone) {
+    if (!phone) return '';
+    // Remove all non-digit characters except leading '+'
+    return phone.replace(/[^\d+]/g, '');
+  }
+
+  function isDuplicateContact(newContact, existingQueue, csvSeenPhones, csvSeenNames) {
+    const newPhone = normalizePhoneNumber(newContact.phone);
+    const newNameCompany = `${newContact.name}|${newContact.company}`.toLowerCase().trim();
+    
+    // Highest priority: Check phone number against existing queue
+    if (newPhone) {
+      // Check against existing queue
+      for (const existing of existingQueue) {
+        const existingPhone = normalizePhoneNumber(existing.phone);
+        if (newPhone === existingPhone && existingPhone) {
+          return true;
+        }
+      }
+      
+      // Check against phones already seen in this import
+      if (csvSeenPhones.has(newPhone)) {
+        return true;
+      }
+      csvSeenPhones.add(newPhone);
+    }
+    
+    // Secondary check: Name + Company (case-insensitive, only if phone is missing)
+    if (!newPhone && newNameCompany) {
+      // Check against existing queue
+      for (const existing of existingQueue) {
+        const existingPhone = normalizePhoneNumber(existing.phone);
+        if (!existingPhone) {
+          // Only compare name+company if existing contact also lacks phone
+          const existingNameCompany = `${existing.name}|${existing.company}`.toLowerCase().trim();
+          if (newNameCompany === existingNameCompany) {
+            return true;
+          }
+        }
+      }
+      
+      // Check against name+company combinations already seen in this import
+      if (csvSeenNames.has(newNameCompany)) {
+        return true;
+      }
+      csvSeenNames.add(newNameCompany);
+    }
+    
+    return false;
+  }
 
   function convertRowToContact(row, index) {
     const mapping = appState.importWizard.fieldMapping;
@@ -2431,25 +3080,39 @@ DROP VM
     storeFieldMapping();
     const rows = appState.importWizard.parsedRows;
     let imported = 0;
-    let skipped = 0;
+    let duplicatesSkipped = 0;
+    let invalidSkipped = 0;
+    
+    // Create lookup sets for efficient duplicate detection within this import
+    const csvSeenPhones = new Set();
+    const csvSeenNames = new Set();
     
     rows.forEach((row, index) => {
       // Skip if required fields are missing
       if (!row[appState.importWizard.fieldMapping.phone]) {
-        skipped++;
+        invalidSkipped++;
         return;
       }
       
       const contact = convertRowToContact(row, imported);
+            
+      // Check for duplicates against existing queue and CSV duplicates
+      if (isDuplicateContact(contact, dialQueue, csvSeenPhones, csvSeenNames)) {
+        duplicatesSkipped++;
+        return;
+      }
+
       dialQueue.push(contact);
       imported++;
     });
     
     appState.importWizard.importedCount = imported;
-    appState.importWizard.skippedCount = skipped;
+    appState.importWizard.skippedCount = duplicatesSkipped + invalidSkipped;
+    appState.importWizard.duplicatesSkipped = duplicatesSkipped;
+    appState.importWizard.invalidSkipped = invalidSkipped;
     
     // Update the completion step display
-    updateCompletionStep(imported, skipped, rows.length);
+    updateCompletionStep(imported, duplicatesSkipped, invalidSkipped, rows.length);
 
     // Refresh the prospect queue display
     updateProspectQueue();
@@ -2458,12 +3121,12 @@ DROP VM
     saveState();
   }
 
-  function updateCompletionStep(imported, skipped, total) {
+  function updateCompletionStep(imported, duplicatesSkipped, invalidSkipped, total) {
     const stats = document.querySelectorAll('[data-wizard-content="4"] .bg-orange-500\\/10, [data-wizard-content="4"] .bg-green-500\\/10, [data-wizard-content="4"] .bg-yellow-500\\/10');
     if (stats.length >= 3) {
-      stats[0].innerHTML = `<p class="text-2xl font-bold text-orange-400">${total}</p><p class="text-xs text-gray-400 mt-1">Total Imported</p>`;
-      stats[1].innerHTML = `<p class="text-2xl font-bold text-green-400">${imported}</p><p class="text-xs text-gray-400 mt-1">Successfully Mapped</p>`;
-      stats[2].innerHTML = `<p class="text-2xl font-bold text-yellow-400">${skipped}</p><p class="text-xs text-gray-400 mt-1">Skipped</p>`;
+      stats[0].innerHTML = `<p class="text-2xl font-bold text-orange-400">${total}</p><p class="text-xs text-gray-400 mt-1">Records Processed</p>`;
+      stats[1].innerHTML = `<p class="text-2xl font-bold text-green-400">${imported}</p><p class="text-xs text-gray-400 mt-1">Imported</p>`;
+      stats[2].innerHTML = `<p class="text-2xl font-bold text-yellow-400">${duplicatesSkipped}</p><p class="text-xs text-gray-400 mt-1">Duplicates Skipped</p>`;
     }
   }
 
@@ -2671,6 +3334,14 @@ DROP VM
     updateProspectQueue();
     updateActiveCallCard();
     updateSessionStats();
+        
+    // Initialize voicemail library if empty - add default voicemails
+    const voicemails = getVoicemailLibrary();
+    if (voicemails.length === 0) {
+      addVoicemail('Follow-up: Real Estate Lead', 42, 'Follow-up message for real estate prospects');
+      addVoicemail('Aggressive Intro - Direct Dial', 18, 'Direct and assertive opening for gatekeepers');
+      addVoicemail('No Answer: Second Touch', 26, 'Secondary voicemail after initial contact');
+    }
 
     // Start/Pause button
     const startBtn = document.querySelector('[data-action="start-dialing"]');
@@ -2684,9 +3355,27 @@ DROP VM
     const skipBtn = document.querySelector('[data-action="skip"]');
     if (skipBtn) skipBtn.addEventListener('click', markSkipped);
     
-    // Voicemail button
+    // VM Studio button
+    const vmStudioBtn = document.getElementById('vmStudioBtn');
+    if (vmStudioBtn) vmStudioBtn.addEventListener('click', openVMStudioFlow);
+    
+    // Voicemail dropdown button
     const vmBtn = document.querySelector('[data-action="voicemail"]');
-    if (vmBtn) vmBtn.addEventListener('click', markVM);
+    if (vmBtn) vmBtn.addEventListener('click', openVMDropModal);
+    
+    // VM Drop Modal buttons
+    const vmDropCancel = document.getElementById('vmDropCancel');
+    const vmDropConfirm = document.getElementById('vmDropConfirm');
+    if (vmDropCancel) vmDropCancel.addEventListener('click', closeVMDropModal);
+    if (vmDropConfirm) vmDropConfirm.addEventListener('click', dropVoicemail);
+    
+    // Close modal on overlay click
+    const vmDropModal = document.getElementById('vmDropModal');
+    if (vmDropModal) {
+      vmDropModal.addEventListener('click', (e) => {
+        if (e.target === vmDropModal) closeVMDropModal();
+      });
+    }
 
     //hang up button
     const hangupBtn = document.querySelector('[data-action="hangup"]'); 
@@ -2747,7 +3436,18 @@ DROP VM
 
     // Modal close on escape
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeImportModal();
+      if (e.key === 'Escape') {
+      closeImportModal();
+      // Also close VM Studio and VM Drop modals
+        const vmStudioOverlay = document.getElementById('vm-studio-modal-overlay');
+        const vmDropModal = document.getElementById('vmDropModal');
+        if (vmStudioOverlay && !vmStudioOverlay.classList.contains('hidden')) {
+          closeVMStudioModal();
+        }
+        if (vmDropModal && !vmDropModal.classList.contains('hidden')) {
+          closeVMDropModal();
+        }
+      }
     });
 
     // Modal click outside
@@ -2829,7 +3529,15 @@ DROP VM
     startCall() {
       if (this.state.phoneNumber.length > 0) {
         // Reuse APP's existing call workflow
+        // Store the phone number in localStorage for activeCall.html to retrieve
+        try {
+          localStorage.setItem('dialforgeDialPadNumber', this.state.phoneNumber);
+        } catch (e) {
+          console.error('Error saving phone number to localStorage:', e);
+        }
         this.close();
+        // Navigate to active call page
+        window.location.href = './activeCall.html';
       }
     },
 
@@ -2891,7 +3599,39 @@ DROP VM
         document.addEventListener('keydown', escapeHandler);
         this.state.escapeListenerAttached = true;
       }
-
+      
+      // Keyboard number input (0-9, +, (, ), -, space)
+      if (!this.state.keyboardInputAttached) {
+        const keyboardHandler = (e) => {
+          if (!this.state.isOpen) return;
+          
+          const key = e.key;
+          
+          // Handle Backspace key - reuse existing deleteLastDigit function
+          if (key === 'Backspace') {
+            e.preventDefault();
+            this.deleteLastDigit();
+            return;
+          }
+          
+          // Handle numeric keys (0-9)
+          if (/^\d$/.test(key)) {
+            e.preventDefault();
+            this.addDigit(key);
+            return;
+          }
+          
+          // Handle phone number formatting characters: +, (, ), -, space
+          if (/^[+\(\)\-\s]$/.test(key)) {
+            e.preventDefault();
+            this.addDigit(key);
+            return;
+          }
+        };
+        document.addEventListener('keydown', keyboardHandler);
+        this.state.keyboardInputAttached = true;
+      }
+      
       this.state.eventListenersAttached = true;
     },
 
@@ -2924,5 +3664,98 @@ DROP VM
   // Make APP and DialPad globally accessible for external integration
   window.DialPad = DialPad;
   </script>
+
+<!-- BEGIN: Usage Minutes Synchronization -->
+<script data-purpose="sync-usage-minutes">
+(function() {
+  // Load the application state from localStorage (set by postCallSummary.html)
+  function loadAndDisplayUsageMinutes() {
+    try {
+      const stored = localStorage.getItem('dialForgeState');
+      if (!stored) return; // No state saved yet, use defaults
+      
+      const appState = JSON.parse(stored);
+      const usageMinutes = appState.usageMinutes || 239;
+      const maxUsageMinutes = appState.maxUsageMinutes || 500;
+      
+      // Update the usage pill text
+      const usagePillText = document.getElementById('usagePillText');
+      if (usagePillText) {
+        usagePillText.textContent = `${usageMinutes} / ${maxUsageMinutes} mins`;
+      }
+      
+      // Update progress bar width
+      const usageProgressBar = document.getElementById('usageProgressBar');
+      if (usageProgressBar) {
+        const percentage = (usageMinutes / maxUsageMinutes) * 100;
+        usageProgressBar.style.width = `${percentage}%`;
+      }
+    } catch (e) {
+      console.error('Error loading usage minutes:', e);
+    }
+  }
+  
+  // Load on DOMContentLoaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadAndDisplayUsageMinutes);
+  } else {
+    loadAndDisplayUsageMinutes();
+  }
+})();
+</script>
+<!-- END: Usage Minutes Synchronization -->
+
+<!-- BEGIN: Power Dialer Record Button -->
+<script data-purpose="power-dialer-record-button">
+(function() {
+  const recordBtn = document.getElementById('powerDialerRecordBtn');
+  if (!recordBtn) return;
+
+  let isRecording = false;
+
+  recordBtn.addEventListener('click', function() {
+    isRecording = !isRecording;
+
+    if (isRecording) {
+      // Change to recording state
+      recordBtn.classList.remove('bg-cyan-500/10', 'hover:bg-cyan-500/20', 'text-cyan-500', 'border-cyan-500/20');
+      recordBtn.classList.add('bg-red-500/20', 'hover:bg-red-500/30', 'text-red-500', 'border-red-500/30', 'recording-active');
+
+      // Update icon
+      const iconSpan = recordBtn.querySelector('.material-symbols-outlined');
+      if (iconSpan) {
+        iconSpan.textContent = 'stop_circle';
+      }
+
+      // Update text
+      const textNodes = Array.from(recordBtn.childNodes).filter(
+        node => node.nodeType === 3 && node.textContent.trim() === 'Record'
+      );
+      if (textNodes.length > 0) {
+        textNodes[0].textContent = 'Recording';
+      }
+    } else {
+      // Return to initial state
+      recordBtn.classList.remove('bg-red-500/20', 'hover:bg-red-500/30', 'text-red-500', 'border-red-500/30', 'recording-active');
+      recordBtn.classList.add('bg-cyan-500/10', 'hover:bg-cyan-500/20', 'text-cyan-500', 'border-cyan-500/20');
+
+      // Update icon
+      const iconSpan = recordBtn.querySelector('.material-symbols-outlined');
+      if (iconSpan) {
+        iconSpan.textContent = 'mic';
+      }
+
+      // Update text
+      const textNodes = Array.from(recordBtn.childNodes).filter(
+        node => node.nodeType === 3 && node.textContent.trim() === 'Recording'
+      );
+      if (textNodes.length > 0) {
+        textNodes[0].textContent = 'Record';
+      }
+    }
+  });
+})();
+</script>
+<!-- END: Power Dialer Record Button -->
 
 </body></html>
