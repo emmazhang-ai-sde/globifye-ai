@@ -465,9 +465,9 @@
 <div class="flex items-center gap-4">
   <!-- Usage Pill -->
   <div class="hidden md:flex items-center gap-3 bg-surface-container-high/40 border border-white/5 rounded-full px-3 py-1.5 relative overflow-hidden">
-    <div class="absolute inset-0 bg-fire-gradient/10 w-[84%]"></div>
+    <div id="usageProgressBar" class="absolute inset-0 bg-fire-gradient/10 w-[47.8%]"></div>
     <span class="material-symbols-outlined text-fire-accent text-sm relative z-10">hourglass_empty</span>
-    <span class="text-[10px] font-bold text-white relative z-10">842 / 1,000 mins</span>
+    <span id="usagePillText" class="text-[10px] font-bold text-white relative z-10">239 / 500 mins</span>
   </div>
 
   <!-- Live Timer -->
@@ -505,6 +505,46 @@
 </header>
 <!-- END: MainHeader -->
 
+<!-- BEGIN: Usage Minutes Synchronization -->
+<script data-purpose="sync-usage-minutes">
+  (function() {
+    // Load the application state from localStorage (set by postCallSummary.html)
+    function loadAndDisplayUsageMinutes() {
+      try {
+        const stored = localStorage.getItem('dialForgeState');
+        if (!stored) return; // No state saved yet, use defaults
+
+        const appState = JSON.parse(stored);
+        const usageMinutes = appState.usageMinutes ?? 239;
+        const maxUsageMinutes = appState.maxUsageMinutes ?? 500;
+
+        // Update the usage pill text
+        const usagePillText = document.getElementById('usagePillText');
+        if (usagePillText) {
+          usagePillText.textContent = `${usageMinutes} / ${maxUsageMinutes} mins`;
+        }
+
+        // Update progress bar width
+        const usageProgressBar = document.getElementById('usageProgressBar');
+        if (usageProgressBar) {
+          const percentage = (usageMinutes / maxUsageMinutes) * 100;
+          usageProgressBar.style.width = `${percentage}%`;
+        }
+      } catch (e) {
+        console.error('Error loading usage minutes:', e);
+      }
+    }
+
+    // Load on DOMContentLoaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadAndDisplayUsageMinutes);
+    } else {
+      loadAndDisplayUsageMinutes();
+    }
+  })();
+</script>
+<!-- END: Usage Minutes Synchronization -->
+
 <!-- BEGIN: MainContent -->
 <main class="page-main pt-24 pl-28 pr-8 pb-12 min-h-screen max-w-[1600px] mx-auto">
 <!-- BEGIN: PageHeader -->
@@ -532,6 +572,11 @@
 <button type="button" class="df-tab-btn active" data-tab="members">
 <span class="material-symbols-outlined text-lg">group</span>
 Members
+</button>
+<button type="button" class="df-tab-btn" data-tab="invites">
+<span class="material-symbols-outlined text-lg">mail</span>
+Invites
+<span id="invites-tab-count" class="ml-0.5 hidden items-center justify-center text-[9px] font-black rounded-full bg-fire-gradient text-white h-4 min-w-[16px] px-1"></span>
 </button>
 <button type="button" class="df-tab-btn" data-tab="roles">
 <span class="material-symbols-outlined text-lg">shield_person</span>
@@ -642,6 +687,27 @@ Performance
 <div class="col-span-2 text-right">Actions</div>
 </div>
 <div class="flex flex-col gap-4" id="member-table-container"></div>
+</div>
+
+<!-- ================= INVITES TAB ================= -->
+<div class="df-tab-panel" id="tab-panel-invites" data-purpose="tab-panel-invites">
+<div class="flex items-center justify-between mb-2">
+<p class="text-xs text-on-surface-variant max-w-xl leading-relaxed">
+          People who have been sent an invite to join this workspace. They'll appear under Members once they accept.
+        </p>
+<button class="px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all font-bold text-[10px] uppercase tracking-wide flex items-center gap-2 flex-shrink-0" id="invite-member-btn-secondary">
+<span class="material-symbols-outlined text-base">person_add</span>
+          New Invite
+        </button>
+</div>
+<div class="hidden lg:grid grid-cols-12 px-6 py-2 text-[10px] font-extrabold text-on-surface-variant uppercase tracking-widest">
+<div class="col-span-4">Invited</div>
+<div class="col-span-2">Role</div>
+<div class="col-span-2">Sent</div>
+<div class="col-span-1 text-center">Status</div>
+<div class="col-span-3 text-right">Actions</div>
+</div>
+<div class="flex flex-col gap-4" id="invite-table-container"></div>
 </div>
 
 <!-- ================= ROLES TAB ================= -->
@@ -1320,7 +1386,18 @@ Performance
       { icon: 'toggle_off', color: 'on-surface-variant', text: 'Sam Okafor was deactivated by Elena Rodriguez.', time: '3d ago' },
       { icon: 'trending_up', color: 'tertiary', text: 'Julian Chen hit 104% of monthly quota.', time: '4d ago' },
     ],
+    invites: [
+      {
+        id: 'invite-seed-1', name: 'Noah Bennett', email: 'noah.bennett@dialforge.pro', title: 'Account Executive',
+        dept: 'Mid-Market', role: 'Member', sentLabel: '3d ago', status: 'Pending', resends: 0, overrides: null,
+      },
+      {
+        id: 'invite-seed-2', name: 'Amara Diallo', email: 'a.diallo@dialforge.pro', title: 'Revenue Ops Analyst',
+        dept: 'Revenue Ops', role: 'Viewer', sentLabel: '9d ago', status: 'Expired', resends: 1, overrides: null,
+      },
+    ],
     memberCounter: 0,
+    inviteCounter: 0,
   };
 
   const COACHING_AREAS = ['Objection handling', 'Discovery questions', 'Closing technique', 'Call opening energy', 'Follow-up cadence'];
@@ -1527,6 +1604,124 @@ Performance
     renderLeaderboard();
     addActivity('person_add', 'tertiary', member.name + ' was added to ' + member.dept + ' as ' + member.role + '.');
     return member;
+  }
+
+  /* =========================================================
+     INVITES TAB
+     ========================================================= */
+  function updateInvitesBadge() {
+    const badge = document.getElementById('invites-tab-count');
+    if (!badge) return;
+    const pendingCount = STATE.invites.filter(i => i.status === 'Pending').length;
+    badge.textContent = pendingCount;
+    badge.classList.toggle('hidden', pendingCount === 0);
+    badge.classList.toggle('flex', pendingCount > 0);
+  }
+
+  function inviteRowHtml(inv) {
+    const role = getRole(inv.role);
+    const isExpired = inv.status === 'Expired';
+    const statusClass = isExpired
+      ? 'bg-on-surface-variant/10 border border-on-surface-variant/20 text-on-surface-variant'
+      : 'bg-fire-accent/10 border border-fire-accent/20 text-fire-accent';
+    return (
+      '<div class="glass-card glass-hi p-6 rounded-2xl transition-all group" data-purpose="invite-row" data-invite-id="' + inv.id + '">' +
+        '<div class="grid grid-cols-1 lg:grid-cols-12 items-center gap-4 lg:gap-2">' +
+          '<div class="col-span-1 lg:col-span-4 flex items-center gap-4">' +
+            '<div class="w-12 h-12 rounded-xl border border-white/10 border-dashed bg-white/5 flex items-center justify-center font-syne font-extrabold text-on-surface-variant">' + initials(inv.name) + '</div>' +
+            '<div><h4 class="text-white font-bold">' + inv.name + '</h4><p class="text-xs text-on-surface-variant">' + inv.email + '</p></div>' +
+          '</div>' +
+          '<div class="col-span-1 lg:col-span-2 flex items-center gap-1.5">' +
+            '<span class="material-symbols-outlined text-' + (role ? role.color : 'on-surface-variant') + ' text-sm">' + (role ? role.icon : 'person') + '</span>' +
+            '<span class="text-xs text-on-surface-variant">' + inv.role + '</span>' +
+          '</div>' +
+          '<div class="col-span-1 lg:col-span-2"><p class="text-[11px] text-on-surface-variant">' + inv.sentLabel + (inv.resends ? ' &middot; resent ' + inv.resends + 'x' : '') + '</p></div>' +
+          '<div class="col-span-1 lg:col-span-1 flex justify-center lg:justify-start">' +
+            '<span class="px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ' + statusClass + '">' + inv.status + '</span>' +
+          '</div>' +
+          '<div class="col-span-1 lg:col-span-3 flex items-center justify-end gap-2">' +
+            '<button type="button" class="px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wide bg-white/5 border border-white/10 hover:bg-white/10 text-on-surface-variant hover:text-white transition-all flex items-center gap-1.5" data-action="resend-invite" data-invite-id="' + inv.id + '" title="Resend invite">' +
+              '<span class="material-symbols-outlined text-base">send</span>Resend' +
+            '</button>' +
+            '<button type="button" class="px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wide bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all" data-action="cancel-invite" data-invite-id="' + inv.id + '" title="Cancel invite">' +
+              'Cancel' +
+            '</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function renderInvites() {
+    const container = document.getElementById('invite-table-container');
+    if (!STATE.invites.length) {
+      container.innerHTML =
+        '<div class="glass-card rounded-2xl p-10 flex flex-col items-center text-center gap-2">' +
+          '<span class="material-symbols-outlined text-4xl text-on-surface-variant/40">mark_email_read</span>' +
+          '<p class="text-sm font-bold text-white">No pending invites</p>' +
+          '<p class="text-xs text-on-surface-variant max-w-sm">Everyone you\u2019ve invited has either joined or been cleared from the list.</p>' +
+        '</div>';
+    } else {
+      container.innerHTML = STATE.invites.map(inviteRowHtml).join('');
+      bindTilt(container);
+    }
+    container.querySelectorAll('[data-action="resend-invite"]').forEach(btn => {
+      btn.addEventListener('click', (e) => { e.stopPropagation(); resendInvite(btn.dataset.inviteId); });
+    });
+    container.querySelectorAll('[data-action="cancel-invite"]').forEach(btn => {
+      btn.addEventListener('click', (e) => { e.stopPropagation(); confirmCancelInvite(btn.dataset.inviteId); });
+    });
+    updateInvitesBadge();
+  }
+
+  function sendInvite(data) {
+    STATE.inviteCounter += 1;
+    const id = 'invite-' + STATE.inviteCounter;
+    const invite = {
+      id, name: data.name, email: data.email, title: data.title || 'Team Member', dept: data.dept,
+      role: data.role, sentLabel: 'Just now', status: 'Pending', resends: 0, overrides: data.overrides || null,
+    };
+    STATE.invites.unshift(invite);
+    renderInvites();
+    addActivity('mail', 'fire-accent', invite.name + ' was invited to ' + invite.dept + ' as ' + invite.role + '.');
+    return invite;
+  }
+
+  function resendInvite(id) {
+    const inv = STATE.invites.find(x => x.id === id);
+    if (!inv) return;
+    const btn = document.querySelector('[data-action="resend-invite"][data-invite-id="' + id + '"]');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="material-symbols-outlined df-spin text-base">progress_activity</span>'; }
+    setTimeout(() => {
+      inv.status = 'Pending';
+      inv.sentLabel = 'Just now';
+      inv.resends = (inv.resends || 0) + 1;
+      renderInvites();
+      addActivity('send', 'fire-accent', 'Invite resent to ' + inv.email + '.');
+      toast('Invite resent to ' + inv.email, 'success');
+    }, 500);
+  }
+
+  function confirmCancelInvite(id) {
+    const inv = STATE.invites.find(x => x.id === id);
+    if (!inv) return;
+    openModal(
+      closeBtnHtml() +
+      '<div class="flex items-center gap-2 mb-4"><span class="material-symbols-outlined text-red-400 text-2xl">warning</span><h3 class="font-syne text-xl font-extrabold text-white">Cancel invite to ' + inv.name + '?</h3></div>' +
+      '<p class="text-sm text-on-surface-variant mb-6 leading-relaxed">The invite link sent to ' + inv.email + ' will stop working. You can always invite them again later.</p>' +
+      '<div class="flex gap-3">' +
+        '<button type="button" data-modal-close class="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 text-sm font-bold hover:bg-white/10 transition-all">Keep Invite</button>' +
+        '<button type="button" id="confirm-cancel-invite-btn" class="flex-1 py-3 rounded-xl bg-red-500 text-white text-sm font-black uppercase tracking-wider shadow-lg">Cancel Invite</button>' +
+      '</div>'
+    );
+    bindModalClose();
+    document.getElementById('confirm-cancel-invite-btn').addEventListener('click', () => {
+      STATE.invites = STATE.invites.filter(x => x.id !== id);
+      renderInvites();
+      closeModal();
+      addActivity('person_remove', 'on-surface-variant', 'Invite to ' + inv.name + ' was canceled.');
+      toast('Invite to ' + inv.name + ' canceled', 'info');
+    });
   }
 
   /* ---------------- Edit Member Modal ---------------- */
@@ -1769,18 +1964,21 @@ Performance
       // Only store as custom overrides if they differ from role defaults
       let differs = PERMISSIONS.some(p => !!pendingOverrides[p.key] !== !!roleDefaults[p.key]);
       setTimeout(() => {
-        addMember({
+        sendInvite({
           name: wizard.name, email: wizard.email, title: wizard.title, dept: wizard.dept,
           role: wizard.role, overrides: differs ? pendingOverrides : null,
         });
         closeModal();
         toast('Invite sent to ' + wizard.email, 'success');
         wizard = null;
+        switchToTab('invites');
       }, 700);
     });
   }
 
   document.getElementById('invite-member-btn').addEventListener('click', startWizard);
+  const inviteMemberBtnSecondary = document.getElementById('invite-member-btn-secondary');
+  if (inviteMemberBtnSecondary) inviteMemberBtnSecondary.addEventListener('click', startWizard);
 
   /* =========================================================
      ROLES TAB
@@ -1962,6 +2160,7 @@ Performance
      INITIAL RENDER
      ========================================================= */
   renderMembers();
+  renderInvites();
   renderRoleCards();
   renderPermissionMatrix();
   renderLeaderboard();
