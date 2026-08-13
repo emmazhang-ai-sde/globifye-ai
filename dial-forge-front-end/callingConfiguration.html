@@ -301,9 +301,9 @@
 <div class="flex items-center gap-4">
   <!-- Usage Pill -->
   <div class="hidden md:flex items-center gap-3 bg-surface-container-high/40 border border-white/5 rounded-full px-3 py-1.5 relative overflow-hidden">
-    <div class="absolute inset-0 bg-fire-gradient/10 w-[84%]"></div>
+    <div id="usageProgressBar" class="absolute inset-0 bg-fire-gradient/10 w-[47.8%]"></div>
     <span class="material-symbols-outlined text-fire-accent text-sm relative z-10">hourglass_empty</span>
-    <span class="text-[10px] font-bold text-white relative z-10">842 / 1,000 mins</span>
+    <span id="usagePillText" class="text-[10px] font-bold text-white relative z-10">239 / 500 mins</span>
   </div>
 
   <!-- Live Timer -->
@@ -415,7 +415,7 @@
 <div class="flex flex-col items-center gap-4 w-full pb-4">
   <a href="./profile.html" class="block w-full h-full cursor-pointer">
     <div class="h-10 w-10 rounded-full overflow-hidden border border-white/10 items-center ml-4">
-    <img alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs">
+    <img id="sidebarProfileAvatar" alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs">
   </div>
   </a>
 </div>
@@ -1350,4 +1350,64 @@
       if (cancelBtn) cancelBtn.addEventListener('click', revertSettings);
     })();
   </script>
+<!-- BEGIN: Usage Minutes Synchronization -->
+<script data-purpose="sync-usage-minutes">
+(function() {
+  // Load the application state from localStorage (set by postCallSummary.html)
+  function loadAndDisplayUsageMinutes() {
+    try {
+      const stored = localStorage.getItem('dialForgeState');
+      if (!stored) return; // No state saved yet, use defaults
+
+      const appState = JSON.parse(stored);
+      const usageMinutes = appState.usageMinutes ?? 239;
+      const maxUsageMinutes = appState.maxUsageMinutes ?? 500;
+
+      // Update the usage pill text
+      const usagePillText = document.getElementById('usagePillText');
+      if (usagePillText) {
+        usagePillText.textContent = `${usageMinutes} / ${maxUsageMinutes} mins`;
+      }
+
+      // Update progress bar width
+      const usageProgressBar = document.getElementById('usageProgressBar');
+      if (usageProgressBar) {
+        const percentage = (usageMinutes / maxUsageMinutes) * 100;
+        usageProgressBar.style.width = `${percentage}%`;
+      }
+    } catch (e) {
+      console.error('Error loading usage minutes:', e);
+    }
+  }
+
+  // Load on DOMContentLoaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadAndDisplayUsageMinutes);
+  } else {
+    loadAndDisplayUsageMinutes();
+  }
+})();
+
+  /* ---------- Saved Profile Picture (shared with profile.html) ---------- */
+  function loadSavedProfileAvatar() {
+    const sidebarProfileAvatar = document.getElementById('sidebarProfileAvatar');
+    if (!sidebarProfileAvatar) return;
+    const savedProfilePicture = localStorage.getItem('dialforge-profile-picture');
+    if (!savedProfilePicture) return;
+    const defaultSrc = sidebarProfileAvatar.src;
+    const testImg = new Image();
+    testImg.onload = () => {
+      sidebarProfileAvatar.src = savedProfilePicture;
+    };
+    testImg.onerror = () => {
+      sidebarProfileAvatar.src = defaultSrc;
+    };
+    testImg.src = savedProfilePicture;
+  }
+
+  /* ---------- Init ---------- */
+  
+  loadSavedProfileAvatar();
+</script>
+<!-- END: Usage Minutes Synchronization -->
 </body></html>
