@@ -5,28 +5,79 @@
 <!-- Tailwind CSS v3 with Plugins -->
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <!-- Typography -->
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&amp;family=DM+Sans:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&amp;family=Syne:wght@700;800&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet">
 <!-- Icons -->
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
 <script id="tailwind-config">
     tailwind.config = {
       darkMode: "class",
       theme: {
         extend: {
           colors: {
-            "primary": "#ffb4a2",
-            "fire-gradient": "#FF7A1C",
-            "fire-accent": "#FFAD1C",
-            "surface": "#12131a",
+            "on-tertiary-fixed-variant": "#005227",
+            "on-primary": "#611200",
+            "on-tertiary": "#003919",
+            "inverse-primary": "#b32a00",
+            "tertiary-fixed-dim": "#00e478",
             "surface-container": "#1e1f27",
+            "on-primary-fixed": "#3c0800",
+            "gold": "#F5C518",
+            "fire-gradient": "#FF7A1C",
+            "on-tertiary-container": "#003115",
+            "secondary-fixed": "#d6e3ff",
+            "secondary-fixed-dim": "#a8c8ff",
+            "primary-fixed": "#ffdbd2",
+            "fire-accent": "#FFAD1C",
+            "primary-container": "#ff562a",
+            "on-secondary-container": "#002956",
+            "surface-container-low": "#1a1b23",
+            "inverse-surface": "#e3e1ec",
+            "surface": "#12131a",
             "surface-variant": "#33343d",
-            "on-surface": "#e3e1ec",
-            "on-surface-variant": "#e5beb4",
-            "teal-support": "#00D4C8",
+            "error-container": "#93000a",
+            "secondary-container": "#3791ff",
+            "surface-container-high": "#292932",
+            "primary-fixed-dim": "#ffb4a2",
+            "on-secondary-fixed": "#001b3c",
+            "background": "#12131a",
+            "surface-tint": "#ffb4a2",
+            "surface-bright": "#383941",
+            "outline": "#ac8980",
+            "on-primary-container": "#550f00",
             "ember-alert": "#FF2200",
-            "ai-purple": "#9B6DFF"
+            "on-tertiary-fixed": "#00210c",
+            "tertiary": "#00e478",
+            "surface-dim": "#12131a",
+            "tertiary-container": "#00a756",
+            "tertiary-fixed": "#61ff98",
+            "teal-support": "#00D4C8",
+            "outline-variant": "#5c4039",
+            "surface-container-highest": "#33343d",
+            "secondary": "#a8c8ff",
+            "error-red": "#FF3B30",
+            "on-error-container": "#ffdad6",
+            "ai-purple": "#9B6DFF",
+            "on-surface-variant": "#e5beb4",
+            "on-primary-fixed-variant": "#891e00",
+            "primary": "#ffb4a2",
+            "on-secondary": "#003062",
+            "on-error": "#690005",
+            "surface-container-lowest": "#0d0e15",
+            "on-surface": "#e3e1ec",
+            "on-background": "#e3e1ec",
+            "error": "#ffb4ab",
+            "inverse-on-surface": "#2f3038",
+            "on-secondary-fixed-variant": "#00468a"
           },
           fontFamily: {
+            "mono-data": ["JetBrains Mono"],
+            "hero-h1": ["Syne"],
+            "button-text": ["DM Sans"],
+            "badge-text": ["DM Sans"],
+            "section-header": ["Syne"],
+            "stat-value": ["Syne"],
+            "body-base": ["DM Sans"],
+            "small-label": ["DM Sans"],
             "syne": ["Syne", "sans-serif"],
             "dm-sans": ["DM Sans", "sans-serif"],
             "mono": ["JetBrains Mono", "monospace"]
@@ -36,60 +87,89 @@
     }
   </script>
 <style data-purpose="custom-effects">
-
-.active-glow {
-    filter: drop-shadow(0 0 8px #FF7A1C)
+    .material-symbols-outlined {
+      font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+    }
+    .active-glow {
+      filter: drop-shadow(0 0 8px #FF7A1C);
     }
     .glass-card {
-    background: rgba(30, 31, 39, 0.7);
-    backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.1)
-    }
-.fire-glow {
-    box-shadow: 0 0 50px rgba(255, 122, 28, 0.15)
-    }
-.noise-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    pointer-events: none;
-    opacity: 0.02;
-    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuAjBgxhjjpbQ1X6hvaeggcEsORm0cusjq8KmhkMIem9paSnZ7_7H4035tguD8hQF_wyJfO0-xi5zinWRn5KCM4dsf9akf-ZEUIsx8r2p38OT_3LwtrA_hw0Bqp7LEHGHhjXR6QSfhiz5U0QWGx-RgUC23zQ_gXBKToAxBg8Gydr2pnyjVJzW_LFuaMzmeu54c7PrLK77yNnBemFzvrQWsOo-ahwjnkRQn0xqS8r25dnS6iz5_tsV9azzSv_REk-2thWjE9T9bosd9s)
-    }
-::-webkit-scrollbar {
-    width: 4px
-    }
-::-webkit-scrollbar-track {
-    background: transparent
-    }
-::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px
-    }
-
-
-    body {
-      background-color: #12131a;
-      color: #e3e1ec;
-      background-image: radial-gradient(circle at 50% 50%, rgba(255, 122, 28, 0.03) 0%, transparent 100%);
-    }
-    .glass-card {
-      background: rgba(30, 31, 39, 0.7);
-      backdrop-filter: blur(12px);
+      background: rgba(26, 27, 35, 0.78);
+      backdrop-filter: blur(20px) saturate(180%);
       border: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+      overflow: hidden;
     }
-    .waveform-bar {
-      transition: height 0.3s ease, background-color 0.3s ease;
+    .glass-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
     }
     .fire-glow {
-      box-shadow: 0 0 30px rgba(255, 122, 28, 0.1);
+      box-shadow: 0 0 40px rgba(255, 122, 28, 0.15), 0 0 80px rgba(255, 122, 28, 0.05);
+    }
+    .noise-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.02;
+      background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAi48KsLd_faAmlkSed1Fs2W5xDLsDVHxr9CmWtAEB3mVawz4ALG0dLChb5BSfGNK2l9-fmgv6hPMrldZIl3QkfcWvn-k7N3x0y7Dl1jokR_qsFoXGfpioBQwdYp4BacU27-O8AvsAAPLZLEI8BeFeol8JuNA7irpaT0xqX6XjvkDN4m2FxjSK5pKh6tDEYfrUqZgNCp1ovBMB_qP7Q1nCe9J7-lwugakQ22eOnZRfu91aRFmlJQOlvF2H1uNq5Ead_J_7AqBWWjEw');
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #33343d; border-radius: 10px; }
+
+    @keyframes pulse-glow {
+      0% { box-shadow: 0 0 0 0 rgba(0, 228, 120, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(0, 228, 120, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 228, 120, 0); }
+    }
+    .active-orb {
+      animation: pulse-glow 2s infinite;
+    }
+    @keyframes ring-shake {
+      0%, 100% { transform: rotate(0deg); }
+      10%, 30%, 50%, 70% { transform: rotate(-14deg); }
+      20%, 40%, 60%, 80% { transform: rotate(14deg); }
+      90% { transform: rotate(0deg); }
+    }
+    @keyframes ring-pulse-ring {
+      0% { transform: scale(0.9); opacity: 0.8; }
+      100% { transform: scale(1.9); opacity: 0; }
+    }
+    .ringing-icon {
+      animation: ring-shake 1.2s ease-in-out infinite;
+    }
+    .ringing-pulse {
+      position: absolute;
+      inset: 0;
+      border-radius: 9999px;
+      border: 2px solid rgba(0, 228, 120, 0.6);
+      animation: ring-pulse-ring 1.6s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+    }
+    .ringing-pulse.delay-1 { animation-delay: 0.5s; }
+    .ringing-pulse.delay-2 { animation-delay: 1s; }
+    @keyframes modal-in {
+      0% { opacity: 0; transform: translateY(16px) scale(0.97); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-in {
+      animation: modal-in 0.25s ease-out forwards;
+    }
+
+    .waveform-bar {
+      transition: height 0.3s ease, background-color 0.3s ease;
     }
     .pulse-dot {
       animation: pulse 2s infinite;
     }
 
-    
-        .crm-panel {
+    .crm-panel {
       width: 18rem;
       transition: width 240ms ease, transform 240ms ease, opacity 240ms ease;
       transform: translateX(0);
@@ -107,21 +187,38 @@
       transform: translateX(8px);
       pointer-events: none;
     }
+    #mainContent {
+      transition: margin-right 240ms ease;
+      margin-right: 18rem; /* matches crm-panel open width by default */
+    }
     @media (max-width: 899px) {
       .crm-panel {
         display: none !important;
       }
+      #mainContent {
+        margin-right: 0 !important;
+      }
     }
-
 
     @keyframes pulse {
       0% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.4; transform: scale(1.2); }
       100% { opacity: 1; transform: scale(1); }
     }
+
+    /* Focus styles for accessibility */
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid #FF7A1C;
+      outline-offset: 2px;
+    }
   </style>
 </head>
-<body class="font-dm-sans overflow-x-hidden selection:bg-fire-accent/30">
+<body class="bg-background text-on-background font-body-base antialiased overflow-x-hidden">
+<div class="noise-overlay"></div>
   
 
 
@@ -468,7 +565,7 @@
 
 
       
-  <main class="pl-[240px] pt-16 min-h-screen">
+  <main id="mainContent" class="pl-[240px] pt-16 min-h-screen transition-[margin-right] duration-200">
 <div class="max-w-[1440px] mx-auto p-8 space-y-8">
 <!-- BEGIN: Header Section -->
 <section class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4" data-purpose="call-header">
@@ -1156,12 +1253,22 @@
         panelIcon.textContent = isOpen ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left';
       }
       localStorage.setItem(storageKey, String(isOpen));
+
+      // Keep the main content clear of the fixed-position CRM panel by
+      // shrinking it to match the panel's current width (open vs collapsed),
+      // instead of letting the panel cover/hide content underneath it.
+      const mainContent = document.getElementById('mainContent');
+      if (mainContent && window.innerWidth >= 900) {
+        mainContent.style.marginRight = isOpen ? '18rem' : '4.5rem';
+      }
     }
 
     function syncPanelVisibility() {
       if (!panel) return;
+      const mainContent = document.getElementById('mainContent');
       if (window.innerWidth < 900) {
         panel.classList.add('hidden');
+        if (mainContent) mainContent.style.marginRight = '0';
         return;
       }
 
