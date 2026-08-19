@@ -7,23 +7,36 @@
 <!-- Tailwind CSS v3 CDN -->
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&amp;family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&amp;family=Syne:wght@700;800&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
 <!-- Material Symbols -->
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <style data-purpose="custom-theme-config">
     /* Custom CSS for glassmorphism and specialized gradients */
+    .material-symbols-outlined {
+      font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+    }
     .glass-card {
       background: rgba(26, 27, 35, 0.78);
       backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
       border: 1px solid rgba(255, 255, 255, 0.05);
-      box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+    .glass-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
     }
     .fire-gradient-bg {
       background: linear-gradient(135deg, #FF7A1C 0%, #FF562A 100%);
     }
     .fire-glow {
-      box-shadow: 0 0 20px rgba(255, 122, 28, 0.2), 0 0 40px rgba(255, 86, 42, 0.1);
+      box-shadow: 0 0 40px rgba(255, 122, 28, 0.15), 0 0 80px rgba(255, 122, 28, 0.05);
     }
     .shimmer {
       position: relative;
@@ -51,17 +64,46 @@
       width: 100%;
       height: 100%;
       pointer-events: none;
-      opacity: 0.03;
-      background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuDHdsyubSP05uRUbr0C9nXW2usmvbm7XTvK-VsLGkhGybIS4n2HoPb0NJ36sFvx-LipiK-Gwr0fZO_z-ysjKbJ44ABxetk9wG3MVb5NHhP68VDfoet-wVM0eFDY4QKqOyuLHFD_L74WEfUXcbkB_WOBi4B-yFyqbsVjGz6efXL6H1xTg2E9iEFzGR1m72tMN7nTIpY10pApBc7k2Kww60wBlYeRYtX2YPbX7golKz5ed5MNGpLSOFxadBGWVXbyaRDtflZMX_PuKCA);
+      opacity: 0.02;
+      background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAi48KsLd_faAmlkSed1Fs2W5xDLsDVHxr9CmWtAEB3mVawz4ALG0dLChb5BSfGNK2l9-fmgv6hPMrldZIl3QkfcWvn-k7N3x0y7Dl1jokR_qsFoXGfpioBQwdYp4BacU27-O8AvsAAPLZLEI8BeFeol8JuNA7irpaT0xqX6XjvkDN4m2FxjSK5pKh6tDEYfrUqZgNCp1ovBMB_qP7Q1nCe9J7-lwugakQ22eOnZRfu91aRFmlJQOlvF2H1uNq5Ead_J_7AqBWWjEw');
       z-index: 9999;
     }
+    @keyframes pulse-glow {
+      0% { box-shadow: 0 0 0 0 rgba(0, 228, 120, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(0, 228, 120, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 228, 120, 0); }
+    }
     .active-orb {
-      box-shadow: 0 0 8px rgba(255, 122, 28, 0.6);
       animation: pulse-glow 2s infinite;
     }
-    @keyframes pulse-glow {
-      0%, 100% { opacity: 0.6; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.2); }
+    @keyframes ring-shake {
+      0%, 100% { transform: rotate(0deg); }
+      10%, 30%, 50%, 70% { transform: rotate(-14deg); }
+      20%, 40%, 60%, 80% { transform: rotate(14deg); }
+      90% { transform: rotate(0deg); }
+    }
+    @keyframes ring-pulse-ring {
+      0% { transform: scale(0.9); opacity: 0.8; }
+      100% { transform: scale(1.9); opacity: 0; }
+    }
+    .ringing-icon {
+      animation: ring-shake 1.2s ease-in-out infinite;
+    }
+    .ringing-pulse {
+      position: absolute;
+      inset: 0;
+      border-radius: 9999px;
+      border: 2px solid rgba(0, 228, 120, 0.6);
+      animation: ring-pulse-ring 1.6s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+    }
+    .ringing-pulse.delay-1 { animation-delay: 0.5s; }
+    .ringing-pulse.delay-2 { animation-delay: 1s; }
+    @keyframes modal-in {
+      0% { opacity: 0; transform: translateY(16px) scale(0.97); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-in {
+      animation: modal-in 0.25s ease-out forwards;
     }
 
         .crm-panel {
@@ -92,11 +134,21 @@
       width: 6px;
     }
     ::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.02);
+      background: transparent;
     }
     ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.1);
+      background: #33343d;
       border-radius: 10px;
+    }
+
+    /* Focus styles for accessibility */
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid #FF7A1C;
+      outline-offset: 2px;
     }
   </style>
 <script id="tailwind-config">
@@ -105,34 +157,79 @@
       theme: {
         extend: {
           colors: {
-            "background": "#12131a",
-            "surface": "#12131a",
+            "on-tertiary-fixed-variant": "#005227",
+            "on-primary": "#611200",
+            "on-tertiary": "#003919",
+            "inverse-primary": "#b32a00",
+            "tertiary-fixed-dim": "#00e478",
             "surface-container": "#1e1f27",
+            "on-primary-fixed": "#3c0800",
+            "gold": "#F5C518",
+            "fire-gradient": "#FF7A1C",
+            "on-tertiary-container": "#003115",
+            "secondary-fixed": "#d6e3ff",
+            "secondary-fixed-dim": "#a8c8ff",
+            "primary-fixed": "#ffdbd2",
+            "fire-accent": "#FFAD1C",
+            "primary-container": "#ff562a",
+            "on-secondary-container": "#002956",
             "surface-container-low": "#1a1b23",
+            "inverse-surface": "#e3e1ec",
+            "surface": "#12131a",
+            "surface-variant": "#33343d",
+            "error-container": "#93000a",
+            "secondary-container": "#3791ff",
             "surface-container-high": "#292932",
+            "primary-fixed-dim": "#ffb4a2",
+            "on-secondary-fixed": "#001b3c",
+            "background": "#12131a",
+            "surface-tint": "#ffb4a2",
+            "surface-bright": "#383941",
+            "outline": "#ac8980",
+            "on-primary-container": "#550f00",
+            "ember-alert": "#FF2200",
+            "on-tertiary-fixed": "#00210c",
+            "tertiary": "#00e478",
+            "surface-dim": "#12131a",
+            "tertiary-container": "#00a756",
+            "tertiary-fixed": "#61ff98",
+            "teal-support": "#00D4C8",
+            "outline-variant": "#5c4039",
             "surface-container-highest": "#33343d",
+            "secondary": "#a8c8ff",
+            "error-red": "#FF3B30",
+            "on-error-container": "#ffdad6",
+            "ai-purple": "#9B6DFF",
+            "on-surface-variant": "#e5beb4",
+            "on-primary-fixed-variant": "#891e00",
+            "primary": "#ffb4a2",
+            "on-secondary": "#003062",
+            "on-error": "#690005",
             "surface-container-lowest": "#0d0e15",
             "on-surface": "#e3e1ec",
-            "on-surface-variant": "#e5beb4",
-            "fire-accent": "#FFAD1C",
-            "fire-gradient": "#FF7A1C",
-            "primary-container": "#ff562a",
-            "ember-alert": "#FF2200",
-            "ai-purple": "#9B6DFF",
-            "tertiary": "#00e478",
-            "secondary": "#a8c8ff"
+            "on-background": "#e3e1ec",
+            "error": "#ffb4ab",
+            "inverse-on-surface": "#2f3038",
+            "on-secondary-fixed-variant": "#00468a"
           },
           fontFamily: {
             "syne": ["Syne", "sans-serif"],
             "dm-sans": ["DM Sans", "sans-serif"],
-            "mono-data": ["JetBrains Mono", "monospace"]
+            "mono-data": ["JetBrains Mono", "monospace"],
+            "hero-h1": ["Syne"],
+            "section-header": ["Syne"],
+            "stat-value": ["Syne"],
+            "button-text": ["DM Sans"],
+            "badge-text": ["DM Sans"],
+            "body-base": ["DM Sans"],
+            "small-label": ["DM Sans"]
           }
         }
       }
     }
   </script>
 </head>
-<body class="bg-background text-on-surface font-dm-sans overflow-hidden select-none">
+<body class="bg-background text-on-surface font-dm-sans antialiased overflow-hidden select-none">
 <div class="noise-overlay"></div>
 <!-- BEGIN: MainHeader -->
 <header class="fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-xl border-b border-white/10 flex justify-between items-center px-6 h-16">
@@ -346,6 +443,203 @@
     </div>
   </div>
 </div>
+
+<!-- BEGIN: Email Modal -->
+<div id="emailModalOverlay" class="hidden fixed inset-0 z-[115] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
+  <div class="modal-in glass-card w-full max-w-lg rounded-3xl p-6 shadow-2xl">
+    <div class="flex items-start justify-between gap-4 mb-6">
+      <div>
+        <p class="text-[10px] font-extrabold uppercase tracking-[0.3em] text-fire-accent">Compose</p>
+        <h3 id="emailModalHeading" class="text-xl font-section-header text-white">Email Contact</h3>
+      </div>
+      <button id="closeEmailModalBtn" type="button" class="rounded-full p-2 text-on-surface-variant/70 hover:bg-white/10 hover:text-white transition-all" aria-label="Close email modal">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="space-y-4">
+      <div>
+        <label for="emailModalAddress" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">To</label>
+        <input id="emailModalAddress" type="email" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none placeholder:text-on-surface-variant/40 focus:border-fire-accent" placeholder="name@company.com" />
+      </div>
+      <div>
+        <label for="emailModalSubject" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Subject</label>
+        <input id="emailModalSubject" type="text" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none placeholder:text-on-surface-variant/40 focus:border-fire-accent" />
+      </div>
+      <div>
+        <label for="emailModalBody" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Message</label>
+        <textarea id="emailModalBody" rows="5" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none placeholder:text-on-surface-variant/40 focus:border-fire-accent resize-none"></textarea>
+      </div>
+      <p id="emailModalError" class="hidden text-[11px] font-bold text-ember-alert"></p>
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button id="cancelEmailModalBtn" type="button" class="rounded-xl border border-white/10 px-4 py-2 text-sm font-bold text-on-surface-variant hover:bg-white/10 hover:text-white transition-all">Cancel</button>
+        <button id="openEmailClientBtn" type="button" class="flex items-center gap-2 rounded-xl bg-fire-gradient px-4 py-2 text-sm font-bold text-on-primary shadow-lg transition-all hover:brightness-110">
+          <span class="material-symbols-outlined text-sm">mail</span>
+          Open Email Client
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- END: Email Modal -->
+
+<!-- BEGIN: New Deal Modal -->
+<div id="dealModalOverlay" class="hidden fixed inset-0 z-[115] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
+  <div class="modal-in glass-card w-full max-w-lg rounded-3xl p-6 shadow-2xl">
+    <div class="flex items-start justify-between gap-4 mb-6">
+      <div>
+        <p class="text-[10px] font-extrabold uppercase tracking-[0.3em] text-fire-accent">Pipeline</p>
+        <h3 class="text-xl font-section-header text-white">Log New Deal</h3>
+      </div>
+      <button id="closeDealModalBtn" type="button" class="rounded-full p-2 text-on-surface-variant/70 hover:bg-white/10 hover:text-white transition-all" aria-label="Close deal modal">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="dealModalContact" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Contact</label>
+          <input id="dealModalContact" type="text" disabled class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/40 px-4 py-3 text-sm text-on-surface-variant/70 outline-none cursor-not-allowed" />
+        </div>
+        <div>
+          <label for="dealModalCompany" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Company</label>
+          <input id="dealModalCompany" type="text" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none placeholder:text-on-surface-variant/40 focus:border-fire-accent" placeholder="e.g. Stripe, Inc." />
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="dealModalValue" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Deal Value ($)</label>
+          <input id="dealModalValue" type="number" min="0" step="100" placeholder="12400" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none placeholder:text-on-surface-variant/40 focus:border-fire-accent" />
+        </div>
+        <div>
+          <label for="dealModalStage" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Stage</label>
+          <select id="dealModalStage" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none focus:border-fire-accent">
+            <option value="Discovery">Discovery</option>
+            <option value="Proposal">Proposal</option>
+            <option value="Negotiation">Negotiation</option>
+            <option value="Closed Won">Closed Won</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label for="dealModalNotes" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Notes</label>
+        <textarea id="dealModalNotes" rows="3" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none placeholder:text-on-surface-variant/40 focus:border-fire-accent resize-none" placeholder="Optional context about this deal"></textarea>
+      </div>
+      <p id="dealModalError" class="hidden text-[11px] font-bold text-ember-alert"></p>
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button id="cancelDealModalBtn" type="button" class="rounded-xl border border-white/10 px-4 py-2 text-sm font-bold text-on-surface-variant hover:bg-white/10 hover:text-white transition-all">Cancel</button>
+        <button id="saveDealModalBtn" type="button" class="flex items-center gap-2 rounded-xl bg-fire-gradient px-4 py-2 text-sm font-bold text-on-primary shadow-lg transition-all hover:brightness-110">
+          <span class="material-symbols-outlined text-sm">add_circle</span>
+          Save Deal
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- END: New Deal Modal -->
+
+<!-- BEGIN: Quick Note Modal -->
+<div id="noteModalOverlay" class="hidden fixed inset-0 z-[115] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
+  <div class="modal-in glass-card w-full max-w-lg rounded-3xl p-6 shadow-2xl">
+    <div class="flex items-start justify-between gap-4 mb-6">
+      <div>
+        <p class="text-[10px] font-extrabold uppercase tracking-[0.3em] text-fire-accent">Activity</p>
+        <h3 class="text-xl font-section-header text-white">Quick Note</h3>
+      </div>
+      <button id="closeNoteModalBtn" type="button" class="rounded-full p-2 text-on-surface-variant/70 hover:bg-white/10 hover:text-white transition-all" aria-label="Close note modal">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="space-y-4">
+      <div>
+        <span class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Note Type</span>
+        <div id="noteTypeTabs" class="flex gap-2 flex-wrap">
+          <button type="button" data-type="General" class="note-type-tab px-3 py-1.5 rounded-lg text-xs font-bold border border-fire-accent/40 bg-fire-accent/15 text-fire-accent transition-colors">General</button>
+          <button type="button" data-type="Call" class="note-type-tab px-3 py-1.5 rounded-lg text-xs font-bold border border-white/10 bg-white/5 text-on-surface-variant hover:bg-white/10 transition-colors">Call Summary</button>
+          <button type="button" data-type="Meeting" class="note-type-tab px-3 py-1.5 rounded-lg text-xs font-bold border border-white/10 bg-white/5 text-on-surface-variant hover:bg-white/10 transition-colors">Meeting</button>
+          <button type="button" data-type="Follow-up" class="note-type-tab px-3 py-1.5 rounded-lg text-xs font-bold border border-white/10 bg-white/5 text-on-surface-variant hover:bg-white/10 transition-colors">Follow-up</button>
+        </div>
+      </div>
+      <div>
+        <label for="noteModalTextarea" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Note</label>
+        <textarea id="noteModalTextarea" rows="5" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none placeholder:text-on-surface-variant/40 focus:border-fire-accent resize-none" placeholder="Type your note..."></textarea>
+      </div>
+      <p id="noteModalError" class="hidden text-[11px] font-bold text-ember-alert"></p>
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button id="cancelNoteModalBtn" type="button" class="rounded-xl border border-white/10 px-4 py-2 text-sm font-bold text-on-surface-variant hover:bg-white/10 hover:text-white transition-all">Cancel</button>
+        <button id="saveNoteModalBtn" type="button" class="flex items-center gap-2 rounded-xl bg-fire-gradient px-4 py-2 text-sm font-bold text-on-primary shadow-lg transition-all hover:brightness-110">
+          <span class="material-symbols-outlined text-sm">sync</span>
+          Save &amp; Sync
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- END: Quick Note Modal -->
+
+<!-- BEGIN: New Lead Modal -->
+<div id="leadModalOverlay" class="hidden fixed inset-0 z-[115] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
+  <div class="modal-in glass-card w-full max-w-lg rounded-3xl p-6 shadow-2xl">
+    <div class="flex items-start justify-between gap-4 mb-6">
+      <div>
+        <p class="text-[10px] font-extrabold uppercase tracking-[0.3em] text-fire-accent">Leads</p>
+        <h3 class="text-xl font-section-header text-white">New Lead</h3>
+      </div>
+      <button id="closeLeadModalBtn" type="button" class="rounded-full p-2 text-on-surface-variant/70 hover:bg-white/10 hover:text-white transition-all" aria-label="Close new lead modal">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="leadModalContact" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Contact</label>
+          <input id="leadModalContact" type="text" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none placeholder:text-on-surface-variant/40 focus:border-fire-accent" placeholder="e.g. Alex Rivers" />
+        </div>
+        <div>
+          <label for="leadModalCompany" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Company</label>
+          <input id="leadModalCompany" type="text" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none placeholder:text-on-surface-variant/40 focus:border-fire-accent" placeholder="e.g. Stripe, Inc." />
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="leadModalEmail" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Email</label>
+          <input id="leadModalEmail" type="email" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none placeholder:text-on-surface-variant/40 focus:border-fire-accent" placeholder="name@company.com" />
+        </div>
+        <div>
+          <label for="leadModalPhone" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Phone</label>
+          <input id="leadModalPhone" type="tel" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none placeholder:text-on-surface-variant/40 focus:border-fire-accent" placeholder="(555) 123-4567" />
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="leadModalValue" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Deal Value ($)</label>
+          <input id="leadModalValue" type="number" min="0" step="100" placeholder="12400" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none placeholder:text-on-surface-variant/40 focus:border-fire-accent" />
+        </div>
+        <div>
+          <label for="leadModalStage" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Stage</label>
+          <select id="leadModalStage" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none focus:border-fire-accent">
+            <option value="Discovery">Discovery</option>
+            <option value="Proposal">Proposal</option>
+            <option value="Negotiation">Negotiation</option>
+            <option value="Closed Won">Closed Won</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label for="leadModalNotes" class="block text-[10px] font-extrabold uppercase tracking-[0.3em] text-on-surface-variant/70 mb-2">Notes</label>
+        <textarea id="leadModalNotes" rows="3" class="w-full rounded-2xl border border-white/10 bg-surface-container-lowest/70 px-4 py-3 text-sm text-white outline-none placeholder:text-on-surface-variant/40 focus:border-fire-accent resize-none" placeholder="Optional context about this lead"></textarea>
+      </div>
+      <p id="leadModalError" class="hidden text-[11px] font-bold text-ember-alert"></p>
+      <div class="flex items-center justify-end gap-3 pt-2">
+        <button id="cancelLeadModalBtn" type="button" class="rounded-xl border border-white/10 px-4 py-2 text-sm font-bold text-on-surface-variant hover:bg-white/10 hover:text-white transition-all">Cancel</button>
+        <button id="saveLeadModalBtn" type="button" class="flex items-center gap-2 rounded-xl bg-fire-gradient px-4 py-2 text-sm font-bold text-on-primary shadow-lg transition-all hover:brightness-110">
+          <span class="material-symbols-outlined text-sm">person_add</span>
+          Save Lead
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- END: New Lead Modal -->
 
 <!-- BEGIN: ActiveCallBar -->
 <div id="activeCallBar" class="hidden fixed top-16 left-0 lg:left-20 right-0 z-40 bg-tertiary-container/95 backdrop-blur-xl border-b border-tertiary/30 px-6 py-3 flex items-center justify-between">
@@ -967,7 +1261,7 @@ function wireDetailEvents(c) {
     btn.addEventListener("click", () => startInlineEdit(c, btn.dataset.field));
   });
 
-  document.getElementById("callActionBtn").addEventListener("click", () => logCall(c));
+  document.getElementById("callActionBtn").addEventListener("click", () => startActiveCallForContact(c));
   document.getElementById("emailActionBtn").addEventListener("click", () => openEmailClient(c));
   document.getElementById("noteActionBtn").addEventListener("click", () => addNote(c));
   document.getElementById("dealActionBtn").addEventListener("click", () => logDeal(c));
@@ -1041,74 +1335,250 @@ function logCall(c) {
   renderList();
 }
 
+/* ------------------------- Call Button -> Active Call Sync ------------------------- */
+/* Reuses the existing Power Dialer -> Active Call handoff mechanism:
+   localStorage keys 'dialforgePowerDialerProspect' + 'dialforgeCallAutoStart',
+   read by activeCall.html on load to auto-start a call with synced contact data. */
+function startActiveCallForContact(c) {
+  const prospect = {
+    name: c.name || "",
+    phone: c.phone || "",
+    company: c.company || "",
+    title: c.title || "",
+    avatar: c.avatarUrl || "",
+    email: c.email || "",
+    dealValue: c.dealValue || "",
+    pipelineStage: c.dealStage || "",
+    status: c.status || "",
+    dealProgress: c.dealProgress || 0,
+    recentTimeline: c.calls || []
+  };
+  localStorage.setItem("dialforgePowerDialerProspect", JSON.stringify(prospect));
+  localStorage.setItem("dialforgeCallAutoStart", "true");
+  window.location.href = "./activeCall.html";
+}
+
+/* ------------------------- Email / Deal / Note Modals ------------------------- */
+
+let activeModalContactId = null;
+
+function showModal(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove("hidden");
+}
+
+function hideModal(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add("hidden");
+}
+
 function openEmailClient(c) {
-  if (!c.email) {
-    const val = prompt(`No email on file for ${c.name}. Enter an email address to continue:`, "");
-    if (!val || !val.trim()) return;
-    c.email = val.trim();
-    renderList();
+  activeModalContactId = c.id;
+  document.getElementById("emailModalHeading").textContent = `Email ${c.name.split(" ")[0]}`;
+  document.getElementById("emailModalAddress").value = c.email || "";
+  document.getElementById("emailModalSubject").value = `Following up, ${c.name.split(" ")[0]}`;
+  document.getElementById("emailModalBody").value = `Hi ${c.name.split(" ")[0]},\n\n`;
+  document.getElementById("emailModalError").classList.add("hidden");
+  showModal("emailModalOverlay");
+  document.getElementById("emailModalAddress").focus();
+}
+
+function closeEmailModal() {
+  hideModal("emailModalOverlay");
+}
+
+function submitEmailModal() {
+  const c = getContact(activeModalContactId);
+  if (!c) return;
+  const errorEl = document.getElementById("emailModalError");
+  const address = document.getElementById("emailModalAddress").value.trim();
+  if (!address) {
+    errorEl.textContent = "Please enter an email address.";
+    errorEl.classList.remove("hidden");
+    return;
   }
-  const subject = encodeURIComponent(`Following up, ${c.name.split(" ")[0]}`);
-  const body = encodeURIComponent(`Hi ${c.name.split(" ")[0]},\n\n`);
-  window.location.href = `mailto:${c.email}?subject=${subject}&body=${body}`;
+  c.email = address;
+  const subject = encodeURIComponent(document.getElementById("emailModalSubject").value);
+  const body = encodeURIComponent(document.getElementById("emailModalBody").value);
+  window.location.href = `mailto:${address}?subject=${subject}&body=${body}`;
+  renderList();
   renderDetail();
+  closeEmailModal();
 }
 
 function addNote(c) {
-  const note = prompt(`Add a note for ${c.name}:`);
-  if (!note || !note.trim()) return;
-  c.calls.unshift({ type: "note", title: "Note added", label: note.trim(), time: "Just now" });
+  activeModalContactId = c.id;
+  document.getElementById("noteModalTextarea").value = "";
+  document.getElementById("noteModalError").classList.add("hidden");
+  setNoteType("General");
+  showModal("noteModalOverlay");
+  document.getElementById("noteModalTextarea").focus();
+}
+
+function closeNoteModal() {
+  hideModal("noteModalOverlay");
+}
+
+let selectedNoteType = "General";
+
+function setNoteType(type) {
+  selectedNoteType = type;
+  document.querySelectorAll(".note-type-tab").forEach(btn => {
+    const active = btn.dataset.type === type;
+    btn.classList.toggle("border-fire-accent/40", active);
+    btn.classList.toggle("bg-fire-accent/15", active);
+    btn.classList.toggle("text-fire-accent", active);
+    btn.classList.toggle("border-white/10", !active);
+    btn.classList.toggle("bg-white/5", !active);
+    btn.classList.toggle("text-on-surface-variant", !active);
+  });
+}
+
+function submitNoteModal() {
+  const c = getContact(activeModalContactId);
+  if (!c) return;
+  const errorEl = document.getElementById("noteModalError");
+  const note = document.getElementById("noteModalTextarea").value.trim();
+  if (!note) {
+    errorEl.textContent = "Please enter a note before saving.";
+    errorEl.classList.remove("hidden");
+    return;
+  }
+  c.calls.unshift({ type: "note", title: `${selectedNoteType} Note`, label: note, time: "Just now" });
+  syncedSecondsAgo = 0;
+  updateSyncStatusText();
   renderDetail();
+  closeNoteModal();
 }
 
 function logDeal(c) {
-  const amountStr = prompt(`Deal value for ${c.name} (USD):`, c.dealValue || "");
-  if (amountStr === null) return;
-  const amount = parseInt(amountStr.replace(/[^0-9]/g, ""), 10);
-  if (isNaN(amount)) return;
-  const stage = prompt("Deal stage (e.g. Discovery, Proposal, Negotiation, Closed Won):", c.dealStage || "Discovery") || c.dealStage;
+  activeModalContactId = c.id;
+  document.getElementById("dealModalContact").value = c.name;
+  document.getElementById("dealModalCompany").value = c.company || "";
+  document.getElementById("dealModalValue").value = c.dealValue || "";
+  document.getElementById("dealModalStage").value = c.dealStage || "Discovery";
+  document.getElementById("dealModalNotes").value = "";
+  document.getElementById("dealModalError").classList.add("hidden");
+  showModal("dealModalOverlay");
+  document.getElementById("dealModalValue").focus();
+}
+
+function closeDealModal() {
+  hideModal("dealModalOverlay");
+}
+
+function submitDealModal() {
+  const c = getContact(activeModalContactId);
+  if (!c) return;
+  const errorEl = document.getElementById("dealModalError");
+  const amountStr = document.getElementById("dealModalValue").value;
+  const amount = parseInt(String(amountStr).replace(/[^0-9]/g, ""), 10);
+  if (isNaN(amount) || amount <= 0) {
+    errorEl.textContent = "Please enter a deal value greater than 0.";
+    errorEl.classList.remove("hidden");
+    return;
+  }
+  const company = document.getElementById("dealModalCompany").value.trim();
+  const stage = document.getElementById("dealModalStage").value;
+  const notes = document.getElementById("dealModalNotes").value.trim();
+
+  if (company) c.company = company;
   c.dealValue = amount;
   c.dealStage = stage;
   const stageProgress = { "Discovery": 25, "Proposal": 55, "Negotiation": 80, "Closed Won": 100 };
   c.dealProgress = stageProgress[stage] !== undefined ? stageProgress[stage] : 40;
   c.calls.unshift({ type: "deal", title: "Deal updated", label: `${stage} • $${amount.toLocaleString()}`, time: "Just now" });
+  if (notes) c.calls.unshift({ type: "note", title: "Deal note", label: notes, time: "Just now" });
+
   renderDetail();
   renderList();
+  closeDealModal();
 }
 
 /* ------------------------- New Contact ------------------------- */
 
-function createNewContact() {
-  const name = prompt("Full name:");
-  if (!name || !name.trim()) return;
-  const title = prompt("Job title (optional):", "") || "";
-  const company = prompt("Company (optional):", "") || "";
-  const email = prompt("Email (optional):", "") || "";
-  const phone = prompt("Phone (optional):", "") || "";
+function openNewLeadModal() {
+  document.getElementById("leadModalContact").value = "";
+  document.getElementById("leadModalCompany").value = "";
+  document.getElementById("leadModalEmail").value = "";
+  document.getElementById("leadModalPhone").value = "";
+  document.getElementById("leadModalValue").value = "";
+  document.getElementById("leadModalStage").value = "Discovery";
+  document.getElementById("leadModalNotes").value = "";
+  document.getElementById("leadModalError").classList.add("hidden");
+  showModal("leadModalOverlay");
+  document.getElementById("leadModalContact").focus();
+}
+
+function closeLeadModal() {
+  hideModal("leadModalOverlay");
+}
+
+function submitLeadModal() {
+  const errorEl = document.getElementById("leadModalError");
+  const name = document.getElementById("leadModalContact").value.trim();
+  if (!name) {
+    errorEl.textContent = "Please enter a contact name.";
+    errorEl.classList.remove("hidden");
+    return;
+  }
+
+  const company = document.getElementById("leadModalCompany").value.trim();
+  const email = document.getElementById("leadModalEmail").value.trim();
+  const phone = document.getElementById("leadModalPhone").value.trim();
+  const valueStr = document.getElementById("leadModalValue").value;
+  const stage = document.getElementById("leadModalStage").value;
+  const notes = document.getElementById("leadModalNotes").value.trim();
+
+  let dealValue = 0;
+  let dealStage = "";
+  let dealProgress = 0;
+  const calls = [];
+
+  if (valueStr.trim() !== "") {
+    const amount = parseInt(String(valueStr).replace(/[^0-9]/g, ""), 10);
+    if (isNaN(amount) || amount <= 0) {
+      errorEl.textContent = "Please enter a valid deal value greater than 0, or leave it blank.";
+      errorEl.classList.remove("hidden");
+      return;
+    }
+    const stageProgress = { "Discovery": 25, "Proposal": 55, "Negotiation": 80, "Closed Won": 100 };
+    dealValue = amount;
+    dealStage = stage;
+    dealProgress = stageProgress[stage] !== undefined ? stageProgress[stage] : 40;
+    calls.unshift({ type: "deal", title: "Deal updated", label: `${stage} • $${amount.toLocaleString()}`, time: "Just now" });
+  }
+
+  if (notes) {
+    calls.unshift({ type: "note", title: "Deal note", label: notes, time: "Just now" });
+  }
 
   const newContact = {
     id: Math.max(0, ...contacts.map(c => c.id)) + 1,
-    name: name.trim(),
-    title: title.trim(),
-    company: company.trim(),
+    name: name,
+    title: "",
+    company: company,
     avatarUrl: "",
     status: "cold",
-    dealValue: 0,
-    dealStage: "",
-    dealProgress: 0,
+    dealValue: dealValue,
+    dealStage: dealStage,
+    dealProgress: dealProgress,
     callCount: 0,
-    email: email.trim(),
-    phone: phone.trim(),
+    email: email,
+    phone: phone,
     linkedin: "",
     bio: "",
     tags: [],
-    calls: []
+    calls: calls
   };
   contacts.unshift(newContact);
   selectedId = newContact.id;
   renderList();
   renderDetail();
   bumpContactCount(1);
+  closeLeadModal();
 }
 
 /* ------------------------- HubSpot Sync Simulation ------------------------- */
@@ -1213,8 +1683,50 @@ function init() {
     renderList();
   });
 
-  document.getElementById("newContactBtn").addEventListener("click", createNewContact);
+  document.getElementById("newContactBtn").addEventListener("click", openNewLeadModal);
   document.getElementById("hubspotSyncBtn").addEventListener("click", runManualSync);
+
+  /* ---- Email / Deal / Note / Lead modal wiring ---- */
+  const modalConfigs = [
+    { overlay: "emailModalOverlay", close: closeEmailModal },
+    { overlay: "dealModalOverlay", close: closeDealModal },
+    { overlay: "noteModalOverlay", close: closeNoteModal },
+    { overlay: "leadModalOverlay", close: closeLeadModal }
+  ];
+  modalConfigs.forEach(({ overlay, close }) => {
+    const el = document.getElementById(overlay);
+    if (!el) return;
+    el.addEventListener("click", e => {
+      if (e.target === el) close();
+    });
+  });
+
+  document.addEventListener("keydown", e => {
+    if (e.key !== "Escape") return;
+    closeEmailModal();
+    closeDealModal();
+    closeNoteModal();
+    closeLeadModal();
+  });
+
+  document.getElementById("closeEmailModalBtn").addEventListener("click", closeEmailModal);
+  document.getElementById("cancelEmailModalBtn").addEventListener("click", closeEmailModal);
+  document.getElementById("openEmailClientBtn").addEventListener("click", submitEmailModal);
+
+  document.getElementById("closeDealModalBtn").addEventListener("click", closeDealModal);
+  document.getElementById("cancelDealModalBtn").addEventListener("click", closeDealModal);
+  document.getElementById("saveDealModalBtn").addEventListener("click", submitDealModal);
+
+  document.getElementById("closeNoteModalBtn").addEventListener("click", closeNoteModal);
+  document.getElementById("cancelNoteModalBtn").addEventListener("click", closeNoteModal);
+  document.getElementById("saveNoteModalBtn").addEventListener("click", submitNoteModal);
+  document.querySelectorAll(".note-type-tab").forEach(btn => {
+    btn.addEventListener("click", () => setNoteType(btn.dataset.type));
+  });
+
+  document.getElementById("closeLeadModalBtn").addEventListener("click", closeLeadModal);
+  document.getElementById("cancelLeadModalBtn").addEventListener("click", closeLeadModal);
+  document.getElementById("saveLeadModalBtn").addEventListener("click", submitLeadModal);
 }
 
 
