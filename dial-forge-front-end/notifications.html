@@ -128,7 +128,6 @@
       z-index: 9999;
       pointer-events: none;
       opacity: 0.02;
-      background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAi48KsLd_faAmlkSed1Fs2W5xDLsDVHxr9CmWtAEB3mVawz4ALG0dLChb5BSfGNK2l9-fmgv6hPMrldZIl3QkfcWvn-k7N3x0y7Dl1jokR_qsFoXGfpioBQwdYp4BacU27-O8AvsAAPLZLEI8BeFeol8JuNA7irpaT0xqX6XjvkDN4m2FxjSK5pKh6tDEYfrUqZgNCp1ovBMB_qP7Q1nCe9J7-lwugakQ22eOnZRfu91aRFmlJQOlvF2H1uNq5Ead_J_7AqBWWjEw');
     }
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -427,7 +426,7 @@
   <div class="hidden md:flex items-center gap-3 bg-surface-container-high/40 border border-white/5 rounded-full px-3 py-1.5 relative overflow-hidden">
     <div id="usageProgressBar" class="absolute inset-0 bg-fire-gradient/10 w-[84%]"></div>
     <span class="material-symbols-outlined text-fire-accent text-sm relative z-10">hourglass_empty</span>
-    <span id="usagePillText" class="text-[10px] font-bold text-white relative z-10">842 / 1,000 mins</span>
+    <span id="usagePillText" class="text-[10px] font-bold text-white relative z-10">239 / 500 mins</span>
   </div>
 
   <!-- Live Timer -->
@@ -559,12 +558,6 @@
         </p>
 </div>
 <div class="flex items-center gap-3">
-<button id="filterBtn" class="flex items-center gap-2 px-6 py-2.5 rounded-full border border-white/20 hover:bg-white/5 transition-all text-sm font-medium">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-          Filter
-        </button>
 <button id="markAllReadBtn" class="flex items-center gap-2 px-6 py-2.5 rounded-full bg-brand hover:bg-orange-600 transition-all text-white text-sm font-bold shadow-lg shadow-orange-500/20">
 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
@@ -1336,27 +1329,55 @@
 <script>
 const STATE = {
   currentFilter: 'all',
+    itemsPerPage: 5,
+  currentPage: 0,
   notifications: [
     { id: 'notif-1', type: 'deals', title: 'Sarah Kim moved to Closing', description: 'The contract for Enterprise Tier was sent and viewed 3 times. High probability of win.', time: '2m ago', read: false },
     { id: 'notif-2', type: 'coaching', title: 'New Coaching Insight Available', description: 'Your last call with Nexus Corp had a 72% objection handling score. Review recommendations.', time: '15m ago', read: false },
     { id: 'notif-3', type: 'system', title: 'Weekly Performance Sync Complete', description: 'Your dashboard has been updated with the latest regional sales data from Salesforce.', time: '1h ago', read: true },
+    { id: 'notif-6', type: 'deals', title: 'Deal Won — $84k Closed', description: 'Redline Ops signed the Enterprise agreement. Commission credited to your next payout.', time: '32m ago', read: false },
+    { id: 'notif-7', type: 'coaching', title: 'Objection Handling Score Updated', description: 'Your objection handling score improved to 85% this week — up 13% from last period. Great progress!', time: '48m ago', read: false },
+    { id: 'notif-8', type: 'system', title: 'Voicemail Transcription Ready', description: '3 new voicemail transcriptions are available from this morning\'s missed calls. Review them in your inbox.', time: '1h ago', read: false },
     { id: 'notif-4', type: 'system', title: 'CRM Contact Enrichment', description: '14 new leads were automatically enriched with LinkedIn profile data and direct-dial numbers.', time: 'Yesterday', read: true },
     { id: 'notif-5', type: 'deals', title: 'Pipeline Milestones Reached', description: 'You\'ve hit 120% of your weekly activity target. Keep the momentum going!', time: 'Yesterday', read: true }
   ]
 };
 
-function filterNotifications() {
+function getFilteredNotifications() {
   const filter = STATE.currentFilter;
-  const items = document.querySelectorAll('[data-type]');
+  return STATE.notifications.filter(notif => 
+    filter === 'all' || notif.type === filter
+  );
+}
+
+function updateNotificationVisibility() {
+  const filter = STATE.currentFilter;
+  const filteredNotifications = getFilteredNotifications();
+  const itemsToShow = STATE.itemsPerPage * (STATE.currentPage + 1);
   
-  items.forEach(item => {
-    const type = item.dataset.type;
-    if (filter === 'all' || type === filter) {
-      item.style.display = '';
-    } else {
-      item.style.display = 'none';
+  // Hide/show based on filter and pagination
+  STATE.notifications.forEach((notif, index) => {
+    const element = document.querySelector(`[data-id="${notif.id}"]`);
+    if (element) {
+      const isInFilter = filter === 'all' || notif.type === filter;
+      const shouldShow = isInFilter && filteredNotifications.slice(0, itemsToShow).some(n => n.id === notif.id);
+      element.style.display = shouldShow ? '' : 'none';
     }
   });
+  
+  // Update load more button visibility
+  const loadMoreBtn = document.getElementById('loadMoreBtn');
+  if (loadMoreBtn) {
+    const totalFiltered = filteredNotifications.length;
+    const currentlyShowing = itemsToShow;
+    const hasMore = currentlyShowing < totalFiltered;
+    loadMoreBtn.style.display = hasMore ? '' : 'none';
+  }
+}
+
+function filterNotifications() {
+  STATE.currentPage = 0;
+  updateNotificationVisibility();
 }
 
 function markAsRead(notifId) {
@@ -1391,6 +1412,11 @@ document.querySelectorAll('#filterTabs button').forEach(btn => {
   });
 });
 
+// Initialize notification visibility on page load
+document.addEventListener('DOMContentLoaded', () => {
+  updateNotificationVisibility();
+});
+
 // Mark all as read button
 document.getElementById('markAllReadBtn').addEventListener('click', markAllAsRead);
 
@@ -1403,13 +1429,10 @@ document.querySelectorAll('[data-id]').forEach(notif => {
 
 // Load more button
 document.getElementById('loadMoreBtn').addEventListener('click', () => {
-  alert('Loading more notifications...');
+  STATE.currentPage++;
+  updateNotificationVisibility();
 });
 
-// Filter button
-document.getElementById('filterBtn').addEventListener('click', () => {
-  alert('Filter options would open here');
-});
 
 // ==================== PROFILE PICTURE LOADING ====================
 function loadSavedProfilePicture() {
