@@ -255,6 +255,142 @@
 <!-- END: Bento Feature Preview -->
 </main>
 <!-- BEGIN: Interactive Scripts -->
+ <script data-purpose="shared-state-management">
+    // Default user state
+    const DEFAULT_USER_STATE = {
+      name: "Hunter L.",
+      email: "hunter@globifye.com",
+      role: "Enterprise AE",
+      company: "GlobiFYE",
+      tier: "starter"
+    };
+
+    // Shared application state
+    const appState = {
+      selectedPersona: null,
+      user: { ...DEFAULT_USER_STATE },
+      onboarding: {
+        firstName: "",
+        lastName: "",
+        password: "",
+        teamSize: "",
+        industry: "",
+        specializations: [],
+        phoneNumber: "",
+        integrations: [],
+        microphone: "",
+        speaker: ""
+      }
+    };
+
+    // Load state from localStorage
+    function loadState() {
+      try {
+        const saved = localStorage.getItem('dialforgeState');
+        console.log('Loaded state from localStorage:', saved);
+        if (saved) {
+          const state = JSON.parse(saved);
+          appState.selectedPersona = state.selectedPersona || null;
+          if (state.user) {
+            appState.user = { ...appState.user, ...state.user };
+          }
+          if (state.onboarding) {
+            appState.onboarding = { ...appState.onboarding, ...state.onboarding };
+          }
+        }
+      } catch (e) {
+        console.log('Could not load state:', e);
+      }
+    }
+
+    // Save state to localStorage
+    function saveState() {
+      try {
+        localStorage.setItem('dialforgeState', JSON.stringify(appState));
+      } catch (e) {
+        console.log('Could not save state:', e);
+      }
+    }
+
+    // Update workspace information in state
+    function updateWorkspaceState() {
+      const companyName = document.getElementById('company-name')?.value || '';
+      const teamSizeSelect = document.querySelector('select');
+      const teamSize = teamSizeSelect?.options[teamSizeSelect.selectedIndex]?.value || '';
+      const industrySelect = document.querySelectorAll('select')[1];
+      const industry = industrySelect?.options[industrySelect.selectedIndex]?.value || '';
+      const activeChips = Array.from(document.querySelectorAll('.liquid-pill.active'))
+        .map(chip => chip.textContent.trim());
+
+      // Update state
+      appState.user.company = companyName || appState.user.company;
+      appState.onboarding.teamSize = teamSize;
+      appState.onboarding.industry = industry;
+      appState.onboarding.specializations = activeChips;
+
+      saveState();
+      console.log('Workspace state updated:', appState);
+    }
+
+    // Initialize form with saved data
+    function initializeForm() {
+      loadState();
+
+      // Populate company name from saved state
+      const companyNameInput = document.getElementById('company-name');
+      if (companyNameInput && appState.user.company) {
+        companyNameInput.value = appState.user.company;
+        updateSlug(appState.user.company);
+      }
+
+      // Populate team size if saved
+      if (appState.onboarding.teamSize) {
+        const teamSizeSelect = document.querySelector('select');
+        teamSizeSelect.value = appState.onboarding.teamSize;
+      }
+
+      // Populate industry if saved
+      if (appState.onboarding.industry) {
+        const industrySelect = document.querySelectorAll('select')[1];
+        industrySelect.value = appState.onboarding.industry;
+      }
+
+      // Restore checked specialization chips
+      if (appState.onboarding.specializations.length > 0) {
+        const chips = document.querySelectorAll('.liquid-pill');
+        chips.forEach(chip => {
+          const chipText = chip.textContent.trim();
+          if (appState.onboarding.specializations.includes(chipText)) {
+            chip.classList.add('active');
+            chip.classList.remove('text-on-surface-variant');
+          }
+        });
+      }
+
+      console.log('Form initialized with saved state:', appState);
+    }
+
+    // Initialize on page load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeForm);
+    } else {
+      initializeForm();
+    }
+
+    // Save state when form changes
+    document.addEventListener('change', (e) => {
+      if (e.target.closest('[data-purpose="main-form"]')) {
+        updateWorkspaceState();
+      }
+    });
+
+    // Save state on input changes
+    document.addEventListener('input', (e) => {
+      if (e.target.closest('[data-purpose="main-form"]')) {
+        updateWorkspaceState();
+      }
+    });
+  </script>
 <script data-purpose="form-interactions">
     /**
      * Updates the URL slug preview based on workspace name input
@@ -286,6 +422,8 @@
       } else {
         el.classList.add('text-on-surface-variant');
       }
+      // Save state when chips change
+      updateWorkspaceState();
     }
   </script>
 <!-- END: Interactive Scripts -->

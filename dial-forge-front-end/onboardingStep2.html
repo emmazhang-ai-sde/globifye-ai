@@ -244,6 +244,123 @@
 </footer>
 <!-- END: Global Footer Help & Status -->
 <!-- BEGIN: Logic & Interaction -->
+ <script data-purpose="shared-state-management">
+    // Default user state
+    const DEFAULT_USER_STATE = {
+      name: "Hunter L.",
+      email: "hunter@globifye.com",
+      role: "Enterprise AE",
+      company: "GlobiFYE",
+      tier: "starter"
+    };
+
+    // Shared application state
+    const appState = {
+      selectedPersona: null,
+      user: { ...DEFAULT_USER_STATE },
+      onboarding: {
+        firstName: "",
+        lastName: "",
+        password: "",
+        teamSize: "",
+        industry: "",
+        specializations: [],
+        phoneNumber: "",
+        integrations: [],
+        microphone: "",
+        speaker: ""
+      }
+    };
+
+    // Load state from localStorage
+    function loadState() {
+      try {
+        const saved = localStorage.getItem('dialforgeState');
+        console.log('Loaded state from localStorage:', saved);
+        if (saved) {
+          const state = JSON.parse(saved);
+          appState.selectedPersona = state.selectedPersona || null;
+          if (state.user) {
+            appState.user = { ...appState.user, ...state.user };
+          }
+          if (state.onboarding) {
+            appState.onboarding = { ...appState.onboarding, ...state.onboarding };
+          }
+        }
+      } catch (e) {
+        console.log('Could not load state:', e);
+      }
+    }
+
+    // Save state to localStorage
+    function saveState() {
+      try {
+        localStorage.setItem('dialforgeState', JSON.stringify(appState));
+      } catch (e) {
+        console.log('Could not save state:', e);
+      }
+    }
+
+    // Update user state with form data
+    function updateUserState() {
+      const firstName = document.getElementById('first_name')?.value || '';
+      const lastName = document.getElementById('last_name')?.value || '';
+      const email = document.getElementById('work_email')?.value || '';
+      const password = document.getElementById('password')?.value || '';
+
+      // Update onboarding data
+      appState.onboarding.firstName = firstName;
+      appState.onboarding.lastName = lastName;
+      appState.onboarding.password = password;
+
+      // Update user.name if names provided, otherwise keep defaults
+      if (firstName || lastName) {
+        appState.user.name = `${firstName} ${lastName}`.trim();
+      }
+
+      // Update user.email if provided, otherwise keep defaults
+      if (email) {
+        appState.user.email = email;
+      }
+
+      saveState();
+    }
+
+    // Initialize form with saved data when page loads
+    function initializeForm() {
+      loadState();
+
+      // Populate form fields with saved data if it exists
+      if (appState.onboarding.firstName) {
+        document.getElementById('first_name').value = appState.onboarding.firstName;
+      }
+      if (appState.onboarding.lastName) {
+        document.getElementById('last_name').value = appState.onboarding.lastName;
+      }
+      if (appState.onboarding.password) {
+        document.getElementById('password').value = appState.onboarding.password;
+      }
+      if (appState.user.email && appState.user.email !== 'hunter@globifye.com') {
+        document.getElementById('work_email').value = appState.user.email;
+      }
+
+      console.log('Form initialized with saved state:', appState);
+    }
+
+    // Initialize on page load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeForm);
+    } else {
+      initializeForm();
+    }
+
+    // Save state when form fields change
+    document.addEventListener('input', (e) => {
+      if (e.target.closest('#registration-form')) {
+        updateUserState();
+      }
+    });
+  </script>
 <script data-purpose="password-logic">
     const passwordInput = document.getElementById('password');
     const segments = document.querySelectorAll('.strength-segment');
@@ -271,6 +388,8 @@
 <script data-purpose="form-submission">
     document.getElementById('registration-form').addEventListener('submit', (e) => {
       e.preventDefault();
+      // Save state before proceeding
+      updateUserState();
       const submitBtn = e.target.querySelector('button[type="submit"]');
       const originalContent = submitBtn.innerHTML;
       
@@ -285,7 +404,6 @@
         submitBtn.innerHTML = originalContent;
         submitBtn.style.pointerEvents = 'auto';
         submitBtn.style.opacity = '1';
-        alert('Validation complete. Moving to Step 2...');
       }, 1500);
     });
   </script>

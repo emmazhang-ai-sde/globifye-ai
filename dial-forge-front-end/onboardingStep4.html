@@ -572,6 +572,89 @@
    */
   updateFilterButtons();
   
+    /**
+   * Shared state management for phone number selection
+   */
+  // Default user state
+  const DEFAULT_USER_STATE = {
+    name: "Hunter L.",
+    email: "hunter@globifye.com",
+    role: "Enterprise AE",
+    company: "GlobiFYE",
+    tier: "starter"
+  };
+
+  // Shared application state
+  const appState = {
+    selectedPersona: null,
+    user: { ...DEFAULT_USER_STATE },
+    onboarding: {
+      firstName: "",
+      lastName: "",
+      password: "",
+      teamSize: "",
+      industry: "",
+      specializations: [],
+      phoneNumber: "",
+      integrations: [],
+      microphone: "",
+      speaker: ""
+    }
+  };
+
+  // Load state from localStorage
+  function loadState() {
+    try {
+      const saved = localStorage.getItem('dialforgeState');
+      if (saved) {
+        const state = JSON.parse(saved);
+        appState.selectedPersona = state.selectedPersona || null;
+        if (state.user) {
+          appState.user = { ...appState.user, ...state.user };
+        }
+        if (state.onboarding) {
+          appState.onboarding = { ...appState.onboarding, ...state.onboarding };
+        }
+      }
+    } catch (e) {
+      console.log('Could not load state:', e);
+    }
+  }
+
+  // Save state to localStorage
+  function saveState() {
+    try {
+      localStorage.setItem('dialforgeState', JSON.stringify(appState));
+    } catch (e) {
+      console.log('Could not save state:', e);
+    }
+  }
+
+  // Initialize: Load state and restore phone selection
+  function initializePhoneSelection() {
+    loadState();
+
+    // Restore previously selected phone number if saved
+    if (appState.onboarding.phoneNumber) {
+      const numberCards = document.querySelectorAll('.number-card');
+      numberCards.forEach(card => {
+        const radioInput = card.querySelector('input[name="number_select"]');
+        if (radioInput && card.getAttribute('data-phone') === appState.onboarding.phoneNumber) {
+          radioInput.checked = true;
+        }
+      });
+    }
+
+    console.log('Phone selection initialized:', appState);
+  }
+
+  // Initialize on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializePhoneSelection);
+  } else {
+    initializePhoneSelection();
+  }
+
   /**
    * Preserve selection feedback on number card selection
    */
@@ -580,6 +663,15 @@
   
   radios.forEach(radio => {
     radio.addEventListener('change', () => {
+      // Get the selected phone number
+      const selectedCard = document.querySelector('.number-card input[name="number_select"]:checked')?.closest('.number-card');
+      if (selectedCard) {
+        const selectedPhone = selectedCard.getAttribute('data-phone');
+        appState.onboarding.phoneNumber = selectedPhone;
+        saveState();
+        console.log('Phone number saved:', selectedPhone);
+      }
+
       // Visual pop animation for the button when a new selection is made
       reserveBtn.classList.add('scale-105');
       setTimeout(() => reserveBtn.classList.remove('scale-105'), 150);

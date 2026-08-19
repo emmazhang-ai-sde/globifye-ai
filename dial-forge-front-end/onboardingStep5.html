@@ -278,6 +278,103 @@
 </main>
 <!-- END: Onboarding Container -->
 <!-- BEGIN: Interactive Scripts -->
+ <script data-purpose="shared-state-management">
+    // Default user state
+    const DEFAULT_USER_STATE = {
+      name: "Hunter L.",
+      email: "hunter@globifye.com",
+      role: "Enterprise AE",
+      company: "GlobiFYE",
+      tier: "starter"
+    };
+
+    // Shared application state
+    const appState = {
+      selectedPersona: null,
+      user: { ...DEFAULT_USER_STATE },
+      onboarding: {
+        firstName: "",
+        lastName: "",
+        password: "",
+        teamSize: "",
+        industry: "",
+        specializations: [],
+        phoneNumber: "",
+        integrations: [],
+        microphone: "",
+        speaker: ""
+      }
+    };
+
+    // Load state from localStorage
+    function loadState() {
+      try {
+        const saved = localStorage.getItem('dialforgeState');
+        if (saved) {
+          const state = JSON.parse(saved);
+          appState.selectedPersona = state.selectedPersona || null;
+          if (state.user) {
+            appState.user = { ...appState.user, ...state.user };
+          }
+          if (state.onboarding) {
+            appState.onboarding = { ...appState.onboarding, ...state.onboarding };
+          }
+        }
+      } catch (e) {
+        console.log('Could not load state:', e);
+      }
+    }
+
+    // Save state to localStorage
+    function saveState() {
+      try {
+        localStorage.setItem('dialforgeState', JSON.stringify(appState));
+      } catch (e) {
+        console.log('Could not save state:', e);
+      }
+    }
+
+    // Update integrations state
+    function updateIntegrationState() {
+      const activeToggles = Array.from(document.querySelectorAll('[data-purpose="toggle-integration"].bg-fire-gradient'));
+      const integrations = activeToggles.map(toggle => {
+        const label = toggle.closest('[data-purpose*="integration"]')?.querySelector('span')?.textContent || '';
+        return label.trim();
+      });
+      appState.onboarding.integrations = integrations;
+      saveState();
+      console.log('Integrations saved:', integrations);
+    }
+
+    // Initialize: Load state and restore integration states
+    function initializeIntegrations() {
+      loadState();
+
+      // Restore previously selected integrations if saved
+      if (appState.onboarding.integrations.length > 0) {
+        document.querySelectorAll('[data-purpose="toggle-integration"]').forEach(toggle => {
+          const label = toggle.closest('[data-purpose*="integration"]')?.querySelector('span')?.textContent?.trim();
+          if (appState.onboarding.integrations.includes(label)) {
+            // Restore the toggle state to ON
+            const knob = toggle.querySelector('div');
+            knob.classList.remove('bg-white/20', 'translate-x-0');
+            knob.classList.add('bg-on-primary', 'translate-x-4');
+            toggle.classList.remove('bg-white/5');
+            toggle.classList.add('bg-fire-gradient');
+          }
+        });
+      }
+
+      console.log('Integrations initialized:', appState);
+    }
+
+    // Initialize on page load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeIntegrations);
+    } else {
+      initializeIntegrations();
+    }
+  </script>
 <script data-purpose="toggle-interactions">
     // Logic for the integration toggle switches
     document.querySelectorAll('[data-purpose="toggle-integration"]').forEach(toggle => {
@@ -298,6 +395,9 @@
           toggle.classList.add('bg-white/5');
           toggle.classList.remove('bg-fire-gradient');
         }
+        
+        // Save state when integrations change
+        updateIntegrationState();
       });
     });
 

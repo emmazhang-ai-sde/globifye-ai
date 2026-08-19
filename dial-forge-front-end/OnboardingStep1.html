@@ -268,30 +268,59 @@
 <!-- END: Visual Accents -->
 <!-- BEGIN: Interactive Scripts -->
 <script data-purpose="persona-interaction-and-state">
-  // State management object (mirroring landing page)
-  const appState = {
-    selectedPersona: null
+  // Default user state (used when no saved state exists)
+  const DEFAULT_USER_STATE = {
+    name: "Hunter L.",
+    email: "hunter@globifye.com",
+    role: "Enterprise AE",
+    company: "GlobiFYE",
+    tier: "starter"
   };
 
-  // Load state from localStorage
+  // Shared state management object across all onboarding pages (mirroring landing page)
+  const appState = {
+    selectedPersona: null,
+     user: { ...DEFAULT_USER_STATE },
+    onboarding: {
+      firstName: "",
+      lastName: "",
+      password: "",
+      teamSize: "",
+      industry: "",
+      specializations: [],
+      phoneNumber: "",
+      integrations: [],
+      microphone: "",
+      speaker: ""
+    }
+  };
+
+  // Load state from localStorage (reuses existing 'dialforgeState' key)
   function loadState() {
     try {
       const saved = localStorage.getItem('dialforgeState');
+      console.log('Loaded state from localStorage:', saved);
       if (saved) {
         const state = JSON.parse(saved);
         appState.selectedPersona = state.selectedPersona || null;
+        // Merge saved user data if it exists
+        if (state.user) {
+          appState.user = { ...appState.user, ...state.user };
+        }
+        // Merge saved onboarding data if it exists
+        if (state.onboarding) {
+          appState.onboarding = { ...appState.onboarding, ...state.onboarding };
+        }
       }
     } catch (e) {
       console.log('Could not load state:', e);
     }
   }
 
-  // Save state to localStorage
+  // Save state to localStorage (extends existing 'dialforgeState' key)
   function saveState() {
     try {
-      localStorage.setItem('dialforgeState', JSON.stringify({
-        selectedPersona: appState.selectedPersona
-      }));
+      localStorage.setItem('dialforgeState', JSON.stringify(appState));
     } catch (e) {
       console.log('Could not save state:', e);
     }

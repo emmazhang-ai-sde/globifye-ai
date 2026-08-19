@@ -240,6 +240,109 @@
 </footer>
 <!-- END: FooterStatus -->
 <!-- BEGIN: Interactions -->
+ <script data-purpose="shared-state-management">
+    // Default user state
+    const DEFAULT_USER_STATE = {
+      name: "Hunter L.",
+      email: "hunter@globifye.com",
+      role: "Enterprise AE",
+      company: "GlobiFYE",
+      tier: "starter"
+    };
+
+    // Shared application state
+    const appState = {
+      selectedPersona: null,
+      user: { ...DEFAULT_USER_STATE },
+      onboarding: {
+        firstName: "",
+        lastName: "",
+        password: "",
+        teamSize: "",
+        industry: "",
+        specializations: [],
+        phoneNumber: "",
+        integrations: [],
+        microphone: "",
+        speaker: ""
+      }
+    };
+
+    // Load state from localStorage
+    function loadState() {
+      try {
+        const saved = localStorage.getItem('dialforgeState');
+        if (saved) {
+          const state = JSON.parse(saved);
+          appState.selectedPersona = state.selectedPersona || null;
+          if (state.user) {
+            appState.user = { ...appState.user, ...state.user };
+          }
+          if (state.onboarding) {
+            appState.onboarding = { ...appState.onboarding, ...state.onboarding };
+          }
+        }
+      } catch (e) {
+        console.log('Could not load state:', e);
+      }
+    }
+
+    // Save state to localStorage
+    function saveState() {
+      try {
+        localStorage.setItem('dialforgeState', JSON.stringify(appState));
+      } catch (e) {
+        console.log('Could not save state:', e);
+      }
+    }
+
+    // Update audio device selections
+    function updateAudioDeviceState() {
+      const micSelects = document.querySelectorAll('select');
+      if (micSelects.length >= 2) {
+        appState.onboarding.microphone = micSelects[0].value;
+        appState.onboarding.speaker = micSelects[1].value;
+        saveState();
+        console.log('Audio devices saved:', {
+          microphone: appState.onboarding.microphone,
+          speaker: appState.onboarding.speaker
+        });
+      }
+    }
+
+    // Initialize: Load state and restore audio device selections
+    function initializeAudioDevices() {
+      loadState();
+
+      const selects = document.querySelectorAll('select');
+      if (selects.length >= 2) {
+        // Restore microphone selection
+        if (appState.onboarding.microphone) {
+          selects[0].value = appState.onboarding.microphone;
+        }
+        // Restore speaker selection
+        if (appState.onboarding.speaker) {
+          selects[1].value = appState.onboarding.speaker;
+        }
+      }
+
+      console.log('Audio devices initialized:', appState);
+    }
+
+    // Initialize on page load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeAudioDevices);
+    } else {
+      initializeAudioDevices();
+    }
+
+    // Save state when device selections change
+    document.addEventListener('change', (e) => {
+      if (e.target.tagName === 'SELECT') {
+        updateAudioDeviceState();
+      }
+    });
+  </script>
 <script data-purpose="audio-test-logic">
     const micOrb = document.getElementById('mic-orb');
     const dbDisplay = document.getElementById('db-level');
