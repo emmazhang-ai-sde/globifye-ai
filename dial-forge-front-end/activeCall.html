@@ -494,9 +494,9 @@ animation: fade-in 0.3s ease-out;
 </div>
 <!-- END: DialPad Modal -->
 <!-- BEGIN: IncomingCallWidget -->
-<div id="incomingCallOverlay" class="hidden fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
+<div id="incomingCallOverlay" class="hidden fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4" aria-modal="true" aria-labelledby="incomingCallTitle">
   <div class="modal-in glass-card fire-glow w-full max-w-sm rounded-2xl p-8 flex flex-col items-center text-center">
-    <span class="text-[10px] font-extrabold text-tertiary uppercase tracking-widest mb-6">Incoming Call</span>
+    <h2 class="text-[10px] font-extrabold text-tertiary uppercase tracking-widest mb-6">Incoming Call</h2>
     <div class="relative w-24 h-24 mb-5">
       <span class="ringing-pulse"></span>
       <span class="ringing-pulse delay-1"></span>
@@ -511,15 +511,15 @@ animation: fade-in 0.3s ease-out;
       <span class="text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest">Ringing…</span>
     </div>
     <div class="grid grid-cols-3 gap-3 w-full">
-      <button id="declineCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-error-red/10 border border-error-red/30 text-error-red hover:bg-error-red/20 transition-all">
+      <button id="declineCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-error-red/10 border border-error-red/30 text-error-red hover:bg-error-red/20 transition-all" aria-label="Decline incoming call" title="Decline call">
         <span class="material-symbols-outlined" aria-hidden="true">call_end</span>
         <span class="text-[9px] font-extrabold uppercase tracking-wider">Decline</span>
       </button>
-      <button id="acceptCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-tertiary/10 border border-tertiary/40 text-tertiary hover:bg-tertiary/20 transition-all">
+      <button id="acceptCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-tertiary/10 border border-tertiary/40 text-tertiary hover:bg-tertiary/20 transition-all" aria-label="Accept incoming call" title="Accept call">
         <span class="material-symbols-outlined" aria-hidden="true">call</span>
         <span class="text-[9px] font-extrabold uppercase tracking-wider">Accept</span>
       </button>
-      <button id="voicemailCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-surface-container-high/60 border border-white/10 text-on-surface-variant hover:text-white transition-all">
+      <button id="voicemailCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-surface-container-high/60 border border-white/10 text-on-surface-variant hover:text-white transition-all" aria-label="Send to voicemail" title="Send to voicemail">
         <span class="material-symbols-outlined" aria-hidden="true">voicemail</span>
         <span class="text-[9px] font-extrabold uppercase tracking-wider">Voicemail</span>
       </button>
@@ -622,11 +622,11 @@ animation: fade-in 0.3s ease-out;
 
   <!-- Action Buttons -->
   <div class="flex items-center gap-2">
-    <button id="testInboundBtn" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-high/50 border border-white/10 text-on-surface-variant hover:text-white transition-all text-xs font-bold">
+    <button id="testInboundBtn" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-high/50 border border-white/10 text-on-surface-variant hover:text-white transition-all text-xs font-bold" aria-label="Test inbound call" title="Test inbound call">
       <span class="material-symbols-outlined text-sm" aria-hidden="true">ring_volume</span>
       Test Inbound
     </button>
-    <button id="newCallBtn" type="button" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-fire-gradient text-on-primary font-bold text-xs hover:brightness-110 transition-all shadow-lg">
+    <button id="newCallBtn" type="button" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-fire-gradient text-on-primary font-bold text-xs hover:brightness-110 transition-all shadow-lg" aria-label="Start new call" title="Start new call">
       <span class="material-symbols-outlined text-sm" aria-hidden="true">add</span>
       New Call
     </button>
@@ -722,7 +722,7 @@ animation: fade-in 0.3s ease-out;
   </a>
 </nav>
 <div class="flex flex-col items-center gap-4 w-full pb-4">
-  <a href="./profile.html" class="block w-full h-full cursor-pointer" aria-label="Go to user Profile">
+  <a href="./profile.html" class="block w-full h-full cursor-pointer" aria-label="Go to user profile">
     <div class="h-10 w-10 rounded-full overflow-hidden border border-white/10 items-center ml-4">
     <img id="activeCallUserAvatar" alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs">
   </div>
@@ -844,11 +844,20 @@ animation: fade-in 0.3s ease-out;
 </div>
 
 <!-- Call Control Bar -->
-<div class="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-4 glass-card rounded-[2.5rem] border border-white/10 shadow-2xl z-30">
+<div class="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-4 px-8 py-4 glass-card rounded-[2.5rem] border border-white/10 shadow-2xl z-30">
 <div class="flex items-center gap-2">
-<button id="btn-mute" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Mute (M)" aria-label="Mute microphone"><span class="material-symbols-outlined" aria-hidden="true">mic</span></button>
-<button id="btn-camera" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Camera" aria-label="Toggle camera"><span class="material-symbols-outlined" aria-hidden="true">videocam</span></button>
-<button id="btn-screen-share" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Screen Share" aria-label="Start screen share"><span class="material-symbols-outlined" aria-hidden="true">present_to_all</span></button>
+  <div class="relative inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 pl-3 pr-2 py-1.5 gap-1.5 shadow-inner shadow-white/5">
+    <button id="mute-arrow" class="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent cursor-pointer pointer-events-auto" title="Mute settings" aria-label="Open mute settings"><span class="material-symbols-outlined text-base" aria-hidden="true">expand_more</span></button>
+    <button id="btn-mute" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Mute (M)" aria-label="Mute microphone"><span class="material-symbols-outlined" aria-hidden="true">mic</span></button>
+  </div>
+  <div class="relative inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 pl-3 pr-2 py-1.5 gap-1.5 shadow-inner shadow-white/5">
+    <button id="camera-arrow" class="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent cursor-pointer pointer-events-auto" title="Camera settings" aria-label="Open camera settings"><span class="material-symbols-outlined text-base" aria-hidden="true">expand_more</span></button>
+    <button id="btn-camera" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Camera" aria-label="Toggle camera"><span class="material-symbols-outlined" aria-hidden="true">videocam</span></button>
+  </div>
+  <div class="relative inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 pl-3 pr-2 py-1.5 gap-1.5 shadow-inner shadow-white/5">
+    <button id="screen-share-arrow" class="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent cursor-pointer pointer-events-auto" title="Mute settings" aria-label="Open mute settings"><span class="material-symbols-outlined text-base" aria-hidden="true">expand_more</span></button>
+    <button id="btn-screen-share" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Screen Share" aria-label="Start screen share"><span class="material-symbols-outlined" aria-hidden="true">present_to_all</span></button>
+  </div>
 <button id="btn-hold" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Hold (H)" aria-label="Hold call"><span class="material-symbols-outlined" aria-hidden="true">pause</span></button>
 <button id="btn-transfer" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Transfer" aria-label="Transfer call"><span class="material-symbols-outlined" aria-hidden="true">forward_to_inbox</span></button>
 <button id="btn-record" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Record" aria-label="Record call"><span class="material-symbols-outlined" aria-hidden="true">fiber_manual_record</span></button>
@@ -936,13 +945,13 @@ animation: fade-in 0.3s ease-out;
 </div>
 
 <!-- Lead Score Card -->
-<div class="glass-card p-5 rounded-2xl border-white/5 mb-8">
+<div id="leadScoreContainer" class="glass-card p-5 rounded-2xl border-white/5 mb-8">
 <div class="flex justify-between items-center mb-4">
 <span class="text-[10px] font-bold uppercase text-gray-500">Lead Score</span>
-<span class="font-syne text-xl font-extrabold text-fire-accent">84<span class="text-xs text-gray-500 ml-0.5">/100</span></span>
+<span class="font-syne text-xl font-extrabold text-fire-accent"><span id="leadScoreValue">84</span><span class="text-xs text-gray-500 ml-0.5">/100</span></span>
 </div>
 <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-<div class="h-full bg-gradient-to-r from-fire-gradient to-fire-accent w-[84%] shadow-[0_0_10px_rgba(255,122,28,0.4)]"></div>
+<div id="leadScoreProgressBar" class="h-full bg-gradient-to-r from-fire-gradient to-fire-accent w-[84%] shadow-[0_0_10px_rgba(255,122,28,0.4)]"></div>
 </div>
 </div>
 
@@ -958,7 +967,7 @@ animation: fade-in 0.3s ease-out;
 </div>
 </div>
 <!-- Timeline -->
-<div class="space-y-4 mb-8">
+<div id="recentTimelineContainer" class="space-y-4 mb-8">
 <h3 class="text-[10px] font-bold uppercase text-gray-500 border-b border-white/5 pb-2">Recent Timeline</h3>
 <div class="flex gap-4">
 <div class="w-8 h-8 rounded-full bg-teal-support/10 flex items-center justify-center flex-shrink-0">
@@ -1418,6 +1427,57 @@ Save & Sync
 </div>
 </div>
 
+<!-- Mute Modal -->
+<div id="mute-modal-overlay" class="modal-overlay hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center" onclick="closeMuteModal(event)">
+<div class="modal-content relative" onclick="event.stopPropagation()">
+<button id="mute-close" onclick="closeMuteModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white" id="mute-close">
+<span class="material-symbols-outlined">close</span>
+</button>
+<h2 class="font-syne text-lg font-bold mb-4">Microphone Settings</h2>
+<div class="space-y-5">
+<div>
+<label class="text-[11px] font-bold uppercase text-gray-500 block mb-2">Microphone Status</label>
+<div class="flex items-center gap-2 p-3 bg-white/5 rounded-lg border border-white/10">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="text-sm">Microphone Active</span>
+</div>
+</div>
+<div>
+<label class="text-[11px] font-bold uppercase text-gray-500 block mb-2">Input Device</label>
+<select class="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:border-fire-accent/50 focus:outline-none">
+<option>Built-in Microphone</option>
+<option>External USB Mic</option>
+<option>Headset Microphone</option>
+</select>
+</div>
+<div>
+<label class="text-[11px] font-bold uppercase text-gray-500 block mb-2">Microphone Sensitivity</label>
+<input type="range" min="0" max="100" value="75" class="w-full"/>
+<div class="text-[10px] text-gray-500 mt-1">75%</div>
+</div>
+<div class="space-y-2">
+<label class="flex items-center gap-2 cursor-pointer">
+<input type="checkbox" checked class="rounded"/>
+<span class="text-sm">Noise Suppression</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer">
+<input type="checkbox" checked class="rounded"/>
+<span class="text-sm">Echo Cancellation</span>
+</label>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex gap-4">
+<button id="mute-dismiss" onclick="closeMuteModal()" class="flex-1 px-6 py-3 rounded-lg border border-glass-border text-gray-300 hover:text-white hover:bg-white/5 transition-all font-medium">
+Cancel
+</button>
+<button id="mute-apply" onclick="applyMuteSettings()" class="flex-1 px-6 py-3 rounded-lg fire-gradient text-white font-bold shadow-lg hover:shadow-xl transition-all">
+Apply Settings
+</button>
+</div>
+</div>
+</div>
+
 <!-- Toast Container -->
 <div id="toast-container"></div>
 
@@ -1594,8 +1654,10 @@ function toggleMute() {
   if (btn) {
     if (CALL.isMuted) {
       btn.classList.add('bg-fire-accent/20', 'text-fire-accent', 'border-fire-accent/30');
+      btn.classList.add('fire-gradient', 'text-fire-accent', 'shadow-lg', 'shadow-fire-gradient/30');
     } else {
       btn.classList.remove('bg-fire-accent/20', 'text-fire-accent', 'border-fire-accent/30');
+      btn.classList.remove('fire-gradient', 'text-fire-accent', 'shadow-lg', 'shadow-fire-gradient/30');
     }
   }
   updateStatusBadges();
@@ -1608,11 +1670,13 @@ function toggleHold() {
   if (btn) {
     if (CALL.isOnHold) {
       btn.classList.add('bg-fire-accent/20', 'text-fire-accent', 'border-fire-accent/30');
+      btn.classList.add('fire-gradient', 'text-fire-accent', 'shadow-lg', 'shadow-fire-gradient/30');
       if (callTimerInterval) {
         // Timer will pause automatically in the interval check
       }
     } else {
       btn.classList.remove('bg-fire-accent/20', 'text-fire-accent', 'border-fire-accent/30');
+      btn.classList.remove('fire-gradient', 'text-fire-accent', 'shadow-lg', 'shadow-fire-gradient/30');
     }
   }
   updateStatusBadges();
@@ -1625,8 +1689,10 @@ function toggleRecord() {
   if (btn) {
     if (CALL.isRecording) {
       btn.classList.add('bg-error-red/20', 'text-error-red');
+      btn.classList.add('fire-gradient', 'text-fire-accent', 'shadow-lg', 'shadow-fire-gradient/30');
     } else {
       btn.classList.remove('bg-error-red/20', 'text-error-red');
+      btn.classList.remove('fire-gradient', 'text-fire-accent', 'shadow-lg', 'shadow-fire-gradient/30');
     }
   }
   updateStatusBadges();
@@ -1667,6 +1733,29 @@ function startCamera() {
     btn.classList.add('fire-gradient', 'text-fire-accent', 'shadow-lg', 'shadow-fire-gradient/30');
   }
   
+  updateStatusBadges();
+  saveState();
+}
+
+function toggleCamera() {
+  CALL.cameraActive = !CALL.cameraActive;
+  const btn = document.getElementById('btn-camera');
+  const cameraPip = document.getElementById('camera-pip');
+  if (CALL.cameraActive) {
+    if (cameraPip) {
+      cameraPip.classList.remove('hidden');
+    }
+    if (btn) {
+      btn.classList.add('fire-gradient', 'text-fire-accent', 'shadow-lg', 'shadow-fire-gradient/30');
+    }
+  } else {
+    if (cameraPip) {
+      cameraPip.classList.add('hidden');
+    }
+    if (btn) {
+      btn.classList.remove('fire-gradient', 'text-fire-accent', 'shadow-lg', 'shadow-fire-gradient/30');
+    }
+  }
   updateStatusBadges();
   saveState();
 }
@@ -1773,6 +1862,35 @@ function toggleScreenSharePreview() {
     }
   }
   saveState();
+}
+
+function toggleScreenShare() {
+  if (CALL.screenShareActive) {
+    stopScreenShare();
+  } else {
+    startScreenShare();
+  }
+}
+
+// ===== MUTE MODAL FUNCTIONS =====
+function openMuteFlow() {
+  const overlay = document.getElementById('mute-modal-overlay');
+  if (overlay) {
+    overlay.classList.remove('hidden');
+  }
+}
+
+function closeMuteModal(event) {
+  if (event && event.target.id !== 'mute-modal-overlay') return;
+  const overlay = document.getElementById('mute-modal-overlay');
+  if (overlay) {
+    overlay.classList.add('hidden');
+  }
+}
+
+function applyMuteSettings() {
+  // Microphone settings applied
+  closeMuteModal();
 }
 
 // ===== TRANSFER FUNCTIONS =====
@@ -2088,12 +2206,21 @@ function registerKeyboardShortcuts() {
 function setupEventListeners() {
   const btnMute = document.getElementById('btn-mute');
   if (btnMute) btnMute.addEventListener('click', toggleMute);
+    
+  const muteArrow = document.getElementById('mute-arrow');
+  if (muteArrow) muteArrow.addEventListener('click', openMuteFlow);
   
   const btnCamera = document.getElementById('btn-camera');
-  if (btnCamera) btnCamera.addEventListener('click', openCameraFlow);
+  if (btnCamera) btnCamera.addEventListener('click', toggleCamera);
+  
+  const cameraArrow = document.getElementById('camera-arrow');
+  if (cameraArrow) cameraArrow.addEventListener('click', openCameraFlow);
   
   const btnScreenShare = document.getElementById('btn-screen-share');
-  if (btnScreenShare) btnScreenShare.addEventListener('click', openScreenShareFlow);
+   if (btnScreenShare) btnScreenShare.addEventListener('click', toggleScreenShare);
+  
+  const screenShareArrow = document.getElementById('screen-share-arrow');
+  if (screenShareArrow) screenShareArrow.addEventListener('click', openScreenShareFlow);
   
   const btnHold = document.getElementById('btn-hold');
   if (btnHold) btnHold.addEventListener('click', toggleHold);
@@ -2199,7 +2326,9 @@ window.addEventListener('beforeunload', function() {
         { name: 'Northwind Labs', value: '$142k', stage: 'Negotiation' },
         { name: 'BrightPath AI', value: '$96k', stage: 'Proposal' },
         { name: 'Redline Ops', value: '$84k', stage: 'Discovery' }
-      ]
+      ],
+      recentTimeline: [],
+      leadScore: null
     }
   };
   
@@ -2372,6 +2501,114 @@ window.addEventListener('beforeunload', function() {
   }
 
   // ========== HELPER: UPDATE CRM PANEL ==========
+  // ========== HELPER: UPDATE RECENT TIMELINE SECTION ==========
+  // Renders Recent Timeline based on contact.recentTimeline from synchronized data
+  function updateRecentTimeline(contact) {
+    const container = document.getElementById('recentTimelineContainer');
+    if (!container || !contact.recentTimeline || contact.recentTimeline.length === 0) {
+      // No data or no container found - keep existing hardcoded timeline
+      return;
+    }
+
+    // Find and remove all existing timeline entry divs (flex gap-4), keeping the header
+    const entries = container.querySelectorAll('.flex.gap-4');
+    entries.forEach(entry => entry.remove());
+
+    // Add new timeline entries from contact data
+    contact.recentTimeline.forEach((event) => {
+      const iconColor = getTimelineIconColor(event.type);
+      const icon = getTimelineIcon(event.type);
+      const iconTextColor = getTimelineIconTextColor(event.type);
+      
+      const entryHTML = `
+        <div class="flex gap-4">
+          <div class="w-8 h-8 rounded-full ${iconColor} flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-[16px] ${iconTextColor}">${icon}</span>
+          </div>
+          <div>
+            <p class="text-[13px] font-bold">${event.title || 'Event'}</p>
+            <p class="text-[11px] text-gray-500">${event.time || 'Unknown time'}</p>
+          </div>
+        </div>
+      `;
+      
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = entryHTML;
+      container.appendChild(wrapper.firstElementChild);
+    });
+  }
+
+  // ========== HELPER: GET TIMELINE ICON AND COLOR ==========
+  function getTimelineIcon(type) {
+    const icons = {
+      'call': 'phone_in_talk',
+      'missed': 'phone_missed',
+      'ai': 'auto_awesome',
+      'email': 'mail',
+      'web': 'web',
+      'linkedin': 'link',
+      'meeting': 'event',
+      'note': 'description',
+      'voicemail': 'voicemail'
+    };
+    return icons[type] || 'event';
+  }
+
+  function getTimelineIconColor(type) {
+    const colors = {
+      'call': 'bg-teal-support/10',
+      'missed': 'bg-fire-accent/10',
+      'ai': 'bg-ai-purple/10',
+      'email': 'bg-teal-support/10',
+      'web': 'bg-fire-accent/10',
+      'linkedin': 'bg-ai-purple/10',
+      'meeting': 'bg-teal-support/10',
+      'note': 'bg-secondary-container/10',
+      'voicemail': 'bg-fire-accent/10'
+    };
+    return colors[type] || 'bg-ai-purple/10';
+  }
+
+  function getTimelineIconTextColor(type) {
+    const colors = {
+      'call': 'text-teal-support',
+      'missed': 'text-fire-accent',
+      'ai': 'text-ai-purple',
+      'email': 'text-teal-support',
+      'web': 'text-fire-accent',
+      'linkedin': 'text-ai-purple',
+      'meeting': 'text-teal-support',
+      'note': 'text-secondary-container',
+      'voicemail': 'text-fire-accent'
+    };
+    return colors[type] || 'text-ai-purple';
+  }
+
+  // ========== HELPER: UPDATE LEAD SCORE SECTION ==========
+  // Renders Lead Score based on contact.leadScore from synchronized data
+  function updateLeadScore(contact) {
+    if (contact.leadScore === null || contact.leadScore === undefined) {
+      // No lead score data - keep existing hardcoded score
+      return;
+    }
+
+    // Find the lead score display elements using IDs
+    const scoreValue = document.getElementById('leadScoreValue');
+    const progressBar = document.getElementById('leadScoreProgressBar');
+
+    if (scoreValue) {
+      // Update score text (e.g., "84")
+      const score = Math.min(Math.max(contact.leadScore, 0), 100); // Clamp between 0-100
+      scoreValue.textContent = score;
+    }
+
+    if (progressBar) {
+      // Update progress bar width based on score
+      const score = Math.min(Math.max(contact.leadScore, 0), 100);
+      progressBar.style.width = `${score}%`;
+    }
+  }
+
   function updateCrmPanel(contact) {
     // Update Contact Information section in main right panel
     updateContactInfoSection(contact);
@@ -2379,6 +2616,12 @@ window.addEventListener('beforeunload', function() {
     // Update Financial/Stats section in main right panel
     updateFinancialSection(contact);
 
+    // Update Recent Timeline section with synchronized data if available
+    updateRecentTimeline(contact);
+    
+    // Update Lead Score section with synchronized data if available
+    updateLeadScore(contact);
+    
     // Update collapsible right CRM panel sections
     const recentCallsList = document.getElementById('crmRecentCalls');
     const topDealsList = document.getElementById('crmTopDeals');
@@ -2649,7 +2892,9 @@ CALL.duration = 0; // Reset duration to zero
           avatar: prospect.avatar || CALL.contact.avatar,
           email: prospect.email || '',
           dealValue: prospect.dealValue || '',
-          pipelineStage: prospect.pipelineStage || ''
+          pipelineStage: prospect.pipelineStage || '',
+          recentTimeline: prospect.recentTimeline || [],
+          leadScore: prospect.leadScore || null
         };
         
         // Start the call with the prospect's information
@@ -3462,7 +3707,9 @@ setInterval(() => {
           location: '',
           email: '',
           dealValue: '',
-          pipelineStage: ''
+          pipelineStage: '',
+          recentTimeline: [],
+          leadScore: null
         };
         
         // Call the start() function from call-state-and-initialization to update Active Call
