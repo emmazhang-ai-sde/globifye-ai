@@ -602,10 +602,10 @@ animation: fade-in 0.3s ease-out;
 
   <!-- Utility Icons -->
   <div class="flex items-center gap-1">
-    <button class="p-2 text-on-surface-variant/60 hover:text-white transition-colors">
+    <button class="p-2 text-on-surface-variant/60 hover:text-white transition-colors" aria-label="Toggle dark mode">
       <span class="material-symbols-outlined">dark_mode</span>
     </button>
-    <button id="crmPanelToggle" type="button" class="p-2 text-on-surface-variant/60 hover:text-white transition-colors">
+    <button id="crmPanelToggle" type="button" class="p-2 text-on-surface-variant/60 hover:text-white transition-colors" aria-label="Toggle contacts panel">
       <span class="material-symbols-outlined">side_navigation</span>
     </button>
   </div>
@@ -707,10 +707,6 @@ animation: fade-in 0.3s ease-out;
 <h1 class="text-6xl syne-wide text-white leading-tight">Prospect<br>Queue</h1>
 <div class="flex items-center justify-between">
 <p class="text-gray-400 text-lg">Enterprise Tech Campaign – Stage 1</p>
-<div class="flex gap-2">
-<span class="px-3 py-1 bg-[#1a1b26] border border-brand-border rounded-full text-[10px] uppercase tracking-wider font-bold">High Intent</span>
-<span class="px-3 py-1 bg-[#1a1b26] border border-brand-border rounded-full text-[10px] uppercase tracking-wider font-bold">Follow Up</span>
-</div>
 </div>
 <!-- BEGIN: Search and Filter Controls -->
 <div class="flex gap-3 pb-2">
@@ -1623,13 +1619,13 @@ Record
             name: selectedOption.dataset.name || 'Contact',
             company: selectedOption.dataset.company || 'Saved Contact',
             number: selectedOption.value,
-            avatar: selectedOption.dataset.avatar || 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE'
+            avatar: selectedOption.dataset.avatar || ''
           }
         : {
             name: 'New Contact',
             company: 'Manual Entry',
             number,
-            avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE'
+            avatar: ''
           };
 
       closeNewCallModal();
@@ -2236,7 +2232,7 @@ Record
       company: prospect.company || '',
       jobTitle: prospect.title || '',
       location: prospect.company || '', // Use company as location fallback
-      avatar: prospect.avatar || 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE',
+      avatar: prospect.avatar || '',
       email: prospect.email || '',
       dealValue: prospect.dealValue || '',
       pipelineStage: prospect.pipelineStage || ''
