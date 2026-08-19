@@ -730,18 +730,21 @@
 <section class="glass-panel rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
 <div class="flex items-center space-x-6">
 <div class="relative">
-<div class="w-20 h-20 rounded-full overflow-hidden border-2 border-fire-primary/20 p-1">
-<img alt="Sarah Kim" class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBw1HM7liqfg24Rfb_Ho6gHpJ-HcMcUCE9fvBULk-ltYD6Y3KzFQkCa4Ji6j9zxKZvIYtuZLqzRyMcvSeZwIWBUSzT_OX10KbgDMV1tSHSteDIwqzGTRkg81Ihu5JQePOnSbTC43R5L5h8Z9_8MMRYH4-GW-5Zi3zYw1TTegQevXLK2cxpN4vFYUKuyKyrU-8nDOBUvkPS6wQdL9QLgzHNdgXLGEccEGxnQwObly4uCzShoifbYtlCf3QX1Zm-Jw444_42gTbSgAc8"/>
+<div class="w-20 h-20 rounded-full overflow-hidden border-2 border-fire-primary/20 p-1 flex items-center justify-center bg-surface-container">
+<img id="postCallContactAvatarImage" alt="Contact Avatar" class="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBw1HM7liqfg24Rfb_Ho6gHpJ-HcMcUCE9fvBULk-ltYD6Y3KzFQkCa4Ji6j9zxKZvIYtuZLqzRyMcvSeZwIWBUSzT_OX10KbgDMV1tSHSteDIwqzGTRkg81Ihu5JQePOnSbTC43R5L5h8Z9_8MMRYH4-GW-5Zi3zYw1TTegQevXLK2cxpN4vFYUKuyKyrU-8nDOBUvkPS6wQdL9QLgzHNdgXLGEccEGxnQwObly4uCzShoifbYtlCf3QX1Zm-Jw444_42gTbSgAc8"/>
+<div id="postCallContactAvatarFallback" class="flex items-center justify-center w-full h-full text-center">
+<span id="postCallContactAvatarText" class="text-sm font-headline text-text-muted uppercase font-bold tracking-wide">NA</span>
+</div>
 </div>
 </div>
 <div>
-<h2 class="font-headline text-3xl text-white">Sarah Kim</h2>
-<p class="text-text-muted text-lg">VP Sales, TechNova</p>
+<h2 id="postCallContactName" class="font-headline text-3xl text-white">Sarah Kim</h2>
+<p id="postCallContactJobAndCompany" class="text-text-muted text-lg">VP Sales, TechNova</p>
 </div>
 </div>
 <div class="text-center md:text-right">
 <p class="text-xs font-mono uppercase tracking-[0.2em] text-text-dim mb-1">Active Deal Value</p>
-<p class="font-headline text-4xl text-success-green tracking-tight">$42,500</p>
+<p id="postCallDealValue" class="font-headline text-4xl text-success-green tracking-tight">$42,500</p>
 </div>
 </section>
 <!-- END: Contact Card -->
@@ -1701,6 +1704,15 @@ Complete Call
       <span class="material-symbols-outlined text-lg">${type === 'success' ? 'check_circle' : 'info'}</span>
       <span>${message}</span>
     `;
+        
+    // Calculate bottom position to stack toasts vertically
+    const visibleToasts = document.querySelectorAll('.toast:not(.hide)');
+    const toastHeight = 52; // Padding (16px) + content (~20px) + padding (16px)
+    const toastGap = 12;    // Gap between toasts
+    const baseBottom = 24;  // Base bottom offset from CSS
+    const bottomPosition = baseBottom + (visibleToasts.length * (toastHeight + toastGap));
+    
+    toast.style.bottom = bottomPosition + 'px';
     document.body.appendChild(toast);
 
     setTimeout(() => {
@@ -1971,11 +1983,56 @@ Complete Call
 
     if (taskForm) {
       taskForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const title = taskTitleInput.value || 'Task';
-        showToast(`Task "${title}" scheduled`, 'success');
+        e.preventDefault(); 
+               
+        // Capture form data - reusing existing form fields
+        const title = taskTitleInput.value.trim() || 'Task';
+        if (!title) return;
+        
+        const description = document.getElementById('taskDescriptionInput').value.trim();
+        const dueTime = document.getElementById('taskDueInput').value;
+        const priority = document.getElementById('taskPriorityInput').value;
+        
+        // Load existing tasks from Dashboard's shared storage key
+        const STORAGE_KEY = 'dialforge-dashboard-tasks';
+        let taskData = { tasks: [] };
+        
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            taskData = { tasks: Array.isArray(parsed && parsed.tasks) ? parsed.tasks : [] };
+          }
+        } catch (e) {
+          console.error('Error loading existing tasks:', e);
+        }
+        
+        // Create new task object with same structure as Dashboard
+        const newTask = {
+          id: crypto.randomUUID ? crypto.randomUUID() : `task-${Date.now()}`,
+          title: title,
+          description: description,
+          dueTime: dueTime,
+          priority: priority,
+          completed: false
+        };
+        
+        // Add new task to beginning of array (newest first)
+        taskData.tasks.unshift(newTask);
+        
+        // Save updated tasks back to localStorage
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(taskData));
+          showToast(`Task "${title}" saved and added to Dashboard`, 'success');
+        } catch (e) {
+          console.error('Error saving task:', e);
+          showToast(`Error saving task`, 'info');
+        }
+        
+        // Close modal and reset form
         taskModal.classList.add('hidden');
         taskForm.reset();
+        document.getElementById('taskPriorityInput').value = 'Medium';
       });
     }
 
@@ -2730,21 +2787,49 @@ Best regards,`;
       const callData = completedCall.callData || {};
       
       // ---- SYNCHRONIZE CONTACT CARD ----
-      // Update avatar image
-      const avatarImg = document.querySelector('section.glass-panel img[alt="Sarah Kim"]');
-      if (avatarImg && contact.avatar) {
-        avatarImg.src = contact.avatar;
-        avatarImg.alt = contact.name || 'Contact Avatar';
+      // Update avatar image - ALWAYS update, even if no avatar provided, to prevent stale avatars
+      // Update avatar - handle three cases: profile picture, initials, or NA
+      const avatarImg = document.getElementById('postCallContactAvatarImage');
+      const avatarFallback = document.getElementById('postCallContactAvatarFallback');
+      const avatarText = document.getElementById('postCallContactAvatarText');
+      
+      if (avatarImg && avatarFallback && avatarText) {
+        if (contact.avatar) {
+           // Case A: Contact has profile picture
+          avatarImg.src = contact.avatar;
+          avatarImg.alt = contact.name || 'Contact Avatar';
+          avatarImg.classList.remove('hidden');
+          avatarFallback.classList.add('hidden');
+        } else if (contact.name && contact.name.trim()) {
+          // Case B: Contact has name but no profile picture - show initials
+          const initials = contact.name
+            .split(' ')
+            .map(word => word.charAt(0))
+            .join('')
+            .toUpperCase()
+            .slice(0, 2);
+          avatarText.textContent = initials;
+          avatarImg.src = '';
+          avatarImg.classList.add('hidden');
+          avatarFallback.classList.remove('hidden');
+        } else {
+          // Clear avatar to blank/placeholder if no avatar in new call data
+          // Case C: No profile picture and no name - show NA
+          avatarText.textContent = 'NA';
+          avatarImg.src = '';
+          avatarImg.classList.add('hidden');
+          avatarFallback.classList.remove('hidden');
+        }
       }
       
-      // Update contact name in card
-      const nameHeading = document.querySelector('section.glass-panel h2.font-headline.text-3xl');
-      if (nameHeading && contact.name) {
-        nameHeading.textContent = contact.name;
+      // Update contact name in card - ALWAYS update to replace old name
+      const nameHeading = document.getElementById('postCallContactName');
+      if (nameHeading) {
+        nameHeading.textContent = contact.name || 'Unknown Contact';
       }
 
-      // Update job title and company in card
-      const jobTitlePara = document.querySelector('section.glass-panel p.text-text-muted.text-lg');
+      // Update job title and company in card - ALWAYS update to replace old values
+      const jobTitlePara = document.getElementById('postCallContactJobAndCompany');
       if (jobTitlePara) {
         const jobTitle = contact.jobTitle || '';
         const company = contact.company || '';
@@ -2755,9 +2840,9 @@ Best regards,`;
       }
       
       // Update deal value
-      const dealValueHeading = document.querySelector('section.glass-panel p.font-headline.text-4xl.text-success-green');
-      if (dealValueHeading && contact.dealValue) {
-        dealValueHeading.textContent = contact.dealValue;
+      const dealValueHeading = document.getElementById('postCallDealValue');
+      if (dealValueHeading) {
+        dealValueHeading.textContent = contact.dealValue || '$0';
       }
       
       // ---- SYNCHRONIZE CALL DURATION IN TIMER ----
@@ -2855,6 +2940,11 @@ Best regards,`;
 
   // Listen for call completion events (if call ends on this page)
   window.addEventListener('callCompleted', function(event) {
+    syncCompletedCallData();
+  });
+    
+  // Listen for contact info updates to immediately refresh display with new data
+  window.addEventListener('contactInfoUpdated', function(event) {
     syncCompletedCallData();
   });
   
@@ -3193,16 +3283,12 @@ Best regards,`;
 
       // Append new entry to beginning of array (newest first)
       callHistory.unshift(callHistoryEntry);
-      // showToast('Call Information added to Call History.', 'success');
+      showToast('Call Information added to Call History.', 'success');
       // Save updated call history back to localStorage
       localStorage.setItem('dialforgeCallHistory', JSON.stringify(callHistory));
 
       // Show success feedback
       showCompleteCallFeedback();
-
-      // Trigger confetti animation on successful completion
-      // Reuses existing initConfetti() function (no duplication)
-      initConfetti();
 
     } catch (e) {
       console.error('Error handling complete call:', e);
