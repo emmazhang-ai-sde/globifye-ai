@@ -116,7 +116,6 @@
       z-index: 9999;
       pointer-events: none;
       opacity: 0.02;
-      background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAi48KsLd_faAmlkSed1Fs2W5xDLsDVHxr9CmWtAEB3mVawz4ALG0dLChb5BSfGNK2l9-fmgv6hPMrldZIl3QkfcWvn-k7N3x0y7Dl1jokR_qsFoXGfpioBQwdYp4BacU27-O8AvsAAPLZLEI8BeFeol8JuNA7irpaT0xqX6XjvkDN4m2FxjSK5pKh6tDEYfrUqZgNCp1ovBMB_qP7Q1nCe9J7-lwugakQ22eOnZRfu91aRFmlJQOlvF2H1uNq5Ead_J_7AqBWWjEw');
     }
     @keyframes pulse-glow {
       0% { box-shadow: 0 0 0 0 rgba(0, 228, 120, 0.4); }
@@ -593,7 +592,7 @@
 <header class="flex flex-col md:flex-row justify-between md:items-end gap-6">
 <div data-purpose="page-title">
 <h1 class="font-hero-h1 text-5xl font-extrabold text-white tracking-tight">Performance <span class="text-fire-gradient">Pulse</span></h1>
-<p class="text-on-surface-variant/80 mt-2">Reviewing live data for <span class="font-bold text-white">Global Sales Territory</span></p>
+<p class="text-on-surface-variant/80 mt-2">Reviewing live data for <span id="dashboardCompanyName" class="font-bold text-white">Global Sales Territory</span></p>
 </div>
 <div class="flex items-center gap-4">
 <div class="flex items-center gap-2 bg-surface-container-high/50 px-4 py-2 rounded-full border border-white/5">
@@ -734,7 +733,7 @@
 <!-- Pipeline Velocity Funnel -->
 <div class="lg:col-span-4 glass-card p-6 rounded-2xl flex flex-col" style="--mouse-x: 139.67498779296875px; --mouse-y: 300px;">
 <h3 class="font-section-header text-xl text-white mb-8">Pipeline Velocity</h3>
-<div class="space-y-4">
+<div id="pipelineVelocityContainer" class="space-y-4">
 <!-- Stage 1 -->
 <div class="p-4 bg-surface-container-high/40 rounded-xl border border-white/5">
 <div class="flex justify-between mb-3 items-center">
@@ -967,6 +966,56 @@
   </div>
 </aside>
 <!--End CRM-->
+
+<!-- BEGIN: Dashboard Company State Sync -->
+<script data-purpose="dashboard-company-state-sync">
+  /**
+   * Load and display company information from shared onboarding state
+   * Uses the same localStorage key as onboarding: 'dialforgeState'
+   */
+  function loadAndDisplayCompanyData() {
+    try {
+      // Load the shared state from localStorage
+      const saved = localStorage.getItem('dialforgeState');
+      
+      // Default company (fallback if no saved state exists)
+      const DEFAULT_COMPANY = 'GlobiFYE';
+
+      let companyName = DEFAULT_COMPANY;
+
+      // If saved state exists, extract company
+      if (saved) {
+        try {
+          const parsedState = JSON.parse(saved);
+          if (parsedState.user && parsedState.user.company) {
+            companyName = parsedState.user.company;
+          }
+        } catch (e) {
+          console.log('Could not parse saved state, using default company:', e);
+        }
+      }
+
+      // Update Dashboard company display
+      const companyElement = document.getElementById('dashboardCompanyName');
+      if (companyElement) {
+        companyElement.textContent = companyName;
+      }
+
+      console.log('Dashboard company loaded from shared state:', companyName);
+    } catch (e) {
+      console.error('Error loading company data from shared state:', e);
+    }
+  }
+
+  // Load company data when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadAndDisplayCompanyData);
+  } else {
+    loadAndDisplayCompanyData();
+  }
+</script>
+<!-- END: Dashboard Company State Sync -->
+
 <script data-purpose="card-interactions">
     // Subtle mouse follow effect for glass cards to simulate specular highlight
     document.querySelectorAll('.glass-card').forEach(card => {
@@ -1627,6 +1676,9 @@
 </script>
 
 <script data-purpose="application-state">
+  // Storage key for persisting call history across pages
+  const CALL_HISTORY_STORAGE_KEY = 'dialForgeCallHistory';
+
   // Application state management
   const APP = {
     state: {
@@ -1825,6 +1877,7 @@
     // Activity feed
     addActivity(activity) {
       this.state.callHistory.unshift(activity);
+      this.saveCallHistoryToStorage();
       this.renderActivity();
     },
 
@@ -1898,10 +1951,42 @@
         }
       }
     },
+    
+    loadCallHistoryFromStorage() {
+      try {
+        const stored = localStorage.getItem(CALL_HISTORY_STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          // Convert timestamp strings back to Date objects
+          return parsed.map(call => ({
+            ...call,
+            timestamp: new Date(call.timestamp)
+          }));
+        }
+      } catch (e) {
+        console.error('Error loading call history from storage:', e);
+      }
+      // Return empty array (use hard-coded data as fallback if storage is empty)
+      return [];
+    },
+
+    saveCallHistoryToStorage() {
+      try {
+        localStorage.setItem(CALL_HISTORY_STORAGE_KEY, JSON.stringify(this.state.callHistory));
+      } catch (e) {
+        console.error('Error saving call history to storage:', e);
+      }
+    },
 
     init() {
       // Load saved profile picture
       this.loadSavedProfilePicture();
+      
+      // Load call history from storage; if empty, keep the hard-coded data as fallback
+      const storedCallHistory = this.loadCallHistoryFromStorage();
+      if (storedCallHistory.length > 0) {
+        this.state.callHistory = storedCallHistory;
+      }
 
       // Initialize leaderboard
       this.sortLeaderboard('revenue');
@@ -1965,6 +2050,160 @@
       });
     }
   };
+  
+// BEGIN: Pipeline Velocity Synchronization
+const PipelineVelocitySync = {
+  PIPELINE_STORAGE_KEY: 'dialforge_pipeline_deals_v1',
+  
+  // Map Pipeline stages to Dashboard display stages with styling
+  stageMap: [
+    { 
+      displayName: 'Prospect',
+      pipelineStages: ['prospect'],
+      colorBar: 'bg-fire-gradient',
+      colorText: 'text-fire-accent',
+      shadow: 'shadow-[0_0_8px_#FF7A1C]'
+    },
+    {
+      displayName: 'Contacted',
+      pipelineStages: ['contacted'],
+      colorBar: 'bg-fire-accent',
+      colorText: 'text-fire-accent',
+      shadow: ''
+    },
+    {
+      displayName: 'Demo',
+      pipelineStages: ['demo'],
+      colorBar: 'bg-ai-purple',
+      colorText: 'text-ai-purple',
+      shadow: ''
+    },
+    {
+      displayName: 'Proposal',
+      pipelineStages: ['proposal'],
+      colorBar: 'bg-tertiary',
+      colorText: 'text-tertiary',
+      shadow: ''
+    },
+    {
+      displayName: 'Closing',
+      pipelineStages: ['closing'],
+      colorBar: 'bg-teal-support',
+      colorText: 'text-teal-support',
+      shadow: ''
+    }
+  ],
+
+  // Load deals from Pipeline storage
+  loadDeals() {
+    try {
+      const raw = localStorage.getItem(this.PIPELINE_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      console.error('Error loading pipeline deals:', e);
+      return [];
+    }
+  },
+
+  // Calculate pipeline velocity data from deals
+  calculateVelocity() {
+    const deals = this.loadDeals();
+    const maxValue = this.getMaxValue(deals);
+    
+    return this.stageMap.map(stage => {
+      const stageTotal = deals
+        .filter(deal => stage.pipelineStages.includes(deal.stage))
+        .reduce((sum, deal) => sum + Number(deal.value || 0), 0);
+      
+      return {
+        displayName: stage.displayName,
+        value: stageTotal,
+        colorBar: stage.colorBar,
+        colorText: stage.colorText,
+        shadow: stage.shadow,
+        barWidth: maxValue > 0 ? Math.round((stageTotal / maxValue) * 100) : 0
+      };
+    });
+  },
+
+  // Get max value for bar scaling
+  getMaxValue(deals) {
+    let max = 0;
+    this.stageMap.forEach(stage => {
+      const total = deals
+        .filter(deal => stage.pipelineStages.includes(deal.stage))
+        .reduce((sum, deal) => sum + Number(deal.value || 0), 0);
+      max = Math.max(max, total);
+    });
+    return max;
+  },
+
+  // Format currency display
+  formatCurrency(value) {
+    const num = Number(value || 0);
+    if (num >= 1000000) return '$' + (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return '$' + (num / 1000).toFixed(0) + 'k';
+    return '$' + num;
+  },
+
+  // Render the pipeline velocity panel
+  render() {
+    const container = document.getElementById('pipelineVelocityContainer');
+    if (!container) return;
+
+    const velocity = this.calculateVelocity();
+    
+    container.innerHTML = velocity.map(stage => `
+      <div class="p-4 bg-surface-container-high/40 rounded-xl border border-white/5">
+        <div class="flex justify-between mb-3 items-center">
+          <span class="text-sm font-bold text-white/90">${stage.displayName}</span>
+          <span class="font-mono-data text-xs ${stage.colorText}">${this.formatCurrency(stage.value)}</span>
+        </div>
+        <div class="w-full bg-surface h-2 rounded-full overflow-hidden">
+          <div class="${stage.colorBar} h-full rounded-full ${stage.shadow}" style="width:${stage.barWidth}%"></div>
+        </div>
+      </div>
+    `).join('');
+  },
+
+  // Listen for localStorage changes from Pipeline page
+  setupSync() {
+    // Track last known state to detect changes
+    let lastDealsJson = JSON.stringify(this.loadDeals());
+
+    // Poll localStorage for changes (handles same-tab updates)
+    setInterval(() => {
+      const currentDealsJson = JSON.stringify(this.loadDeals());
+      if (currentDealsJson !== lastDealsJson) {
+        lastDealsJson = currentDealsJson;
+        this.render();
+      }
+    }, 500); // Check every 500ms for changes
+
+    // Also listen for storage events (changes in other tabs/windows)
+    window.addEventListener('storage', (e) => {
+      if (e.key === this.PIPELINE_STORAGE_KEY) {
+        lastDealsJson = JSON.stringify(this.loadDeals());
+        this.render();
+      }
+    });
+
+    // Listen for custom event dispatched by Pipeline when it saves
+    document.addEventListener('pipelineDealsUpdated', () => {
+      lastDealsJson = JSON.stringify(this.loadDeals());
+      this.render();
+    });
+  },
+
+  // Initialize
+  init() {
+    this.render();
+    this.setupSync();
+  }
+};
+
+// END: Pipeline Velocity Synchronization
+
 // DialPad Module
   const DialPad = {
     state: {
@@ -2167,6 +2406,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     APP.init();
     DialPad.attachKeyboardShortcut();
+    PipelineVelocitySync.init();
   });
 
   // Make APP globally accessible for external integration
