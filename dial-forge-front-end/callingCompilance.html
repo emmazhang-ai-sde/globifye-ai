@@ -115,7 +115,7 @@
       inset: 0;
       z-index: 9999;
       pointer-events: none;
-      opacity: 0.02;
+      opacity: 0.00;
       background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAi48KsLd_faAmlkSed1Fs2W5xDLsDVHxr9CmWtAEB3mVawz4ALG0dLChb5BSfGNK2l9-fmgv6hPMrldZIl3QkfcWvn-k7N3x0y7Dl1jokR_qsFoXGfpioBQwdYp4BacU27-O8AvsAAPLZLEI8BeFeol8JuNA7irpaT0xqX6XjvkDN4m2FxjSK5pKh6tDEYfrUqZgNCp1ovBMB_qP7Q1nCe9J7-lwugakQ22eOnZRfu91aRFmlJQOlvF2H1uNq5Ead_J_7AqBWWjEw');
     }
     @keyframes pulse-glow {
@@ -189,11 +189,121 @@
         display: none !important;
       }
     }
-
+    .dial-pad-btn {
+      padding: 0.75rem;
+      background-color: rgb(30, 31, 39);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.5rem;
+      color: #e3e1ec;
+      font-family: "DM Sans";
+      font-weight: 700;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 150ms ease;
+    }
+    .dial-pad-btn:hover {
+      background-color: rgb(41, 41, 50);
+      border-color: rgba(255, 122, 28, 0.4);
+      color: #ffb4a2;
+    }
+    .dial-pad-btn:focus-visible {
+      outline: 2px solid #FF7A1C;
+      outline-offset: 2px;
+    }
+    .dial-pad-btn:active {
+      transform: scale(0.95);
+    }
   </style>
 </head>
 <body class="bg-background text-on-background font-body-base antialiased">
 <div class="noise-overlay"></div>
+
+  
+<!-- BEGIN: DialPad Modal -->
+<div id="dialPadOverlay" class="hidden fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
+  <div class="modal-in glass-card fire-glow w-full max-w-sm rounded-2xl p-8 flex flex-col">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+      <span class="text-[10px] font-extrabold text-tertiary uppercase tracking-widest">Dial Pad</span>
+      <button id="dialPadCloseBtn" class="text-on-surface-variant/60 hover:text-white transition-colors" aria-label="Close dial pad modal">
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+    </div>
+
+    <!-- Phone Number Display -->
+    <div class="mb-6">
+      <input 
+        id="dialPadDisplay" 
+        type="text" 
+        placeholder="Enter number" 
+        class="w-full px-4 py-4 bg-surface-container-low rounded-lg border border-white/10 text-white font-mono-data text-2xl text-center tracking-widest focus:outline-none focus:border-tertiary transition-colors placeholder-on-surface-variant/30"
+        inputmode="none"
+        autocomplete="off"
+        aria-label="Phone number input"
+      >
+    </div>
+
+    <!-- Number Pad Grid -->
+    <div class="grid grid-cols-3 gap-3 mb-6">
+      <!-- Row 1: 1 2 3 -->
+      <button class="dial-pad-btn" data-digit="1" aria-label="1">1</button>
+      <button class="dial-pad-btn" data-digit="2" aria-label="2">2</button>
+      <button class="dial-pad-btn" data-digit="3" aria-label="3">3</button>
+      
+      <!-- Row 2: 4 5 6 -->
+      <button class="dial-pad-btn" data-digit="4" aria-label="4">4</button>
+      <button class="dial-pad-btn" data-digit="5" aria-label="5">5</button>
+      <button class="dial-pad-btn" data-digit="6" aria-label="6">6</button>
+      
+      <!-- Row 3: 7 8 9 -->
+      <button class="dial-pad-btn" data-digit="7" aria-label="7">7</button>
+      <button class="dial-pad-btn" data-digit="8" aria-label="8">8</button>
+      <button class="dial-pad-btn" data-digit="9" aria-label="9">9</button>
+      
+      <!-- Row 4: * 0 # -->
+      <button class="dial-pad-btn" data-digit="*" aria-label="Star">*</button>
+      <button class="dial-pad-btn" data-digit="0" aria-label="0">0</button>
+      <button class="dial-pad-btn" data-digit="#" aria-label="Hash">#</button>
+    </div>
+
+    <!-- Control Buttons Row -->
+    <div class="grid grid-cols-3 gap-3 mb-6">
+      <!-- Delete Button -->
+      <button 
+        id="dialPadDeleteBtn" 
+        class="py-3 px-4 bg-surface-container-low hover:bg-surface-container-high border border-white/10 hover:border-fire-accent/40 rounded-lg text-on-surface-variant/80 hover:text-fire-accent transition-all font-button-text font-bold text-sm flex items-center justify-center gap-1"
+        aria-label="Delete last digit">
+        <span class="material-symbols-outlined text-lg">backspace</span>
+      </button>
+      
+      <!-- Plus Button -->
+      <button class="dial-pad-btn" data-digit="+" aria-label="Plus">+</button>
+      
+      <!-- Clear Button -->
+      <button 
+        id="dialPadClearBtn" 
+        class="py-3 px-4 bg-surface-container-low hover:bg-surface-container-high border border-white/10 hover:border-error-red/40 rounded-lg text-on-surface-variant/80 hover:text-error-red transition-all font-button-text font-bold text-sm"
+        aria-label="Clear all digits">
+        Clear
+      </button>
+    </div>
+
+    <!-- Call Now Button -->
+    <button 
+      id="dialPadCallNowBtn" 
+      class="w-full py-3 px-4 bg-fire-gradient hover:bg-fire-accent text-on-primary font-button-text font-bold text-sm rounded-lg transition-all duration-200 hover:shadow-lg active:scale-95"
+      disabled
+      aria-label="Call now"
+    >
+      <span class="flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined">call</span>
+        <span>Call Now</span>
+      </span>
+    </button>
+  </div>
+</div>
+<!-- END: DialPad Modal -->
+
 <!-- BEGIN: IncomingCallWidget -->
 <div id="incomingCallOverlay" class="hidden fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center px-4">
   <div class="modal-in glass-card fire-glow w-full max-w-sm rounded-2xl p-8 flex flex-col items-center text-center">
@@ -409,7 +519,7 @@
   <a href="./notifications.html" class="block w-full">
     <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
       <span class="material-symbols-outlined">notifications</span>
-      <span class="text-[8px] uppercase font-bold">Notifications</span>
+      <span class="text-[8px] uppercase font-bold">Notifs</span>
     </button>
   </a>
 </div>
@@ -1019,7 +1129,7 @@
     voicemailBtn.addEventListener('click', sendToVoicemail);
     holdBtn.addEventListener('click', toggleHold);
     endBtn.addEventListener('click', endCall);
-    newCallBtn?.addEventListener('click', openNewCallModal);
+    newCallBtn?.addEventListener('click', () => DialPad.open());
     cancelCallBtn?.addEventListener('click', closeNewCallModal);
     cancelCallSecondaryBtn?.addEventListener('click', closeNewCallModal);
     startCallBtn?.addEventListener('click', startOutboundCall);
@@ -1329,6 +1439,216 @@
       if (cancelBtn) cancelBtn.addEventListener('click', revertSettings);
     })();
   </script>
+
+
+<!-- BEGIN: DialPad Module -->
+<script data-purpose="dial-pad">
+// DialPad Module
+  const DialPad = {
+    state: {
+      isOpen: false,
+      phoneNumber: '',
+      eventListenersAttached: false
+    },
+
+    get overlay() {
+      return document.getElementById('dialPadOverlay');
+    },
+
+    get display() {
+      return document.getElementById('dialPadDisplay');
+    },
+
+    get callNowBtn() {
+      return document.getElementById('dialPadCallNowBtn');
+    },
+
+    open() {
+      if (!this.state.isOpen) {
+        this.reset();
+        this.overlay.classList.remove('hidden');
+        this.state.isOpen = true;
+        this.display.focus();
+        this.attachEventListeners();
+      }
+    },
+
+    close() {
+      if (this.state.isOpen) {
+        this.overlay.classList.add('hidden');
+        this.state.isOpen = false;
+        this.reset();
+      }
+    },
+
+    reset() {
+      this.state.phoneNumber = '';
+      this.display.value = '';
+      this.callNowBtn.disabled = true;
+    },
+
+    addDigit(digit) {
+      this.state.phoneNumber += digit;
+      this.display.value = this.state.phoneNumber;
+      this.updateCallButton();
+    },
+
+    deleteLastDigit() {
+      if (this.state.phoneNumber.length > 0) {
+        this.state.phoneNumber = this.state.phoneNumber.slice(0, -1);
+        this.display.value = this.state.phoneNumber;
+        this.updateCallButton();
+      }
+    },
+
+    clearAll() {
+      this.state.phoneNumber = '';
+      this.display.value = '';
+      this.updateCallButton();
+    },
+
+    updateCallButton() {
+      this.callNowBtn.disabled = this.state.phoneNumber.length === 0;
+    },
+
+    startCall() {
+      if (this.state.phoneNumber.length > 0) {
+        // Store the phone number in localStorage for activeCall.html to retrieve
+        try {
+          localStorage.setItem('dialforgeDialPadNumber', this.state.phoneNumber);
+        } catch (e) {
+          console.error('Error saving phone number to localStorage:', e);
+        }
+        this.close();
+        // Navigate to active call page
+        window.location.href = './activeCall.html';
+      }
+    },
+
+    attachEventListeners() {
+      if (this.state.eventListenersAttached) return;
+
+      // Digit pad buttons
+      document.querySelectorAll('.dial-pad-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const digit = btn.dataset.digit;
+          this.addDigit(digit);
+        });
+      });
+
+      // Delete button
+      const deleteBtn = document.getElementById('dialPadDeleteBtn');
+      if (deleteBtn && !deleteBtn.dataset.listenerAttached) {
+        deleteBtn.addEventListener('click', () => this.deleteLastDigit());
+        deleteBtn.dataset.listenerAttached = 'true';
+      }
+
+      // Clear button
+      const clearBtn = document.getElementById('dialPadClearBtn');
+      if (clearBtn && !clearBtn.dataset.listenerAttached) {
+        clearBtn.addEventListener('click', () => this.clearAll());
+        clearBtn.dataset.listenerAttached = 'true';
+      }
+
+      // Call Now button
+      if (this.callNowBtn && !this.callNowBtn.dataset.listenerAttached) {
+        this.callNowBtn.addEventListener('click', () => this.startCall());
+        this.callNowBtn.dataset.listenerAttached = 'true';
+      }
+
+      // Close button
+      const closeBtn = document.getElementById('dialPadCloseBtn');
+      if (closeBtn && !closeBtn.dataset.listenerAttached) {
+        closeBtn.addEventListener('click', () => this.close());
+        closeBtn.dataset.listenerAttached = 'true';
+      }
+
+      // Close on overlay click (outside modal)
+      if (!this.overlay.dataset.listenerAttached) {
+        this.overlay.addEventListener('click', (e) => {
+          if (e.target === this.overlay) {
+            this.close();
+          }
+        });
+        this.overlay.dataset.listenerAttached = 'true';
+      }
+
+      // Close on Escape key
+      if (!this.state.escapeListenerAttached) {
+        const escapeHandler = (e) => {
+          if (e.key === 'Escape' && this.state.isOpen) {
+            this.close();
+          }
+        };
+        document.addEventListener('keydown', escapeHandler);
+        this.state.escapeListenerAttached = true;
+      }
+      
+      // Keyboard number input (0-9, +, (, ), -, space)
+      if (!this.state.keyboardInputAttached) {
+        const keyboardHandler = (e) => {
+          if (!this.state.isOpen) return;
+          
+          const key = e.key;
+          
+          // Handle Backspace key - reuse existing deleteLastDigit function
+          if (key === 'Backspace') {
+            e.preventDefault();
+            this.deleteLastDigit();
+            return;
+          }
+          
+          // Handle numeric keys (0-9)
+          if (/^\d$/.test(key)) {
+            e.preventDefault();
+            this.addDigit(key);
+            return;
+          }
+          
+          // Handle phone number formatting characters: +, (, ), -, space
+          if (/^[+\(\)\-\s]$/.test(key)) {
+            e.preventDefault();
+            this.addDigit(key);
+            return;
+          }
+        };
+        document.addEventListener('keydown', keyboardHandler);
+        this.state.keyboardInputAttached = true;
+      }
+
+      this.state.eventListenersAttached = true;
+    },
+
+    attachKeyboardShortcut() {
+      document.addEventListener('keydown', (e) => {
+        const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+        const isKKey = e.key.toLowerCase() === 'k';
+        
+        // Don't trigger if user is typing in an input, textarea, or contenteditable element
+        const target = e.target;
+        const isEditableElement = 
+          target.tagName === 'INPUT' && target.id !== 'dialPadDisplay' ||
+          target.tagName === 'TEXTAREA' ||
+          target.contentEditable === 'true';
+        
+        if (isCtrlOrCmd && isKKey && !isEditableElement) {
+          e.preventDefault();
+          this.open();
+        }
+      });
+    }
+  };
+
+  // Initialize the app when DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    DialPad.attachKeyboardShortcut();
+  });
+
+  // Make DialPad globally accessible
+  window.DialPad = DialPad;
+</script>
+<!-- END: DialPad Module -->
+
 <!-- BEGIN: Usage Minutes Synchronization -->
 <script data-purpose="sync-usage-minutes">
 (function() {
