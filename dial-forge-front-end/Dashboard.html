@@ -492,8 +492,8 @@
 
   <!-- Utility Icons -->
   <div class="flex items-center gap-1">
-    <button class="p-2 text-on-surface-variant/60 hover:text-white transition-colors" aria-label="Toggle dark mode">
-      <span class="material-symbols-outlined">dark_mode</span>
+    <button id="themeToggleBtn" class="p-2 text-on-surface-variant/60 hover:text-white transition-colors" aria-label="Toggle dark mode">
+      <span id="themeToggleIcon" class="material-symbols-outlined">dark_mode</span>
     </button>
     <button id="crmPanelToggle" type="button" class="p-2 text-on-surface-variant/60 hover:text-white transition-colors" aria-label="Toggle CRM panel">
       <span class="material-symbols-outlined">side_navigation</span>
@@ -595,9 +595,9 @@
 <p class="text-on-surface-variant/80 mt-2">Reviewing live data for <span id="dashboardCompanyName" class="font-bold text-white">Global Sales Territory</span></p>
 </div>
 <div class="flex items-center gap-4">
-<div class="flex items-center gap-2 bg-surface-container-high/50 px-4 py-2 rounded-full border border-white/5">
-<span class="w-2.5 h-2.5 rounded-full bg-tertiary active-orb"></span>
-<span class="text-[10px] font-extrabold text-tertiary tracking-widest uppercase">System Live</span>
+<div id="apiStatusIndicator" class="flex items-center gap-2 bg-surface-container-high/50 px-4 py-2 rounded-full border border-white/5" aria-label="API connection status">
+<span id="apiStatusDot" class="w-2.5 h-2.5 rounded-full bg-tertiary active-orb"></span>
+<span id="apiStatusText" class="text-[10px] font-extrabold text-tertiary tracking-widest uppercase">System Live</span>
 </div>
 
 </div>
@@ -934,7 +934,7 @@
           <p class="text-[10px] font-extrabold uppercase tracking-[0.3em] text-fire-accent">Right CRM</p>
           <h3 class="text-sm font-section-header text-white">Context Hub</h3>
         </div>
-        <span class="rounded-full border border-tertiary/20 bg-tertiary/10 px-2 py-1 text-[10px] font-bold text-tertiary">Live</span>
+        <span id="crmLiveIndicator" class="rounded-full border border-tertiary/20 bg-tertiary/10 px-2 py-1 text-[10px] font-bold text-tertiary">Live</span>
       </div>
 
       <div class="space-y-4">
@@ -966,6 +966,94 @@
   </div>
 </aside>
 <!--End CRM-->
+
+<script data-purpose="dashboard-ui-updates">
+/**
+ * Dashboard UI Update Functions
+ * 
+ * These functions consume API data from dashboardAPI.js and update
+ * the Dashboard DOM with the results.
+ * 
+ * They are NOT responsible for fetching data - that's handled by dashboardAPI.js.
+ * They only handle UI updates.
+ */
+
+// Update API status indicator in header and CRM panel
+function updateApiStatusIndicator(isAvailable) {
+  const headerDot = document.getElementById('apiStatusDot');
+  const headerText = document.getElementById('apiStatusText');
+  const crmDot = document.getElementById('crmApiDot');
+  const crmStatusText = document.getElementById('crmApiStatusText');
+  
+  if (isAvailable) {
+    // API is available
+    if (headerDot) headerDot.className = 'w-2.5 h-2.5 rounded-full bg-tertiary active-orb';
+    if (headerText) {
+      headerText.textContent = 'System Live';
+      headerText.className = 'text-[10px] font-extrabold text-tertiary tracking-widest uppercase';
+    }
+    if (crmDot) crmDot.className = 'w-2 h-2 rounded-full bg-tertiary';
+    if (crmStatusText) crmStatusText.textContent = 'Connected';
+  } else {
+    // API is unavailable
+    if (headerDot) headerDot.className = 'w-2.5 h-2.5 rounded-full bg-error-red';
+    if (headerText) {
+      headerText.textContent = 'API Unavailable';
+      headerText.className = 'text-[10px] font-extrabold text-error-red tracking-widest uppercase';
+    }
+    if (crmDot) crmDot.className = 'w-2 h-2 rounded-full bg-error-red';
+    if (crmStatusText) crmStatusText.textContent = 'Offline - Using cached data';
+  }
+}
+
+// Update contacts display in CRM panel
+function updateContactsDisplay(contactsData) {
+  const countEl = document.getElementById('crmContactsCount');
+  const detailEl = document.getElementById('crmContactsDetail');
+  
+  if (!countEl || !detailEl) return;
+  
+  const total = contactsData.total || 0;
+  countEl.textContent = total.toString();
+  
+  if (total > 0) {
+    detailEl.innerHTML = `<span class="text-tertiary font-semibold">${total} active contacts</span>`;
+  } else {
+    detailEl.innerHTML = '<span class="text-on-surface-variant/60">No contacts available</span>';
+  }
+}
+
+// Update tickets display in CRM panel
+function updateTicketsDisplay(ticketsData) {
+  const countEl = document.getElementById('crmTicketsCount');
+  const detailEl = document.getElementById('crmTicketsDetail');
+  
+  if (!countEl || !detailEl) return;
+  
+  const total = ticketsData.all || 0;
+  const open = ticketsData.open || 0;
+  
+  countEl.textContent = open.toString();
+  
+  if (total > 0) {
+    detailEl.innerHTML = `<span class="text-fire-accent font-semibold">${open} / ${total} open</span>`;
+  } else {
+    detailEl.innerHTML = '<span class="text-tertiary">All resolved</span>';
+  }
+}
+
+// Main function to load Dashboard data from API and update UI
+async function loadDashboardDataAndUpdateUI() {
+  // Fetch all Dashboard data from API layer
+  const dashboardData = await dashboardAPI.loadDashboardData();
+  
+  // Update UI with the retrieved data
+  updateApiStatusIndicator(dashboardData.isApiAvailable);
+  updateContactsDisplay(dashboardData.contacts);
+  updateTicketsDisplay(dashboardData.tickets);
+}
+</script>
+
 
 <!-- BEGIN: Dashboard Company State Sync -->
 <script data-purpose="dashboard-company-state-sync">
@@ -1677,7 +1765,8 @@
 
 <script data-purpose="application-state">
   // Storage key for persisting call history across pages
-  const CALL_HISTORY_STORAGE_KEY = 'dialForgeCallHistory';
+  const CALL_HISTORY_STORAGE_KEY = 'dialforgeCallHistory';
+  const LEADERBOARD_STORAGE_KEY = 'dialforge-leaderboard-data';
 
   // Application state management
   const APP = {
@@ -2407,12 +2496,21 @@ const PipelineVelocitySync = {
     APP.init();
     DialPad.attachKeyboardShortcut();
     PipelineVelocitySync.init();
+    // Load Dashboard data from API and update UI
+    loadDashboardDataAndUpdateUI();
   });
 
   // Make APP globally accessible for external integration
   window.APP = APP;
   window.DialPad = DialPad;
 </script>
+
+<!-- BEGIN: API Integration Scripts -->
+<!-- Load universal API infrastructure first -->
+<script src="./APIintegration/dialforgeAPI.js"></script>
+<!-- Load Dashboard-specific API layer -->
+<script src="./APIintegration/dashboardAPI.js"></script>
+<!-- END: API Integration Scripts -->
 
 <!-- BEGIN: Usage Minutes Synchronization -->
 <script data-purpose="sync-usage-minutes">
