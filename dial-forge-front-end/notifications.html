@@ -9,7 +9,7 @@
 <!-- Google Fonts: Syne -->
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&amp;family=Syne:wght@700;800&amp;family=JetBrains+Mono&amp;display=swap" rel="stylesheet"/>
 <!-- Icons -->
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
 
@@ -19,6 +19,14 @@
         extend: {
           fontFamily: {
             syne: ['Syne', 'sans-serif'],
+            "mono-data": ["JetBrains Mono"],
+            "hero-h1": ["Syne"],
+            "button-text": ["DM Sans"],
+            "badge-text": ["DM Sans"],
+            "section-header": ["Syne"],
+            "stat-value": ["Syne"],
+            "body-base": ["DM Sans"],
+            "small-label": ["DM Sans"]
           },
           colors: {
             brand: '#ff7a1c',
@@ -225,6 +233,57 @@
     .dial-pad-btn:active {
       transform: scale(0.95);
     }
+    
+    /* Focus visible styles for all interactive elements */
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid #FF7A1C;
+      outline-offset: 2px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 899px) {
+      body {
+        padding-left: 0;
+      }
+      .left-sidebar {
+        display: none !important;
+      }
+      #mainContent {
+        margin-left: 0 !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .header-title {
+        font-size: 2.5rem;
+      }
+      .flex-responsive-wrap {
+        flex-direction: column;
+      }
+      .grid-responsive {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
+    @media (max-width: 599px) {
+      #mainContent {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+      .header-title {
+        font-size: 1.875rem;
+      }
+      .notification-item {
+        padding: 1rem;
+      }
+      .flex-responsive-hide-mobile {
+        display: none;
+      }
+    }
   </style>
 </head>
 <body class="min-h-screen">
@@ -334,15 +393,15 @@
       <span class="text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest">Ringing…</span>
     </div>
     <div class="grid grid-cols-3 gap-3 w-full">
-      <button id="declineCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-error-red/10 border border-error-red/30 text-error-red hover:bg-error-red/20 transition-all">
+      <button id="declineCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-error-red/10 border border-error-red/30 text-error-red hover:bg-error-red/20 transition-all" aria-label="Decline call">
         <span class="material-symbols-outlined">call_end</span>
         <span class="text-[9px] font-extrabold uppercase tracking-wider">Decline</span>
       </button>
-      <button id="acceptCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-tertiary/10 border border-tertiary/40 text-tertiary hover:bg-tertiary/20 transition-all">
+      <button id="acceptCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-tertiary/10 border border-tertiary/40 text-tertiary hover:bg-tertiary/20 transition-all" aria-label="Accept call">
         <span class="material-symbols-outlined">call</span>
         <span class="text-[9px] font-extrabold uppercase tracking-wider">Accept</span>
       </button>
-      <button id="voicemailCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-surface-container-high/60 border border-white/10 text-on-surface-variant hover:text-white transition-all">
+      <button id="voicemailCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-surface-container-high/60 border border-white/10 text-on-surface-variant hover:text-white transition-all" aria-label="Send to voicemail">
         <span class="material-symbols-outlined">voicemail</span>
         <span class="text-[9px] font-extrabold uppercase tracking-wider">Voicemail</span>
       </button>
@@ -357,7 +416,7 @@
         <p class="text-[10px] font-extrabold uppercase tracking-[0.3em] text-fire-accent">New Call</p>
         <h3 class="text-xl font-section-header text-white">Start a conversation</h3>
       </div>
-      <button id="cancelCallBtn" type="button" class="rounded-full p-2 text-on-surface-variant/70 hover:bg-white/10 hover:text-white transition-all">
+      <button id="cancelCallBtn" type="button" class="rounded-full p-2 text-on-surface-variant/70 hover:bg-white/10 hover:text-white transition-all" aria-label="Close new call modal">
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
@@ -376,8 +435,8 @@
       </div>
 
       <div class="flex items-center justify-end gap-3 pt-2">
-        <button id="cancelCallSecondaryBtn" type="button" class="rounded-xl border border-white/10 px-4 py-2 text-sm font-bold text-on-surface-variant hover:bg-white/10 hover:text-white transition-all">Cancel</button>
-        <button id="startCallBtn" type="button" class="flex items-center gap-2 rounded-xl bg-fire-gradient px-4 py-2 text-sm font-bold text-on-primary shadow-lg transition-all hover:brightness-110">
+        <button id="cancelCallSecondaryBtn" type="button" class="rounded-xl border border-white/10 px-4 py-2 text-sm font-bold text-on-surface-variant hover:bg-white/10 hover:text-white transition-all" aria-label="Cancel call">Cancel</button>
+        <button id="startCallBtn" type="button" class="flex items-center gap-2 rounded-xl bg-fire-gradient px-4 py-2 text-sm font-bold text-on-primary shadow-lg transition-all hover:brightness-110" aria-label="Start call">
           <span class="material-symbols-outlined text-sm">call</span>
           Start Call
         </button>
@@ -387,31 +446,31 @@
 </div>
 
 <!-- BEGIN: ActiveCallBar -->
-<div id="activeCallBar" class="hidden fixed top-16 left-0 lg:left-20 right-0 z-40 bg-tertiary-container/95 backdrop-blur-xl border-b border-tertiary/30 px-6 py-3 flex items-center justify-between">
-  <div class="flex items-center gap-3">
+<div id="activeCallBar" class="hidden fixed top-16 left-0 lg:left-20 right-0 z-40 bg-tertiary-container/95 backdrop-blur-xl border-b border-tertiary/30 px-6 py-3 flex items-center justify-between overflow-x-auto">
+  <div class="flex items-center gap-3 flex-shrink-0">
     <span class="w-2 h-2 rounded-full bg-white active-orb"></span>
     <span id="activeCallStatusLabel" class="text-[10px] font-extrabold text-white uppercase tracking-widest">Active Call</span>
-    <span class="text-white/50">•</span>
-    <span id="activeCallName" class="text-sm font-bold text-white">Jordan Blake</span>
-    <span id="activeCallCompany" class="text-xs text-white/70 font-bold">Meridian Capital Partners</span>
+    <span class="text-white/50 hidden sm:inline">•</span>
+    <span id="activeCallName" class="text-sm font-bold text-white hidden sm:inline">Jordan Blake</span>
+    <span id="activeCallCompany" class="text-xs text-white/70 font-bold hidden md:inline">Meridian Capital Partners</span>
   </div>
-  <div class="flex items-center gap-2 xl:pr-16">
+  <div class="flex items-center gap-2 flex-shrink-0">
     <span id="activeCallDuration" class="font-mono-data text-sm font-bold text-white">00:00</span>
-    <button id="holdCallBtn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all">
+    <button id="holdCallBtn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all" aria-label="Hold call">
       <span class="material-symbols-outlined text-sm">pause</span>
-      Hold
+      <span class="hidden sm:inline">Hold</span>
     </button>
-    <button id="endCallBtn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-error-red text-white text-xs font-bold hover:brightness-110 transition-all">
+    <button id="endCallBtn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-error-red text-white text-xs font-bold hover:brightness-110 transition-all" aria-label="End call">
       <span class="material-symbols-outlined text-sm">call_end</span>
-      End
+      <span class="hidden sm:inline">End</span>
     </button>
   </div>
 </div>
 <!-- END: ActiveCallBar -->
 
 <!-- BEGIN: MainHeader -->
-<header class="fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-xl border-b border-white/10 flex justify-between items-center px-6 h-16">
-<div class="flex items-center gap-8">
+<header class="fixed top-0 w-full z-50 bg-surface/70 backdrop-blur-xl border-b border-white/10 flex justify-between items-center px-4 sm:px-6 h-16 overflow-x-auto">
+<div class="flex items-center gap-4 sm:gap-8">
 <span class="font-hero-h1 text-2xl font-extrabold text-white">Dial<span class="text-fire-gradient">Forge</span></span>
 <div class="h-8 w-px bg-white/10 hidden lg:block"></div>
   <div class="flex flex-col justify-center">
@@ -421,7 +480,7 @@
 
 </div>
 
-<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 sm:gap-4 flex-shrink-0">
   <!-- Usage Pill -->
   <div class="hidden md:flex items-center gap-3 bg-surface-container-high/40 border border-white/5 rounded-full px-3 py-1.5 relative overflow-hidden">
     <div id="usageProgressBar" class="absolute inset-0 bg-fire-gradient/10 w-[84%]"></div>
@@ -435,21 +494,21 @@
     <span id="callTimerText" class="font-mono-data text-sm font-bold text-white">00:00</span>
   </div>
 
-  <div class="h-8 w-px bg-white/10 mx-2"></div>
+  <div class="h-8 w-px bg-white/10 mx-2 sm:block"></div>
 
   <!-- Action Buttons -->
-  <div class="flex items-center gap-2">
-    <button id="testInboundBtn" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-high/50 border border-white/10 text-on-surface-variant hover:text-white transition-all text-xs font-bold">
+  <div class="flex items-center gap-1 sm:gap-2">
+    <button id="testInboundBtn" class="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg bg-surface-container-high/50 border border-white/10 text-on-surface-variant hover:text-white transition-all text-xs font-bold" aria-label="Test inbound call">
       <span class="material-symbols-outlined text-sm">ring_volume</span>
-      Test Inbound
+      <span class="hidden sm:inline">Test Inbound</span>
     </button>
-    <button id="newCallBtn" type="button" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-fire-gradient text-on-primary font-bold text-xs hover:brightness-110 transition-all shadow-lg">
+    <button id="newCallBtn" type="button" class="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg bg-fire-gradient text-on-primary font-bold text-xs hover:brightness-110 transition-all shadow-lg" aria-label="Start new call">
       <span class="material-symbols-outlined text-sm">add</span>
-      New Call
+      <span class="hidden sm:inline">New Call</span>
     </button>
   </div>
 
-  <div class="h-8 w-px bg-white/10 mx-2"></div>
+  <div class="h-8 w-px bg-white/10 mx-2 sm:block"></div>
 
   <!-- Utility Icons -->
   <div class="flex items-center gap-1">
@@ -468,116 +527,129 @@
 <aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex flex-col bg-surface-container-low/78 backdrop-blur-xl border-r border-white/5 items-center py-6 gap-8 z-40">
 <div class="flex flex-col items-center gap-4 w-full overflow-y-auto flex-1">
   <a href="./Dashboard.html" class="block">
-        <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+        <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Dashboard">
             <span class="material-symbols-outlined">dashboard</span>
             <span class="text-[8px] uppercase font-bold">Dashboard</span>
         </button>
     </a>
-  <a href="./activeCall.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+  <a href="./activeCall.html" aria-label="Active call"> 
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Call">
     <span class="material-symbols-outlined">call</span>
     <span class="text-[8px] uppercase font-bold">Call</span>
+  </button>
   </a>
-  <a href="./supportQueue.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+  <a href="./supportQueue.html" aria-label="Support queue"> 
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Queue">
     <span class="material-symbols-outlined">queue</span>
     <span class="text-[8px] uppercase font-bold">Queue</span>
+  </button>
   </a>
-  <a href="./callCoaching.html" class="block w-full">
-    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+  <a href="./callCoaching.html" class="block w-full" aria-label="Call coaching">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Coaching">
       <span class="material-symbols-outlined">graphic_eq</span>
       <span class="text-[8px] uppercase font-bold">Coaching</span>
     </button>
   </a>
-  <a href="./powerDialer.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+  <a href="./powerDialer.html" aria-label="Power dialer"> 
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Dialer">
     <span class="material-symbols-outlined">dialer_sip</span>
     <span class="text-[8px] uppercase font-bold">Dialer</span>
+  </button>
   </a>
-  <a href="./salesPipeline.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+  <a href="./salesPipeline.html" sria-label="Sales pipeline"> 
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Pipeline">
     <span class="material-symbols-outlined">view_kanban</span>
     <span class="text-[8px] uppercase font-bold">Pipeline</span>
+  </button>
   </a>
-  <a href="./callHistory.html" class="block w-full">
-    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+  <a href="./callHistory.html" class="block w-full" aria-label="Call history">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="History">
       <span class="material-symbols-outlined">history</span>
       <span class="text-[8px] uppercase font-bold">History</span>
     </button>
   </a>
-  <a href="./contacts.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+  <a href="./contacts.html" aria-label="Contacts">
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
     <span class="material-symbols-outlined">group</span>
     <span class="text-[8px] uppercase font-bold">Contacts</span>
+  </button>
   </a>
-  <a href="./integrationsHub.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+  <a href="./integrationsHub.html"> 
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
     <span class="material-symbols-outlined">apps</span>
     <span class="text-[8px] uppercase font-bold">Integrations</span>
+  </button>
   </a>
   <a href="./numbers.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
     <span class="material-symbols-outlined">123</span>
     <span class="text-[8px] uppercase font-bold">Numbers</span>
   </a>
-  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
-    <a href="./billingSubscription.html" class="flex flex-col items-center gap-1 w-full h-full text-inherit no-underline">
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Billing">
+    <a href="./billingSubscription.html" class="flex flex-col items-center gap-1 w-full h-full text-inherit no-underline" aria-label="Billing and subscription">
       <span class="material-symbols-outlined">payments</span>
       <span class="text-[8px] uppercase font-bold">Billing</span>
     </a>
   </button>
-  <a href="./teamGovernance.html" class="block w-full">
-    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+  <a href="./teamGovernance.html" class="block w-full" aria-label="Team governance">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Team">
       <span class="material-symbols-outlined">groups</span>
       <span class="text-[8px] uppercase font-bold">Team</span>
     </button>
   </a>
-   <a href="./settingsGeneral.html" class="block w-full">
-    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+   <a href="./settingsGeneral.html" class="block w-full" aria-label="General settings" aria-label="General settings">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Settings">
       <span class="material-symbols-outlined">settings</span>
       <span class="text-[8px] uppercase font-bold">Settings</span>
     </button>
   </a>
-    <button class="group relative flex flex-col items-center gap-1 w-full py-3 bg-primary-container/20 text-fire-accent border-l-4 border-fire-accent shadow-[0_0_20px_rgba(255,122,28,0.2)]">
+    <button class="group relative flex flex-col items-center gap-1 w-full py-3 bg-primary-container/20 text-fire-accent border-l-4 border-fire-accent shadow-[0_0_20px_rgba(255,122,28,0.2)]" aria-label="Notifications - current page">
       <span class="material-symbols-outlined">notifications</span>
-      <span class="text-[8px] uppercase font-bold">Notif</span>
+      <span class="text-[8px] uppercase font-bold">Notifs</span>
     </button>
  
 
 </div>
 <div class="flex flex-col items-center gap-4 w-full pb-4">
-  <a href="./profile.html" class="block w-full h-full cursor-pointer">
-    <div class="h-10 w-10 rounded-full overflow-hidden border border-white/10 items-center ml-4">
+  <a href="./profile.html" class="block w-full h-full cursor-pointer" aria-label="Profile">
+    <button class="h-10 w-10 rounded-full overflow-hidden border border-white/10 items-center ml-4" aria-label="Profile picture">
     <img id="notificationsUserAvatar" alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs">
-  </div>
+    </button>
   </a>
 </div>
 </aside>
+<!-- END: LeftSidebar -->
 
 <!-- END: MainHeader -->
-<main id="mainContent" class="max-w-5xl mx-auto px-6 py-12">
+<main id="mainContent" class="ml-32 pt-16 pb-16">
 <!-- BEGIN: NotificationsHeader -->
-<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 px-4 sm:px-8 md:px-12">
 <div class="max-w-2xl">
-<h1 class="header-title text-5xl md:text-6xl mb-4 mt-16">Notifications</h1>
-<p class="text-gray-400 text-lg leading-relaxed">
+<h1 class="header-title text-4xl sm:text-5xl md:text-6xl mb-4 mt-4 sm:mt-8">Notifications</h1>
+<p class="text-gray-400 text-sm sm:text-lg leading-relaxed">
           Stay updated with real-time deal alerts, coaching feedback, and system synchronization.
         </p>
 </div>
 <div class="flex items-center gap-3">
-<button id="markAllReadBtn" class="flex items-center gap-2 px-6 py-2.5 rounded-full bg-brand hover:bg-orange-600 transition-all text-white text-sm font-bold shadow-lg shadow-orange-500/20">
+<button id="markAllReadBtn" class="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-2.5 rounded-full bg-brand hover:bg-orange-600 transition-all text-white text-xs sm:text-sm font-bold shadow-lg shadow-orange-500/20 whitespace-nowrap" aria-label="Mark all as read">
 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
 </svg>
-          Mark All as Read
+          <span class="xs:inline">Mark All as Read</span>
         </button>
 </div>
 </div>
 <!-- END: NotificationsHeader -->
 <!-- BEGIN: FilterTabs -->
-<div class="flex flex-wrap gap-3 mb-12" id="filterTabs">
-<button class="px-8 py-2.5 rounded-full bg-brand text-white font-bold transition-all" data-filter="all">All</button>
-<button class="px-8 py-2.5 rounded-full bg-surface-container border border-white/10 hover:border-brand/50 text-gray-400 hover:text-white transition-all" data-filter="deals">Deal Alerts</button>
-<button class="px-8 py-2.5 rounded-full bg-surface-container border border-white/10 hover:border-brand/50 text-gray-400 hover:text-white transition-all" data-filter="coaching">Coaching</button>
-<button class="px-8 py-2.5 rounded-full bg-surface-container border border-white/10 hover:border-brand/50 text-gray-400 hover:text-white transition-all" data-filter="system">System</button>
+<div class="flex flex-wrap gap-2 sm:gap-3 mb-12 px-4 sm:px-8 md:px-12" id="filterTabs">
+<button class="px-4 sm:px-8 py-2 sm:py-2.5 rounded-full bg-brand text-white font-bold transition-all text-xs sm:text-sm" data-filter="all" aria-label="All notifications">All</button>
+<button class="px-4 sm:px-8 py-2 sm:py-2.5 rounded-full bg-surface-container border border-white/10 hover:border-brand/50 text-gray-400 hover:text-white transition-all text-xs sm:text-sm" data-filter="deals" aria-label="Deal alerts">Deal Alerts</button>
+<button class="px-4 sm:px-8 py-2 sm:py-2.5 rounded-full bg-surface-container border border-white/10 hover:border-brand/50 text-gray-400 hover:text-white transition-all text-xs sm:text-sm" data-filter="coaching" aria-label="Coaching">Coaching</button>
+<button class="px-4 sm:px-8 py-2 sm:py-2.5 rounded-full bg-surface-container border border-white/10 hover:border-brand/50 text-gray-400 hover:text-white transition-all text-xs sm:text-sm" data-filter="system" aria-label="System">System</button>
 </div>
 <!-- END: FilterTabs -->
 <!-- BEGIN: RecentNotifications -->
-<section class="mb-12">
-<h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">Recent</h3>
+<section class="mb-12 px-4 sm:px-8 md:px-12">
+<h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">Recent</h2>
 <div class="space-y-4" id="recentNotifications">
 <!-- Notification: Sarah Kim -->
 <div class="notification-item glass-card rounded-custom p-5 border-l-4 border-l-brand relative" data-type="deals" data-id="notif-1">
@@ -588,8 +660,8 @@
 </svg>
 </div>
 <div class="flex-1 min-w-0">
-<div class="flex items-center justify-between gap-4 mb-1">
-<h4 class="font-bold text-white truncate text-lg">Sarah Kim moved to Closing</h4>
+<div class="flex items-center justify-between gap-4 mb-1 flex-wrap">
+<h3 class="font-bold text-white truncate text-base sm:text-lg">Sarah Kim moved to Closing</h3>
 <span class="text-xs text-gray-500 whitespace-nowrap">2m ago</span>
 </div>
 <p class="text-gray-400 text-sm">The contract for Enterprise Tier was sent and viewed 3 times. High probability of win.</p>
@@ -606,8 +678,8 @@
 </svg>
 </div>
 <div class="flex-1 min-w-0">
-<div class="flex items-center justify-between gap-4 mb-1">
-<h4 class="font-bold text-white truncate text-lg">New Coaching Insight Available</h4>
+<div class="flex items-center justify-between gap-4 mb-1 flex-wrap">
+<h3 class="font-bold text-white truncate text-base sm:text-lg">New Coaching Insight Available</h3>
 <span class="text-xs text-gray-500 whitespace-nowrap">15m ago</span>
 </div>
 <p class="text-gray-400 text-sm">Your last call with Nexus Corp had a 72% objection handling score. Review recommendations.</p>
@@ -624,8 +696,8 @@
 </svg>
 </div>
 <div class="flex-1 min-w-0">
-<div class="flex items-center justify-between gap-4 mb-1">
-<h4 class="font-bold text-white truncate text-lg">Weekly Performance Sync Complete</h4>
+<div class="flex items-center justify-between gap-4 mb-1 flex-wrap">
+<h3 class="font-bold text-white truncate text-base sm:text-lg">Weekly Performance Sync Complete</h3>
 <span class="text-xs text-gray-500 whitespace-nowrap">1h ago</span>
 </div>
 <p class="text-gray-400 text-sm">Your dashboard has been updated with the latest regional sales data from Salesforce.</p>
@@ -641,8 +713,8 @@
 </svg>
 </div>
 <div class="flex-1 min-w-0">
-<div class="flex items-center justify-between gap-4 mb-1">
-<h4 class="font-bold text-white truncate text-lg">Deal Won — $84k Closed</h4>
+<div class="flex items-center justify-between gap-4 mb-1 flex-wrap">
+<h3 class="font-bold text-white truncate text-base sm:text-lg">Deal Won — $84k Closed</h3>
 <span class="text-xs text-gray-500 whitespace-nowrap">32m ago</span>
 </div>
 <p class="text-gray-400 text-sm">Redline Ops signed the Enterprise agreement. Commission credited to your next payout.</p>
@@ -659,8 +731,8 @@
 </svg>
 </div>
 <div class="flex-1 min-w-0">
-<div class="flex items-center justify-between gap-4 mb-1">
-<h4 class="font-bold text-white truncate text-lg">Objection Handling Score Updated</h4>
+<div class="flex items-center justify-between gap-4 mb-1 flex-wrap">
+<h3 class="font-bold text-white truncate text-base sm:text-lg">Objection Handling Score Updated</h3>
 <span class="text-xs text-gray-500 whitespace-nowrap">48m ago</span>
 </div>
 <p class="text-gray-400 text-sm">Your objection handling score improved to 85% this week — up 13% from last period. Great progress!</p>
@@ -677,8 +749,8 @@
 </svg>
 </div>
 <div class="flex-1 min-w-0">
-<div class="flex items-center justify-between gap-4 mb-1">
-<h4 class="font-bold text-white truncate text-lg">Voicemail Transcription Ready</h4>
+<div class="flex items-center justify-between gap-4 mb-1 flex-wrap">
+<h3 class="font-bold text-white truncate text-base sm:text-lg">Voicemail Transcription Ready</h3>
 <span class="text-xs text-gray-500 whitespace-nowrap">1h ago</span>
 </div>
 <p class="text-gray-400 text-sm">3 new voicemail transcriptions are available from this morning's missed calls. Review them in your inbox.</p>
@@ -689,8 +761,8 @@
 </section>
 <!-- END: RecentNotifications -->
 <!-- BEGIN: YesterdayNotifications -->
-<section class="mb-12">
-<h3 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">Yesterday</h3>
+<section class="mb-12 px-4 sm:px-8 md:px-12">
+<h2 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6">Yesterday</h2>
 <div class="space-y-4" id="yesterdayNotifications">
 <!-- Notification: CRM Enrichment -->
 <div class="notification-item glass-card rounded-custom p-5 border-l-4 border-l-accent-teal relative is-read" data-type="system" data-id="notif-4">
@@ -701,8 +773,8 @@
 </svg>
 </div>
 <div class="flex-1 min-w-0">
-<div class="flex items-center justify-between gap-4 mb-1">
-<h4 class="font-bold text-white truncate text-lg">CRM Contact Enrichment</h4>
+<div class="flex items-center justify-between gap-4 mb-1 flex-wrap">
+<h3 class="font-bold text-white truncate text-base sm:text-lg">CRM Contact Enrichment</h3>
 <span class="text-xs text-gray-500 whitespace-nowrap">Yesterday</span>
 </div>
 <p class="text-gray-400 text-sm">14 new leads were automatically enriched with LinkedIn profile data and direct-dial numbers.</p>
@@ -718,8 +790,8 @@
 </svg>
 </div>
 <div class="flex-1 min-w-0">
-<div class="flex items-center justify-between gap-4 mb-1">
-<h4 class="font-bold text-white truncate text-lg">Pipeline Milestones Reached</h4>
+<div class="flex items-center justify-between gap-4 mb-1 flex-wrap">
+<h3 class="font-bold text-white truncate text-base sm:text-lg">Pipeline Milestones Reached</h3>
 <span class="text-xs text-gray-500 whitespace-nowrap">Yesterday</span>
 </div>
 <p class="text-gray-400 text-sm">You've hit 120% of your weekly activity target. Keep the momentum going!</p>
@@ -729,55 +801,14 @@
 </section>
 <!-- END: YesterdayNotifications -->
 <!-- BEGIN: FooterAction -->
-<div class="flex justify-center mt-16">
-<button id="loadMoreBtn" class="px-12 py-3.5 rounded-full glass-card hover:bg-white/10 transition-all text-sm font-bold text-white border border-white/10">
+<div class="flex justify-center mt-16 px-4">
+<button id="loadMoreBtn" class="px-8 sm:px-12 py-3 sm:py-3.5 rounded-full glass-card hover:bg-white/10 transition-all text-xs sm:text-sm font-bold text-white border border-white/10" aria-label="Load older notifications">
         Load Older Notifications
       </button>
 </div>
 <!-- END: FooterAction -->
 </main>
 
-<div id="taskModal" class="hidden fixed inset-0 z-[120] bg-black/70 backdrop-blur-sm px-4 py-10">
-  <div class="mx-auto flex max-w-lg flex-col rounded-2xl border border-white/10 bg-surface-container-low/95 p-6 shadow-2xl">
-    <div class="mb-6 flex items-start justify-between gap-3">
-      <div>
-        <p class="text-[10px] font-extrabold uppercase tracking-[0.3em] text-fire-accent">Planning</p>
-        <h4 class="text-lg font-section-header text-white">Add Task</h4>
-      </div>
-      <button id="closeTaskModalBtn" type="button" class="rounded-full border border-white/10 bg-surface-container-high/70 p-2 text-on-surface-variant transition-all hover:bg-white/10 hover:text-white" aria-label="Close task modal">
-        <span class="material-symbols-outlined text-base">close</span>
-      </button>
-    </div>
-    <form id="taskForm" class="space-y-4">
-      <label class="block">
-        <span class="mb-2 block text-[11px] font-extrabold uppercase tracking-[0.2em] text-on-surface-variant/70">Task title</span>
-        <input id="taskTitleInput" name="title" type="text" required class="w-full rounded-xl border border-white/10 bg-surface-container-high/60 px-3 py-3 text-sm text-white outline-none ring-0 placeholder:text-on-surface-variant/40" placeholder="Follow up with the team" />
-      </label>
-      <label class="block">
-        <span class="mb-2 block text-[11px] font-extrabold uppercase tracking-[0.2em] text-on-surface-variant/70">Description</span>
-        <textarea id="taskDescriptionInput" name="description" rows="3" class="w-full rounded-xl border border-white/10 bg-surface-container-high/60 px-3 py-3 text-sm text-white outline-none ring-0 placeholder:text-on-surface-variant/40" placeholder="Optional notes"></textarea>
-      </label>
-      <div class="grid gap-4 md:grid-cols-2">
-        <label class="block">
-          <span class="mb-2 block text-[11px] font-extrabold uppercase tracking-[0.2em] text-on-surface-variant/70">Due time</span>
-          <input id="taskDueInput" name="dueTime" type="time" class="w-full rounded-xl border border-white/10 bg-surface-container-high/60 px-3 py-3 text-sm text-white outline-none ring-0" />
-        </label>
-        <label class="block">
-          <span class="mb-2 block text-[11px] font-extrabold uppercase tracking-[0.2em] text-on-surface-variant/70">Priority</span>
-          <select id="taskPriorityInput" name="priority" class="w-full rounded-xl border border-white/10 bg-surface-container-high/60 px-3 py-3 text-sm text-white outline-none ring-0">
-            <option value="Low">Low</option>
-            <option value="Medium" selected>Medium</option>
-            <option value="High">High</option>
-          </select>
-        </label>
-      </div>
-      <div class="flex justify-end gap-3 pt-2">
-        <button id="cancelTaskBtn" type="button" class="rounded-full border border-white/10 bg-surface-container-high/70 px-4 py-2 text-[10px] font-extrabold uppercase tracking-[0.2em] text-on-surface-variant transition-all hover:bg-white/10 hover:text-white">Cancel</button>
-        <button type="submit" class="rounded-full bg-fire-gradient px-4 py-2 text-[10px] font-extrabold uppercase tracking-[0.2em] text-on-primary shadow-lg">Save Task</button>
-      </div>
-    </form>
-  </div>
-</div>
  <aside id="crmPanel" class="crm-panel fixed top-16 right-0 z-[45] h-[calc(100vh-64px)] border-l border-white/10 bg-surface-container-low/95 backdrop-blur-xl shadow-2xl overflow-hidden">
   <div class="flex h-full">
     <div class="w-16 flex-shrink-0 border-r border-white/10 bg-surface-container-lowest/60 flex flex-col items-center justify-between py-4">

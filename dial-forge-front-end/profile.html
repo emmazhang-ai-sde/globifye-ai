@@ -174,6 +174,33 @@
     .dial-pad-btn:active {
       transform: scale(0.95);
     }
+        
+    /* Focus visible styles for all interactive elements */
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid #FF7A1C;
+      outline-offset: 2px;
+    }
+    
+    /* Hamburger menu button */
+    .hamburger-btn {
+      display: none;
+    }
+    @media (max-width: 899px) {
+      .hamburger-btn {
+        display: flex;
+      }
+    }
+    
+    /* Hide hamburger on desktop */
+    @media (min-width: 900px) {
+      .hamburger-btn {
+        display: none !important;
+      }
+    }
   </style>
 <script id="tailwind-config">
     tailwind.config = {
@@ -476,22 +503,22 @@
   <div class="flex items-center gap-2">
     <button id="testInboundBtn" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-high/50 border border-white/10 text-on-surface-variant hover:text-white transition-all text-xs font-bold">
       <span class="material-symbols-outlined text-sm">ring_volume</span>
-      Test Inbound
+      <span class="md:inline">Test Inbound</span>
     </button>
     <button id="newCallBtn" type="button" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-fire-gradient text-on-primary font-bold text-xs hover:brightness-110 transition-all shadow-lg">
       <span class="material-symbols-outlined text-sm">add</span>
-      New Call
+      <span class="md:inline">New Call</span>
     </button>
   </div>
 
-  <div class="h-8 w-px bg-white/10 mx-2"></div>
+  <div class="h-8 w-px bg-white/10 mx-2 sm:block flex-shrink-0"></div>
 
   <!-- Utility Icons -->
-  <div class="flex items-center gap-1">
-    <button class="p-2 text-on-surface-variant/60 hover:text-white transition-colors">
+  <div class="flex items-center gap-1 flex-shrink-0">
+    <button class="p-2 text-on-surface-variant/60 hover:text-white transition-colors" aria-label="Toggle dark mode">
       <span class="material-symbols-outlined">dark_mode</span>
     </button>
-    <button id="crmPanelToggle" type="button" class="p-2 text-on-surface-variant/60 hover:text-white transition-colors">
+    <button id="crmPanelToggle" type="button" class="p-2 text-on-surface-variant/60 hover:text-white transition-colors" aria-label="Toggle CRM panel">
       <span class="material-symbols-outlined">side_navigation</span>
     </button>
   </div>
@@ -586,8 +613,8 @@
 <div class="glass-card p-8 rounded-3xl flex flex-col md:flex-row items-center md:items-end gap-10 relative overflow-hidden">
 <div class="absolute top-0 right-0 w-80 h-80 bg-fire-accent/5 rounded-full blur-[100px] -mr-40 -mt-40"></div>
 <div class="relative">
-<div class="w-32 h-32 md:w-44 md:h-44 rounded-3xl border-4 border-white/10 overflow-hidden shadow-2xl relative z-10">
-<img id="profileAvatarImage" alt="Marcus Thorne" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs"/>
+<div class="w-32 h-32 md:w-44 md:h-44 rounded-3xl border-4 border-white/10 overflow-hidden shadow-2xl relative z-10 flex-shrink-0">
+<img id="profileAvatarImage" alt="Marcus Thorne profile picture" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs"/>
 </div>
 <div class="absolute -bottom-2 -right-2 w-10 h-10 bg-tertiary rounded-full border-4 border-surface flex items-center justify-center shadow-lg z-20">
 <span class="material-symbols-outlined text-surface text-lg font-black" style="font-variation-settings: 'FILL' 1;">verified</span>
@@ -612,7 +639,7 @@
 <!-- BEGIN: PerformanceDashboard -->
 <section class="mb-10">
 <div class="flex items-center justify-between mb-8">
-<h3 class="font-syne text-2xl font-bold text-white tracking-tight">Monthly Performance</h3>
+<h2 class="font-syne text-2xl font-bold text-white tracking-tight">Monthly Performance</h2>
 <div class="flex gap-3">
 <div class="px-5 py-2 bg-surface-container-high rounded-full text-xs font-bold text-fire-accent border border-fire-accent/20">October 2023</div>
 <button id="monthPickerBtn" class="material-symbols-outlined bg-white/5 p-2 rounded-xl text-on-surface-variant hover:text-white transition-colors">calendar_month</button>
@@ -681,9 +708,9 @@
           </p>
 <div class="relative pt-6 pb-12">
 <div class="flex justify-between font-mono text-[10px] text-on-surface-variant/50 mb-4 tracking-tighter uppercase">
-<span>$0</span>
-<span>$75k (Midpoint)</span>
-<span>$150k</span>
+<span class="flex-shrink-0">$0</span>
+<span class="flex-shrink-0">$75k (Midpoint)</span>
+<span class="flex-shrink-0">$150k</span>
 </div>
 <!-- Progress Bar Container -->
 <div class="h-10 bg-surface-container-high rounded-2xl p-1.5 overflow-visible relative">
@@ -703,18 +730,18 @@
 </div>
 </div>
 </div>
-<div class="grid grid-cols-3 gap-6 mt-6 pt-10 border-t border-white/5">
+<div class="grid grid-cols-3 gap-3 md:gap-6 mt-6 pt-10 border-t border-white/5">
 <div class="text-center">
 <p class="text-[9px] font-bold text-on-surface-variant/50 uppercase tracking-[0.2em] mb-2">Days Remaining</p>
-<p class="font-syne text-2xl font-extrabold text-white">8 Days</p>
+<p class="font-syne text-xl md:text-2xl font-extrabold text-white">8 Days</p>
 </div>
 <div class="text-center border-x border-white/5">
 <p class="text-[9px] font-bold text-on-surface-variant/50 uppercase tracking-[0.2em] mb-2">Proj. Finish</p>
-<p class="font-syne text-2xl font-extrabold text-white">$158k</p>
+<p class="font-syne text-xl md:text-2xl font-extrabold text-white">$158k</p>
 </div>
 <div class="text-center">
 <p class="text-[9px] font-bold text-on-surface-variant/50 uppercase tracking-[0.2em] mb-2">Commission</p>
-<p class="font-syne text-2xl font-extrabold text-tertiary">$12.4k</p>
+<p class="font-syne text-xl md:text-2xl font-extrabold text-tertiary">$12.4k</p>
 </div>
 </div>
 </section>
@@ -876,7 +903,7 @@
 <div class="glass-card rounded-3xl max-w-md w-full p-8 animate-in">
 <div class="flex items-center justify-between mb-6">
 <h2 class="font-syne text-2xl font-bold text-white">Edit Profile</h2>
-<button id="closeEditProfileModal" class="material-symbols-outlined text-on-surface-variant/60 hover:text-white text-2xl">close</button>
+<button id="closeEditProfileModal" class="material-symbols-outlined text-on-surface-variant/60 hover:text-white text-2xl" aria-label="Close edit profile modal">close</button>
 </div>
 <div class="space-y-4 mb-6">
 <div>
@@ -893,8 +920,8 @@
 </div>
 </div>
 <div class="flex gap-3">
-<button id="cancelEditProfile" class="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl font-bold text-sm text-on-surface hover:bg-white/10 transition-all">Cancel</button>
-<button id="saveEditProfile" class="flex-1 px-4 py-2.5 fire-gradient text-white rounded-xl font-bold text-sm shadow-lg transition-all">Save Changes</button>
+<button id="cancelEditProfile" class="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl font-bold text-sm text-on-surface hover:bg-white/10 transition-all" aria-label="Cancel editing profile">Cancel</button>
+<button id="saveEditProfile" class="flex-1 px-4 py-2.5 fire-gradient text-white rounded-xl font-bold text-sm shadow-lg transition-all" aria-label="Save profile changes">Save Changes</button>
 </div>
 </div>
 </div>
@@ -904,7 +931,7 @@
 <div class="glass-card rounded-3xl max-w-md w-full p-8">
 <div class="flex items-center justify-between mb-6">
 <h2 class="font-syne text-2xl font-bold text-white">Update Profile Picture</h2>
-<button id="closeUpdateProfilePictureModal" class="material-symbols-outlined text-on-surface-variant/60 hover:text-white text-2xl">close</button>
+<button id="closeUpdateProfilePictureModal" class="material-symbols-outlined text-on-surface-variant/60 hover:text-white text-2xl" aria-label="Close update profile picture modal">close</button>
 </div>
 <div class="space-y-4 mb-6">
 <div>
@@ -919,8 +946,8 @@
 </div>
 </div>
 <div class="flex gap-3">
-<button id="cancelUpdateProfilePicture" class="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl font-bold text-sm text-on-surface hover:bg-white/10 transition-all">Cancel</button>
-<button id="saveUpdateProfilePicture" class="flex-1 px-4 py-2.5 fire-gradient text-white rounded-xl font-bold text-sm shadow-lg transition-all">Save</button>
+<button id="cancelUpdateProfilePicture" class="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl font-bold text-sm text-on-surface hover:bg-white/10 transition-all" aria-label="Cancel updating profile picture">Cancel</button>
+<button id="saveUpdateProfilePicture" class="flex-1 px-4 py-2.5 fire-gradient text-white rounded-xl font-bold text-sm shadow-lg transition-all" aria-label="Save profile picture">Save</button>
 </div>
 </div>
 </div>
@@ -947,8 +974,8 @@
 </div>
 </div>
 <div class="flex gap-3">
-<button id="cancelChangePassword" class="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl font-bold text-sm text-on-surface hover:bg-white/10 transition-all">Cancel</button>
-<button id="saveChangePassword" class="flex-1 px-4 py-2.5 fire-gradient text-white rounded-xl font-bold text-sm shadow-lg transition-all">Update Password</button>
+<button id="cancelChangePassword" class="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl font-bold text-sm text-on-surface hover:bg-white/10 transition-all" aria-label="Cancel changing password">Cancel</button>
+<button id="saveChangePassword" class="flex-1 px-4 py-2.5 fire-gradient text-white rounded-xl font-bold text-sm shadow-lg transition-all" aria-label="Update password">Update Password</button>
 </div>
 </div>
 </div>
@@ -958,7 +985,7 @@
 <div class="glass-card rounded-3xl max-w-md w-full p-8">
 <div class="flex items-center justify-between mb-6">
 <h2 class="font-syne text-2xl font-bold text-white">Two-Factor Authentication</h2>
-<button id="closeTwoFactorModal" class="material-symbols-outlined text-on-surface-variant/60 hover:text-white text-2xl">close</button>
+<button id="closeTwoFactorModal" class="material-symbols-outlined text-on-surface-variant/60 hover:text-white text-2xl" aria-label="Close two-factor authentication modal">close</button>
 </div>
 <div class="mb-6">
 <div class="flex items-center gap-3 mb-6 p-4 bg-tertiary/10 border border-tertiary/20 rounded-2xl">

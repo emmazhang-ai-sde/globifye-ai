@@ -97,7 +97,6 @@
       100% { transform: scale(1.5); opacity: 0; }
     }
     .status-pulse {
-      
       position: relative;
     }
     .status-pulse::after {
@@ -359,10 +358,40 @@ animation: fade-in 0.3s ease-out;
       border-color: rgba(255, 122, 28, 0.4);
       color: #ffb4a2;
     }
+    .dial-pad-btn:focus {
+      outline: 2px solid #ffb4a2;
+      outline-offset: 2px;
+    }
     .dial-pad-btn:active {
       transform: scale(0.95);
     }
-        
+       
+    /* ACCESSIBILITY: Focus states for all interactive elements */
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid #ffb4a2;
+      outline-offset: 2px;
+    }
+    
+    /* Specific focus styles for buttons without visible text */
+    button.icon-only:focus-visible {
+      outline: 2px solid #ffb4a2;
+      outline-offset: 2px;
+    }
+    
+    /* Override Tailwind's focus ring for better visibility */
+    .focus\:ring-0:focus {
+      --tw-ring-width: 0;
+    }
+    
+    input[type="checkbox"]:focus-visible {
+      outline: 2px solid #ffb4a2;
+      outline-offset: 2px;
+    }
+           
     /* Power Dialer Record Button Recording State */
     @keyframes recording-pulse {
       0%, 100% { opacity: 1; }
@@ -371,6 +400,85 @@ animation: fade-in 0.3s ease-out;
     
     #powerDialerRecordBtn.recording-active {
       animation: recording-pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+        
+    /* Responsive calling controller width */
+    .calling-controller-wrapper {
+      width: 100%;
+      max-width: 450px;
+    }
+    
+    @media (max-width: 900px) {
+      .calling-controller-wrapper {
+        max-width: 100%;
+        width: 100%;
+      }
+      .workspace-container {
+        flex-direction: column;
+      }
+      .prospect-queue-section {
+        width: 100%;
+      }
+    }
+    
+    @media (max-width: 600px) {
+      .workspace-container {
+        flex-direction: column;
+        gap: 1.5rem !important;
+      }
+      .prospect-queue-section {
+        width: 100%;
+        order: 2;
+      }
+      .calling-controller-wrapper {
+        width: 100%;
+        order: 1;
+      }
+      main {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+      }
+      aside.fixed.left-0 {
+        display: none;
+      }
+    }
+    
+    /* Control overflow menu for responsive call controls */
+    .call-controls-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .call-controls-primary {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .call-controls-overflow {
+      display: none;
+    }
+    
+    .call-controls-overflow.active {
+      display: flex;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: rgba(26, 27, 38, 0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.75rem;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      flex-direction: column;
+      gap: 0.5rem;
+      z-index: 50;
+      min-width: 200px;
+    }
+    
+    .overflow-menu-btn {
+      position: relative;
     }
   </style>
 </head>
@@ -382,7 +490,7 @@ animation: fade-in 0.3s ease-out;
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
       <span class="text-[10px] font-extrabold text-tertiary uppercase tracking-widest">Dial Pad</span>
-      <button id="dialPadCloseBtn" class="text-on-surface-variant/60 hover:text-white transition-colors">
+      <button id="dialPadCloseBtn" class="text-on-surface-variant/60 hover:text-white transition-colors icon-only" aria-label="Close dial pad">
         <span class="material-symbols-outlined text-xl">close</span>
       </button>
     </div>
@@ -402,45 +510,47 @@ animation: fade-in 0.3s ease-out;
     <!-- Number Pad Grid -->
     <div class="grid grid-cols-3 gap-3 mb-6">
       <!-- Row 1: 1 2 3 -->
-      <button class="dial-pad-btn" data-digit="1">1</button>
-      <button class="dial-pad-btn" data-digit="2">2</button>
-      <button class="dial-pad-btn" data-digit="3">3</button>
+      <button class="dial-pad-btn" data-digit="1" aria-label="Digit 1">1</button>
+      <button class="dial-pad-btn" data-digit="2" aria-label="Digit 2">2</button>
+      <button class="dial-pad-btn" data-digit="3" aria-label="Digit 3">3</button>
       
       <!-- Row 2: 4 5 6 -->
-      <button class="dial-pad-btn" data-digit="4">4</button>
-      <button class="dial-pad-btn" data-digit="5">5</button>
-      <button class="dial-pad-btn" data-digit="6">6</button>
+      <button class="dial-pad-btn" data-digit="4" aria-label="Digit 4">4</button>
+      <button class="dial-pad-btn" data-digit="5" aria-label="Digit 5">5</button>
+      <button class="dial-pad-btn" data-digit="6" aria-label="Digit 6">6</button>
       
       <!-- Row 3: 7 8 9 -->
-      <button class="dial-pad-btn" data-digit="7">7</button>
-      <button class="dial-pad-btn" data-digit="8">8</button>
-      <button class="dial-pad-btn" data-digit="9">9</button>
+      <button class="dial-pad-btn" data-digit="7" aria-label="Digit 7">7</button>
+      <button class="dial-pad-btn" data-digit="8" aria-label="Digit 8">8</button>
+      <button class="dial-pad-btn" data-digit="9" aria-label="Digit 9">9</button>
       
       <!-- Row 4: * 0 # -->
-      <button class="dial-pad-btn" data-digit="*">*</button>
-      <button class="dial-pad-btn" data-digit="0">0</button>
-      <button class="dial-pad-btn" data-digit="#">#</button>
+      <button class="dial-pad-btn" data-digit="*" aria-label="Asterisk">*</button>
+      <button class="dial-pad-btn" data-digit="0" aria-label="Digit 0">0</button>
+      <button class="dial-pad-btn" data-digit="#" aria-label="Hash">#</button>
     </div>
 
     <!-- Control Buttons Row -->
     <div class="grid grid-cols-3 gap-3 mb-6">
       <!-- Delete Button -->
       <button 
-        id="dialPadDeleteBtn" 
-        class="py-3 px-4 bg-surface-container-low hover:bg-surface-container-high border border-white/10 hover:border-fire-accent/40 rounded-lg text-on-surface-variant/80 hover:text-fire-accent transition-all font-button-text font-bold text-sm flex items-center justify-center gap-1"
-        title="Delete last digit"
+      id="dialPadDeleteBtn" 
+      class="py-3 px-4 bg-surface-container-low hover:bg-surface-container-high border border-white/10 hover:border-fire-accent/40 rounded-lg text-on-surface-variant/80 hover:text-fire-accent transition-all font-button-text font-bold text-sm flex items-center justify-center gap-1"
+      title="Delete last digit"
+      aria-label="Delete last digit"
       >
         <span class="material-symbols-outlined text-lg">backspace</span>
       </button>
       
       <!-- Plus Button -->
-      <button class="dial-pad-btn" data-digit="+">+</button>
+      <button class="dial-pad-btn" data-digit="+" aria-label="Plus sign">+</button>
       
       <!-- Clear Button -->
       <button 
         id="dialPadClearBtn" 
         class="py-3 px-4 bg-surface-container-low hover:bg-surface-container-high border border-white/10 hover:border-error-red/40 rounded-lg text-on-surface-variant/80 hover:text-error-red transition-all font-button-text font-bold text-sm"
         title="Clear all digits"
+        aria-label="Clear all digits"
       >
         Clear
       </button>
@@ -451,6 +561,7 @@ animation: fade-in 0.3s ease-out;
       id="dialPadCallNowBtn" 
       class="w-full py-3 px-4 bg-fire-gradient hover:bg-fire-accent text-on-primary font-button-text font-bold text-sm rounded-lg transition-all duration-200 hover:shadow-lg active:scale-95"
       disabled
+      aria-label="Call now button"
     >
       <span class="flex items-center justify-center gap-2">
         <span class="material-symbols-outlined">call</span>
@@ -478,15 +589,15 @@ animation: fade-in 0.3s ease-out;
       <span class="text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest">Ringing…</span>
     </div>
     <div class="grid grid-cols-3 gap-3 w-full">
-      <button id="declineCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-error-red/10 border border-error-red/30 text-error-red hover:bg-error-red/20 transition-all">
+      <button id="declineCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-error-red/10 border border-error-red/30 text-error-red hover:bg-error-red/20 transition-all" aria-label="Decline incoming call">
         <span class="material-symbols-outlined">call_end</span>
         <span class="text-[9px] font-extrabold uppercase tracking-wider">Decline</span>
       </button>
-      <button id="acceptCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-tertiary/10 border border-tertiary/40 text-tertiary hover:bg-tertiary/20 transition-all">
+      <button id="acceptCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-tertiary/10 border border-tertiary/40 text-tertiary hover:bg-tertiary/20 transition-all" aria-label="Accept incoming call">
         <span class="material-symbols-outlined">call</span>
         <span class="text-[9px] font-extrabold uppercase tracking-wider">Accept</span>
       </button>
-      <button id="voicemailCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-surface-container-high/60 border border-white/10 text-on-surface-variant hover:text-white transition-all">
+      <button id="voicemailCallBtn" class="flex flex-col items-center gap-2 py-3 rounded-xl bg-surface-container-high/60 border border-white/10 text-on-surface-variant hover:text-white transition-all" aria-label="Send to voicemail">
         <span class="material-symbols-outlined">voicemail</span>
         <span class="text-[9px] font-extrabold uppercase tracking-wider">Voicemail</span>
       </button>
@@ -501,7 +612,7 @@ animation: fade-in 0.3s ease-out;
         <p class="text-[10px] font-extrabold uppercase tracking-[0.3em] text-fire-accent">New Call</p>
         <h3 class="text-xl font-section-header text-white">Start a conversation</h3>
       </div>
-      <button id="cancelCallBtn" type="button" class="rounded-full p-2 text-on-surface-variant/70 hover:bg-white/10 hover:text-white transition-all">
+      <button id="cancelCallBtn" type="button" class="rounded-full p-2 text-on-surface-variant/70 hover:bg-white/10 hover:text-white transition-all" aria-label="Close new call modal">
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
@@ -531,81 +642,81 @@ animation: fade-in 0.3s ease-out;
 </div>
 
 <!-- BEGIN: ActiveCallBar -->
-<div id="activeCallBar" class="hidden fixed top-16 left-0 lg:left-20 right-0 z-40 bg-tertiary-container/95 backdrop-blur-xl border-b border-tertiary/30 px-6 py-3 flex items-center justify-between">
-  <div class="flex items-center gap-3">
-    <span class="w-2 h-2 rounded-full bg-white active-orb"></span>
-    <span id="activeCallStatusLabel" class="text-[10px] font-extrabold text-white uppercase tracking-widest">Active Call</span>
-    <span class="text-white/50">•</span>
-    <span id="activeCallName" class="text-sm font-bold text-white">Jordan Blake</span>
-    <span id="activeCallCompany" class="text-xs text-white/70 font-bold">Meridian Capital Partners</span>
+<div id="activeCallBar" class="hidden fixed top-16 left-0 lg:left-20 right-0 z-40 bg-tertiary-container/95 backdrop-blur-xl border-b border-tertiary/30 px-3 sm:px-6 py-3 flex items-center justify-between overflow-x-auto">
+  <div class="flex items-center gap-3 flex-shrink-0">
+    <span class="w-2 h-2 rounded-full bg-white active-orb flex-shrink-0"></span>
+    <span id="activeCallStatusLabel" class="text-[10px] font-extrabold text-white uppercase tracking-widest whitespace-nowrap flex-shrink-0">Active Call</span>
+    <span class="text-white/50 hidden sm:inline">•</span>
+    <span id="activeCallName" class="text-sm font-bold text-white whitespace-nowrap flex-shrink-0">Jordan Blake</span>
+    <span id="activeCallCompany" class="text-xs text-white/70 font-bold hidden sm:inline whitespace-nowrap flex-shrink-0">Meridian Capital Partners</span>
   </div>
-  <div class="flex items-center gap-2 xl:pr-16 mr-16">
-    <span id="activeCallDuration" class="font-mono-data text-sm font-bold text-white">00:00</span>
-    <button id="holdCallBtn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all">
+  <div class="flex items-center gap-2 xl:pr-16 mr-16 flex-shrink-0">
+    <span id="activeCallDuration" class="font-mono-data text-sm font-bold text-white whitespace-nowrap flex-shrink-0">00:00</span>
+    <button id="holdCallBtn" class="flex items-center gap-1 px-2 sm:px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all flex-shrink-0 whitespace-nowrap" aria-label="Hold call">
       <span class="material-symbols-outlined text-sm">pause</span>
-      Hold
+       <span class="hidden sm:inline">Hold</span>
     </button>
-    <button id="endCallBtn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-error-red text-white text-xs font-bold hover:brightness-110 transition-all">
+    <button id="endCallBtn" class="flex items-center gap-1 px-2 sm:px-3 py-1.5 rounded-lg bg-error-red text-white text-xs font-bold hover:brightness-110 transition-all flex-shrink-0 whitespace-nowrap" aria-label="End call">
       <span class="material-symbols-outlined text-sm">call_end</span>
-      End
+     <span class="hidden sm:inline">End</span>
     </button>
   </div>
 </div>
 <!-- END: ActiveCallBar -->
  
 <!-- BEGIN: TopAppBar -->
-<header class="fixed top-0 w-full z-50 h-16 glass-card flex items-center justify-between px-6 border-b border-white/5">
-<div class="flex items-center gap-6">
-<span class="font-hero-h1 text-2xl font-extrabold text-white">Dial<span class="text-fire-gradient">Forge</span></span>
-<div class="h-8 w-px bg-white/10 hidden lg:block"></div>
-  <div class="flex flex-col justify-center">
+<header class="fixed top-0 w-full z-50 h-16 glass-card flex items-center justify-between px-4 sm:px-6 border-b border-white/5">
+<div class="flex items-center gap-4 sm:gap-6 flex-shrink-0">
+<span class="font-hero-h1 text-xl sm:text-2xl font-extrabold text-white whitespace-nowrap">Dial<span class="text-fire-gradient">Forge</span></span>
+<div class="h-8 w-px bg-white/10 hidden lg:block flex-shrink-0"></div>
+  <div class="flex flex-col justify-center sm:flex flex-shrink-0">
     <h2 class="text-xs font-bold text-on-surface-variant/60 uppercase tracking-widest leading-none mb-1">Page</h2>
     <span class="text-sm font-bold text-white whitespace-nowrap">Power Dialer</span>
   </div>
 
 </div>
 
-<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 sm:gap-4 flex-shrink-0">
   <!-- Usage Pill -->
   <div class="hidden md:flex items-center gap-3 bg-surface-container-high/40 border border-white/5 rounded-full px-3 py-1.5 relative overflow-hidden">
     <div id="usageProgressBar"class="absolute inset-0 bg-fire-gradient/10 w-[47.8%]"></div>
-    <span class="material-symbols-outlined text-fire-accent text-sm relative z-10">hourglass_empty</span>
-    <span id="usagePillText"class="text-[10px] font-bold text-white relative z-10">239 / 500 mins</span>
+    <span class="material-symbols-outlined text-fire-accent text-sm relative z-10 flex-shrink-0">hourglass_empty</span>
+    <span id="usagePillText"class="text-[10px] font-bold text-white relative z-10 whitespace-nowrap flex-shrink-0">239 / 500 mins</span>
   </div>
 
   <!-- Live Timer -->
-   <div id="callTimerContainer" class="flex items-center gap-2 bg-surface-container-lowest/50 border border-white/5 rounded-lg px-3 py-1.5">
-    <span id="callTimerDot" class="w-1.5 h-1.5 rounded-full bg-white/20"></span>
-    <span id="callTimerText" class="font-mono-data text-sm font-bold text-white">00:00</span>
+   <div id="callTimerContainer" class="flex items-center gap-2 bg-surface-container-lowest/50 border border-white/5 rounded-lg px-3 py-1.5 flex-shrink-0">
+    <span id="callTimerDot" class="w-1.5 h-1.5 rounded-full bg-white/20 flex-shrink-0"></span>
+    <span id="callTimerText" class="font-mono-data text-sm font-bold text-white whitespace-nowrap flex-shrink-0">00:00</span>
   </div>
 
-  <div class="h-8 w-px bg-white/10 mx-2"></div>
+  <div class="h-8 w-px bg-white/10 mx-2 hidden sm:block flex-shrink-0"></div>
 
   <!-- Action Buttons -->
-  <div class="flex items-center gap-2">
-    <button id="testInboundBtn" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-high/50 border border-white/10 text-on-surface-variant hover:text-white transition-all text-xs font-bold">
+  <div class="flex items-center gap-2 flex-shrink-0">
+    <button id="testInboundBtn" class="flex items-center gap-2 px-2 sm:px-4 py-2 rounded-lg bg-surface-container-high/50 border border-white/10 text-on-surface-variant hover:text-white transition-all text-xs font-bold flex-shrink-0 whitespace-nowrap" aria-label="Test inbound call">
       <span class="material-symbols-outlined text-sm">ring_volume</span>
-      Test Inbound
+      <span class="hidden sm:inline">Test Inbound</span>
     </button>
-    <button id="newCallBtn" type="button" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-fire-gradient text-on-primary font-bold text-xs hover:brightness-110 transition-all shadow-lg">
+    <button id="newCallBtn" type="button" class="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg bg-fire-gradient text-on-primary font-bold text-xs hover:brightness-110 transition-all shadow-lg flex-shrink-0 whitespace-nowrap" aria-label="New call">
       <span class="material-symbols-outlined text-sm">add</span>
-      New Call
+      <span class="hidden sm:inline">New Call</span>
     </button>
 </div>
 
-  <div class="flex items-center gap-4">
-<button class="bg-fire-gradient hover:opacity-90 text-white font-bold py-2 px-6 rounded-lg text-sm transition-all" data-action="start-dialing">START DIALING</button>
-<button class="bg-white/10 hover:bg-white/20 text-white font-bold py-2 px-6 rounded-lg text-sm transition-all border border-white/20" data-action="import">IMPORT</button>
+  <div class="flex items-center gap-2 flex-shrink-0">
+<button class="bg-fire-gradient hover:opacity-90 text-white font-bold py-2 px-3 sm:px-6 rounded-lg text-xs sm:text-sm transition-all flex-shrink-0 whitespace-nowrap" data-action="start-dialing" aria-label="Start dialing">START DIALING</button>
+<button class="bg-white/10 hover:bg-white/20 text-white font-bold py-2 px-3 sm:px-6 rounded-lg text-xs sm:text-sm transition-all border border-white/20 flex-shrink-0 whitespace-nowrap" data-action="import" aria-label="Import contacts">IMPORT</button>
 </div>
 
   <div class="h-8 w-px bg-white/10 mx-2"></div>
 
   <!-- Utility Icons -->
-  <div class="flex items-center gap-1">
-    <button class="p-2 text-on-surface-variant/60 hover:text-white transition-colors" aria-label="Toggle dark mode">
+  <div class="flex items-center gap-1 flex-shrink-0">
+    <button class="p-2 text-on-surface-variant/60 hover:text-white transition-colors icon-only" aria-label="Toggle dark mode">
       <span class="material-symbols-outlined">dark_mode</span>
     </button>
-    <button id="crmPanelToggle" type="button" class="p-2 text-on-surface-variant/60 hover:text-white transition-colors" aria-label="Toggle contacts panel">
+    <button id="crmPanelToggle" type="button" class="p-2 text-on-surface-variant/60 hover:text-white transition-colors icon-only" aria-label="Toggle contacts panel">
       <span class="material-symbols-outlined">side_navigation</span>
     </button>
   </div>
@@ -614,75 +725,74 @@ animation: fade-in 0.3s ease-out;
 <!-- END: MainHeader -->
 <div class="flex flex-col sm:flex-row min-h-screen w-full">
 <!-- BEGIN: Left Sidebar Navigation -->
-<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex flex-col bg-surface-container-low/78 backdrop-blur-xl border-r border-white/5 items-center py-6 gap-8 z-40">
-  <!---fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex flex-col bg-surface-container-low/78 backdrop-blur-xl border-r border-white/5 items-center py-6 gap-8 z-40--->
+<aside class="sm:flex fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex-col bg-surface-container-low/78 backdrop-blur-xl border-r border-white/5 items-center py-6 gap-8 z-40">
 <div class="flex flex-col items-center gap-1 w-full overflow-y-auto flex-1">
   <a href="./Dashboard.html" class="block">
-        <button class="group relative flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+        <button class="group relative flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Dashboard">
             <span class="material-symbols-outlined">dashboard</span>
             <span class="text-[8px] uppercase font-bold">Dashboard</span>
         </button>
     </a>
-  <a href="./activeCall.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+  <a href="./activeCall.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Active call page">
     <span class="material-symbols-outlined">call</span>
     <span class="text-[8px] uppercase font-bold">Call</span>
   </a>
-  <a href="./supportQueue.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+  <a href="./supportQueue.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Support queue">
     <span class="material-symbols-outlined">queue</span>
     <span class="text-[8px] uppercase font-bold">Queue</span>
   </a>
   <a href="./callCoaching.html" class="block w-full">
-    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Call coaching">
       <span class="material-symbols-outlined">graphic_eq</span>
       <span class="text-[8px] uppercase font-bold">Coaching</span>
     </button>
   </a>
-  <button class="group relative flex flex-col items-center gap-1 w-full py-3 bg-primary-container/20 text-fire-accent border-l-4 border-fire-accent shadow-[0_0_20px_rgba(255,122,28,0.2)]">
+  <button class="group relative flex flex-col items-center gap-1 w-full py-3 bg-primary-container/20 text-fire-accent border-l-4 border-fire-accent shadow-[0_0_20px_rgba(255,122,28,0.2)]" aria-label="Power dialer (current page)" aria-current="page">
     <span class="material-symbols-outlined">dialer_sip</span>
     <span class="text-[8px] uppercase font-bold">Dialer</span>
 </button>
-  <a href="./salesPipeline.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+  <a href="./salesPipeline.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Sales pipeline">
     <span class="material-symbols-outlined">view_kanban</span>
     <span class="text-[8px] uppercase font-bold">Pipeline</span>
   </a>
   <a href="./callHistory.html" class="block w-full">
-    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Call history">
       <span class="material-symbols-outlined">history</span>
       <span class="text-[8px] uppercase font-bold">History</span>
     </button>
   </a>
-  <a href="./contacts.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+  <a href="./contacts.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Contacts">
     <span class="material-symbols-outlined">group</span>
     <span class="text-[8px] uppercase font-bold">Contacts</span>
   </a>
-  <a href="./integrationsHub.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+  <a href="./integrationsHub.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Integrations">
     <span class="material-symbols-outlined">apps</span>
     <span class="text-[8px] uppercase font-bold">Integrations</span>
   </a>
-  <a href="./numbers.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+  <a href="./numbers.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Phone numbers">
     <span class="material-symbols-outlined">123</span>
     <span class="text-[8px] uppercase font-bold">Numbers</span>
   </a>
-  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Billing">
     <a href="./billingSubscription.html" class="flex flex-col items-center gap-1 w-full h-full text-inherit no-underline">
       <span class="material-symbols-outlined">payments</span>
       <span class="text-[8px] uppercase font-bold">Billing</span>
     </a>
   </button>
   <a href="./teamGovernance.html" class="block w-full">
-    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Team">
       <span class="material-symbols-outlined">groups</span>
       <span class="text-[8px] uppercase font-bold">Team</span>
     </button>
   </a>
    <a href="./settingsGeneral.html" class="block w-full">
-    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Settings">
       <span class="material-symbols-outlined">settings</span>
       <span class="text-[8px] uppercase font-bold">Settings</span>
     </button>
   </a>
   <a href="./notifications.html" class="block w-full">
-    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all">
+    <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Notifications">
       <span class="material-symbols-outlined">notifications</span>
       <span class="text-[8px] uppercase font-bold">Notif</span>
     </button>
@@ -700,24 +810,25 @@ animation: fade-in 0.3s ease-out;
 <main id="mainContent" class="min-h-screen flex-1 flex flex-col bg-brand-dark relative ml-20 mr-20 mt-20">
 
 <!-- BEGIN: Workspace Container -->
-<div class="flex flex-1 overflow-hidden p-6 gap-6">
+<div class="workspace-container flex-1 overflow-hidden p-4 sm:p-6 gap-6 flex">
 <!-- BEGIN: Left Column (Prospect Queue) -->
-<div class="flex-1 flex flex-col gap-6">
+<div class="prospect-queue-section flex-1 flex flex-col gap-6">
 <div class="flex flex-col gap-2">
-<h1 class="text-6xl syne-wide text-white leading-tight">Prospect<br>Queue</h1>
+<h1 class="text-4xl sm:text-6xl syne-wide text-white leading-tight">Prospect<br>Queue</h1>
 <div class="flex items-center justify-between">
-<p class="text-gray-400 text-lg">Enterprise Tech Campaign – Stage 1</p>
+<p class="text-gray-400 text-sm sm:text-lg">Enterprise Tech Campaign – Stage 1</p>
 </div>
 <!-- BEGIN: Search and Filter Controls -->
-<div class="flex gap-3 pb-2">
+<div class="flex gap-3 pb-2 flex-col sm:flex-row">
 <input 
   id="search-input"
   type="text" 
   placeholder="Search by name, company, phone..." 
-  class="flex-1 bg-[#1a1b26] border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500/50">
+  class="flex-1 bg-[#1a1b26] border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-orange-500/50"
+  aria-label="Search prospects">
 <select 
   id="status-filter"
-  class="bg-[#1a1b26] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-orange-500/50">
+  class="bg-[#1a1b26] border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-orange-500/50" aria-label="Filter by status">
   <option value="all">All Statuses</option>
   <option value="waiting">Waiting</option>
   <option value="calling">Calling</option>
@@ -733,12 +844,12 @@ animation: fade-in 0.3s ease-out;
 <div class="overflow-y-auto pr-2 space-y-4 flex-1 min-h-0 max-h-dvh" data-purpose="prospect-list">
 <!-- Card 1: Jordan Peterson (UP NEXT) -->
 <div class="glass-card active-card rounded-2xl p-4 flex items-center gap-4 group cursor-pointer transition-all hover:scale-[1.01]" data-purpose="active-prospect">
-<div class="relative">
+<div class="relative flex-shrink-0">
 <img alt="Jordan Peterson" class="w-12 h-12 rounded-full border-2 border-orange-500/50" src="https://lh3.googleusercontent.com/aida-public/AB6AXuABYxrItLWMWQGRhejBqyB4saRkf_yBZ2ZmllBo6Ysg2-S2oSxYvi760KIxyNY8UkVgJatC_jWoDXasuG5xklwUniPfZlvlY_o9VQlJuoaMcv8kfw8EeeXZ7nwhTGI51UxHXH901RTCtXU7kx90bT2-0wl5cl1jlYQkv911G64F6axaT2vgJ6lUv6YAG-2T-9SRvrQU9xEei84H7nTvEeiJCtXnVo2WVA4WWD24Z50_FRHD5j__aHZCZyLkd38Jx720VO4uGhO2zos">
 <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[#12131a] status-pulse"></div>
 </div>
-<div class="flex-1">
-<h3 class="font-bold text-white text-lg">Jordan Peterson</h3>
+<div class="flex-1 min-w-0">
+<p class="font-bold text-white text-lg">Jordan Peterson</p>
 <p class="text-xs text-gray-500 uppercase tracking-widest">VP OF OPERATIONS @ NEXUS AI</p>
 </div>
 <div class="text-right">
@@ -861,11 +972,11 @@ animation: fade-in 0.3s ease-out;
 
 <button class="bg-red-500/10 hover:bg-red-500/20 text-red-500 py-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border border-red-500/20 transition-colors" data-action="hangup">
 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"></path></svg>
-                  HANG UP
-                </button>
+                <span>HANG UP</span>
+              </button>
 <button class="bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-500 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border border-yellow-500/20 transition-colors" data-action="skip">
 <span class="material-symbols-outlined text-sm">skip_next</span>
-SKIP
+<span>SKIP</span>
 </button>
 </button>
 <button class="bg-purple-500/10 hover:bg-purple-500/20 text-purple-500 py-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 border border-purple-500/20 transition-colors" id="vmStudioBtn">
@@ -926,10 +1037,10 @@ Record
 </section>
 <!-- END: Context Notes Section -->
 <!-- BEGIN: Local Presence Card -->
-<section class="glass-card rounded-2xl p-6 space-y-4">
-<div class="flex items-center justify-between">
-<div class="flex items-center gap-3">
-<div class="p-2 bg-teal-500/10 rounded-lg">
+<section class="glass-card rounded-2xl p-6 space-y-4 flex-shrink-0" role="region" aria-label="Local presence settings">
+<div class="flex items-start sm:items-center justify-between gap-4 flex-col sm:flex-row">
+<div class="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+<div class="p-2 bg-teal-500/10 rounded-lg flex-shrink-0">
 <span class="material-symbols-outlined text-teal-500">phone</span>
 </div>
 <h3 class="font-bold text-lg text-white">Local Presence</h3>
@@ -946,7 +1057,7 @@ Record
 </div>
 <div class="flex items-center justify-between p-4 bg-[#0a0b10] border border-white/5 rounded-xl">
 <p class="text-[10px] text-gray-500 font-bold uppercase">Local Presence</p>
-<input id="localPresenceToggle" type="checkbox" class="rounded cursor-pointer">
+<input id="localPresenceToggle" type="checkbox" class="rounded cursor-pointer" aria-label="Toggle local presence">
 </div>
 </div>
 </section>
@@ -958,10 +1069,10 @@ Record
 </main>
 
 <!-- END: Main Content Area -->
-<aside id="crmPanel" class="crm-panel fixed top-16 right-0 z-[45] h-[calc(100vh-64px)] border-l border-white/10 bg-surface-container-low/95 backdrop-blur-xl shadow-2xl overflow-hidden">
+<aside id="crmPanel" class="crm-panel fixed top-16 right-0 z-[45] h-[calc(100vh-64px)] border-l border-white/10 bg-surface-container-low/95 backdrop-blur-xl shadow-2xl overflow-hidden" role="complementary" aria-label="CRM panel">
   <div class="flex h-full">
     <div class="w-16 flex-shrink-0 border-r border-white/10 bg-surface-container-lowest/60 flex flex-col items-center justify-between py-4">
-      <button id="crmPanelToggleRail" type="button" class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-surface-container-high/70 text-on-surface-variant transition-all hover:bg-white/10 hover:text-white" aria-label="Toggle CRM panel" aria-expanded="true">
+      <button id="crmPanelToggleRail" type="button" class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-surface-container-high/70 text-on-surface-variant transition-all hover:bg-white/10 hover:text-white icon-only" aria-label="Toggle CRM panel" aria-expanded="true">
         <span id="crmPanelToggleRailIcon" class="material-symbols-outlined">keyboard_double_arrow_right</span>
       </button>
       <div class="flex flex-col items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/70">
@@ -976,13 +1087,13 @@ Record
           <p class="text-[10px] font-extrabold uppercase tracking-[0.3em] text-fire-accent">Right CRM</p>
           <h3 class="text-sm font-section-header text-white">Context Hub</h3>
         </div>
-        <span class="rounded-full border border-tertiary/20 bg-tertiary/10 px-2 py-1 text-[10px] font-bold text-tertiary">Live</span>
+        <span class="rounded-full border border-tertiary/20 bg-tertiary/10 px-2 py-1 text-[10px] font-bold text-tertiary flex-shrink-0">Live</span>
       </div>
 
       <div class="space-y-4">
         <section class="rounded-2xl border border-white/10 bg-surface-container-high/30 p-3">
           <div class="mb-3 flex items-center gap-2">
-            <span class="material-symbols-outlined text-fire-accent">history</span>
+            <span class="material-symbols-outlined text-fire-accent flex-shrink-0">history</span>
             <h4 class="text-sm font-bold text-white">Recent Calls</h4>
           </div>
           <ul id="crmRecentCalls" class="space-y-2"></ul>
@@ -990,7 +1101,7 @@ Record
 
         <section class="rounded-2xl border border-white/10 bg-surface-container-high/30 p-3">
           <div class="mb-3 flex items-center gap-2">
-            <span class="material-symbols-outlined text-tertiary">workspace_premium</span>
+            <span class="material-symbols-outlined text-tertiary flex-shrink-0">workspace_premium</span>
             <h4 class="text-sm font-bold text-white">Top Deals</h4>
           </div>
           <ul id="crmTopDeals" class="space-y-2"></ul>
@@ -998,7 +1109,7 @@ Record
 
         <section class="rounded-2xl border border-white/10 bg-surface-container-high/30 p-3">
           <div class="mb-3 flex items-center gap-2">
-            <span class="material-symbols-outlined text-ai-purple">auto_awesome</span>
+            <span class="material-symbols-outlined text-ai-purple flex-shrink-0">auto_awesome</span>
             <h4 class="text-sm font-bold text-white">AI Suggestions</h4>
           </div>
           <ul id="crmSuggestions" class="space-y-2"></ul>
@@ -1012,13 +1123,13 @@ Record
 <!-- END: Main Dashboard Layout -->
 
 <!-- BEGIN: Import Wizard Modal -->
-<div data-modal="import-wizard" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center" data-step="1">
+<div data-modal="import-wizard" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" data-step="1" role="dialog" aria-modal="true" aria-labelledby="import-wizard-title">
   <!-- Modal Content -->
   <div class="bg-[#1e1f27] rounded-3xl border border-white/10 w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
     <!-- Modal Header -->
     <div class="flex items-center justify-between p-6 border-b border-white/5">
-      <h2 class="text-2xl font-bold text-white">Import Prospects</h2>
-      <button data-modal-close class="text-gray-400 hover:text-white transition-colors">
+      <h2 id="import-wizard-title" class="text-2xl font-bold text-white">Import Prospects</h2>
+      <button data-modal-close class="text-gray-400 hover:text-white transition-colors icon-only" aria-label="Close modal">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
       </button>
     </div>
@@ -1040,7 +1151,7 @@ Record
           <p class="text-gray-400 text-sm mb-4">Select or drag and drop your CSV file with prospect data.</p>
         </div>
         <!-- Hidden file input -->
-        <input type="file" id="csv-file-input" accept=".csv" class="hidden" />
+        <input type="file" id="csv-file-input" accept=".csv" class="hidden" aria-label="CSV file input" />
         <!-- Upload area -->
         <div id="wizard-upload-area" class="border-2 border-dashed border-orange-500/40 rounded-2xl p-8 text-center cursor-pointer hover:border-orange-500 hover:bg-orange-500/5 transition-all">
           <svg class="w-12 h-12 text-orange-500/60 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M2 12a10 10 0 1120 0 10 10 0 01-20 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
@@ -1220,9 +1331,9 @@ Record
     </div>
 
     <!-- Modal Footer -->
-    <div class="flex items-center justify-between p-6 border-t border-white/5 bg-[#12131a]/50">
-      <button data-wizard="prev" class="px-6 py-2 text-white font-bold bg-white/10 hover:bg-white/20 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">BACK</button>
-      <button data-wizard="next" class="px-6 py-2 text-white font-bold bg-fire-gradient hover:opacity-90 rounded-lg transition-all">NEXT</button>
+    <div class="flex items-center justify-between p-6 border-t border-white/5 bg-[#12131a]/50 gap-3 flex-wrap">
+      <button data-wizard="prev" class="px-6 py-2 text-white font-bold bg-white/10 hover:bg-white/20 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed" aria-label="Previous step">BACK</button>
+      <button data-wizard="next" class="px-6 py-2 text-white font-bold bg-fire-gradient hover:opacity-90 rounded-lg transition-all" aria-label="Next step">NEXT</button>
     </div>
   </div>
 </div>
@@ -1336,6 +1447,29 @@ Record
       });
     });
   </script>
+
+<script data-purpose="accessibility-enhancements">
+  // Close overflow menu when Escape key is pressed
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const overflowMenu = document.querySelector('.call-controls-overflow.active');
+      if (overflowMenu) {
+        overflowMenu.classList.remove('active');
+      }
+    }
+  });
+  
+  // Ensure all buttons have proper focus management
+  document.addEventListener('click', (e) => {
+    // Close overflow menu when clicking outside
+    if (!e.target.closest('.overflow-menu-btn')) {
+      const overflowMenu = document.querySelector('.call-controls-overflow.active');
+      if (overflowMenu) {
+        overflowMenu.classList.remove('active');
+      }
+    }
+  });
+</script>
 
 <script data-purpose="incoming-call-and-timer">
   (function () {
@@ -2289,7 +2423,6 @@ Record
     });
 
     advanceToNextProspect();
-    updateProspectQueue();
     updateActiveCallCard();
     updateTopStats();
     updateSessionStats();
@@ -2298,6 +2431,9 @@ Record
     // Transition to Active Call workflow using existing synchronized call state
     // Reuse the connected prospect's information and existing call-start workflow
     transitionToActiveCall(current);
+        
+    // Re-render the prospect queue after all state updates are complete
+    updateProspectQueue();
     
     // Navigate to Active Call page after state is prepared
     // This simulates answering the call
@@ -2319,11 +2455,13 @@ Record
     });
 
     advanceToNextProspect();
-    updateProspectQueue();
     updateActiveCallCard();
     updateTopStats();
     updateSessionStats();
     saveState();
+        
+    // Re-render the prospect queue after all state updates are complete
+    updateProspectQueue();
   }
     function markVM() {
     const current = dialQueue[CALLS.currentProspectIndex];

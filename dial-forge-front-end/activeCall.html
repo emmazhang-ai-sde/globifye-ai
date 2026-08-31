@@ -176,7 +176,7 @@
       transition: margin-right 240ms ease;
       margin-right: 18rem; /* matches crm-panel open width by default */
     }
-    @media (max-width: 899px) {
+    @media (max-width: 900px) {
       #mainContent {
         margin-right: 0 !important;
       }
@@ -202,7 +202,7 @@
       transform: translateX(8px);
       pointer-events: none;
     }
-    @media (max-width: 899px) {
+    @media (max-width: 900px) {
       .crm-panel {
         display: none !important;
       }
@@ -403,6 +403,209 @@ animation: fade-in 0.3s ease-out;
     .dial-pad-btn:active {
       transform: scale(0.95);
     }
+    
+    /* RESPONSIVE IMPROVEMENTS */
+    /* Responsive main layout */
+    @media (max-width: 900px) {
+      #mainContent {
+                display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-rows: auto auto;
+        margin-right: 0;
+      }
+
+      #mainContent > section:nth-child(2) {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        min-height: 30rem;
+      }
+
+      #mainContent > section:first-child,
+      #rightCrmPanel {
+        width: auto;
+        min-width: 0;
+      }
+
+      #mainContent > section:first-child {
+        grid-column: 1;
+        grid-row: 2;
+      }
+
+      #rightCrmPanel {
+        grid-column: 2;
+        grid-row: 2;
+      }
+    }
+
+    @media (max-width: 600px) {
+      #mainContent {
+        mt: 0;
+      }
+      
+      body {
+        overflow-y: auto;
+      }
+    }
+
+    /* CONTROL BAR RESPONSIVE STYLING */
+    .control-bar-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: nowrap;
+      justify-content: center;
+    }
+
+    .control-bar-main {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: nowrap;
+      
+    }
+
+    .control-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    /* Overflow menu styles */
+    .overflow-menu-wrapper {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .overflow-menu-button {
+      width: 2.75rem;
+      height: 2.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #d4d4d8;
+      cursor: pointer;
+      transition: all 150ms ease;
+      flex-shrink: 0;
+    }
+
+    .overflow-menu-button:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #FF7A1C;
+    }
+
+    .overflow-menu-button:focus-visible {
+      outline: 2px solid #FF7A1C;
+      outline-offset: 2px;
+    }
+
+    .overflow-menu-button[aria-expanded="true"] {
+      background: rgba(255, 122, 28, 0.15);
+      border-color: rgba(255, 122, 28, 0.3);
+    }
+
+    .overflow-menu-dropdown {
+      position: absolute;
+      bottom: 100%;
+      right: 0;
+      margin-bottom: 0.5rem;
+      background: rgba(30, 31, 39, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1rem;
+      padding: 0.5rem;
+      min-width: 180px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      display: none;
+      flex-direction: column;
+      gap: 0.25rem;
+      z-index: 100;
+    }
+
+    .overflow-menu-dropdown.active {
+      display: flex;
+    }
+
+    .overflow-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0.75rem;
+      background: transparent;
+      border: none;
+      border-radius: 0.5rem;
+      color: #d4d4d8;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 150ms ease;
+      text-align: left;
+      font-family: "DM Sans", sans-serif;
+      white-space: nowrap;
+    }
+
+    .overflow-menu-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #FF7A1C;
+    }
+
+    .overflow-menu-item:focus-visible {
+      outline: 2px solid #FF7A1C;
+      outline-offset: -2px;
+    }
+
+    .overflow-menu-item span:first-child {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* Responsive control bar positioning */
+    @media (max-width: 600px) {
+      .control-bar-container {
+        position: static;
+        width: 100%;
+        padding: 1rem;
+        transform: none;
+        left: auto;
+        bottom: auto;
+      }
+
+      .control-bar-main {
+        width: 100%;
+      }
+
+      .call-end-btn {
+        margin-top: 0.5rem;
+        width: 100%;
+      }
+    }
+
+    /* Accessibility: Focus visible on all interactive elements */
+    button:focus-visible,
+    a:focus-visible {
+      outline: 2px solid #FF7A1C;
+      outline-offset: 2px;
+    }
+
+    /* Responsive heading styles */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2.25rem;
+      }
+      
+      h2 {
+        font-size: 1.125rem;
+      }
+      
+      h3 {
+        font-size: 1rem;
+      }
+    }
+
     </style>
 </head>
 <body class="bg-surface text-[#e3e1ec] font-sans selection:bg-fire-accent/30 overflow-hidden">
@@ -428,7 +631,7 @@ animation: fade-in 0.3s ease-out;
         inputmode="none"
         autocomplete="off"
         aria-label="Phone number input"
-      >
+      />
     </div>
 
     <!-- Number Pad Grid -->
@@ -650,7 +853,7 @@ animation: fade-in 0.3s ease-out;
 <!-- BEGIN: SideNav -->
 <aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-20 flex flex-col items-center py-6 gap-6 glass-card border-r border-white/5 z-40 overflow-y-auto" aria-label="Main navigation">
 <nav class="flex flex-col gap-4 items-center gap-4 w-full overflow-y-auto flex-1">
-    <a href="./Dashboard.html" class="block">
+    <a href="./Dashboard.html" class="block w-full">
         <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Go to Dashboard">
             <span class="material-symbols-outlined" aria-hidden="true">dashboard</span>
             <span class="text-[8px] uppercase font-bold">Dashboard</span>
@@ -660,9 +863,11 @@ animation: fade-in 0.3s ease-out;
     <span class="material-symbols-outlined" aria-hidden="true">call</span>
     <span class="text-[8px] uppercase font-bold">Call</span>
 </button>
-<a href="./supportQueue.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Go to Support Queue">
+<a href="./supportQueue.html"> 
+<button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Go to Support Queue">
     <span class="material-symbols-outlined" aria-hidden="true">queue</span>
     <span class="text-[8px] uppercase font-bold">Queue</span>
+</button>
   </a>
   <a href="./callCoaching.html" class="block w-full">
     <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Go to Call Coaching">
@@ -684,9 +889,11 @@ animation: fade-in 0.3s ease-out;
       <span class="text-[8px] uppercase font-bold">History</span>
     </button>
   </a>
-  <a href="./contacts.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Go to Contacts">
+  <a href="./contacts.html" class="block w-full">
+  <button class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Go to Contacts">
     <span class="material-symbols-outlined" aria-hidden="true">group</span>
     <span class="text-[8px] uppercase font-bold">Contacts</span>
+  </button>
   </a>
   <a href="./integrationsHub.html" class="group flex flex-col items-center gap-1 w-full py-3 text-on-surface-variant/60 hover:text-fire-accent hover:bg-white/5 transition-all" aria-label="Go to Integrations">
     <span class="material-symbols-outlined" aria-hidden="true">apps</span>
@@ -844,28 +1051,52 @@ animation: fade-in 0.3s ease-out;
 </div>
 
 <!-- Call Control Bar -->
-<div class="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-4 px-8 py-4 glass-card rounded-[2.5rem] border border-white/10 shadow-2xl z-30">
-<div class="flex items-center gap-2">
+<div class="control-bar-container absolute bottom-12 left-1/2 -translate-x-1/2 px-8 py-4 glass-card rounded-[2.5rem] border border-white/10 shadow-2xl z-30">
+<div class="control-bar-main">
+    <!-- Mute Control Group -->
+  <div class="control-btn-group">
   <div class="relative inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 pl-3 pr-2 py-1.5 gap-1.5 shadow-inner shadow-white/5">
     <button id="mute-arrow" class="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent cursor-pointer pointer-events-auto" title="Mute settings" aria-label="Open mute settings"><span class="material-symbols-outlined text-base" aria-hidden="true">expand_more</span></button>
     <button id="btn-mute" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Mute (M)" aria-label="Mute microphone"><span class="material-symbols-outlined" aria-hidden="true">mic</span></button>
   </div>
+  </div>
+  
+  <!-- Camera Control Group -->
+  <div class="control-btn-group">
   <div class="relative inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 pl-3 pr-2 py-1.5 gap-1.5 shadow-inner shadow-white/5">
     <button id="camera-arrow" class="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent cursor-pointer pointer-events-auto" title="Camera settings" aria-label="Open camera settings"><span class="material-symbols-outlined text-base" aria-hidden="true">expand_more</span></button>
     <button id="btn-camera" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Camera" aria-label="Toggle camera"><span class="material-symbols-outlined" aria-hidden="true">videocam</span></button>
   </div>
+  </div>
+  
+  <!-- Screen Share Control Group -->
+  <div class="control-btn-group">
   <div class="relative inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 pl-3 pr-2 py-1.5 gap-1.5 shadow-inner shadow-white/5">
-    <button id="screen-share-arrow" class="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent cursor-pointer pointer-events-auto" title="Mute settings" aria-label="Open mute settings"><span class="material-symbols-outlined text-base" aria-hidden="true">expand_more</span></button>
+    <button id="screen-share-arrow" class="w-9 h-9 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent cursor-pointer pointer-events-auto" title="Screen share settings" aria-label="Open screen share settings"><span class="material-symbols-outlined text-base" aria-hidden="true">expand_more</span></button>
     <button id="btn-screen-share" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Screen Share" aria-label="Start screen share"><span class="material-symbols-outlined" aria-hidden="true">present_to_all</span></button>
   </div>
-<button id="btn-hold" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Hold (H)" aria-label="Hold call"><span class="material-symbols-outlined" aria-hidden="true">pause</span></button>
-<button id="btn-transfer" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Transfer" aria-label="Transfer call"><span class="material-symbols-outlined" aria-hidden="true">forward_to_inbox</span></button>
-<button id="btn-record" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Record" aria-label="Record call"><span class="material-symbols-outlined" aria-hidden="true">fiber_manual_record</span></button>
-<button id="btn-vm-drop" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="VM Studio" aria-label="Open voicemail studio"><span class="material-symbols-outlined" aria-hidden="true">voicemail</span></button>
-<button id="btn-quick-note" class="w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Quick Note" aria-label="Add quick note"><span class="material-symbols-outlined" aria-hidden="true">note_add</span></button>
+  </div>
+  
+  <!-- Individual Controls -->
+<button id="btn-hold" class="control-btn-group w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Hold (H)" aria-label="Hold call"><span class="material-symbols-outlined" aria-hidden="true">pause</span></button>
+<button id="btn-transfer" class="control-btn-group w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Transfer" aria-label="Transfer call"><span class="material-symbols-outlined" aria-hidden="true">forward_to_inbox</span></button>
+<button id="btn-record" class="control-btn-group w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Record" aria-label="Record call"><span class="material-symbols-outlined" aria-hidden="true">fiber_manual_record</span></button>
+<button id="btn-vm-drop" class="control-btn-group w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="VM Studio" aria-label="Open voicemail studio"><span class="material-symbols-outlined" aria-hidden="true">voicemail</span></button>
+<button id="btn-quick-note" class="control-btn-group w-11 h-11 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-all text-gray-300 hover:text-fire-accent" title="Quick Note" aria-label="Add quick note"><span class="material-symbols-outlined" aria-hidden="true">note_add</span></button>
+
+  <!-- Overflow Menu -->
+  <div class="overflow-menu-wrapper">
+    <button id="overflow-menu-btn" class="overflow-menu-button" aria-label="More call controls" aria-expanded="false" aria-haspopup="menu" aria-controls="overflow-menu">
+      <span class="material-symbols-outlined text-lg" aria-hidden="true">more_vert</span>
+    </button>
+    <div id="overflow-menu" class="overflow-menu-dropdown" role="menu">
+      <!-- Menu items will be populated by JavaScript -->
+    </div>
+  </div>
 </div>
+
 <div class="w-px h-8 bg-white/10 mx-2"></div>
-<button id="endCall" class="px-8 py-3.5 bg-error-red hover:bg-red-600 text-white rounded-full flex items-center gap-3 font-bold transition-all active:scale-95 shadow-[0_0_25px_rgba(255,59,48,0.4)]" aria-label="End current call">
+<button id="endCall" class="call-end-btn px-8 py-3.5 bg-error-red hover:bg-red-600 text-white rounded-full flex items-center gap-3 font-bold transition-all active:scale-95 shadow-[0_0_25px_rgba(255,59,48,0.4)]" aria-label="End current call">
 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">call_end</span>
 <span class="">End Call</span>
 </button>
@@ -1063,7 +1294,7 @@ animation: fade-in 0.3s ease-out;
 <div id="camera-modal-overlay" class="modal-overlay hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center" onclick="closeCameraModal(event)">
 <div class="modal-content liquid-glass rounded-3xl w-full max-w-2xl mx-4 p-10 relative overflow-auto" onclick="event.stopPropagation()">
 <!-- Close Button -->
-<button onclick="closeCameraModal()" class="absolute top-6 right-6 p-2 hover:bg-white/10 rounded-full transition-colors" title="Close (Esc)">
+<button onclick="closeCameraModal()" class="absolute top-6 right-6 p-2 hover:bg-white/10 rounded-full transition-colors" title="Close (Esc)" aria-label="Close camera modal">
 <span class="material-symbols-outlined text-gray-300">close</span>
 </button>
 <!-- Header -->
@@ -1177,7 +1408,7 @@ Start Camera
 <p class="text-xs text-gray-500"><span class="font-bold text-gray-400">What is screen sharing?</span> We use WebRTC to securely stream your screen content in real-time with end-to-end encryption.</p>
 </div>
 <!-- Footer -->
-<div class="flex items-center justify-between border-t border-glass-border pt-8">
+<div class="flex items-center justify-between border-t border-glass-border pt-8 flex-wrap gap-4">
 <label class="flex items-center gap-3 cursor-pointer group">
 <div class="relative w-5 h-5 border-2 border-glass-border rounded group-hover:border-fire-accent transition-colors flex items-center justify-center">
 <input id="share-system-audio" checked class="peer hidden" type="checkbox">
@@ -2300,6 +2531,178 @@ window.addEventListener('beforeunload', function() {
   saveState();
 });
 </script>
+
+<!-- BEGIN: Overflow Menu Manager -->
+<script data-purpose="responsive-control-bar">
+(function() {
+  const controlBarContainer = document.querySelector('.control-bar-container');
+  const controlBarMain = document.querySelector('.control-bar-main');
+  const overflowWrapper = document.querySelector('.overflow-menu-wrapper');
+  const overflowBtn = document.getElementById('overflow-menu-btn');
+  const overflowMenu = document.getElementById('overflow-menu');
+
+  // Control metadata in order of visibility priority (first = most important, last = hide first)
+  const controls = [
+    { selector: '.control-btn-group:nth-of-type(1)', id: 'btn-mute', label: 'Mute', icon: 'mic' },
+    { selector: '.control-btn-group:nth-of-type(2)', id: 'btn-camera', label: 'Camera', icon: 'videocam' },
+    { selector: '.control-btn-group:nth-of-type(3)', id: 'btn-screen-share', label: 'Screen Share', icon: 'present_to_all' },
+    { selector: '#btn-hold', id: 'btn-hold', label: 'Hold', icon: 'pause' },
+    { selector: '#btn-transfer', id: 'btn-transfer', label: 'Transfer', icon: 'forward_to_inbox' },
+    { selector: '#btn-record', id: 'btn-record', label: 'Record', icon: 'fiber_manual_record' },
+    { selector: '#btn-vm-drop', id: 'btn-vm-drop', label: 'VM Studio', icon: 'voicemail' },
+    { selector: '#btn-quick-note', id: 'btn-quick-note', label: 'Quick Note', icon: 'note_add' }
+  ];
+
+  // Get the actual control button elements (the .control-btn-group wrappers)
+  function getControlElements() {
+    return controlBarMain.querySelectorAll('.control-btn-group');
+  }
+
+  /**
+   * Calculate how much width is needed for the overflow button + wrapper
+   */
+  function getOverflowButtonWidth() {
+    return overflowWrapper.offsetWidth;
+  }
+
+  /**
+   * Measure total width of all visible controls
+   */
+  function measureControlsWidth(controlElements, upToIndex) {
+    let totalWidth = 0;
+    for (let i = 0; i < upToIndex && i < controlElements.length; i++) {
+      totalWidth += controlElements[i].offsetWidth;
+    }
+    // Add gaps between controls (0.5rem = 8px)
+    const gapWidth = (upToIndex > 0 ? upToIndex - 1 : 0) * 8;
+    return totalWidth + gapWidth;
+  }
+
+  /**
+   * Main layout calculation - determines how many controls fit
+   */
+  function updateControlBarLayout() {
+    const controlElements = getControlElements();
+    const mainBarWidth = controlBarMain.offsetWidth;
+    const overflowButtonWidth = getOverflowButtonWidth();
+    
+    // Available width = main bar width - overflow button - gap between them
+    const availableForControls = mainBarWidth - overflowButtonWidth - 8;
+    
+    // Find how many controls fit
+    let fittingControls = 0;
+    for (let i = 0; i < controlElements.length; i++) {
+      const widthNeeded = measureControlsWidth(controlElements, i + 1);
+      if (widthNeeded <= availableForControls) {
+        fittingControls = i + 1;
+      } else {
+        break;
+      }
+    }
+
+    // Show/hide controls based on what fits
+    controlElements.forEach((el, index) => {
+      el.style.display = index < fittingControls ? '' : 'none';
+    });
+
+    // Populate overflow menu with controls that don't fit
+    overflowMenu.innerHTML = '';
+    let hasOverflowControls = false;
+    
+    for (let i = fittingControls; i < controlElements.length; i++) {
+      hasOverflowControls = true;
+      const control = controls[i];
+      if (control) {
+        createOverflowMenuItem(control);
+      }
+    }
+
+    // Show/hide overflow button only if there are controls to overflow
+    overflowBtn.style.display = hasOverflowControls ? 'flex' : 'none';
+    if (!hasOverflowControls) {
+      closeOverflowMenu();
+    }
+  }
+
+  function createOverflowMenuItem(control) {
+    const item = document.createElement('button');
+    item.className = 'overflow-menu-item';
+    item.type = 'button';
+    item.setAttribute('aria-label', control.label);
+    item.setAttribute('role', 'menuitem');
+    item.innerHTML = `
+      <span class="material-symbols-outlined text-sm">${control.icon}</span>
+      <span>${control.label}</span>
+    `;
+    item.addEventListener('click', () => {
+      // Click the actual control button by ID
+      const btn = document.getElementById(control.id);
+      if (btn) {
+        btn.click();
+      }
+      closeOverflowMenu();
+    });
+    overflowMenu.appendChild(item);
+  }
+
+  function toggleOverflowMenu() {
+    const isOpen = overflowMenu.classList.toggle('active');
+    overflowBtn.setAttribute('aria-expanded', isOpen);
+  }
+
+  function closeOverflowMenu() {
+    overflowMenu.classList.remove('active');
+    overflowBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  // Event listeners
+  overflowBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleOverflowMenu();
+  });
+
+  // Close menu on escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeOverflowMenu();
+    }
+  });
+
+  // Close menu when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!controlBarContainer.contains(e.target)) {
+      closeOverflowMenu();
+    }
+  });
+
+  // Use ResizeObserver to detect when control bar width changes
+  if (typeof ResizeObserver !== 'undefined') {
+    const resizeObserver = new ResizeObserver(() => {
+      updateControlBarLayout();
+    });
+    resizeObserver.observe(controlBarMain);
+  } else {
+    // Fallback for browsers without ResizeObserver
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(updateControlBarLayout, 150);
+  });
+}
+
+  // Initial layout calculation
+  // Wait for DOM to be fully rendered before measuring
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', updateControlBarLayout);
+  } else {
+    // Small delay to ensure all styles are applied
+    requestAnimationFrame(() => {
+      setTimeout(updateControlBarLayout, 10);
+    });
+  }
+})();
+</script>
+<!-- END: Overflow Menu Manager -->
 
 <script data-purpose="call-state-and-initialization">
   // ========== CALL STATE OBJECT ==========
