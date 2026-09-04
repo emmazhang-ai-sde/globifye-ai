@@ -5,17 +5,18 @@ A phone-call AI agent: a caller talks to a company's AI over SIP, and a browser 
 Design docs: [`design-docs-sip/`](design-docs-sip/). This README is just how to run it.
 
 ```
-Softphone (Linphone)  <->  Asterisk (Docker)  <->  step2_stt_bridge.py  (STT -> LLM -> TTS)
-                                                          |  events
-                                                          v
-                                                   demo_ui_server.py  ->  browser (localhost:8400)
+Softphone (Linphone)  <->  Asterisk (Docker)  <->  stt_bridge_ai_human_transfer.py  (STT -> LLM -> TTS + handoff)
+                                                                        |  events
+                                                                        v
+                                                                 demo_ui_server.py  ->  browser (localhost:8400)
 ```
 
 ## Folders
 
 | Path | What |
 |---|---|
-| `scripts/step2_stt_bridge.py` | The pipeline: call audio -> Modulate STT -> Groq LLM -> Deepgram Aura TTS -> back into the call |
+| `scripts/stt_bridge_ai_human_transfer.py` | Latest runtime: call audio -> Modulate STT -> Groq LLM -> Deepgram Aura TTS -> back into the call, with AI-human-AI handoff |
+| `scripts/archive/` | Older bridge and transport experiments kept for reference only |
 | `demo-ui/` | The web console (stdlib Python server + static pages) |
 | `knowledge-base/` | Per-company KB + `companies.json` (extension, voice, KB file) |
 
@@ -37,7 +38,7 @@ docker start asterisk-mvp
 #      -v $(pwd)/asterisk-config:/etc/asterisk andrius/asterisk
 
 # 2. The pipeline (STT -> LLM -> TTS). Must be the venv Python, with -u:
-venv/bin/python -u sip/scripts/step2_stt_bridge.py
+venv/bin/python -u sip/scripts/stt_bridge_ai_human_transfer.py
 
 # 3. The web console:
 venv/bin/python sip/demo-ui/demo_ui_server.py
@@ -47,7 +48,7 @@ Terminal 3 should print:
 
 ```
 Demo UI running at http://localhost:8400
-Waiting for bridge events on POST /internal/events (from step2_stt_bridge.py)
+Waiting for bridge events on POST /internal/events (from stt_bridge_ai_human_transfer.py)
 Supabase mirror: ON -> https://...   (or OFF if no key)
 ```
 

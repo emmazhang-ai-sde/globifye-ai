@@ -5,7 +5,7 @@
 A small, stdlib-only web console for demoing the SIP voice-agent loop to non-technical viewers. It serves two synced interfaces over the same real call: a **SALES dashboard** (live transcript, pipeline log, post-call analysis) and a **CLIENT phone** (incoming-call screen, live conversation). No framework, no build step: edit the files in `static/` and refresh the browser.
 
 > **What's the demo console vs the bridge:**
-> The console (`demo_ui_server.py`) only shows what is happening. The actual voice loop (audio in, STT, LLM, TTS, audio out) runs in `sip/scripts/step2_stt_bridge.py`, which POSTs its log events to this console. The console never touches audio.
+> The console (`demo_ui_server.py`) only shows what is happening. The actual voice loop (audio in, STT, LLM, TTS, audio out, AI-human-AI handoff) runs in `sip/scripts/stt_bridge_ai_human_transfer.py`, which POSTs its log events to this console. The console never touches audio.
 
 ## How to start (UI only)
 
@@ -38,7 +38,7 @@ The console is one of four pieces. Start order:
 |---|-------|--------------|------------------|
 | 1 | Asterisk (Docker) | see `sip/design-docs-sip/` step1 setup doc | Owns the SIP call; exposes ARI on `localhost:8088` |
 | 2 | Softphone (Linphone) | open Linphone, confirm `test-endpoint` is registered | Acts as the customer's phone (microphone/speaker) |
-| 3 | Bridge script | `venv/bin/python sip/scripts/step2_stt_bridge.py` (own terminal) | Runs the actual STT -> LLM -> TTS loop and streams events to the console |
+| 3 | Bridge script | `venv/bin/python -u sip/scripts/stt_bridge_ai_human_transfer.py` (own terminal) | Runs the actual STT -> LLM -> TTS + handoff loop and streams events to the console |
 | 4 | This console | `venv/bin/python sip/demo-ui/demo_ui_server.py` (own terminal) | Shows the call live and runs post-call analysis |
 
 ## Configuration

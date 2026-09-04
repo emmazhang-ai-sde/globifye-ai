@@ -34,8 +34,12 @@ import time
 
 # --- STEP 2 ADDITION: ARI + RTP bridge imports (not in original agent-test6.py) ---
 import socket as udp_socket
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import requests
 from websocket import create_connection
+
+from agent_registry import AgentRegistry
+from call_session import CallSession
 
 # set up timer for timestamps
 _START = time.time()
@@ -47,7 +51,7 @@ _log_lock = threading.Lock()
 SHOW_LLM_STREAM = os.environ.get("SHOW_LLM_STREAM") == "1"
 
 
-def log(tag, text="", ms=None, blank_before=0, blank_after=0):
+def log(tag, text="", ms=None, blank_before=0, blank_after=0, payload=None):
     """Thread-safe, single-line logger. Every worker must call this instead
     of print() -- concurrent bare prints (esp. groq_worker's raw token
     stream) is what caused interleaved garbage like
@@ -65,7 +69,10 @@ def log(tag, text="", ms=None, blank_before=0, blank_after=0):
         print(line, flush=True)
         for _ in range(int(blank_after)):
             print()
-    _ui_queue.put({"tag": tag, "text": text, "ms": ms})
+    event = {"tag": tag, "text": text, "ms": ms}
+    if payload is not None:
+        event["payload"] = payload
+    _ui_queue.put(event)
 
 
 # --- DEMO UI ADDITION (2026-07-10): mirror every log() line to the demo UI
@@ -74,6 +81,8 @@ def log(tag, text="", ms=None, blank_before=0, blank_after=0):
 # thread: if the UI server isn't running, each POST fails fast and the event
 # is dropped -- the call loop never blocks or slows down because of the UI. ---
 UI_EVENTS_URL = "http://localhost:8400/internal/events"
+CONTROL_HOST = "127.0.0.1"
+CONTROL_PORT = 8500
 _ui_queue = queue.Queue()
 
 
@@ -281,8 +290,8 @@ def _load_companies():
 
 
 COMPANIES = _load_companies()
-_EXT_TO_COMPANY = {c["extension"]: key for key, c in COMPANIES.items()}
 DEFAULT_COMPANY = "pacificbeef"
+AGENT_REGISTRY = AgentRegistry.from_legacy_company_data(COMPANIES)
 
 # Set per call from StasisStart (single active call only, per MVP scope).
 current_company = DEFAULT_COMPANY
@@ -293,6 +302,11 @@ MAX_HISTORY = 10
 # Position 0 is always the active company's system prompt; the trim in
 # groq_worker preserves it, so it survives regardless of which company is live.
 conversation_history = [COMPANIES[DEFAULT_COMPANY]["system_prompt"]]
+current_session = CallSession.from_agent(
+    AGENT_REGISTRY.get(DEFAULT_COMPANY),
+    call_session_id="legacy-single-call",
+    conversation_history=conversation_history,
+)
 
 # clients
 dg = DeepgramClient(api_key=DEEPGRAM_KEY)
@@ -347,6 +361,8 @@ def groq_worker():
         # --- TRANSFER: human is live -- transcript still logged upstream, but
         # don't feed the LLM or generate a reply. ---
         if holder == "human":
+            current_session.skip_ai_turn(transcript, source="groq_worker")
+            log("SKIP_TURN", "owner is HUMAN; AI is listening but not responding", payload=current_session.room_debug_payload())
             continue
 
         turn_epoch = epoch  # stamp this turn; drop it if holder switches mid-turn
@@ -355,6 +371,7 @@ def groq_worker():
             "role": "user",
             "content": transcript
         })
+        current_session.conversation_history = conversation_history
 
         response = client.chat.completions.create(
             model="openai/gpt-oss-120b",
@@ -401,11 +418,13 @@ def groq_worker():
             "role": "assistant",
             "content": full_response
         })
+        current_session.conversation_history = conversation_history
 
         if len(conversation_history) > MAX_HISTORY + 1:
             conversation_history = (
                 [conversation_history[0]] + conversation_history[-(MAX_HISTORY):]
             )
+            current_session.conversation_history = conversation_history
 
 
 # --- STEP 3 CHANGE: was local playback via sounddevice
@@ -470,6 +489,7 @@ def play_deepgram(text):
     # DELETE /playbacks/{id} and cut the AI off mid-sentence. ---
     result = ari_post(f"/channels/{current_channel_id}/play", media=f"sound:custom/{sound_name}")
     current_playback_id = result["id"] if result else None
+    current_session.set_playback(current_playback_id)
     log("TTS played", sound_name, ms=_ms())
 
 # TTS worker - Deepgram Aura
@@ -615,7 +635,10 @@ _external_media_channel_ids = set()
 # in _sales_channel_ids. `current_sales_channel_id` is what set_holder()
 # targets for mute/unmute. ---
 _sales_channel_ids = set()
+_human_channel_hangup_causes = {}
 current_sales_channel_id = None
+DEFAULT_HUMAN_ENDPOINT = "PJSIP/sales-endpoint"
+DEFAULT_HUMAN_CALLER_ID = "Sales"
 
 # --- TRANSFER (step 2): holder switch. `holder` decides who is audible;
 # everything (sales mute, LLM gating, TTS suppression) derives from it. `epoch`
@@ -625,10 +648,12 @@ current_sales_channel_id = None
 holder = "ai"                  # "ai" | "human"
 epoch = 0
 current_playback_id = None
+_call_control_lock = threading.RLock()
 
 
-def bridge_call_to_external_media(caller_channel_id):
-    global current_bridge_id, current_ext_channel_id, current_sales_channel_id
+def create_asterisk_room(caller_channel_id):
+    """Create the Asterisk equivalent of a Telnyx room for this call."""
+    global current_bridge_id, current_ext_channel_id
     bridge = ari_post("/bridges", type="mixing")
     bridge_id = bridge["id"]
     ari_post(f"/bridges/{bridge_id}/addChannel", channel=caller_channel_id)
@@ -644,62 +669,322 @@ def bridge_call_to_external_media(caller_channel_id):
     # Remember them so StasisEnd can tear them down instead of leaking.
     current_bridge_id = bridge_id
     current_ext_channel_id = ext_channel["id"]
+    current_session.set_room(bridge_id=bridge_id, ai_media_channel_id=ext_channel["id"])
+    log("ROOM", "created", payload=current_session.room_debug_payload())
     log("CALL", f"bridged {caller_channel_id} + externalMedia {ext_channel['id']} into bridge {bridge_id}")
+    return bridge_id, ext_channel["id"]
 
+
+def invite_human_to_room(endpoint, *, caller_id=DEFAULT_HUMAN_CALLER_ID):
+    """Invite a human participant into the active Asterisk room."""
+    global current_sales_channel_id
     # --- TRANSFER (step 1): originate the salesperson leg into the SAME bridge,
     # muted. Ringing/answer is async -- the actual addChannel + mute happen when
     # this channel's StasisStart fires (handled in ari_event_loop). Tracked in
     # _sales_channel_ids so its StasisStart is NOT treated as a new inbound call. ---
-    sales = ari_post(
-        "/channels",
-        endpoint="PJSIP/sales-endpoint",
-        app=APP_NAME,
-        callerId="Sales",
-    )
+    try:
+        sales = ari_post(
+            "/channels",
+            endpoint=endpoint,
+            app=APP_NAME,
+            callerId=caller_id,
+        )
+    except requests.RequestException as e:
+        mark_handoff_failure(
+            status="failed",
+            reason=f"human originate failed: {type(e).__name__}: {e}",
+            source="invite_human_to_room",
+        )
+        return None
     _sales_channel_ids.add(sales["id"])
     current_sales_channel_id = sales["id"]
-    log("SALES", f"originating sales leg {sales['id']} (ringing, will join muted)")
+    current_session.invite_human(
+        endpoint=endpoint,
+        caller_id=caller_id,
+        channel_id=sales["id"],
+    )
+    log("HUMAN_INVITE", "ringing", payload=current_session.room_debug_payload())
+    log("SALES", f"originating human leg {sales['id']} to {endpoint} (ringing, will join muted)")
+    return sales["id"]
 
 
-def set_holder(value):
-    """--- TRANSFER (step 2): single derive point for a switch. Never set mute
-    and mode independently elsewhere -- that can desync into 'sales unmuted
-    while AI still generating', with both talking at once. All four actions of
-    a takeover (mute/unmute, mode flip, playback teardown, epoch bump) happen
-    together here. ---"""
+def invite_default_human_to_room():
+    invite_human_to_room(DEFAULT_HUMAN_ENDPOINT, caller_id=DEFAULT_HUMAN_CALLER_ID)
+
+
+def bridge_call_to_external_media(caller_channel_id):
+    """Compatibility wrapper: create the room, then attach the default human leg."""
+    create_asterisk_room(caller_channel_id)
+    invite_default_human_to_room()
+
+
+def _apply_owner_side_effects():
     global holder, epoch, current_playback_id
-    if value == holder:
-        return
-    holder = value
-    epoch += 1  # invalidate any in-flight turn (checked in groq_worker/tts_worker)
+    holder = current_session.owner
+    epoch = current_session.epoch  # invalidate any in-flight turn (checked in groq_worker/tts_worker)
 
     if current_sales_channel_id:
-        action = "unmute" if value == "human" else "mute"
+        action = "unmute" if holder == "human" else "mute"
         requests.post(
             f"http://{ARI_HOST}/ari/channels/{current_sales_channel_id}/{action}",
             params={"direction": "in"},
             auth=(ARI_USER, ARI_PASSWORD),
         )
 
-    if value == "human" and current_playback_id:
+    if holder == "human" and current_playback_id:
         ari_delete(f"/playbacks/{current_playback_id}")  # cut AI off mid-sentence
         current_playback_id = None
+        current_session.clear_playback()
 
-    log("HOLDER", value)
+    log("HOLDER", holder)
+
+
+def set_call_owner(owner, *, reason=None, source="internal"):
+    """Switch the product owner of the call while preserving the legacy globals."""
+    with _call_control_lock:
+        if not current_session.set_owner(owner, reason=reason, source=source):
+            return False
+        _apply_owner_side_effects()
+        return True
+
+
+def takeover_by_human(*, reason=None, source="internal"):
+    return set_call_owner("human", reason=reason, source=source)
+
+
+def accept_handoff(*, accepted_by=None, source="internal"):
+    with _call_control_lock:
+        holder_changed = current_session.accept_handoff(accepted_by=accepted_by, source=source)
+        if not holder_changed:
+            return False
+        _apply_owner_side_effects()
+        log("HANDOFF", "accepted", payload=current_session.room_debug_payload())
+        return True
+
+
+def resume_ai(*, handback_note=None, resumed_by=None, source="internal"):
+    with _call_control_lock:
+        holder_changed = current_session.resume_ai(
+            handback_note=handback_note,
+            resumed_by=resumed_by,
+            source=source,
+        )
+        if not holder_changed:
+            return False
+        _append_handback_context()
+        _apply_owner_side_effects()
+        log("HANDOFF", "resumed", payload=current_session.room_debug_payload())
+        return True
+
+
+def _append_handback_context():
+    global conversation_history
+    conversation_history.append(current_session.handback_context_message())
+    if len(conversation_history) > MAX_HISTORY + 1:
+        conversation_history = (
+            [conversation_history[0]] + conversation_history[-(MAX_HISTORY):]
+        )
+    current_session.conversation_history = conversation_history
+
+
+def _handoff_failure_payload(recovery_action):
+    payload = current_session.room_debug_payload()
+    payload["recovery_action"] = recovery_action
+    return payload
+
+
+def mark_handoff_failure(
+    *,
+    status,
+    reason,
+    source="internal",
+    channel_id=None,
+):
+    """Record a human handoff failure and keep the caller in a valid owner state."""
+    global current_sales_channel_id
+    with _call_control_lock:
+        owner_before = current_session.owner
+        tracked_channel_id = channel_id or current_sales_channel_id
+        current_session.mark_handoff_failure(
+            status=status,
+            reason=reason,
+            source=source,
+        )
+        if tracked_channel_id:
+            ari_delete(f"/channels/{tracked_channel_id}")
+            _sales_channel_ids.discard(tracked_channel_id)
+            _human_channel_hangup_causes.pop(tracked_channel_id, None)
+        if current_sales_channel_id == tracked_channel_id:
+            current_sales_channel_id = None
+
+        recovery_action = "ai_remained_owner"
+        if owner_before == "human":
+            current_session.resume_ai(
+                handback_note=f"Human handoff ended unexpectedly: {reason}",
+                resumed_by="system",
+                source=source,
+                reason="handoff_failure_recovery",
+            )
+            _append_handback_context()
+            _apply_owner_side_effects()
+            recovery_action = "returned_to_ai"
+        else:
+            _apply_owner_side_effects()
+
+        log(
+            "HANDOFF_FAILURE",
+            status,
+            payload=_handoff_failure_payload(recovery_action),
+        )
+        return recovery_action
+
+
+def _human_failure_status_from_hangup(channel_id):
+    hangup = _human_channel_hangup_causes.pop(channel_id, {}) or {}
+    cause = hangup.get("cause")
+    cause_txt = str(hangup.get("cause_txt") or "").lower()
+    if cause == 17 or "busy" in cause_txt:
+        return "busy"
+    if cause in (21, 603) or "reject" in cause_txt or "declin" in cause_txt:
+        return "declined"
+    if cause in (18, 19) or "no answer" in cause_txt or "no user response" in cause_txt:
+        return "no_answer"
+    if current_session.owner == "human" or current_session.handoff_accept_status == "accepted":
+        return "dropped"
+    if current_session.human_invite_status == "ringing":
+        return "no_answer"
+    return "dropped"
+
+
+def toggle_call_owner(*, source="internal"):
+    if holder == "ai":
+        return accept_handoff(accepted_by=DEFAULT_HUMAN_CALLER_ID, source=source)
+    return resume_ai(
+        handback_note="manual_toggle",
+        resumed_by=DEFAULT_HUMAN_CALLER_ID,
+        source=source,
+    )
+
+
+def set_holder(value):
+    """Compatibility alias for older scripts/docs that still say holder."""
+    return set_call_owner(value, source="legacy_set_holder")
+
+
+class ControlHandler(BaseHTTPRequestHandler):
+    def log_message(self, fmt, *args):
+        return
+
+    def _read_json_body(self):
+        length = int(self.headers.get("Content-Length", "0") or 0)
+        if length <= 0:
+            return {}
+        raw = self.rfile.read(length)
+        try:
+            return json.loads(raw.decode("utf-8"))
+        except json.JSONDecodeError:
+            return {}
+
+    def _send_json(self, body, status=200):
+        data = json.dumps(body).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+
+    def do_POST(self):
+        if self.path not in (
+            "/internal/handoff/accept",
+            "/internal/handoff/resume-ai",
+            "/internal/handoff/failure",
+        ):
+            self._send_json({"error": "not found"}, 404)
+            return
+        if self.client_address[0] not in ("127.0.0.1", "::1"):
+            self._send_json({"error": "forbidden"}, 403)
+            return
+
+        body = self._read_json_body()
+        actor = body.get("accepted_by") or body.get("resumed_by") or DEFAULT_HUMAN_CALLER_ID
+        try:
+            if current_session.status != "active":
+                self._send_json(
+                    {"error": "no active call", **current_session.room_debug_payload()},
+                    409,
+                )
+                return
+            recovery_action = None
+            if self.path == "/internal/handoff/accept":
+                changed = accept_handoff(accepted_by=actor, source="control_api")
+            elif self.path == "/internal/handoff/resume-ai":
+                changed = resume_ai(
+                    handback_note=body.get("handback_note"),
+                    resumed_by=actor,
+                    source="control_api",
+                )
+            else:
+                recovery_action = mark_handoff_failure(
+                    status=body.get("status") or "failed",
+                    reason=body.get("reason") or "handoff failure reported by control API",
+                    source="control_api",
+                )
+                changed = recovery_action == "returned_to_ai"
+            response = {
+                "ok": True,
+                "changed": changed,
+                **current_session.room_debug_payload(),
+            }
+            if recovery_action:
+                response["recovery_action"] = recovery_action
+            self._send_json(response)
+        except RuntimeError as e:
+            self._send_json(
+                {"error": str(e), **current_session.room_debug_payload()},
+                409,
+            )
+        except ValueError as e:
+            self._send_json({"error": str(e)}, 400)
+
+
+def control_server():
+    server = ThreadingHTTPServer((CONTROL_HOST, CONTROL_PORT), ControlHandler)
+    log("CONTROL", f"listening on http://{CONTROL_HOST}:{CONTROL_PORT}")
+    server.serve_forever()
 
 
 # --- STEP 3 ADDITION: the container's sounds dir may not exist yet --
 # create it once at startup so play_deepgram's docker cp doesn't fail. ---
 def ensure_sounds_dir():
-    subprocess.run(
-        ["docker", "exec", ASTERISK_CONTAINER, "mkdir", "-p", SOUNDS_DIR_IN_CONTAINER],
-        check=True,
-    )
+    try:
+        subprocess.run(
+            ["docker", "exec", ASTERISK_CONTAINER, "mkdir", "-p", SOUNDS_DIR_IN_CONTAINER],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except FileNotFoundError:
+        log("SETUP", "Docker CLI was not found. Install Docker Desktop before starting the bridge.")
+        raise SystemExit(1)
+    except subprocess.CalledProcessError as e:
+        detail = (e.stderr or e.stdout or "").strip()
+        if detail:
+            detail = f" Detail: {detail}"
+        log(
+            "SETUP",
+            (
+                f"Cannot prepare Asterisk sounds dir in container '{ASTERISK_CONTAINER}'. "
+                "Start Docker Desktop and make sure the Asterisk container is running, "
+                f"then retry.{detail}"
+            ),
+        )
+        raise SystemExit(1)
 
 
 def ari_event_loop():
     global current_channel_id, current_company, current_voice, conversation_history
     global current_bridge_id, current_ext_channel_id, current_sales_channel_id
+    global holder, epoch, current_playback_id
 
     ws_url = f"ws://{ARI_HOST}/ari/events?api_key={ARI_USER}:{ARI_PASSWORD}&app={APP_NAME}"
     log("ARI", f"connecting to ws://{ARI_HOST}/ari/events?api_key=***:***&app={APP_NAME}")
@@ -728,31 +1013,39 @@ def ari_event_loop():
 
                 # --- TRANSFER (step 1): our own salesperson leg answered --
                 # add to the active bridge, muted. Not a new inbound call. ---
-                if channel_id in _sales_channel_ids:
+                if channel_id in _sales_channel_ids or channel_id == current_sales_channel_id:
                     ari_post(f"/bridges/{current_bridge_id}/addChannel", channel=channel_id)
+                    current_session.set_human_channel(channel_id)
                     requests.post(
                         f"http://{ARI_HOST}/ari/channels/{channel_id}/mute",
                         params={"direction": "in"},
                         auth=(ARI_USER, ARI_PASSWORD),
                     )
+                    log("HUMAN_INVITE", "joined", payload=current_session.room_debug_payload())
                     log("SALES", f"joined bridge muted: {channel_id}")
                     continue
 
-                # --- MULTI-COMPANY: pick the company from the Stasis argument the
-                # dialplan passed (Stasis(sip-mvp-app,<key>)). Fall back to the
-                # dialed extension, then to the default. Reset the LLM context to
-                # that company's system prompt and switch the TTS voice, so the
-                # rest of the loop answers as that business. ---
-                args = event.get("args") or []
-                company_key = args[0] if args else _EXT_TO_COMPANY.get(
-                    event.get("channel", {}).get("dialplan", {}).get("exten"), DEFAULT_COMPANY
+                # --- AGENT REGISTRY: resolve the call into a voice-agent config.
+                # Today the registry is backed by companies.json; later this is
+                # where Customer Registration / Dashboard data plugs in.
+                resolution = AGENT_REGISTRY.resolve(
+                    stasis_args=event.get("args") or [],
+                    dialed_extension=event.get("channel", {}).get("dialplan", {}).get("exten"),
+                    default_agent_id=DEFAULT_COMPANY,
                 )
-                if company_key not in COMPANIES:
-                    company_key = DEFAULT_COMPANY
+                company_key = resolution.agent.company_key
                 company = COMPANIES[company_key]
                 current_company = company_key
                 current_voice = company["voice"]
                 conversation_history = [company["system_prompt"]]
+                current_session.start_call(
+                    caller_channel_id=channel_id,
+                    agent=resolution.agent,
+                    conversation_history=conversation_history,
+                )
+                holder = current_session.owner
+                epoch = current_session.epoch
+                current_playback_id = current_session.current_playback_id
 
                 log("CALL", f"arrived: {channel_id}")
                 log("AGENT", company["display_name"])
@@ -767,10 +1060,17 @@ def ari_event_loop():
             elif event_type == "StasisEnd":
                 channel_id = event["channel"]["id"]
 
-                # --- TRANSFER (step 1): our own sales/externalMedia legs ending
-                # -- just untrack, no teardown cascade. ---
+                # --- TRANSFER: our own human leg ending should never strand
+                # the caller. If human already owned the call, return control
+                # to AI; otherwise keep AI as-is and expose the failure.
                 if channel_id in _sales_channel_ids:
-                    _sales_channel_ids.discard(channel_id)
+                    failure_status = _human_failure_status_from_hangup(channel_id)
+                    mark_handoff_failure(
+                        status=failure_status,
+                        reason=f"human channel ended: {channel_id}",
+                        source="ari_stasis_end",
+                        channel_id=channel_id,
+                    )
                     continue
 
                 if channel_id == current_channel_id:
@@ -786,24 +1086,34 @@ def ari_event_loop():
                     if current_sales_channel_id:
                         ari_delete(f"/channels/{current_sales_channel_id}")
                         _sales_channel_ids.discard(current_sales_channel_id)
+                        _human_channel_hangup_causes.pop(current_sales_channel_id, None)
                     _external_media_channel_ids.discard(current_ext_channel_id)
                     current_ext_channel_id = None
                     current_bridge_id = None
                     current_sales_channel_id = None
+                    current_session.end_call()
+                    holder = current_session.owner
+                    epoch = current_session.epoch
+                    current_playback_id = current_session.current_playback_id
 
-            # --- TRANSFER (step 2): DTMF-triggered holder toggle. The salesperson
-            # presses `1` on their softphone to take the call over (holder=human)
-            # or hand it back (holder=ai). Same handler will be reachable from the
-            # dashboard toggle in a later increment (POST /api/holder via a
-            # localhost control hook). The unconditional DTMF log is temporary,
-            # left in for now so we can confirm the events fire; remove once the
-            # UI toggle path is proven and DTMF is no longer the only trigger. ---
+            elif event_type == "ChannelHangupRequest":
+                channel_id = event.get("channel", {}).get("id")
+                if channel_id in _sales_channel_ids or channel_id == current_sales_channel_id:
+                    _human_channel_hangup_causes[channel_id] = {
+                        "cause": event.get("cause"),
+                        "cause_txt": event.get("cause_txt"),
+                    }
+
+            # --- TRANSFER (step 2): DTMF-triggered owner toggle. The salesperson
+            # presses `1` on their softphone to take the call over or hand it back.
+            # This now goes through the same product-level call-control functions
+            # that a dashboard/API endpoint can call in a later increment. ---
             elif event_type == "ChannelDtmfReceived":
                 digit = event.get("digit")
                 ch = event.get("channel", {}).get("id")
                 log("DTMF", f"{digit} from {ch}")
                 if ch == current_sales_channel_id and digit == "1":
-                    set_holder("human" if holder == "ai" else "ai")
+                    toggle_call_owner(source="dtmf")
 
         except Exception as e:
             log("ARI", f"error handling event ({type(e).__name__}: {e}); call skipped, bridge still up")
@@ -818,6 +1128,7 @@ ensure_sounds_dir()
 # modulate_worker, so deepgram is TTS-only here, called directly from
 # tts_worker). ---
 threads = [
+    threading.Thread(target=control_server, daemon=True),
     threading.Thread(target=rtp_listener, daemon=True),
     threading.Thread(target=modulate_worker, daemon=True),
     threading.Thread(target=groq_worker, daemon=True),

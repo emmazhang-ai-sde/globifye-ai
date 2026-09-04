@@ -37,6 +37,8 @@ import socket as udp_socket
 import requests
 from websocket import create_connection
 
+from agent_registry import AgentRegistry
+
 # set up timer for timestamps
 _START = time.time()
 def _ms():
@@ -273,8 +275,8 @@ def _load_companies():
 
 
 COMPANIES = _load_companies()
-_EXT_TO_COMPANY = {c["extension"]: key for key, c in COMPANIES.items()}
 DEFAULT_COMPANY = "pacificbeef"
+AGENT_REGISTRY = AgentRegistry.from_legacy_company_data(COMPANIES)
 
 # Set per call from StasisStart (single active call only, per MVP scope).
 current_company = DEFAULT_COMPANY
@@ -609,10 +611,29 @@ def bridge_call_to_external_media(caller_channel_id):
 # --- STEP 3 ADDITION: the container's sounds dir may not exist yet --
 # create it once at startup so play_deepgram's docker cp doesn't fail. ---
 def ensure_sounds_dir():
-    subprocess.run(
-        ["docker", "exec", ASTERISK_CONTAINER, "mkdir", "-p", SOUNDS_DIR_IN_CONTAINER],
-        check=True,
-    )
+    try:
+        subprocess.run(
+            ["docker", "exec", ASTERISK_CONTAINER, "mkdir", "-p", SOUNDS_DIR_IN_CONTAINER],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except FileNotFoundError:
+        log("SETUP", "Docker CLI was not found. Install Docker Desktop before starting the bridge.")
+        raise SystemExit(1)
+    except subprocess.CalledProcessError as e:
+        detail = (e.stderr or e.stdout or "").strip()
+        if detail:
+            detail = f" Detail: {detail}"
+        log(
+            "SETUP",
+            (
+                f"Cannot prepare Asterisk sounds dir in container '{ASTERISK_CONTAINER}'. "
+                "Start Docker Desktop and make sure the Asterisk container is running, "
+                f"then retry.{detail}"
+            ),
+        )
+        raise SystemExit(1)
 
 
 def ari_event_loop():
@@ -644,17 +665,15 @@ def ari_event_loop():
                     # call -- already bridged inside bridge_call_to_external_media().
                     continue
 
-                # --- MULTI-COMPANY: pick the company from the Stasis argument the
-                # dialplan passed (Stasis(sip-mvp-app,<key>)). Fall back to the
-                # dialed extension, then to the default. Reset the LLM context to
-                # that company's system prompt and switch the TTS voice, so the
-                # rest of the loop answers as that business. ---
-                args = event.get("args") or []
-                company_key = args[0] if args else _EXT_TO_COMPANY.get(
-                    event.get("channel", {}).get("dialplan", {}).get("exten"), DEFAULT_COMPANY
+                # --- AGENT REGISTRY: resolve the call into a voice-agent config.
+                # Today the registry is backed by companies.json; later this is
+                # where Customer Registration / Dashboard data plugs in.
+                resolution = AGENT_REGISTRY.resolve(
+                    stasis_args=event.get("args") or [],
+                    dialed_extension=event.get("channel", {}).get("dialplan", {}).get("exten"),
+                    default_agent_id=DEFAULT_COMPANY,
                 )
-                if company_key not in COMPANIES:
-                    company_key = DEFAULT_COMPANY
+                company_key = resolution.agent.company_key
                 company = COMPANIES[company_key]
                 current_company = company_key
                 current_voice = company["voice"]
