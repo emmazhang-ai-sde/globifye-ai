@@ -1712,6 +1712,13 @@ Apply Settings
 <!-- Toast Container -->
 <div id="toast-container"></div>
 
+<!-- BEGIN: API Integration Scripts -->
+<!-- Load universal API infrastructure first -->
+<script src="./APIintegration/dialforgeAPI.js"></script>
+<!-- Load Active Call-specific API layer -->
+<script src="./APIintegration/activeCallAPI.js"></script>
+<!-- END: API Integration Scripts -->
+
 <script data-purpose="state-management">
 // ===== APPLICATION STATE =====
 // Use existing globals if present to avoid redeclaration errors
@@ -2371,16 +2378,44 @@ function saveQuickNote() {
   }
 }
 
-function saveAndSyncQuickNote() {
+async function saveAndSyncQuickNote() {
   const textarea = document.getElementById('quick-note-textarea');
   if (textarea && textarea.value.trim()) {
+    // STEP 1: Save locally first (always)
     if (!CALL.notes) CALL.notes = [];
     CALL.notes.push({
       type: CALL.noteTab || 'general',
       content: textarea.value,
       timestamp: new Date().toISOString(),
-      synced: true
+      synced: false  // Initially not synced
     });
+    
+    // STEP 2: Attempt to sync to HubSpot (non-blocking)
+    const noteData = {
+      hubspotId: CALL.contact?.hubspotId,
+      notes: textarea.value,
+      noteType: CALL.noteTab || 'general',
+      contact: CALL.contact
+    };
+    
+    try {
+      const result = await activeCallAPI.saveCrmNotesToHubSpot(noteData);
+      if (result) {
+        // Mark the note as synced
+        const noteIndex = CALL.notes.length - 1;
+        if (CALL.notes[noteIndex]) {
+          CALL.notes[noteIndex].synced = true;
+        }
+        console.log('[Active Call] CRM notes synced to HubSpot');
+      } else {
+        console.log('[Active Call] CRM notes saved locally (HubSpot sync unavailable)');
+      }
+    } catch (error) {
+      console.warn('[Active Call] Error syncing CRM notes to HubSpot:', error);
+      // Notes are already saved locally, so call continues normally
+    }
+    
+    // STEP 3: Clean up and save state
     closeQuickNoteModal();
     saveState();
   }
@@ -3072,7 +3107,7 @@ window.addEventListener('beforeunload', function() {
   }
 
   // ========== MAIN: START CALL WITH CONTACT ==========
-  function start(contact) {
+ async function start(contact) {
     // Update CALL state
     if (typeof contact === 'string') {
       // Handle legacy string format (contact name)
@@ -3093,8 +3128,22 @@ CALL.duration = 0; // Reset duration to zero
     // Update Large Avatar section
     updateAvatarSection(CALL.contact);
 
-    // Update CRM panel
+    // Update CRM panel with initial local contact data
     updateCrmPanel(CALL.contact);
+    
+    // API INTEGRATION: Search HubSpot for contact information
+    // This enriches the contact with HubSpot data if available
+    // If the API is unavailable, continues with local contact data
+    const enrichedContact = await activeCallAPI.onCallConnected(CALL.contact);
+    
+    if (enrichedContact) {
+      // Update CALL state with enriched contact
+      CALL.contact = enrichedContact;
+      // Refresh CRM panel with enriched data
+      updateCrmPanel(CALL.contact);
+      // Update avatar and other display areas with enriched data
+      updateAvatarSection(CALL.contact);
+    }
 
     console.log('Call started with contact:', CALL.contact);
   }

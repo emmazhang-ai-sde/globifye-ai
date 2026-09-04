@@ -2355,21 +2355,28 @@ Record
   }
   
   // ==================== CALL TRANSITION TO ACTIVE CALL ====================
-  function transitionToActiveCall(prospect) {
-    // Reuse existing prospect data to initialize Active Call
-    if (!prospect) return;
+  function transitionToActiveCall(contact) {
+    // Accept either original prospect or enriched contact data
+    if (!contact) return;
 
-    // Map Power Dialer prospect fields to Active Call contact structure
+    // Map contact fields to Active Call contact structure
+    // Support both original prospect field names and enriched contact field names
     const activeCallContact = {
-      name: prospect.name || '',
-      number: prospect.phone || '',
-      company: prospect.company || '',
-      jobTitle: prospect.title || '',
-      location: prospect.company || '', // Use company as location fallback
-      avatar: prospect.avatar || '',
-      email: prospect.email || '',
-      dealValue: prospect.dealValue || '',
-      pipelineStage: prospect.pipelineStage || ''
+      name: contact.name || '',
+      // Handle both 'phone' (original prospect) and 'number' (enriched contact) field names
+      number: contact.number || contact.phone || '',
+      company: contact.company || '',
+      // Handle both 'title' (original prospect) and 'jobTitle' (enriched contact) field names
+      jobTitle: contact.jobTitle || contact.title || '',
+      location: contact.location || contact.company || '',
+      avatar: contact.avatar || '',
+      email: contact.email || '',
+      dealValue: contact.dealValue || '',
+      pipelineStage: contact.pipelineStage || '',
+      // Add HubSpot enrichment info if available
+      ...(contact.hubspotId && { hubspotId: contact.hubspotId }),
+      ...(contact.isEnriched && { isEnriched: contact.isEnriched }),
+      ...(contact.sourceProspectId && { sourceProspectId: contact.sourceProspectId })
     };
 
     // Prepare Active Call state with the connected prospect
@@ -2409,7 +2416,7 @@ Record
   }
 
   // ==================== CALL ACTIONS ====================
-  function markConnected() {
+  async function markConnected() {
     const current = dialQueue[CALLS.currentProspectIndex];
     if (!current) return;
 
@@ -2428,9 +2435,13 @@ Record
     updateSessionStats();
     saveState();
     
-    // Transition to Active Call workflow using existing synchronized call state
-    // Reuse the connected prospect's information and existing call-start workflow
-    transitionToActiveCall(current);
+   // API INTEGRATION: Search HubSpot for contact information
+    // This enriches the prospect with HubSpot data if available
+    // If the API is unavailable, continues with local prospect data
+    const enrichedContact = await powerDialerAPI.onProspectConnected(current);
+    
+    // Transition to Active Call workflow using enriched contact data
+    transitionToActiveCall(enrichedContact || current);
         
     // Re-render the prospect queue after all state updates are complete
     updateProspectQueue();
@@ -3798,6 +3809,13 @@ Record
   // Make APP and DialPad globally accessible for external integration
   window.DialPad = DialPad;
   </script>
+
+<!-- BEGIN: API Integration Scripts -->
+<!-- Load universal API infrastructure first -->
+<script src="./APIintegration/dialforgeApi.js"></script>
+<!-- Load Power Dialer-specific API layer -->
+<script src="./APIintegration/powerDialerAPI.js"></script>
+<!-- END: API Integration Scripts -->
 
 <!-- BEGIN: Usage Minutes Synchronization -->
 <script data-purpose="sync-usage-minutes">
