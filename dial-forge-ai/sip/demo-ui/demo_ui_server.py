@@ -2,14 +2,14 @@
 SIP loop PM-demo UI server.
 
 A deliberately small, stdlib-only web console for demoing the SIP voice-agent
-loop (step2_stt_bridge.py) to non-technical viewers. It does four things:
+loop (stt_bridge_ai_human_transfer.py) to non-technical viewers. It does four things:
 
 1. Serves two synced interfaces over the same real call (static/ folder, no
    framework, no build step -- fully separate from the frontend team's app):
    a SALES dashboard (live transcript + pipeline log + post-call analysis)
    and a CLIENT phone (incoming-call screen + live conversation, no analysis).
    Which side rings depends on the call direction; see /api/call.
-2. Receives every log() event from step2_stt_bridge.py via POST
+2. Receives every log() event from stt_bridge_ai_human_transfer.py via POST
    /internal/events (see the DEMO UI ADDITION block in that file) and fans
    it out to connected browsers over Server-Sent Events, filtered by role so
    the analysis reaches only the sales interface.
@@ -35,6 +35,7 @@ import json
 import os
 import queue
 import secrets
+import sys
 import threading
 import time
 import urllib.parse
@@ -56,12 +57,18 @@ USERS_PATH = os.path.join(BASE_DIR, "demo_users.json")
 HISTORY_DIR = os.path.join(BASE_DIR, "call-history")
 # Shared with the bridge script -- same companies.json + knowledge base files
 KB_DIR = os.path.join(BASE_DIR, "..", "knowledge-base")
+SCRIPTS_DIR = os.path.join(BASE_DIR, "..", "scripts")
+if SCRIPTS_DIR not in sys.path:
+    sys.path.insert(0, SCRIPTS_DIR)
 
-# Same ARI settings as sip/scripts/step2_stt_bridge.py
+from agent_registry import AgentRegistry
+
+# Same ARI settings as sip/scripts/stt_bridge_ai_human_transfer.py
 ARI_HOST = "localhost:8088"
 ARI_USER = "sip-mvp-user"
 ARI_PASSWORD = "changeme_use_a_real_secret"
 APP_NAME = "sip-mvp-app"
+BRIDGE_CONTROL_URL = "http://127.0.0.1:8500"
 
 # The registered softphone endpoint ([test-endpoint] in pjsip.conf) and the
 # dialplan context that routes the demo extensions into the Stasis app
@@ -73,7 +80,7 @@ DIAL_CONTEXT = "sip-mvp"
 ANALYSIS_MODEL = "llama-3.3-70b-versatile"
 
 
-# --- Same zero-dependency .env.local parser as step2_stt_bridge.py ---
+# --- Same zero-dependency .env.local parser as stt_bridge_ai_human_transfer.py ---
 def _load_env_local():
     env_path = os.path.join(BASE_DIR, "..", "..", "ai-pipeline", ".env.local")
     env = {}
@@ -118,25 +125,15 @@ SUPABASE_ENABLED = bool(SUPABASE_SIP_URL and SUPABASE_SIP_KEY)
 with open(USERS_PATH) as f:
     USERS = {u["email"]: u for u in json.load(f)}
 
-# Company registry -- same companies.json the bridge script loads. Maps each
-# business to its extension, TTS voice, and knowledge base file.
-with open(os.path.join(KB_DIR, "companies.json")) as f:
-    COMPANIES = json.load(f)
-_EXT_TO_COMPANY = {c["extension"]: key for key, c in COMPANIES.items()}
-# Call records store the business by display name; recordings.did_number wants
-# the number that was dialled to reach it.
-_EXT_FOR_COMPANY = {c["display_name"]: c["extension"] for c in COMPANIES.values()}
+# Company registry -- same companies.json the bridge script loads, exposed in
+# the future Agent Registry shape used by Customer Registration / Dashboard.
+AGENT_REGISTRY = AgentRegistry.from_legacy_companies(os.path.join(KB_DIR, "companies.json"))
+COMPANIES = AGENT_REGISTRY.as_legacy_companies()
 
 
 def _company_public(key):
     """The fields the browser is allowed to see for a company."""
-    c = COMPANIES[key]
-    return {
-        "key": key,
-        "display_name": c["display_name"],
-        "extension": c["extension"],
-        "blurb": c["blurb"],
-    }
+    return AGENT_REGISTRY.get(key).to_public_dict()
 
 
 def _me_payload(user):
@@ -215,6 +212,8 @@ def _new_call_record(channel_id):
         "company": None,  # display name of the business called; set by the AGENT event
         "direction": None,  # sales_to_client | client_to_sales
         "caller": None,  # who initiated (business name or "Customer")
+        "call_session": None,  # runtime metadata, populated by ROOM event
+        "room": None,  # Asterisk bridge + AI media IDs, populated by ROOM event
         "turns": [],  # {role: customer|agent, text, at_sec}
         "analysis": None,
         "analysis_error": None,
@@ -337,7 +336,9 @@ def mirror_call_to_supabase(call):
                         {
                             "audio_url": None,  # call audio capture not built yet
                             "duration_seconds": duration,
-                            "did_number": _EXT_FOR_COMPANY.get(call.get("company")),
+                            "did_number": AGENT_REGISTRY.extension_for_display_name(
+                                call.get("company")
+                            ),
                             "caller_number": None,  # softphone demo: no real caller ID
                             "sip_provider": "asterisk",
                             "sip_session_id": sid,
@@ -563,6 +564,7 @@ def handle_bridge_event(event):
     tag = event.get("tag", "")
     text = event.get("text", "")
     ms = event.get("ms")
+    event_payload = event.get("payload") or {}
 
     if tag == "BRIDGE":
         return  # heartbeat only -- liveness recorded above, nothing to display
@@ -591,6 +593,36 @@ def handle_bridge_event(event):
             # Bridge announces which business answered, right after "arrived:"
             if _current_call is not None:
                 _current_call["company"] = text
+        elif tag == "ROOM" and text == "created":
+            if _current_call is not None:
+                _current_call["call_session"] = {
+                    k: v for k, v in event_payload.items() if k != "room"
+                }
+                _current_call["room"] = event_payload.get("room")
+        elif tag == "HUMAN_INVITE" and text in ("ringing", "joined"):
+            if _current_call is not None:
+                _current_call["call_session"] = {
+                    k: v for k, v in event_payload.items() if k != "room"
+                }
+                _current_call["room"] = event_payload.get("room")
+        elif tag == "HANDOFF" and text in ("accepted", "resumed"):
+            if _current_call is not None:
+                _current_call["call_session"] = {
+                    k: v for k, v in event_payload.items() if k != "room"
+                }
+                _current_call["room"] = event_payload.get("room")
+        elif tag == "HANDOFF_FAILURE":
+            if _current_call is not None:
+                _current_call["call_session"] = {
+                    k: v for k, v in event_payload.items() if k != "room"
+                }
+                _current_call["room"] = event_payload.get("room")
+        elif tag == "SKIP_TURN":
+            if _current_call is not None:
+                _current_call["call_session"] = {
+                    k: v for k, v in event_payload.items() if k != "room"
+                }
+                _current_call["room"] = event_payload.get("room")
         elif tag == "CALL" and text.startswith("ended:"):
             if _current_call is not None:
                 _current_call["ended_at"] = time.time()
@@ -611,9 +643,28 @@ def handle_bridge_event(event):
                 turn_at_sec = at_sec
 
     payload = {"tag": tag, "text": text, "ms": ms, "raw": raw_line}
+    if event_payload:
+        payload["payload"] = event_payload
     if turn_at_sec is not None:
         payload["at_sec"] = turn_at_sec
     broadcast("pipeline_event", payload)
+
+    if (tag == "ROOM" and text == "created") or (
+        tag == "HUMAN_INVITE" and text in ("ringing", "joined")
+    ) or (
+        tag == "HANDOFF" and text in ("accepted", "resumed")
+    ) or (
+        tag == "HANDOFF_FAILURE"
+    ) or (
+        tag == "SKIP_TURN"
+    ):
+        broadcast(
+            "call_room_updated",
+            {
+                "call_session": {k: v for k, v in event_payload.items() if k != "room"},
+                "room": event_payload.get("room"),
+            },
+        )
 
     if connected_call is not None:
         broadcast("call_connected", {"call": connected_call})
@@ -711,7 +762,7 @@ def dial_extension(extension, company):
     except requests.RequestException:
         return False, "Asterisk is not reachable. Is the asterisk-mvp container running?", None
     if r.status_code == 404:
-        return False, "Bridge script is not running (Stasis app not registered). Start step2_stt_bridge.py first.", None
+        return False, "Bridge script is not running (Stasis app not registered). Start stt_bridge_ai_human_transfer.py first.", None
 
     try:
         r = requests.post(
@@ -858,7 +909,7 @@ class Handler(BaseHTTPRequestHandler):
                     markdown = kb.read()
             except (TypeError, FileNotFoundError):
                 # No KB connected: the agent runs on the fallback prompt
-                # (see step2_stt_bridge.py _build_fallback_prompt).
+                # (see stt_bridge_ai_human_transfer.py _build_fallback_prompt).
                 markdown = (
                     "# No knowledge base connected yet\n\n"
                     "The agent answers detail questions with the fallback line "
@@ -866,6 +917,24 @@ class Handler(BaseHTTPRequestHandler):
                 )
             self._send_json(
                 {"company": COMPANIES[key]["display_name"], "markdown": markdown}
+            )
+        elif path == "/api/call-room":
+            if user is None:
+                self._send_json({"error": "not logged in"}, 401)
+                return
+            with _state_lock:
+                call = dict(_current_call) if _current_call is not None else None
+                room = call.get("room") if call is not None else None
+                call_session = call.get("call_session") if call is not None else None
+            response = {
+                "active": call is not None,
+                "call_id": call.get("id") if call is not None else None,
+                "room": room,
+            }
+            if call_session:
+                response.update(call_session)
+            self._send_json(
+                response
             )
         elif path == "/api/calls":
             if user is None:
@@ -1010,7 +1079,7 @@ class Handler(BaseHTTPRequestHandler):
             # answered (the "instant disconnect" bug). Tell the user instead.
             if _bridge_last_seen is None or (time.time() - _bridge_last_seen) > BRIDGE_ALIVE_WINDOW:
                 self._send_json(
-                    {"error": "Bridge script isn't running. Start it: venv/bin/python -u sip/scripts/step2_stt_bridge.py"},
+                    {"error": "Bridge script isn't running. Start it: venv/bin/python -u sip/scripts/stt_bridge_ai_human_transfer.py"},
                     502,
                 )
                 return
@@ -1058,6 +1127,85 @@ class Handler(BaseHTTPRequestHandler):
                 # No live call to emit an "ended" event, so tell the UIs directly.
                 broadcast("call_cancelled", {})
             self._send_json({"ok": True})
+        elif path == "/api/handoff/accept":
+            try:
+                bridge_response = requests.post(
+                    f"{BRIDGE_CONTROL_URL}/internal/handoff/accept",
+                    json={
+                        "accepted_by": f"{user['name']} ({COMPANIES[user['company_key']]['display_name']})"
+                    },
+                    timeout=3,
+                )
+                try:
+                    body = bridge_response.json()
+                except ValueError:
+                    body = {"error": bridge_response.text or "Bridge control failed."}
+                self._send_json(body, bridge_response.status_code)
+            except requests.RequestException as e:
+                self._send_json(
+                    {
+                        "error": (
+                            "Bridge control hook is not running. Start the bridge "
+                            "script and try again."
+                        ),
+                        "detail": str(e),
+                    },
+                    502,
+                )
+        elif path == "/api/handoff/resume-ai":
+            body = self._read_json_body()
+            try:
+                bridge_response = requests.post(
+                    f"{BRIDGE_CONTROL_URL}/internal/handoff/resume-ai",
+                    json={
+                        "resumed_by": f"{user['name']} ({COMPANIES[user['company_key']]['display_name']})",
+                        "handback_note": body.get("handback_note"),
+                    },
+                    timeout=3,
+                )
+                try:
+                    response_body = bridge_response.json()
+                except ValueError:
+                    response_body = {"error": bridge_response.text or "Bridge control failed."}
+                self._send_json(response_body, bridge_response.status_code)
+            except requests.RequestException as e:
+                self._send_json(
+                    {
+                        "error": (
+                            "Bridge control hook is not running. Start the bridge "
+                            "script and try again."
+                        ),
+                        "detail": str(e),
+                    },
+                    502,
+                )
+        elif path == "/api/handoff/failure":
+            body = self._read_json_body()
+            try:
+                bridge_response = requests.post(
+                    f"{BRIDGE_CONTROL_URL}/internal/handoff/failure",
+                    json={
+                        "status": body.get("status"),
+                        "reason": body.get("reason"),
+                    },
+                    timeout=3,
+                )
+                try:
+                    response_body = bridge_response.json()
+                except ValueError:
+                    response_body = {"error": bridge_response.text or "Bridge control failed."}
+                self._send_json(response_body, bridge_response.status_code)
+            except requests.RequestException as e:
+                self._send_json(
+                    {
+                        "error": (
+                            "Bridge control hook is not running. Start the bridge "
+                            "script and try again."
+                        ),
+                        "detail": str(e),
+                    },
+                    502,
+                )
         elif path.startswith("/api/analyze/"):
             # On-demand post-call analysis -- runs only when the sales user
             # clicks "Run analysis", never automatically.
@@ -1084,7 +1232,7 @@ def main():
     os.makedirs(HISTORY_DIR, exist_ok=True)
     server = ThreadingHTTPServer(("0.0.0.0", PORT), Handler)
     print(f"Demo UI running at http://localhost:{PORT}")
-    print(f"Waiting for bridge events on POST /internal/events (from step2_stt_bridge.py)")
+    print(f"Waiting for bridge events on POST /internal/events (from stt_bridge_ai_human_transfer.py)")
     print(
         "Supabase mirror: " + (f"ON -> {SUPABASE_SIP_URL}" if SUPABASE_ENABLED
         else "OFF (set SUPABASE_SIP_URL + SUPABASE_SIP_SERVICE_ROLE_KEY in .env.local to enable)")
