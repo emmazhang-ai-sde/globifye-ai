@@ -288,6 +288,15 @@
       tier: "starter"
     };
 
+    // Default integration enabled state
+    const DEFAULT_INTEGRATIONS_STATE = {
+      salesforce: false,
+      hubspot: false,
+      slack: false,
+      apolloio: false,
+      calendly: false
+    };
+
     // Shared application state
     const appState = {
       selectedPersona: null,
@@ -303,7 +312,18 @@
         integrations: [],
         microphone: "",
         speaker: ""
-      }
+      },
+      // Shared integration state (synchronized across all pages)
+      integrations: { ...DEFAULT_INTEGRATIONS_STATE }
+    };
+
+    // Mapping of integration names to IDs (used in this onboarding step)
+    const INTEGRATION_ID_MAP = {
+      'Salesforce': 'salesforce',
+      'Slack': 'slack',
+      'Apollo.io': 'apolloio',
+      'Calendly': 'calendly',
+      'HubSpot': 'hubspot'
     };
 
     // Load state from localStorage
@@ -318,6 +338,9 @@
           }
           if (state.onboarding) {
             appState.onboarding = { ...appState.onboarding, ...state.onboarding };
+          }
+          if (state.integrations) {
+            appState.integrations = { ...appState.integrations, ...state.integrations };
           }
         }
       } catch (e) {
@@ -334,37 +357,68 @@
       }
     }
 
-    // Update integrations state
+    // Update integrations state based on toggle elements
     function updateIntegrationState() {
-      const activeToggles = Array.from(document.querySelectorAll('[data-purpose="toggle-integration"].bg-fire-gradient'));
-      const integrations = activeToggles.map(toggle => {
-        const label = toggle.closest('[data-purpose*="integration"]')?.querySelector('span')?.textContent || '';
-        return label.trim();
+      // Reset all to false first
+      Object.keys(appState.integrations).forEach(key => {
+        appState.integrations[key] = false;
       });
-      appState.onboarding.integrations = integrations;
+
+      // Find all active toggles and mark them as enabled
+      const activeToggles = Array.from(document.querySelectorAll('[data-purpose="toggle-integration"].bg-fire-gradient'));
+      activeToggles.forEach(toggle => {
+        const card = toggle.closest('[class*="glass-card"]');
+        if (card) {
+          const heading = card.querySelector('h3');
+          if (heading) {
+            const integrationName = heading.textContent.trim();
+            const integrationId = INTEGRATION_ID_MAP[integrationName];
+            if (integrationId && appState.integrations.hasOwnProperty(integrationId)) {
+              appState.integrations[integrationId] = true;
+            }
+          }
+        }
+      });
+
       saveState();
-      console.log('Integrations saved:', integrations);
+      console.log('Integration state updated:', appState.integrations);
+    }
+
+    // Restore toggle states from saved integration state
+    function restoreIntegrationToggles() {
+      document.querySelectorAll('[data-purpose="toggle-integration"]').forEach(toggle => {
+        const card = toggle.closest('[class*="glass-card"]');
+        if (card) {
+          const heading = card.querySelector('h3');
+          if (heading) {
+            const integrationName = heading.textContent.trim();
+            const integrationId = INTEGRATION_ID_MAP[integrationName];
+            
+            // Check if this integration should be enabled
+            if (integrationId && appState.integrations[integrationId] === true) {
+              // Ensure toggle is ON
+              const knob = toggle.querySelector('div');
+              knob.classList.remove('bg-white/20', 'translate-x-0');
+              knob.classList.add('bg-on-primary', 'translate-x-4');
+              toggle.classList.remove('bg-white/5');
+              toggle.classList.add('bg-fire-gradient');
+            } else {
+              // Ensure toggle is OFF
+              const knob = toggle.querySelector('div');
+              knob.classList.remove('bg-on-primary', 'translate-x-4');
+              knob.classList.add('bg-white/20', 'translate-x-0');
+              toggle.classList.add('bg-white/5');
+              toggle.classList.remove('bg-fire-gradient');
+            }
+          }
+        }
+      });
     }
 
     // Initialize: Load state and restore integration states
     function initializeIntegrations() {
       loadState();
-
-      // Restore previously selected integrations if saved
-      if (appState.onboarding.integrations.length > 0) {
-        document.querySelectorAll('[data-purpose="toggle-integration"]').forEach(toggle => {
-          const label = toggle.closest('[data-purpose*="integration"]')?.querySelector('span')?.textContent?.trim();
-          if (appState.onboarding.integrations.includes(label)) {
-            // Restore the toggle state to ON
-            const knob = toggle.querySelector('div');
-            knob.classList.remove('bg-white/20', 'translate-x-0');
-            knob.classList.add('bg-on-primary', 'translate-x-4');
-            toggle.classList.remove('bg-white/5');
-            toggle.classList.add('bg-fire-gradient');
-          }
-        });
-      }
-
+      restoreIntegrationToggles();
       console.log('Integrations initialized:', appState);
     }
 
