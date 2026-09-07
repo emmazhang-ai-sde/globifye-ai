@@ -2412,7 +2412,7 @@ Record
     localStorage.setItem('dialforgeCallAutoStart', 'true');
     
     // Save the original prospect reference for Power Dialer integration
-    localStorage.setItem('dialforgePowerDialerProspect', JSON.stringify(prospect));
+    localStorage.setItem('dialforgePowerDialerProspect', JSON.stringify(contact));
   }
 
   // ==================== CALL ACTIONS ====================
@@ -3812,7 +3812,7 @@ Record
 
 <!-- BEGIN: API Integration Scripts -->
 <!-- Load universal API infrastructure first -->
-<script src="./APIintegration/dialforgeApi.js"></script>
+<script src="./APIintegration/dialforgeAPI.js"></script>
 <!-- Load Power Dialer-specific API layer -->
 <script src="./APIintegration/powerDialerAPI.js"></script>
 <!-- END: API Integration Scripts -->
