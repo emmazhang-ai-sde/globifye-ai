@@ -28,8 +28,91 @@
 
 const POWER_DIALER_CACHE_KEYS = {
   HUBSPOT_CONTACT: 'pd_hubspot_contact',
-  SEARCH_HISTORY: 'pd_search_history'
+  SEARCH_HISTORY: 'pd_search_history',
+  CALL_QUEUE: 'pd_call_queue'
 };
+
+// ============================================================================
+// CALL QUEUE
+// ============================================================================
+
+function normalizePriorityLabel(priority, priorityValue) {
+  if (priority === 'high' || priority === 'medium' || priority === 'low') {
+    return priority;
+  }
+  const numericPriority = Number(priorityValue || 0);
+  if (numericPriority >= 3) return 'high';
+  if (numericPriority === 2) return 'medium';
+  return 'low';
+}
+
+function normalizeCallQueueItem(item, index) {
+  const priority = normalizePriorityLabel(item.priority, item.priority_value);
+  return {
+    id: item.queue_id || item.id || index + 1,
+    queueId: item.queue_id || item.id || null,
+    contactId: item.contact_id || null,
+    name: item.name || 'Unknown Prospect',
+    company: item.company || '',
+    phone: item.phone || '',
+    email: item.email || '',
+    title: item.title || 'PROSPECT',
+    status: item.status || 'waiting',
+    dbStatus: item.db_status || item.dbStatus || '',
+    priority,
+    priorityValue: Number(item.priority_value || 0),
+    callMode: item.call_mode || '',
+    scheduledAt: item.scheduled_at || '',
+    avatar: item.avatar || item.avatar_url || null,
+    duration: item.duration || 0
+  };
+}
+
+async function loadCallQueue() {
+  const response = await dialforgeApi.fetch('/api/call-queue', {
+    fallbackKey: POWER_DIALER_CACHE_KEYS.CALL_QUEUE,
+    fallbackValue: null
+  });
+  const queue = dialforgeApi.extractArray(response, 'queue');
+  const normalized = queue.map(normalizeCallQueueItem);
+  if (normalized.length) {
+    dialforgeApi.cacheData(POWER_DIALER_CACHE_KEYS.CALL_QUEUE, { queue: normalized });
+  }
+  return normalized;
+}
+
+async function updateCallQueueItem(queueId, status, details = {}) {
+  if (!queueId) {
+    return null;
+  }
+
+  const response = await dialforgeApi.fetch(`/api/call-queue/${queueId}`, {
+    method: 'PATCH',
+    body: {
+      status,
+      ...details
+    },
+    fallbackValue: null
+  });
+
+  if (!response || !response.item) {
+    return null;
+  }
+
+  return normalizeCallQueueItem(response.item, 0);
+}
+
+async function loadCallQueueEvents(queueId) {
+  if (!queueId) {
+    return [];
+  }
+
+  const response = await dialforgeApi.fetch(`/api/call-queue/${queueId}/events`, {
+    fallbackValue: { events: [] }
+  });
+
+  return dialforgeApi.extractArray(response, 'events');
+}
 
 // ============================================================================
 // HUBSPOT CONTACT SEARCH
@@ -227,6 +310,10 @@ async function onProspectConnected(prospect) {
  *   const contact = await powerDialerAPI.searchHubSpotContact(prospect);
  */
 const powerDialerAPI = {
+  loadCallQueue,
+  updateCallQueueItem,
+  loadCallQueueEvents,
+
   // Main workflow
   onProspectConnected,
   

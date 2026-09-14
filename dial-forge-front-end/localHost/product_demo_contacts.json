@@ -1,0 +1,86 @@
+[
+  {
+    "source": "powerDialer.dialQueue",
+    "organization_name": "GlobiFYE",
+    "name": "Jordan Peterson",
+    "email": "jordan.peterson@nexusai.example",
+    "phone": "(415) 555-0100",
+    "company": "Nexus AI",
+    "title": "VP OF OPERATIONS",
+    "status": "waiting",
+    "priority": "high",
+    "avatar_url": "https://lh3.googleusercontent.com/aida-public/AB6AXuABYxrItLWMWQGRhejBqyB4saRkf_yBZ2ZmllBo6Ysg2-S2oSxYvi760KIxyNY8UkVgJatC_jWoDXasuG5xklwUniPfZlvlY_o9VQlJuoaMcv8kfw8EeeXZ7nwhTGI51UxHXH901RTCtXU7kx90bT2-0wl5cl1jlYQkv911G64F6axaT2vgJ6lUv6YAG-2T-9SRvrQU9xEei84H7nTvEeiJCtXnVo2WVA4WWD24Z50_FRHD5j__aHZCZyLkd38Jx720VO4uGhO2zos"
+  },
+  {
+    "source": "powerDialer.dialQueue",
+    "organization_name": "GlobiFYE",
+    "name": "Sarah Jenkins",
+    "email": "sarah.jenkins@cloudscale.example",
+    "phone": "(415) 555-0101",
+    "company": "CloudScale",
+    "title": "HEAD OF IT",
+    "status": "waiting",
+    "priority": "high",
+    "avatar_url": "https://lh3.googleusercontent.com/aida-public/AB6AXuDb8J6ekhKRUbnJdwE1ToiBnu-Qx5dgWZaDArXNOOHf0vEHYjdf7CI5XLiP7KFSfHo6Kbfjg51Euqmw3gxRTVT5XnYDhi0ek81FNarrpf95hCDdPTpV6FCLpIt-5QtqM8tL-oXfF6W4RD1eDPAvqsuc_F2mUp1ddbSzYf6BJmveZzxAiEmv5UELC5Fdph_5QJxtBQEKYKcPL-FtanOdFi8CMdwzasv_Ju7OGb9x0llhx3VCeAbioXNjt3gDXZCsmd42ujLmlqINoSY"
+  },
+  {
+    "source": "powerDialer.dialQueue",
+    "organization_name": "GlobiFYE",
+    "name": "Michael Chen",
+    "email": "michael.chen@quantumdynamics.example",
+    "phone": "(415) 555-0102",
+    "company": "Quantum Dynamics",
+    "title": "DIRECTOR",
+    "status": "waiting",
+    "priority": "medium",
+    "avatar_url": "https://lh3.googleusercontent.com/aida-public/AB6AXuDPRjSxnvBCe_AJWzrz1Zq3i2ujna5plFUBoFx-iHymRG_X4_VNwPprvw0E91aqPJVkeTBBKUhg-0a3qGwTQ3I1K_Nuvim30781-cO291wCRWvVsn8nRy5mBY40VMtCP0c7XlpLz28QoAkyvpK0MIyqCboXZB5l8GNqELbNROcwBAehK1_c_IqLoZYMiGy1qMdlAZTQWwsNL1T6gguJsFEEyVL3fE78eHb2MteBlHTGC223EbJkggRNPE-uBej-8czghB4xaGdwJew"
+  },
+  {
+    "source": "powerDialer.dialQueue",
+    "organization_name": "GlobiFYE",
+    "name": "Elena Morales",
+    "email": "elena.morales@skynetsystems.example",
+    "phone": "(415) 555-0103",
+    "company": "Skynet Systems",
+    "title": "OPERATIONS",
+    "status": "waiting",
+    "priority": "medium",
+    "avatar_url": "https://lh3.googleusercontent.com/aida-public/AB6AXuAORW2xSfBqFpnbvnYOw5oyWbLWh96Lb-z9RcY5NUupdyLMhP0yfJ5MmIsSCkhPNYNyo5YwQFj3AacVhkvl57wkbemKA3XBZN9jYt6WWgTn6oEI7c65NCZmndGyb2pQscjXrN2E0PB_PZPPNqEIvspImwcpDuN2fAzWvRHldF9_ccksiQCCCImyLOxjqFgMN_qF_jS35o7B-NYx0xiAMQnHEPcWfRPWqPq3PRahz2A0r9T86Jj1lrmWB50LsC2uKxgTxeERpjaCz-w"
+  },
+  {
+    "source": "powerDialer.dialQueue",
+    "organization_name": "GlobiFYE",
+    "name": "Alex Rivera",
+    "email": "alex.rivera@innovatexglobal.example",
+    "phone": "(415) 555-0104",
+    "company": "InnovateX Global",
+    "title": "CEO",
+    "status": "waiting",
+    "priority": "low",
+    "avatar_url": ""
+  },
+  {
+    "source": "powerDialer.dialQueue",
+    "organization_name": "GlobiFYE",
+    "name": "Emily Carter",
+    "email": "emily.carter@vertexsolutions.example",
+    "phone": "(415) 555-0105",
+    "company": "Vertex Solutions",
+    "title": "SALES DIRECTOR",
+    "status": "waiting",
+    "priority": "high",
+    "avatar_url": ""
+  },
+  {
+    "source": "powerDialer.dialQueue",
+    "organization_name": "GlobiFYE",
+    "name": "David Morgan",
+    "email": "david.morgan@horizonanalytics.example",
+    "phone": "(415) 555-0106",
+    "company": "Horizon Analytics",
+    "title": "CHIEF OPERATING OFFICER",
+    "status": "waiting",
+    "priority": "medium",
+    "avatar_url": ""
+  }
+]

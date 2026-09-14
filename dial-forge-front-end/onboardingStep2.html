@@ -245,13 +245,13 @@
 <!-- END: Global Footer Help & Status -->
 <!-- BEGIN: Logic & Interaction -->
  <script data-purpose="shared-state-management">
-    // Default user state
+    // Empty onboarding draft; signed-in identity is hydrated by currentUserAPI.
     const DEFAULT_USER_STATE = {
-      name: "Hunter L.",
-      email: "hunter@globifye.com",
-      role: "Enterprise AE",
-      company: "GlobiFYE",
-      tier: "starter"
+      name: "",
+      email: "",
+      role: "",
+      company: "",
+      tier: ""
     };
 
     // Shared application state
@@ -340,7 +340,7 @@
       if (appState.onboarding.password) {
         document.getElementById('password').value = appState.onboarding.password;
       }
-      if (appState.user.email && appState.user.email !== 'hunter@globifye.com') {
+      if (appState.user.email) {
         document.getElementById('work_email').value = appState.user.email;
       }
 

@@ -34,6 +34,7 @@
  * To change the API endpoint, update this single location.
  */
 const DIALFORGE_API_BASE_URL = 'http://localhost:8000';
+const DIALFORGE_API_AUTH_TOKEN_KEY = 'dialforgeAuthToken';
 
 // ============================================================================
 // UNIVERSAL FETCH WRAPPER
@@ -77,15 +78,18 @@ async function dialforgeApiFetch(endpoint, options = {}) {
 
   // Build full API URL
   const url = `${DIALFORGE_API_BASE_URL}${endpoint}`;
+  const authToken = getDialforgeAuthToken();
+  const requestHeaders = {
+    'Content-Type': 'application/json',
+    ...(authToken && { Authorization: `Bearer ${authToken}` }),
+    ...headers
+  };
 
   try {
     // Make the fetch request
     const response = await fetch(url, {
       method,
-      headers: {
-        'Content-Type': 'application/json',
-        ...headers
-      },
+      headers: requestHeaders,
       ...(body && { body: JSON.stringify(body) })
     });
 
@@ -124,6 +128,15 @@ async function dialforgeApiFetch(endpoint, options = {}) {
       `[DialForge API] No fallback cache available for: ${endpoint}, using default`
     );
     return fallbackValue;
+  }
+}
+
+function getDialforgeAuthToken() {
+  try {
+    return localStorage.getItem(DIALFORGE_API_AUTH_TOKEN_KEY);
+  } catch (error) {
+    console.warn('[DialForge API] Could not read auth token:', error.message);
+    return null;
   }
 }
 
@@ -281,9 +294,11 @@ function dialforgeClearCache(key) {
 const dialforgeApi = {
   // Configuration
   BASE_URL: DIALFORGE_API_BASE_URL,
+  AUTH_TOKEN_KEY: DIALFORGE_API_AUTH_TOKEN_KEY,
 
   // Universal fetch wrapper
   fetch: dialforgeApiFetch,
+  getAuthToken: getDialforgeAuthToken,
 
   // Response parsing
   extractArray: dialforgeExtractArray,

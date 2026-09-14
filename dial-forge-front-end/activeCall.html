@@ -931,7 +931,7 @@ animation: fade-in 0.3s ease-out;
 <div class="flex flex-col items-center gap-4 w-full pb-4">
   <a href="./profile.html" class="block w-full h-full cursor-pointer" aria-label="Go to user profile">
     <div class="h-10 w-10 rounded-full overflow-hidden border border-white/10 items-center ml-4">
-    <img id="activeCallUserAvatar" alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs">
+    <img id="activeCallUserAvatar" alt="User profile avatar" class="w-full h-full object-cover" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
   </div>
   </a>
 </div>
@@ -942,7 +942,7 @@ animation: fade-in 0.3s ease-out;
 <section class="w-80 lg:w-[400px] flex flex-col p-6 border-r border-white/5 bg-surface-container-low/30">
 <div class="flex items-center justify-between mb-6">
 <h2 class="font-syne text-xs uppercase tracking-widest text-fire-accent font-bold">Live Transcript</h2>
-<span class="bg-ai-purple/20 text-ai-purple text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-tighter">AI-Active</span>
+<span id="sipOwnerCenterBadge" class="bg-ai-purple/20 text-ai-purple text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-tighter">AI-Active</span>
 </div>
 <!-- Transcript Container - Scrollable independently -->
 <div class="transcript-container space-y-6 pr-2 mb-6" id="transcript-feed">
@@ -1109,6 +1109,37 @@ animation: fade-in 0.3s ease-out;
 <!-- BEGIN: RightPanel_CRM -->
 <section id="rightCrmPanel" class="w-80 lg:w-[350px] flex flex-col p-6 border-l border-white/5 bg-surface-container-low/30 overflow-y-auto">
 <h2 class="font-syne text-xs uppercase tracking-widest text-fire-accent font-bold mb-6">CRM Insights</h2>
+
+<!-- SIP Handoff Controls -->
+<div id="sipHandoffPanel" class="mb-8 rounded-2xl border border-white/10 bg-surface-container-lowest/70 p-4">
+<div class="flex items-center justify-between gap-3 mb-3">
+<div>
+<h3 class="text-[10px] font-bold uppercase text-gray-500">AI Handoff</h3>
+<p id="sipHandoffStatusText" class="text-xs text-gray-400 mt-1">Waiting for SIP room state</p>
+</div>
+<span id="sipHandoffOwnerBadge" class="px-2.5 py-1 rounded-full border border-white/10 bg-white/5 text-[10px] font-bold uppercase text-on-surface-variant">Offline</span>
+</div>
+<div class="grid grid-cols-2 gap-2 text-[10px] text-gray-500 mb-4">
+<div class="rounded-lg bg-white/5 px-2 py-2">
+<p class="uppercase font-bold mb-1">Invite</p>
+<p id="sipHandoffInviteStatus" class="text-gray-300 truncate">-</p>
+</div>
+<div class="rounded-lg bg-white/5 px-2 py-2">
+<p class="uppercase font-bold mb-1">Failure</p>
+<p id="sipHandoffFailureStatus" class="text-gray-300 truncate">-</p>
+</div>
+<div class="rounded-lg bg-white/5 px-2 py-2 col-span-2">
+<p class="uppercase font-bold mb-1">Bridge</p>
+<p id="sipHandoffBridgeId" class="font-mono-data text-gray-300 truncate">-</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-2">
+<button id="sipAcceptHandoffBtn" type="button" class="rounded-lg bg-tertiary/10 border border-tertiary/30 px-3 py-2 text-[10px] font-bold uppercase text-tertiary hover:bg-tertiary/20 transition-all">Take Over</button>
+<button id="sipResumeAiBtn" type="button" class="rounded-lg bg-ai-purple/10 border border-ai-purple/30 px-3 py-2 text-[10px] font-bold uppercase text-ai-purple hover:bg-ai-purple/20 transition-all">Return AI</button>
+<button id="sipDeclineHandoffBtn" type="button" class="rounded-lg bg-error-red/10 border border-error-red/30 px-3 py-2 text-[10px] font-bold uppercase text-error-red hover:bg-error-red/20 transition-all">Decline</button>
+<button id="sipRefreshRoomBtn" type="button" class="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[10px] font-bold uppercase text-on-surface-variant hover:text-white hover:bg-white/10 transition-all">Refresh</button>
+</div>
+</div>
 
 <!-- Contact Information -->
 <div class="mb-8">
@@ -1715,6 +1746,7 @@ Apply Settings
 <!-- BEGIN: API Integration Scripts -->
 <!-- Load universal API infrastructure first -->
 <script src="./APIintegration/dialforgeAPI.js"></script>
+<script src="./APIintegration/currentUserAPI.js"></script>
 <!-- Load Active Call-specific API layer -->
 <script src="./APIintegration/activeCallAPI.js"></script>
 <!-- END: API Integration Scripts -->
@@ -3325,6 +3357,9 @@ CALL.duration = 0; // Reset duration to zero
   document.addEventListener('DOMContentLoaded', function() {
     setupCallStartedListener();
     loadSavedProfilePicture();
+    currentUserAPI.hydrateCurrentUserOnPage().catch((error) => {
+      console.warn('Could not hydrate current user on active call page:', error);
+    });
         
     // ========== AUTO-START CALL FROM POWER DIALER ==========
     // Check for auto-start flag and contact data passed from Power Dialer
@@ -4324,5 +4359,163 @@ setInterval(() => {
 })();
 </script>
 <!-- END: Usage Minutes Synchronization -->
+
+<script data-purpose="sip-handoff-integration">
+(function () {
+  const POLL_MS = 2500;
+  let sipRoomPollHandle = null;
+  let lastSipRoom = null;
+
+  function byId(id) {
+    return document.getElementById(id);
+  }
+
+  function toast(message, type = 'success') {
+    if (typeof showToast === 'function') {
+      showToast(message, type);
+    } else {
+      console.log(`[SIP handoff] ${message}`);
+    }
+  }
+
+  function setText(id, value) {
+    const el = byId(id);
+    if (el) el.textContent = value || '-';
+  }
+
+  function setButtonState(id, disabled) {
+    const btn = byId(id);
+    if (!btn) return;
+    btn.disabled = Boolean(disabled);
+    btn.classList.toggle('opacity-40', Boolean(disabled));
+    btn.classList.toggle('cursor-not-allowed', Boolean(disabled));
+  }
+
+  function updateOwnerBadge(owner, active) {
+    const label = !active ? 'Offline' : owner === 'human' ? 'Human' : 'AI';
+    const panelBadge = byId('sipHandoffOwnerBadge');
+    const centerBadge = byId('sipOwnerCenterBadge');
+    [panelBadge, centerBadge].forEach((badge) => {
+      if (!badge) return;
+      badge.textContent = active ? `${label}-Active` : label;
+      badge.classList.remove('text-ai-purple', 'text-tertiary', 'text-on-surface-variant');
+      if (!active) {
+        badge.classList.add('text-on-surface-variant');
+      } else if (owner === 'human') {
+        badge.classList.add('text-tertiary');
+      } else {
+        badge.classList.add('text-ai-purple');
+      }
+    });
+  }
+
+  function renderSipRoom(room) {
+    lastSipRoom = room || { active: false };
+    const active = Boolean(lastSipRoom.active);
+    const owner = lastSipRoom.owner || 'ai';
+    const handoff = lastSipRoom.handoff || {};
+    const asteriskRoom = lastSipRoom.room || {};
+
+    updateOwnerBadge(owner, active);
+    setText(
+      'sipHandoffStatusText',
+      active
+        ? `${lastSipRoom.display_name || 'DialForge'} room is live`
+        : 'No active SIP room'
+    );
+    setText('sipHandoffInviteStatus', handoff.invite_status);
+    setText('sipHandoffFailureStatus', handoff.failure_status || handoff.failure_reason);
+    setText('sipHandoffBridgeId', asteriskRoom.bridge_id);
+
+    const humanJoined = handoff.invite_status === 'joined';
+    setButtonState('sipAcceptHandoffBtn', !active || owner === 'human' || !humanJoined);
+    setButtonState('sipResumeAiBtn', !active || owner !== 'human');
+    setButtonState('sipDeclineHandoffBtn', !active || owner === 'human');
+  }
+
+  async function refreshSipRoom({ silent = false } = {}) {
+    if (!window.activeCallAPI?.getSipCallRoom) return null;
+    const room = await window.activeCallAPI.getSipCallRoom();
+    renderSipRoom(room);
+    if (!silent && room?.active) toast('SIP room state refreshed.', 'success');
+    return room;
+  }
+
+  async function acceptHandoffFromUI() {
+    const result = await window.activeCallAPI.acceptSipHandoff();
+    if (result?.error) {
+      toast(result.error, 'error');
+    } else {
+      renderSipRoom(result);
+      toast('Human agent took over the call.', 'success');
+    }
+  }
+
+  async function resumeAIFromUI(handbackNote = 'Returned from DialForge front-end.') {
+    const result = await window.activeCallAPI.resumeSipAI(handbackNote);
+    if (result?.error) {
+      toast(result.error, 'error');
+    } else {
+      renderSipRoom(result);
+      toast('Call returned to AI.', 'success');
+    }
+  }
+
+  async function declineHandoffFromUI() {
+    const result = await window.activeCallAPI.reportSipHandoffFailure(
+      'declined',
+      'Human declined from DialForge front-end.'
+    );
+    if (result?.error) {
+      toast(result.error, 'error');
+    } else {
+      renderSipRoom(result);
+      toast('Handoff declined; AI remains active.', 'success');
+    }
+  }
+
+  function bindSipHandoffControls() {
+    byId('sipAcceptHandoffBtn')?.addEventListener('click', acceptHandoffFromUI);
+    byId('sipResumeAiBtn')?.addEventListener('click', () => resumeAIFromUI());
+    byId('sipDeclineHandoffBtn')?.addEventListener('click', declineHandoffFromUI);
+    byId('sipRefreshRoomBtn')?.addEventListener('click', () => refreshSipRoom());
+
+    const originalExecAITransfer = window.execAITransfer;
+    window.execAITransfer = async function () {
+      if (lastSipRoom?.active) {
+        await resumeAIFromUI('Returned through the Transfer to AI control.');
+        if (typeof closeTransferModal === 'function') closeTransferModal();
+        return;
+      }
+      if (typeof originalExecAITransfer === 'function') {
+        originalExecAITransfer();
+      }
+    };
+  }
+
+  function startSipHandoffIntegration() {
+    bindSipHandoffControls();
+    refreshSipRoom({ silent: true });
+    sipRoomPollHandle = setInterval(() => refreshSipRoom({ silent: true }), POLL_MS);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startSipHandoffIntegration);
+  } else {
+    startSipHandoffIntegration();
+  }
+
+  window.addEventListener('beforeunload', () => {
+    if (sipRoomPollHandle) clearInterval(sipRoomPollHandle);
+  });
+
+  window.sipHandoffIntegration = {
+    refresh: refreshSipRoom,
+    accept: acceptHandoffFromUI,
+    resumeAI: resumeAIFromUI,
+    decline: declineHandoffFromUI,
+  };
+})();
+</script>
 
 </body></html>

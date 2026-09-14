@@ -134,7 +134,7 @@
 <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant ml-1">Work Email</label>
 <div class="relative">
 <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">mail</span>
-<input class="w-full bg-[#1A1B23] border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-sm transition-all focus:ring-0" placeholder="name@company.com" required="" type="email">
+<input id="loginEmail" name="email" autocomplete="email" class="w-full bg-[#1A1B23] border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-sm transition-all focus:ring-0" placeholder="name@company.com" required="" type="email">
 </div>
 </div>
 <!-- Password Field -->
@@ -145,14 +145,15 @@
 </div>
 <div class="relative">
 <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg">lock</span>
-<input class="w-full bg-[#1A1B23] border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-sm transition-all focus:ring-0" placeholder="••••••••" required="" type="password">
+<input id="loginPassword" name="password" autocomplete="current-password" class="w-full bg-[#1A1B23] border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-sm transition-all focus:ring-0" placeholder="••••••••" required="" type="password">
 </div>
 </div>
 <!-- CTA Button -->
-<button class="shimmer-btn w-full mt-2 bg-fire-gradient hover:brightness-110 active:scale-[0.98] py-4 rounded-xl font-bold text-xs text-white uppercase tracking-[0.15em] flex items-center justify-center gap-2 transition-all shadow-lg shadow-fire-red/20" type="submit"><a href="./Dashboard.html" class="flex items-center justify-center gap-2 w-full h-full">
+<p id="loginError" class="hidden text-xs font-bold text-fire-red bg-fire-red/10 border border-fire-red/20 rounded-xl px-4 py-3"></p>
+<button id="loginSubmitBtn" class="shimmer-btn w-full mt-2 bg-fire-gradient hover:brightness-110 active:scale-[0.98] py-4 rounded-xl font-bold text-xs text-white uppercase tracking-[0.15em] flex items-center justify-center gap-2 transition-all shadow-lg shadow-fire-red/20" type="submit">
             Launch Dashboard
             <span class="material-symbols-outlined text-sm font-bold">arrow_forward</span>
-</a></button>
+</button>
 </form>
 <!-- Divider -->
 <div class="flex items-center gap-4 my-8">
@@ -183,6 +184,8 @@
 <!-- END: System Footer Links -->
 </main>
 <!-- END: Main Container -->
+<script src="./APIintegration/dialforgeAPI.js"></script>
+<script src="./APIintegration/currentUserAPI.js"></script>
 <!-- BEGIN: Interactivity Script -->
 <script data-purpose="interactive-animations">
     // Subtle mouse parallax for background orbs
@@ -197,23 +200,33 @@
       purpleOrb.style.transform = `translate(${x * -30}px, ${y * -30}px)`;
     });
 
-    // Form Handling Simulation
+    // Product login flow
     const loginForm = document.getElementById('loginForm');
-    loginForm.addEventListener('submit', (e) => {
+    const loginError = document.getElementById('loginError');
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const submitBtn = loginForm.querySelector('button[type="submit"]');
       const originalContent = submitBtn.innerHTML;
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
       
       submitBtn.disabled = true;
+      loginError.classList.add('hidden');
+      loginError.textContent = '';
       submitBtn.innerHTML = `
         <span class="material-symbols-outlined animate-spin text-sm">sync</span>
         Authenticating...
       `;
       
-      setTimeout(() => {
+      try {
+        await currentUserAPI.login(email, password);
+        window.location.href = './Dashboard.html';
+      } catch (error) {
+        loginError.textContent = error.message || 'Unable to sign in.';
+        loginError.classList.remove('hidden');
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalContent;
-      }, 2000);
+      }
     });
   </script>
 <!-- END: Interactivity Script -->

@@ -1,0 +1,92 @@
+[
+  {
+    "id": "usr_demo_alex",
+    "email": "alex.rivera@globifye.com",
+    "password": "demo1234",
+    "display_name": "Alex Rivera",
+    "full_name": "Alex Rivera",
+    "role": "Enterprise AE",
+    "avatar_url": "https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs",
+    "organization": {
+      "id": 3,
+      "name": "GlobiFYE",
+      "slug": "globifye",
+      "plan": "starter"
+    }
+  },
+  {
+    "id": "usr_demo_sophia",
+    "email": "sophia.patel@globifye.com",
+    "password": "demo1234",
+    "display_name": "Sophia Patel",
+    "full_name": "Sophia Patel",
+    "role": "Sales Manager",
+    "avatar_url": "",
+    "organization": {
+      "id": 3,
+      "name": "GlobiFYE",
+      "slug": "globifye",
+      "plan": "growth"
+    }
+  },
+  {
+    "id": "usr_demo_marcus",
+    "email": "marcus.reed@globifye.com",
+    "password": "demo1234",
+    "display_name": "Marcus Reed",
+    "full_name": "Marcus Reed",
+    "role": "Account Executive",
+    "avatar_url": "",
+    "organization": {
+      "id": 3,
+      "name": "GlobiFYE",
+      "slug": "globifye",
+      "plan": "growth"
+    }
+  },
+  {
+    "id": "usr_demo_elena",
+    "email": "elena.morales@globifye.com",
+    "password": "demo1234",
+    "display_name": "Elena Morales",
+    "full_name": "Elena Morales",
+    "role": "SDR Lead",
+    "avatar_url": "",
+    "organization": {
+      "id": 3,
+      "name": "GlobiFYE",
+      "slug": "globifye",
+      "plan": "growth"
+    }
+  },
+  {
+    "id": "usr_demo_daniel",
+    "email": "daniel.kim@globifye.com",
+    "password": "demo1234",
+    "display_name": "Daniel Kim",
+    "full_name": "Daniel Kim",
+    "role": "Customer Success Manager",
+    "avatar_url": "",
+    "organization": {
+      "id": 3,
+      "name": "GlobiFYE",
+      "slug": "globifye",
+      "plan": "growth"
+    }
+  },
+  {
+    "id": "usr_demo_maya",
+    "email": "maya.chen@acmehealth.com",
+    "password": "demo1234",
+    "display_name": "Maya Chen",
+    "full_name": "Maya Chen",
+    "role": "Support Lead",
+    "avatar_url": "",
+    "organization": {
+      "id": 2,
+      "name": "Pacific Beef Trading",
+      "slug": "pacific-beef-trading",
+      "plan": "growth"
+    }
+  }
+]
