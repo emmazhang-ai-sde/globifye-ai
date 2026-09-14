@@ -40,6 +40,16 @@ from websocket import create_connection
 
 from agent_registry import AgentRegistry
 from call_session import CallSession
+from capability_registry import CapabilityRegistry
+from capability_executor import execute_capability_call
+from knowledge_base_registry import KnowledgeBaseRegistry
+from runtime_context_builder import build_runtime_context
+from runtime_capability_policy import (
+    DEFAULT_MAX_TOOL_RESULT_CHARS,
+    CapabilityCallBudgetExceeded,
+    RuntimeCapabilityCallBudget,
+    serialize_tool_result,
+)
 
 # set up timer for timestamps
 _START = time.time()
@@ -49,6 +59,13 @@ def _ms():
 
 _log_lock = threading.Lock()
 SHOW_LLM_STREAM = os.environ.get("SHOW_LLM_STREAM") == "1"
+ENABLE_RUNTIME_CAPABILITY_TOOLS = (
+    os.environ.get("ENABLE_RUNTIME_CAPABILITY_TOOLS", "").strip().lower()
+    in {"1", "true", "yes", "on"}
+)
+MAX_RUNTIME_TOOL_RESULT_CHARS = int(
+    os.environ.get("MAX_RUNTIME_TOOL_RESULT_CHARS") or DEFAULT_MAX_TOOL_RESULT_CHARS
+)
 
 
 def log(tag, text="", ms=None, blank_before=0, blank_after=0, payload=None):
@@ -292,18 +309,24 @@ def _load_companies():
 COMPANIES = _load_companies()
 DEFAULT_COMPANY = "pacificbeef"
 AGENT_REGISTRY = AgentRegistry.from_legacy_company_data(COMPANIES)
+KNOWLEDGE_BASE_REGISTRY = KnowledgeBaseRegistry.from_path(
+    os.path.join(_KB_DIR, "knowledge_profiles.json")
+)
+CAPABILITY_REGISTRY = CapabilityRegistry.default()
 
 # Set per call from StasisStart (single active call only, per MVP scope).
 current_company = DEFAULT_COMPANY
 current_voice = COMPANIES[DEFAULT_COMPANY]["voice"]
+current_agent_config = AGENT_REGISTRY.get(DEFAULT_COMPANY)
 
 MAX_HISTORY = 10
+MAX_RUNTIME_TOOL_ROUNDS = 2
 
 # Position 0 is always the active company's system prompt; the trim in
 # groq_worker preserves it, so it survives regardless of which company is live.
 conversation_history = [COMPANIES[DEFAULT_COMPANY]["system_prompt"]]
 current_session = CallSession.from_agent(
-    AGENT_REGISTRY.get(DEFAULT_COMPANY),
+    current_agent_config,
     call_session_id="legacy-single-call",
     conversation_history=conversation_history,
 )
@@ -372,53 +395,110 @@ def groq_worker():
             "content": transcript
         })
         current_session.conversation_history = conversation_history
+        runtime_context = _record_runtime_context(source="llm_turn")
+        model_kwargs = _runtime_capability_model_kwargs(runtime_context)
+        tool_budget = _runtime_capability_call_budget(runtime_context)
+        defer_tts_until_tool_decision = bool(model_kwargs)
 
-        response = client.chat.completions.create(
-            model="openai/gpt-oss-120b",
-            messages=conversation_history,
-            stream=True
-        )
+        for tool_round in range(MAX_RUNTIME_TOOL_ROUNDS + 1):
+            response = client.chat.completions.create(
+                model="openai/gpt-oss-120b",
+                messages=conversation_history,
+                stream=True,
+                **model_kwargs,
+            )
 
-        sentence = ""
-        full_response = ""
-        first_token = True
+            sentence = ""
+            full_response = ""
+            first_token = True
+            tool_calls = {}
 
-        for chunk in response:
-            token = chunk.choices[0].delta.content
+            for chunk in response:
+                delta = chunk.choices[0].delta
 
-            if token is None:
-                continue
+                if getattr(delta, "tool_calls", None):
+                    for tool_call in delta.tool_calls:
+                        function_call = getattr(tool_call, "function", None)
+                        entry = tool_calls.setdefault(
+                            tool_call.index,
+                            {"id": "", "name": "", "arguments": ""},
+                        )
+                        if tool_call.id:
+                            entry["id"] = tool_call.id
+                        if function_call and function_call.name:
+                            entry["name"] = function_call.name
+                        if function_call and function_call.arguments:
+                            entry["arguments"] += function_call.arguments
+                    continue
 
-            if first_token:
-                log("LLM first-token", ms=_ms(), blank_before=True)
-                first_token = False
+                token = delta.content
 
-            sentence += token
-            full_response += token
+                if token is None:
+                    continue
+
+                if first_token:
+                    log("LLM first-token", ms=_ms(), blank_before=True)
+                    first_token = False
+
+                sentence += token
+                full_response += token
+
+                if SHOW_LLM_STREAM:
+                    print(token, end="", flush=True)
+
+                if sentence.endswith(
+                    (".", "!", "?")
+                ):
+                    if turn_epoch != epoch:   # holder switched -- abandon this turn
+                        break
+                    if not defer_tts_until_tool_decision:
+                        tts_queue.put((sentence, turn_epoch))
+                    sentence = ""
 
             if SHOW_LLM_STREAM:
-                print(token, end="", flush=True)
+                print()
 
-            if sentence.endswith(
-                (".", "!", "?")
-            ):
-                if turn_epoch != epoch:   # holder switched -- abandon this turn
+            if tool_calls:
+                _dispatch_runtime_tool_calls(
+                    runtime_context=runtime_context,
+                    tool_calls=tool_calls,
+                    tool_budget=tool_budget,
+                    assistant_content=full_response,
+                )
+                current_session.conversation_history = conversation_history
+                if tool_round >= MAX_RUNTIME_TOOL_ROUNDS:
+                    fallback_response = (
+                        "I’m sorry, I’m having trouble completing that action right now. "
+                        "Let me continue with what I can confirm."
+                    )
+                    log(
+                        "CAPABILITY_TOOLS",
+                        "tool round limit reached; skipping additional model call",
+                    )
+                    if turn_epoch == epoch:
+                        tts_queue.put((fallback_response, turn_epoch))
+                    conversation_history.append({
+                        "role": "assistant",
+                        "content": fallback_response,
+                    })
+                    current_session.conversation_history = conversation_history
                     break
-                tts_queue.put((sentence, turn_epoch))
-                sentence = ""
+                continue
 
-        if sentence and turn_epoch == epoch:
-            tts_queue.put((sentence, turn_epoch))
+            if turn_epoch == epoch:
+                if defer_tts_until_tool_decision and full_response:
+                    tts_queue.put((full_response, turn_epoch))
+                elif sentence:
+                    tts_queue.put((sentence, turn_epoch))
 
-        if SHOW_LLM_STREAM:
-            print()
-        log("LLM reply", full_response, ms=_ms())
+            log("LLM reply", full_response, ms=_ms())
 
-        conversation_history.append({
-            "role": "assistant",
-            "content": full_response
-        })
-        current_session.conversation_history = conversation_history
+            conversation_history.append({
+                "role": "assistant",
+                "content": full_response
+            })
+            current_session.conversation_history = conversation_history
+            break
 
         if len(conversation_history) > MAX_HISTORY + 1:
             conversation_history = (
@@ -649,6 +729,324 @@ holder = "ai"                  # "ai" | "human"
 epoch = 0
 current_playback_id = None
 _call_control_lock = threading.RLock()
+
+
+def _build_active_runtime_context():
+    """Build the new runtime vocabulary from the currently active call."""
+    return build_runtime_context(
+        agent=current_agent_config,
+        session=current_session,
+        knowledge_base_registry=KNOWLEDGE_BASE_REGISTRY,
+        default_human_endpoint=DEFAULT_HUMAN_ENDPOINT,
+        human_caller_id=DEFAULT_HUMAN_CALLER_ID,
+    )
+
+
+def _runtime_context_debug_payload(runtime_context):
+    return {
+        "agent_config_id": runtime_context.agent_config_id,
+        "company_key": runtime_context.company_key,
+        "call_session_id": runtime_context.call_session_id,
+        "owner": runtime_context.owner,
+        "current_stage": runtime_context.current_stage,
+        "stage_transitions": [
+            transition.name for transition in runtime_context.stage_transitions
+        ],
+        "knowledge_profiles": [
+            knowledge_base.knowledge_profile_id
+            for knowledge_base in runtime_context.knowledge_bases
+        ],
+        "human_handoff_enabled": bool(
+            runtime_context.session_state.get("human_handoff_enabled")
+        ),
+        "default_human_endpoint": runtime_context.session_state.get(
+            "default_human_endpoint"
+        ),
+    }
+
+
+def _record_runtime_context(*, source):
+    """Record RuntimeContext without changing the current LLM/tool behavior."""
+    try:
+        runtime_context = _build_active_runtime_context()
+    except Exception as exc:
+        log(
+            "RUNTIME_CONTEXT",
+            f"failed to build from active call: {type(exc).__name__}: {exc}",
+        )
+        return None
+
+    payload = _runtime_context_debug_payload(runtime_context)
+    current_session.append_event(
+        "runtime_context.built",
+        source=source,
+        **payload,
+    )
+    return runtime_context
+
+
+def _runtime_capability_model_kwargs(runtime_context):
+    """Return model kwargs for capability tools when the rollout flag is on."""
+    if not ENABLE_RUNTIME_CAPABILITY_TOOLS or runtime_context is None:
+        return {}
+
+    try:
+        tools = CAPABILITY_REGISTRY.to_llm_tools(runtime_context)
+    except Exception as exc:
+        current_session.append_event(
+            "runtime_capability_tools.failed",
+            error=f"{type(exc).__name__}: {exc}",
+        )
+        log(
+            "CAPABILITY_TOOLS",
+            f"failed to expose tools: {type(exc).__name__}: {exc}",
+        )
+        return {}
+
+    tool_names = [
+        tool.get("function", {}).get("name")
+        for tool in tools
+        if tool.get("function", {}).get("name")
+    ]
+    current_session.append_event(
+        "runtime_capability_tools.exposed",
+        enabled=True,
+        tool_names=tool_names,
+        agent_config_id=runtime_context.agent_config_id,
+        company_key=runtime_context.company_key,
+        call_session_id=runtime_context.call_session_id,
+        owner=runtime_context.owner,
+    )
+    log(
+        "CAPABILITY_TOOLS",
+        f"exposed {len(tool_names)} tool(s)",
+        payload={"tool_names": tool_names},
+    )
+
+    if not tools:
+        return {}
+    return {"tools": tools}
+
+
+def _runtime_capability_call_budget(runtime_context):
+    if not ENABLE_RUNTIME_CAPABILITY_TOOLS or runtime_context is None:
+        return None
+    try:
+        return RuntimeCapabilityCallBudget.from_capabilities(
+            CAPABILITY_REGISTRY.allowed_for(runtime_context)
+        )
+    except Exception as exc:
+        current_session.append_event(
+            "runtime_capability_policy.failed",
+            error=f"{type(exc).__name__}: {exc}",
+        )
+        log(
+            "CAPABILITY_TOOLS",
+            f"failed to build call budget: {type(exc).__name__}: {exc}",
+        )
+        return None
+
+
+def _dispatch_runtime_tool_calls(
+    *,
+    runtime_context,
+    tool_calls,
+    tool_budget=None,
+    assistant_content="",
+):
+    global conversation_history
+    pending_tool_calls = _normalized_tool_calls(tool_calls)
+    current_session.append_event(
+        "runtime_capability_tool_calls.dispatching",
+        tool_calls=pending_tool_calls,
+        call_session_id=getattr(runtime_context, "call_session_id", None),
+        company_key=getattr(runtime_context, "company_key", None),
+    )
+    log(
+        "CAPABILITY_TOOLS",
+        f"dispatching {len(pending_tool_calls)} tool call(s)",
+        payload={
+            "tool_calls": [
+                {
+                    "id": call.get("id"),
+                    "name": call.get("name"),
+                    "arguments": call.get("arguments"),
+                }
+                for call in pending_tool_calls
+            ]
+        },
+    )
+
+    assistant_message = {
+        "role": "assistant",
+        "tool_calls": [
+            {
+                "id": call["id"],
+                "type": "function",
+                "function": {
+                    "name": call["name"],
+                    "arguments": call["arguments"],
+                },
+            }
+            for call in pending_tool_calls
+        ],
+    }
+    if assistant_content:
+        assistant_message["content"] = assistant_content
+    conversation_history.append(assistant_message)
+
+    for call in pending_tool_calls:
+        result = _execute_runtime_tool_call(runtime_context, call, tool_budget=tool_budget)
+        content, truncated, original_char_count = serialize_tool_result(
+            result,
+            max_chars=MAX_RUNTIME_TOOL_RESULT_CHARS,
+        )
+        if truncated:
+            current_session.append_event(
+                "runtime_capability_tool_result.truncated",
+                tool_call_id=call["id"],
+                capability=call["name"],
+                original_char_count=original_char_count,
+                max_char_count=MAX_RUNTIME_TOOL_RESULT_CHARS,
+                serialized_char_count=len(content),
+            )
+        conversation_history.append({
+            "role": "tool",
+            "tool_call_id": call["id"],
+            "content": content,
+        })
+    current_session.conversation_history = conversation_history
+
+
+def _normalized_tool_calls(tool_calls):
+    normalized = []
+    for index, call in sorted(tool_calls.items()):
+        name = (call.get("name") or "").strip() or "unknown_capability"
+        normalized.append({
+            "id": call.get("id") or f"runtime_tool_call_{index}",
+            "name": name,
+            "arguments": call.get("arguments") or "{}",
+        })
+    return normalized
+
+
+def _execute_runtime_tool_call(runtime_context, call, *, tool_budget=None):
+    if runtime_context is None:
+        return {
+            "ok": False,
+            "capability": call.get("name"),
+            "error": "RuntimeContext is not available for this tool call.",
+        }
+
+    budget_payload = None
+    try:
+        if tool_budget is not None:
+            budget_payload = tool_budget.reserve(call.get("name"))
+        arguments = _parse_tool_arguments(call.get("arguments"))
+        result = execute_capability_call(
+            runtime_context,
+            call.get("name"),
+            arguments,
+            registry=CAPABILITY_REGISTRY,
+            human_handoff_handler=_runtime_human_handoff_handler,
+        )
+        current_session.append_event(
+            "runtime_capability_tool_call.executed",
+            tool_call_id=call.get("id"),
+            capability=call.get("name"),
+            ok=True,
+            budget=budget_payload,
+        )
+        return result
+    except CapabilityCallBudgetExceeded as exc:
+        error = f"{type(exc).__name__}: {exc}"
+        current_session.append_event(
+            "runtime_capability_tool_call.failed",
+            tool_call_id=call.get("id"),
+            capability=call.get("name"),
+            error=error,
+            policy="max_calls_per_turn",
+            budget=budget_payload,
+        )
+        log(
+            "CAPABILITY_TOOLS",
+            f"tool call blocked by policy: {error}",
+            payload={"tool_call_id": call.get("id"), "name": call.get("name")},
+        )
+        return {
+            "ok": False,
+            "capability": call.get("name"),
+            "error": error,
+            "policy": "max_calls_per_turn",
+        }
+    except Exception as exc:
+        error = f"{type(exc).__name__}: {exc}"
+        current_session.append_event(
+            "runtime_capability_tool_call.failed",
+            tool_call_id=call.get("id"),
+            capability=call.get("name"),
+            error=error,
+            budget=budget_payload,
+        )
+        log(
+            "CAPABILITY_TOOLS",
+            f"tool call failed: {error}",
+            payload={"tool_call_id": call.get("id"), "name": call.get("name")},
+        )
+        return {
+            "ok": False,
+            "capability": call.get("name"),
+            "error": error,
+        }
+
+
+def _parse_tool_arguments(raw_arguments):
+    if raw_arguments is None or raw_arguments == "":
+        return {}
+    try:
+        arguments = json.loads(raw_arguments)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"invalid tool arguments JSON: {exc}") from exc
+    if not isinstance(arguments, dict):
+        raise ValueError("tool arguments must decode to an object")
+    return arguments
+
+
+def _runtime_human_handoff_handler(
+    *,
+    context,
+    reason,
+    urgency,
+    preferred_team,
+    endpoint,
+    caller_id,
+):
+    endpoint = endpoint or DEFAULT_HUMAN_ENDPOINT
+    caller_id = caller_id or DEFAULT_HUMAN_CALLER_ID
+
+    if current_sales_channel_id or current_session.human_invite_status:
+        return {
+            "invite_status": current_session.human_invite_status,
+            "channel_id": current_sales_channel_id or current_session.human_channel_id,
+            "already_invited": True,
+            "endpoint": current_session.human_endpoint or endpoint,
+            "caller_id": current_session.human_caller_id or caller_id,
+            "reason": reason,
+            "urgency": urgency,
+            "preferred_team": preferred_team,
+        }
+
+    channel_id = invite_human_to_room(endpoint, caller_id=caller_id)
+    return {
+        "invite_status": current_session.human_invite_status,
+        "channel_id": channel_id,
+        "already_invited": False,
+        "endpoint": endpoint,
+        "caller_id": caller_id,
+        "reason": reason,
+        "urgency": urgency,
+        "preferred_team": preferred_team,
+    }
 
 
 def create_asterisk_room(caller_channel_id):
@@ -984,6 +1382,7 @@ def ensure_sounds_dir():
 def ari_event_loop():
     global current_channel_id, current_company, current_voice, conversation_history
     global current_bridge_id, current_ext_channel_id, current_sales_channel_id
+    global current_agent_config
     global holder, epoch, current_playback_id
 
     ws_url = f"ws://{ARI_HOST}/ari/events?api_key={ARI_USER}:{ARI_PASSWORD}&app={APP_NAME}"
@@ -1037,6 +1436,7 @@ def ari_event_loop():
                 company = COMPANIES[company_key]
                 current_company = company_key
                 current_voice = company["voice"]
+                current_agent_config = resolution.agent
                 conversation_history = [company["system_prompt"]]
                 current_session.start_call(
                     caller_channel_id=channel_id,
@@ -1046,9 +1446,16 @@ def ari_event_loop():
                 holder = current_session.owner
                 epoch = current_session.epoch
                 current_playback_id = current_session.current_playback_id
+                runtime_context = _record_runtime_context(source="call_start")
 
                 log("CALL", f"arrived: {channel_id}")
                 log("AGENT", company["display_name"])
+                if runtime_context:
+                    log(
+                        "RUNTIME_CONTEXT",
+                        "built for active call",
+                        payload=_runtime_context_debug_payload(runtime_context),
+                    )
                 requests.post(
                     f"http://{ARI_HOST}/ari/channels/{channel_id}/answer",
                     auth=(ARI_USER, ARI_PASSWORD),

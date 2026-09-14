@@ -69,6 +69,13 @@ ARI_USER = "sip-mvp-user"
 ARI_PASSWORD = "changeme_use_a_real_secret"
 APP_NAME = "sip-mvp-app"
 BRIDGE_CONTROL_URL = "http://127.0.0.1:8500"
+FRONTEND_PROXY_HEADER = "X-DialForge-Frontend-Proxy"
+FRONTEND_PROXY_POST_PATHS = {
+    "/api/hangup",
+    "/api/handoff/accept",
+    "/api/handoff/resume-ai",
+    "/api/handoff/failure",
+}
 
 # The registered softphone endpoint ([test-endpoint] in pjsip.conf) and the
 # dialplan context that routes the demo extensions into the Stasis app
@@ -864,11 +871,24 @@ class Handler(BaseHTTPRequestHandler):
         except json.JSONDecodeError:
             return {}
 
+    def _is_frontend_proxy_request(self):
+        return (
+            self.client_address[0] in ("127.0.0.1", "::1")
+            and self.headers.get(FRONTEND_PROXY_HEADER) == "1"
+        )
+
+    def _actor_label(self, user):
+        if user is None:
+            return "Frontend Demo"
+        company = COMPANIES[user["company_key"]]
+        return f"{user['name']} ({company['display_name']})"
+
     # --- GET ---------------------------------------------------------------
 
     def do_GET(self):
         path = urllib.parse.urlparse(self.path).path
         user = _session_user(self)
+        is_frontend_proxy = self._is_frontend_proxy_request()
 
         if path == "/":
             self._redirect("/home.html" if user else "/login.html")
@@ -919,7 +939,7 @@ class Handler(BaseHTTPRequestHandler):
                 {"company": COMPANIES[key]["display_name"], "markdown": markdown}
             )
         elif path == "/api/call-room":
-            if user is None:
+            if user is None and not is_frontend_proxy:
                 self._send_json({"error": "not logged in"}, 401)
                 return
             with _state_lock:
@@ -1052,7 +1072,10 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         user = _session_user(self)
-        if user is None:
+        is_frontend_proxy = self._is_frontend_proxy_request()
+        if user is None and not (
+            is_frontend_proxy and path in FRONTEND_PROXY_POST_PATHS
+        ):
             self._send_json({"error": "not logged in"}, 401)
             return
 
@@ -1128,12 +1151,11 @@ class Handler(BaseHTTPRequestHandler):
                 broadcast("call_cancelled", {})
             self._send_json({"ok": True})
         elif path == "/api/handoff/accept":
+            actor = self._actor_label(user)
             try:
                 bridge_response = requests.post(
                     f"{BRIDGE_CONTROL_URL}/internal/handoff/accept",
-                    json={
-                        "accepted_by": f"{user['name']} ({COMPANIES[user['company_key']]['display_name']})"
-                    },
+                    json={"accepted_by": actor},
                     timeout=3,
                 )
                 try:
@@ -1154,11 +1176,12 @@ class Handler(BaseHTTPRequestHandler):
                 )
         elif path == "/api/handoff/resume-ai":
             body = self._read_json_body()
+            actor = self._actor_label(user)
             try:
                 bridge_response = requests.post(
                     f"{BRIDGE_CONTROL_URL}/internal/handoff/resume-ai",
                     json={
-                        "resumed_by": f"{user['name']} ({COMPANIES[user['company_key']]['display_name']})",
+                        "resumed_by": actor,
                         "handback_note": body.get("handback_note"),
                     },
                     timeout=3,
