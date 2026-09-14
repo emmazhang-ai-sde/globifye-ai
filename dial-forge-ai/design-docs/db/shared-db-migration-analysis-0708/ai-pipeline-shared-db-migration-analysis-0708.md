@@ -3,6 +3,8 @@
 **Last updated:** 2026-07-08
 **Related docs:** [`backend-system-design-v3.md`](../backend-system-design-v3.md) (backend target schema), [`ai-pipeline-mvp-step11-schema-migration.md`](./ai-pipeline-mvp-implementation-steps/ai-pipeline-mvp-step11-schema-migration.md) (schema alignment already done), [`ai-pipeline-data-dictionary.md`](./ai-pipeline-data-dictionary.md) (current live tables)
 
+**Current live inventory:** [`supabase-current-database-inventory.md`](./supabase-current-database-inventory.md)
+
 ---
 
 The backend team has proposed merging the AI pipeline into their environment on a single shared database. This doc analyzes how to make that move and recommends a path. The decision matters because it determines the AI team's blast radius on a shared production DB, how much of the real-time write path we still own, and how much re-work the move costs versus what Step 11 already bought us.
