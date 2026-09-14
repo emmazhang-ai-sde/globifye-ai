@@ -39,3 +39,28 @@ create index if not exists sip_kb_chunks_hnsw
 -- Speeds the ingest job's per-file compare/delete (Step 2).
 create index if not exists sip_kb_chunks_company_file_idx
   on sip_kb_chunks (company_key, source_file);
+
+-- Call-time retrieval RPC (RAG Step 3). The phone runtime passes the active
+-- company_key from RuntimeContext; the model never supplies tenant scope.
+drop function if exists match_kb_chunks(text, vector, int);
+create or replace function match_kb_chunks(
+  p_company_key text,
+  p_query_embedding vector(1536),
+  p_match_count int default 3
+)
+returns table (
+  id bigint,
+  source_file text,
+  section text,
+  content text,
+  distance float
+)
+language sql stable as $$
+  select id, source_file, section, content, embedding <=> p_query_embedding as distance
+  from sip_kb_chunks
+  where company_key = p_company_key and kind = 'detail'
+  order by embedding <=> p_query_embedding
+  limit p_match_count;
+$$;
+
+grant execute on function match_kb_chunks(text, vector, int) to service_role;
