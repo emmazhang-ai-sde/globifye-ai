@@ -1,0 +1,64 @@
+{
+  "pacificbeef": {
+    "knowledge_profile_id": "pacificbeef",
+    "company_key": "pacificbeef",
+    "display_name": "Pacific Beef Trading Knowledge Base",
+    "legacy_kb_file": "pacificbeef.md",
+    "corpus_path": "pacificbeef/",
+    "source_files": [
+      "pacificbeef/company-overview.md",
+      "pacificbeef/product-catalog.md",
+      "pacificbeef/grades-and-quality.md",
+      "pacificbeef/export-markets.md",
+      "pacificbeef/certifications-compliance.md",
+      "pacificbeef/food-safety-traceability.md",
+      "pacificbeef/packaging-cold-chain.md",
+      "pacificbeef/pricing-and-terms.md",
+      "pacificbeef/ordering-process.md",
+      "pacificbeef/faq.md"
+    ],
+    "retrieval_policy": {
+      "mode": "company_scoped_rag",
+      "top_k": 3,
+      "score_threshold": 0.2
+    },
+    "fallback_policy": {
+      "mode": "standard_line",
+      "offer_handoff": true
+    },
+    "status": "active",
+    "version": "2026-09-07",
+    "enabled": true
+  },
+  "globifye": {
+    "knowledge_profile_id": "globifye",
+    "company_key": "globifye",
+    "display_name": "GlobiFYE Knowledge Base",
+    "legacy_kb_file": "globifye.md",
+    "corpus_path": "globifye/",
+    "source_files": [
+      "globifye/company-overview.md",
+      "globifye/product-overview.md",
+      "globifye/features.md",
+      "globifye/use-cases.md",
+      "globifye/pricing-and-plans.md",
+      "globifye/integrations.md",
+      "globifye/security-compliance.md",
+      "globifye/voice-and-languages.md",
+      "globifye/onboarding-implementation.md",
+      "globifye/faq.md"
+    ],
+    "retrieval_policy": {
+      "mode": "company_scoped_rag",
+      "top_k": 3,
+      "score_threshold": 0.2
+    },
+    "fallback_policy": {
+      "mode": "standard_line",
+      "offer_handoff": true
+    },
+    "status": "active",
+    "version": "2026-09-07",
+    "enabled": true
+  }
+}

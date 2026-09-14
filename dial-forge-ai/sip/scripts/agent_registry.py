@@ -27,6 +27,12 @@ class AgentConfig:
 
     ``company_key`` is kept as the compatibility bridge to today's RAG and
     prompt files. ``agent_config_id`` is the future Dashboard/API identifier.
+
+    Vocabulary boundary:
+
+    * ``kb_file`` is the legacy single-file prompt-injection source.
+    * ``knowledge_profile_id`` is the future KnowledgeBaseResource binding.
+    * human handoff fields are policy inputs for future human capabilities.
     """
 
     agent_config_id: str
