@@ -579,7 +579,7 @@
 <div class="flex flex-col items-center gap-4 w-full pb-4">
   <a href="./profile.html" class="block w-full h-full cursor-pointer" aria-label="User profile">
     <div class="h-10 w-10 rounded-full overflow-hidden border border-white/10 items-center ml-4">
-    <img id="dashboardUserAvatar" alt="User profile avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCagjE36u1YmKi_8aukCq2ppDUKv8D7fvrjk79UYnOJ4kA3SWz_k8Idp9jK7O1RKHxO9BdcEL26oFKylFTJK5xaZCuuopzYIhsYd7BRLnCr5oKcC4HZNL5t0WhLeon3iVIjOmRrKrL-ET-AZu0JN54bCgsg86JU9hlrSC8tTp6VsKBDHul6pkRu86PEuD2gvKftw8Fsjeg1VhTLtSrthU_k32CGK33V_wtt5gIBNOR1lUAXqolbNcoyC6v9-17SvLOOwBN1yd8CFxs">
+    <img id="dashboardUserAvatar" alt="User profile avatar" class="w-full h-full object-cover" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
   </div>
   </a>
 </div>
@@ -592,7 +592,7 @@
 <header class="flex flex-col md:flex-row justify-between md:items-end gap-6">
 <div data-purpose="page-title">
 <h1 class="font-hero-h1 text-5xl font-extrabold text-white tracking-tight">Performance <span class="text-fire-gradient">Pulse</span></h1>
-<p class="text-on-surface-variant/80 mt-2">Reviewing live data for <span id="dashboardCompanyName" class="font-bold text-white">Global Sales Territory</span></p>
+<p class="text-on-surface-variant/80 mt-2">Reviewing live data for <span id="dashboardCompanyName" class="font-bold text-white">your organization</span></p>
 </div>
 <div class="flex items-center gap-4">
 <div id="apiStatusIndicator" class="flex items-center gap-2 bg-surface-container-high/50 px-4 py-2 rounded-full border border-white/5" aria-label="API connection status">
@@ -1058,40 +1058,35 @@ async function loadDashboardDataAndUpdateUI() {
 <!-- BEGIN: Dashboard Company State Sync -->
 <script data-purpose="dashboard-company-state-sync">
   /**
-   * Load and display company information from shared onboarding state
-   * Uses the same localStorage key as onboarding: 'dialforgeState'
+   * Load cached company information until currentUserAPI hydrates from /api/me.
    */
   function loadAndDisplayCompanyData() {
     try {
-      // Load the shared state from localStorage
       const saved = localStorage.getItem('dialforgeState');
-      
-      // Default company (fallback if no saved state exists)
-      const DEFAULT_COMPANY = 'GlobiFYE';
+      let companyName = '';
 
-      let companyName = DEFAULT_COMPANY;
-
-      // If saved state exists, extract company
       if (saved) {
         try {
           const parsedState = JSON.parse(saved);
+          if (parsedState.organization && parsedState.organization.name) {
+            companyName = parsedState.organization.name;
+          }
           if (parsedState.user && parsedState.user.company) {
             companyName = parsedState.user.company;
           }
         } catch (e) {
-          console.log('Could not parse saved state, using default company:', e);
+          console.log('Could not parse saved state for company:', e);
         }
       }
 
-      // Update Dashboard company display
       const companyElement = document.getElementById('dashboardCompanyName');
-      if (companyElement) {
+      if (companyElement && companyName) {
         companyElement.textContent = companyName;
       }
 
-      console.log('Dashboard company loaded from shared state:', companyName);
+      console.log('Dashboard company loaded from cached state:', companyName);
     } catch (e) {
-      console.error('Error loading company data from shared state:', e);
+      console.error('Error loading company data from cached state:', e);
     }
   }
 
@@ -1776,7 +1771,7 @@ async function loadDashboardDataAndUpdateUI() {
       teamMembers: [
         {
           id: 1,
-          name: 'Alex Rivers',
+          name: 'Alex Rivera',
           title: 'Top Closer',
           avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE',
           revenue: 142000,
@@ -1787,8 +1782,8 @@ async function loadDashboardDataAndUpdateUI() {
         },
         {
           id: 2,
-          name: 'Sarah Chen',
-          title: 'Volume King',
+          name: 'Sophia Patel',
+          title: 'Volume Lead',
           avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCcIsQXOEfl9RPSSkYicZMQ5sZEXB_YEaWoTeRrnAo1-nAKuvFvlT46sDnAWOA7VkquKxtVzp5yjZv4DNj2NUZgU4etcHIroG96_E4yWdR_osy9rpoyTTuryFKuIyfkcTnf9FFhG2oA-M-U6JuX6WdWCZu-SM5MrrHJaNQJ4ZCYaNTHQs0TL6BH3YXV0DqvhDq1Vuw4n1-NjhNdDgGvmF4YaY0FVQlMxtXxQWjSXkpodrsqF8olnkV-WKEzTNiCPTtXW-yghBOX-jQ',
           revenue: 128000,
           calls: 612,
@@ -1798,7 +1793,7 @@ async function loadDashboardDataAndUpdateUI() {
         },
         {
           id: 3,
-          name: 'Marcus Thorne',
+          name: 'Marcus Reed',
           title: 'Connect Specialist',
           avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDxpGJ4Ipzimbxj3HtSBAli7TjUBzI2_5jjspz16beTbPyfWRo4lyp0H-rao99dlnU47rfKmrSl5Ypolg02PBuRqcpau7OiaZM_vaP30nvyBffUQ73WPhJ5rNNh743XfSRDHe9arWVzaIzIYC4iwT7FLP4rjkGJ5LeJjetwtF2qmuRIjoV9VT5p5Rjt9gmq3gPKohuev805CdvWmVD8dLVE2ZrGgqxkGjCXUgVqEBVoieyHd78ep4o2yrNlx8WjNlSrm-MMwDrKxRc',
           revenue: 115000,
@@ -2508,9 +2503,18 @@ const PipelineVelocitySync = {
 <!-- BEGIN: API Integration Scripts -->
 <!-- Load universal API infrastructure first -->
 <script src="./APIintegration/dialforgeAPI.js"></script>
+<script src="./APIintegration/currentUserAPI.js"></script>
 <!-- Load Dashboard-specific API layer -->
 <script src="./APIintegration/dashboardAPI.js"></script>
 <!-- END: API Integration Scripts -->
+
+<script data-purpose="current-user-hydration">
+  document.addEventListener('DOMContentLoaded', () => {
+    currentUserAPI.hydrateCurrentUserOnPage().catch((error) => {
+      console.warn('Could not hydrate current user on dashboard:', error);
+    });
+  });
+</script>
 
 <!-- BEGIN: Usage Minutes Synchronization -->
 <script data-purpose="sync-usage-minutes">

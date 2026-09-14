@@ -35,6 +35,55 @@ const ACTIVE_CALL_CACHE_KEYS = {
   CURRENT_CONTACT: 'ac_current_contact'
 };
 
+const SIP_DEMO_API_PREFIX = '/sip-demo';
+
+async function fetchSipDemo(endpoint, options = {}) {
+  return dialforgeApi.fetch(`${SIP_DEMO_API_PREFIX}${endpoint}`, {
+    fallbackValue: options.fallbackValue ?? null,
+    ...options
+  });
+}
+
+// ============================================================================
+// SIP HANDOFF / CALL ROOM INTEGRATION
+// ============================================================================
+
+async function getSipCallRoom() {
+  return fetchSipDemo('/api/call-room', {
+    fallbackValue: { active: false, room: null }
+  });
+}
+
+async function acceptSipHandoff() {
+  return fetchSipDemo('/api/handoff/accept', {
+    method: 'POST',
+    fallbackValue: null
+  });
+}
+
+async function resumeSipAI(handbackNote = '') {
+  return fetchSipDemo('/api/handoff/resume-ai', {
+    method: 'POST',
+    body: { handback_note: handbackNote },
+    fallbackValue: null
+  });
+}
+
+async function reportSipHandoffFailure(status, reason = '') {
+  return fetchSipDemo('/api/handoff/failure', {
+    method: 'POST',
+    body: { status, reason },
+    fallbackValue: null
+  });
+}
+
+async function hangupSipCall() {
+  return fetchSipDemo('/api/hangup', {
+    method: 'POST',
+    fallbackValue: null
+  });
+}
+
 // ============================================================================
 // HUBSPOT CONTACT SEARCH
 // ============================================================================
@@ -428,6 +477,13 @@ async function createSupportTicket(ticketData) {
  *   await activeCallAPI.createSupportTicket(ticketData);
  */
 const activeCallAPI = {
+  // SIP demo / AI-human handoff workflow
+  getSipCallRoom,
+  acceptSipHandoff,
+  resumeSipAI,
+  reportSipHandoffFailure,
+  hangupSipCall,
+
   // Main workflow
   onCallConnected,
   

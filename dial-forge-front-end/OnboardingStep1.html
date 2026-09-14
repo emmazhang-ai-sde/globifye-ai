@@ -268,13 +268,13 @@
 <!-- END: Visual Accents -->
 <!-- BEGIN: Interactive Scripts -->
 <script data-purpose="persona-interaction-and-state">
-  // Default user state (used when no saved state exists)
+  // Empty onboarding draft; signed-in identity is hydrated by currentUserAPI.
   const DEFAULT_USER_STATE = {
-    name: "Hunter L.",
-    email: "hunter@globifye.com",
-    role: "Enterprise AE",
-    company: "GlobiFYE",
-    tier: "starter"
+    name: "",
+    email: "",
+    role: "",
+    company: "",
+    tier: ""
   };
 
   // Shared state management object across all onboarding pages (mirroring landing page)
