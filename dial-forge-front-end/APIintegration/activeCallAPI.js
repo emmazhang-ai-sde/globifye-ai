@@ -35,10 +35,8 @@ const ACTIVE_CALL_CACHE_KEYS = {
   CURRENT_CONTACT: 'ac_current_contact'
 };
 
-const SIP_DEMO_API_PREFIX = '/sip-demo';
-
-async function fetchSipDemo(endpoint, options = {}) {
-  return dialforgeApi.fetch(`${SIP_DEMO_API_PREFIX}${endpoint}`, {
+async function fetchSipBridge(endpoint, options = {}) {
+  return dialforgeApi.fetch(endpoint, {
     fallbackValue: options.fallbackValue ?? null,
     ...options
   });
@@ -49,38 +47,114 @@ async function fetchSipDemo(endpoint, options = {}) {
 // ============================================================================
 
 async function getSipCallRoom() {
-  return fetchSipDemo('/api/call-room', {
-    fallbackValue: { active: false, room: null }
-  });
+  const result = await getSipRuntimeSession();
+  if (!result || result.ok === false || result.error) {
+    return { active: false, room: null, error: result?.error || 'runtime session unavailable' };
+  }
+  return {
+    active: result.status === 'active',
+    call_session_id: result.call_session_id,
+    display_name: result.display_name,
+    owner: result.owner || 'ai',
+    room: result.room || null,
+    handoff: result.handoff || {},
+    direction: result.direction,
+    report_type: result.report_type,
+    initial_context: result.initial_context || {}
+  };
 }
 
 async function acceptSipHandoff() {
-  return fetchSipDemo('/api/handoff/accept', {
+  return fetchSipBridge('/api/handoff/accept', {
     method: 'POST',
+    body: { accepted_by: 'product front-end' },
     fallbackValue: null
   });
 }
 
 async function resumeSipAI(handbackNote = '') {
-  return fetchSipDemo('/api/handoff/resume-ai', {
+  return fetchSipBridge('/api/handoff/resume-ai', {
     method: 'POST',
-    body: { handback_note: handbackNote },
+    body: { resumed_by: 'product front-end', handback_note: handbackNote },
     fallbackValue: null
   });
 }
 
 async function reportSipHandoffFailure(status, reason = '') {
-  return fetchSipDemo('/api/handoff/failure', {
+  return fetchSipBridge('/api/handoff/failure', {
     method: 'POST',
     body: { status, reason },
     fallbackValue: null
   });
 }
 
-async function hangupSipCall() {
-  return fetchSipDemo('/api/hangup', {
+async function hangupSipCall(payload = {}) {
+  return fetchSipBridge('/api/hangup', {
     method: 'POST',
+    body: {
+      source: 'active_call_frontend',
+      requested_by: 'product front-end',
+      ...payload
+    },
     fallbackValue: null
+  });
+}
+
+async function getSipRuntimeSession() {
+  return dialforgeApi.fetch('/api/runtime/session', {
+    fallbackValue: { ok: false, error: 'runtime session unavailable' }
+  });
+}
+
+async function getSipRuntimeTimeline({ sinceSequence = null, callSessionId = null } = {}) {
+  const params = new URLSearchParams();
+  if (sinceSequence != null) params.set('since_sequence', String(sinceSequence));
+  if (callSessionId) params.set('call_session_id', callSessionId);
+  const query = params.toString();
+  return dialforgeApi.fetch(`/api/runtime/timeline${query ? `?${query}` : ''}`, {
+    fallbackValue: { ok: false, count: 0, events: [] }
+  });
+}
+
+async function getPersistedCallSummary(callSessionId) {
+  if (!callSessionId) {
+    return { ok: false, error: 'call_session_id is required' };
+  }
+  return dialforgeApi.fetch(`/api/call-summaries/${encodeURIComponent(callSessionId)}`, {
+    fallbackValue: { ok: false, error: 'call summary unavailable' }
+  });
+}
+
+async function saveCallSummary(summaryPayload) {
+  return dialforgeApi.fetch('/api/call-summaries', {
+    method: 'POST',
+    body: summaryPayload,
+    fallbackValue: { ok: false, persisted: false, error: 'call summary persistence unavailable' }
+  });
+}
+
+async function generateCallSummary(summaryRequest) {
+  return dialforgeApi.fetch('/api/call-summaries/generate', {
+    method: 'POST',
+    body: summaryRequest,
+    fallbackValue: { ok: false, persisted: false, error: 'call summary generation unavailable' }
+  });
+}
+
+async function getCallTranscript(callSessionId) {
+  if (!callSessionId) {
+    return { ok: false, error: 'call_session_id is required', rows: [] };
+  }
+  return dialforgeApi.fetch(`/api/call-transcripts/${encodeURIComponent(callSessionId)}`, {
+    fallbackValue: { ok: false, error: 'call transcript unavailable', rows: [] }
+  });
+}
+
+async function syncCallTranscript(transcriptRequest) {
+  return dialforgeApi.fetch('/api/call-transcripts/sync', {
+    method: 'POST',
+    body: transcriptRequest,
+    fallbackValue: { ok: false, error: 'call transcript sync unavailable', rows: [] }
   });
 }
 
@@ -477,12 +551,19 @@ async function createSupportTicket(ticketData) {
  *   await activeCallAPI.createSupportTicket(ticketData);
  */
 const activeCallAPI = {
-  // SIP demo / AI-human handoff workflow
+  // SIP runtime / AI-human handoff workflow
   getSipCallRoom,
   acceptSipHandoff,
   resumeSipAI,
   reportSipHandoffFailure,
   hangupSipCall,
+  getSipRuntimeSession,
+  getSipRuntimeTimeline,
+  getPersistedCallSummary,
+  saveCallSummary,
+  generateCallSummary,
+  getCallTranscript,
+  syncCallTranscript,
 
   // Main workflow
   onCallConnected,

@@ -109,6 +109,30 @@
 .animate-pulse-ring-slow {
     animation: pulse-ring 4s cubic-bezier(0.4, 0, 0.6, 1) infinite
     }
+[data-call-motion] {
+    transition: opacity 180ms ease, transform 180ms ease;
+    }
+[data-call-motion]:not(.is-call-active),
+[data-call-motion]:not(.is-call-active) * {
+    animation-play-state: paused !important;
+    }
+#avatarPulseRing:not(.is-call-active),
+#avatarPulseRingSlow:not(.is-call-active) {
+    opacity: 0;
+    }
+#voiceVisualizer:not(.is-call-active) .voice-bar {
+    opacity: 0.35;
+    transform: scaleY(0.35);
+    transform-origin: bottom;
+    }
+#voiceVisualizer.is-call-active .voice-bar {
+    opacity: 1;
+    transform: scaleY(1);
+    }
+#badge-live:not(.is-call-active) {
+    opacity: 0;
+    pointer-events: none;
+    }
 .glass-card {
     background: rgba(30, 31, 39, 0.7);
     backdrop-filter: blur(20px) saturate(180%);
@@ -464,12 +488,18 @@ animation: fade-in 0.3s ease-out;
       
     }
 
-    .control-btn-group {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex-shrink: 0;
-    }
+	    .control-btn-group {
+	      display: flex;
+	      align-items: center;
+	      gap: 0.5rem;
+	      flex-shrink: 0;
+	    }
+
+	    .call-end-btn {
+	      min-width: 12rem;
+	      flex-shrink: 0;
+	      white-space: nowrap;
+	    }
 
     /* Overflow menu styles */
     .overflow-menu-wrapper {
@@ -704,11 +734,11 @@ animation: fade-in 0.3s ease-out;
       <span class="ringing-pulse"></span>
       <span class="ringing-pulse delay-1"></span>
       <span class="ringing-pulse delay-2"></span>
-      <img id="incomingCallAvatar" alt="Caller avatar" class="relative w-24 h-24 rounded-full object-cover border-2 border-tertiary z-10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE">
+      <img id="incomingCallAvatar" alt="Caller avatar" class="hidden relative w-24 h-24 rounded-full object-cover border-2 border-tertiary z-10" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=">
     </div>
-    <span id="incomingCallName" class="font-section-header text-xl text-white mb-1">Jordan Blake</span>
-    <span id="incomingCallCompany" class="text-xs font-bold text-on-surface-variant/60 mb-1">Meridian Capital Partners</span>
-    <span id="incomingCallNumber" class="font-mono-data text-sm text-fire-accent mb-8">+1 (415) 555-0148</span>
+    <span id="incomingCallName" class="font-section-header text-xl text-white mb-1">—</span>
+    <span id="incomingCallCompany" class="text-xs font-bold text-on-surface-variant/60 mb-1">Waiting for SIP runtime session</span>
+    <span id="incomingCallNumber" class="font-mono-data text-sm text-fire-accent mb-8">—</span>
     <div class="flex items-center gap-3 mb-3 w-full">
       <span class="material-symbols-outlined text-fire-accent ringing-icon">ring_volume</span>
       <span class="text-[10px] font-bold text-on-surface-variant/70 uppercase tracking-widest">Ringing…</span>
@@ -766,29 +796,6 @@ animation: fade-in 0.3s ease-out;
   </div>
 </div>
 
-<!-- BEGIN: ActiveCallBar -->
-<div id="activeCallBar" class="hidden fixed top-16 left-0 lg:left-20 right-0 z-40 bg-tertiary-container/95 backdrop-blur-xl border-b border-tertiary/30 px-6 py-3 flex items-center justify-between">
-  <div class="flex items-center gap-3">
-    <span class="w-2 h-2 rounded-full bg-white active-orb"></span>
-    <span id="activeCallStatusLabel" class="text-[10px] font-extrabold text-white uppercase tracking-widest">Active Call</span>
-    <span class="text-white/50">•</span>
-    <span id="activeCallName" class="text-sm font-bold text-white">Jordan Blake</span>
-    <span id="activeCallCompany" class="text-xs text-white/70 font-bold">Meridian Capital Partners</span>
-  </div>
-  <div id="activeCallContent" class="flex items-center gap-2 mr-16">
-    <span id="activeCallDuration" class="font-mono-data text-sm font-bold text-white">00:00</span>
-    <button id="holdCallBtn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all">
-      <span class="material-symbols-outlined text-sm">pause</span>
-      Hold
-    </button>
-    <button id="endCallBtn" class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-error-red text-white text-xs font-bold hover:brightness-110 transition-all">
-      <span class="material-symbols-outlined text-sm">call_end</span>
-      End
-    </button>
-  </div>
-</div>
-<!-- END: ActiveCallBar -->
-
 <!-- BEGIN: TopAppBar -->
 <header class="fixed top-0 w-full z-50 h-16 glass-card flex items-center justify-between px-6 border-b border-white/5">
 <div class="flex items-center gap-6">
@@ -798,8 +805,8 @@ animation: fade-in 0.3s ease-out;
     <h2 class="text-xs font-bold text-on-surface-variant/60 uppercase tracking-widest leading-none mb-1">Page</h2>
     <span class="text-sm font-bold text-white whitespace-nowrap">Active Call</span>
   </div>
-  <span class="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_8px_#00e478] animate-pulse"></span>
-<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface" id="call-status-indicator">Live Call • <span id="call-timer">00:00</span></span>
+  <span id="call-status-dot" class="hidden w-2 h-2 rounded-full bg-white/20"></span>
+<span class="hidden text-[10px] font-bold uppercase tracking-widest text-on-surface" id="call-status-indicator">No Active Call • <span id="call-timer">00:00</span></span>
 
 </div>
 
@@ -825,10 +832,6 @@ animation: fade-in 0.3s ease-out;
 
   <!-- Action Buttons -->
   <div class="flex items-center gap-2">
-    <button id="testInboundBtn" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-high/50 border border-white/10 text-on-surface-variant hover:text-white transition-all text-xs font-bold" aria-label="Test inbound call" title="Test inbound call">
-      <span class="material-symbols-outlined text-sm" aria-hidden="true">ring_volume</span>
-      Test Inbound
-    </button>
     <button id="newCallBtn" type="button" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-fire-gradient text-on-primary font-bold text-xs hover:brightness-110 transition-all shadow-lg" aria-label="Start new call" title="Start new call">
       <span class="material-symbols-outlined text-sm" aria-hidden="true">add</span>
       New Call
@@ -942,38 +945,12 @@ animation: fade-in 0.3s ease-out;
 <section class="w-80 lg:w-[400px] flex flex-col p-6 border-r border-white/5 bg-surface-container-low/30">
 <div class="flex items-center justify-between mb-6">
 <h2 class="font-syne text-xs uppercase tracking-widest text-fire-accent font-bold">Live Transcript</h2>
-<span id="sipOwnerCenterBadge" class="bg-ai-purple/20 text-ai-purple text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-tighter">AI-Active</span>
-</div>
-<!-- Transcript Container - Scrollable independently -->
-<div class="transcript-container space-y-6 pr-2 mb-6" id="transcript-feed">
-<!-- Message 1 -->
-<div class="space-y-2">
-<div class="flex justify-between items-center px-1">
-<span class="text-[10px] text-gray-500 font-bold uppercase">14:10 • Sarah Connor</span>
-</div>
-<div class="bg-white/5 p-4 rounded-2xl rounded-tl-none border border-white/10 text-sm leading-relaxed">
-            "The pricing seems a bit steep for the 'Solo' tier. We were hoping for more team-based features at that price point."
-          </div>
-</div>
-<!-- Message 2 -->
-<div class="space-y-2">
-<div class="flex justify-end px-1">
-<span class="text-[10px] text-fire-accent/60 font-bold uppercase">14:11 • You</span>
-</div>
-<div class="bg-fire-accent/5 p-4 rounded-2xl rounded-tr-none border border-fire-accent/10 text-sm leading-relaxed">
-            "I understand. Let's look at the ROI DialForge brings to teams your size..."
-          </div>
-</div>
-<!-- Message 3 -->
-<div class="space-y-2">
-<div class="flex justify-between items-center px-1">
-<span class="text-[10px] text-gray-500 font-bold uppercase">14:12 • Sarah Connor</span>
-</div>
-<div class="bg-white/5 p-4 rounded-2xl rounded-tl-none border border-white/10 text-sm leading-relaxed">
-            "How does the integration with Salesforce handle deduplication of leads?"
-          </div>
-</div>
-</div>
+<span id="sipOwnerCenterBadge" class="bg-white/10 text-gray-400 text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-tighter">No Active Call</span>
+	</div>
+	<!-- Transcript Container - Scrollable independently -->
+	<div class="transcript-container space-y-6 pr-2 mb-6" id="transcript-feed">
+	<p class="text-xs text-gray-600">Database transcript will appear when final turns are persisted.</p>
+	</div>
 <!-- AI Coach Bubble - Fixed position -->
 <div id="ai-coach-bubble" class="coach-bubble-fixed glass-card p-5 rounded-3xl border-fire-accent/30 fire-glow relative overflow-hidden group">
 <div class="absolute inset-0 bg-fire-gradient opacity-[0.02] group-hover:opacity-[0.05] transition-opacity"></div>
@@ -1002,23 +979,23 @@ animation: fade-in 0.3s ease-out;
 <div class="relative flex flex-col items-center z-10 mb-14">
 <div class="relative mb-12">
 <!-- Pulse Rings -->
-<div class="absolute inset-0 rounded-full border-2 border-fire-accent/20 animate-pulse-ring"></div>
-<div class="absolute inset-0 rounded-full border-2 border-fire-accent/10 animate-pulse-ring-slow"></div>
+<div id="avatarPulseRing" data-call-motion class="absolute inset-0 rounded-full border-2 border-fire-accent/20 animate-pulse-ring"></div>
+<div id="avatarPulseRingSlow" data-call-motion class="absolute inset-0 rounded-full border-2 border-fire-accent/10 animate-pulse-ring-slow"></div>
 <div class="w-64 h-64 rounded-full border-[8px] border-surface-container-high shadow-2xl overflow-hidden relative fire-glow">
 <img id="avatarImage" alt="Contact avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqKguv2lN-Bz17QH9A5oJ04TkQSL4nMLIAKfF9xp4iOEpTKOiZEaEHl--uHjC9vHGXU6qmkQ8SAjrqYN2C5ZC0j0r3BIhBFSbt2mBmxkoGo8qxofHET6kJrC-YmSooHt2JdsXAUudIM2DjBPuGycorYtogSyZEIsTXmimMxi0zwngsa6Xw93Z3U8i9cgKZaiG6k08y-t5t8PWxjLRW4f0Waz8F9OhmRfq8HzPfeCgvHAb8TQZArckHVJ0rmXREH7UOib28r3OKIGk">
 <div id="avatarInitials" class="hidden absolute inset-0 w-full h-full flex items-center justify-center bg-gradient-to-br from-surface-container-high to-surface-container-low text-on-surface text-6xl font-syne font-extrabold tracking-tight">NA</div>
 </div>
 <!-- State Badges -->
 <div class="absolute top-8 right-8 flex flex-col gap-2 z-20" id="status-badges">
-<div id="badge-live" class="px-3 py-1 bg-tertiary/20 text-tertiary border border-tertiary/30 rounded-full text-[10px] font-bold uppercase badge-pulse">LIVE</div>
+<div id="badge-live" data-call-motion class="px-3 py-1 bg-tertiary/20 text-tertiary border border-tertiary/30 rounded-full text-[10px] font-bold uppercase badge-pulse">LIVE</div>
 </div>
 <!-- Voice Visualizer Overlay -->
-<div class="absolute -bottom-4 left-1/2 -translate-x-1/2 flex items-end justify-center gap-1.5 h-12 px-6 py-2 glass-card rounded-full border border-white/10">
-<div class="w-1.5 bg-fire-accent rounded-full animate-[bounce_1s_infinite]" style="height: 40%"></div>
-<div class="w-1.5 bg-fire-accent rounded-full animate-[bounce_0.8s_infinite]" style="height: 85%"></div>
-<div class="w-1.5 bg-fire-accent rounded-full animate-[bounce_1.4s_infinite]" style="height: 60%"></div>
-<div class="w-1.5 bg-fire-accent rounded-full animate-[bounce_1s_infinite]" style="height: 95%"></div>
-<div class="w-1.5 bg-fire-accent rounded-full animate-[bounce_1.2s_infinite]" style="height: 50%"></div>
+<div id="voiceVisualizer" data-call-motion class="absolute -bottom-4 left-1/2 -translate-x-1/2 flex items-end justify-center gap-1.5 h-12 px-6 py-2 glass-card rounded-full border border-white/10">
+<div class="voice-bar w-1.5 bg-fire-accent rounded-full animate-[bounce_1s_infinite]" style="height: 40%"></div>
+<div class="voice-bar w-1.5 bg-fire-accent rounded-full animate-[bounce_0.8s_infinite]" style="height: 85%"></div>
+<div class="voice-bar w-1.5 bg-fire-accent rounded-full animate-[bounce_1.4s_infinite]" style="height: 60%"></div>
+<div class="voice-bar w-1.5 bg-fire-accent rounded-full animate-[bounce_1s_infinite]" style="height: 95%"></div>
+<div class="voice-bar w-1.5 bg-fire-accent rounded-full animate-[bounce_1.2s_infinite]" style="height: 50%"></div>
 </div>
 </div>
 <div class="text-center">
@@ -1096,9 +1073,9 @@ animation: fade-in 0.3s ease-out;
 </div>
 
 <div class="w-px h-8 bg-white/10 mx-2"></div>
-<button id="endCall" class="call-end-btn px-8 py-3.5 bg-error-red hover:bg-red-600 text-white rounded-full flex items-center gap-3 font-bold transition-all active:scale-95 shadow-[0_0_25px_rgba(255,59,48,0.4)]" aria-label="End current call">
+<button id="endCall" class="call-end-btn px-10 py-3.5 bg-error-red hover:bg-red-600 text-white rounded-full flex items-center justify-center gap-3 font-bold transition-all active:scale-95 shadow-[0_0_25px_rgba(255,59,48,0.4)]" aria-label="End current call">
 <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">call_end</span>
-<span class="">End Call</span>
+<span class="whitespace-nowrap">End Call</span>
 </button>
 
 </div>
@@ -1139,10 +1116,41 @@ animation: fade-in 0.3s ease-out;
 <button id="sipDeclineHandoffBtn" type="button" class="rounded-lg bg-error-red/10 border border-error-red/30 px-3 py-2 text-[10px] font-bold uppercase text-error-red hover:bg-error-red/20 transition-all">Decline</button>
 <button id="sipRefreshRoomBtn" type="button" class="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[10px] font-bold uppercase text-on-surface-variant hover:text-white hover:bg-white/10 transition-all">Refresh</button>
 </div>
+<div class="mt-4 border-t border-white/5 pt-4">
+<div class="flex items-center justify-between gap-3 mb-2">
+<h3 class="text-[10px] font-bold uppercase text-gray-500">Runtime Timeline</h3>
+<span id="sipRuntimeStatus" class="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] font-bold uppercase text-on-surface-variant">Waiting</span>
 </div>
-
-<!-- Contact Information -->
-<div class="mb-8">
+<p id="sipRuntimeSessionMeta" class="mb-2 truncate font-mono-data text-[10px] text-gray-500">-</p>
+<div id="sipRuntimeTimeline" class="max-h-48 space-y-2 overflow-y-auto pr-1 text-[10px] text-gray-400">
+<p class="text-gray-600">Runtime events will appear when the bridge is running.</p>
+</div>
+	</div>
+	</div>
+	
+	<!-- Post-call AI Summary -->
+	<div id="postCallSummaryAction" class="mb-8 hidden rounded-2xl border border-white/10 bg-surface-container-lowest/70 p-4">
+	<div class="flex items-start justify-between gap-3">
+	<div>
+	<h3 class="text-[10px] font-bold uppercase text-gray-500">Post-call AI Summary</h3>
+	<p id="postCallSummaryHint" class="mt-1 text-xs text-gray-400">Call ended. Generate a summary when you are ready.</p>
+	</div>
+	<button id="generateRuntimeSummaryBtn" type="button" class="inline-flex items-center gap-2 rounded-lg bg-fire-accent/15 border border-fire-accent/30 px-3 py-2 text-[10px] font-bold uppercase text-fire-accent hover:bg-fire-accent/25 transition-all">
+	<span class="material-symbols-outlined text-sm" aria-hidden="true">auto_awesome</span>
+	<span>Generate</span>
+	</button>
+	</div>
+	<div id="runtimeSummaryPanel" class="hidden mt-4 border-t border-white/5 pt-4">
+	<div class="flex items-center gap-2 mb-3">
+	<span class="material-symbols-outlined text-fire-accent text-base" aria-hidden="true">summarize</span>
+	<h4 class="text-[10px] font-bold uppercase text-gray-300">AI Call Summary</h4>
+	</div>
+	<ul id="runtimeSummaryList" class="space-y-2 text-[11px] leading-snug text-gray-300"></ul>
+	</div>
+	</div>
+	
+	<!-- Contact Information -->
+	<div class="mb-8">
 <h3 class="text-[10px] font-bold uppercase text-gray-500 border-b border-white/5 pb-2 mb-4">Contact Information</h3>
 <div class="space-y-4">
 <div class="flex gap-3 items-start">
@@ -1181,10 +1189,7 @@ animation: fade-in 0.3s ease-out;
 <div class="mb-8">
 <h3 class="text-[10px] font-bold uppercase text-gray-500 border-b border-white/5 pb-2 mb-3">Transcript Feed</h3>
 <div class="space-y-3 max-h-[200px] overflow-y-auto pr-2 text-[11px]" id="right-transcript">
-<div class="space-y-1">
-<span class="text-[9px] text-gray-600">14:12 • Sarah</span>
-<p class="text-gray-300">How does the integration with Salesforce handle lead deduplication?</p>
-</div>
+<p class="text-gray-600">Database transcript rows will appear here.</p>
 </div>
 </div>
 
@@ -1755,7 +1760,7 @@ Apply Settings
 // ===== APPLICATION STATE =====
 // Use existing globals if present to avoid redeclaration errors
 window.CALL = window.CALL || {
-  isActive: true,
+  isActive: false,
   isMuted: false,
   isOnHold: false,
   isRecording: false,
@@ -1838,14 +1843,44 @@ function updateTimerDisplay() {
   const mins = Math.floor(CALL.duration / 60);
   const secs = CALL.duration % 60;
   const timeStr = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-  const timerEl = document.getElementById('call-timer');
-  if (timerEl) timerEl.textContent = timeStr;
+  renderHeaderCallStatus(Boolean(CALL.isActive), timeStr, CALL.isOnHold ? 'On Hold' : 'Live Call');
 }
 
 function stopCallTimer() {
   if (callTimerInterval) {
     clearInterval(callTimerInterval);
     callTimerInterval = null;
+  }
+}
+
+function renderHeaderCallStatus(isLive, timeStr = '00:00', label = 'Live Call') {
+  const statusEl = document.getElementById('call-status-indicator');
+  const timerEl = document.getElementById('call-timer');
+  const dotEl = document.getElementById('call-status-dot');
+  const transcriptStatusBadge = document.getElementById('sipOwnerCenterBadge');
+  const text = isLive ? label : 'No Active Call';
+  if (timerEl) timerEl.textContent = timeStr;
+  if (statusEl) {
+    statusEl.childNodes[0].nodeValue = `${text} • `;
+  }
+  if (dotEl) {
+    dotEl.classList.remove('bg-tertiary', 'shadow-[0_0_8px_#00e478]', 'animate-pulse', 'bg-fire-accent', 'bg-white/20');
+    if (isLive) {
+      dotEl.classList.add(label === 'On Hold' ? 'bg-fire-accent' : 'bg-tertiary', 'shadow-[0_0_8px_#00e478]', 'animate-pulse');
+    } else {
+      dotEl.classList.add('bg-white/20');
+    }
+  }
+  if (transcriptStatusBadge) {
+    transcriptStatusBadge.textContent = isLive ? `${text} • ${timeStr}` : text;
+    transcriptStatusBadge.classList.remove('bg-ai-purple/20', 'text-ai-purple', 'bg-tertiary/20', 'text-tertiary', 'bg-fire-accent/20', 'text-fire-accent', 'bg-white/10', 'text-gray-400');
+    if (!isLive) {
+      transcriptStatusBadge.classList.add('bg-white/10', 'text-gray-400');
+    } else if (label === 'On Hold') {
+      transcriptStatusBadge.classList.add('bg-fire-accent/20', 'text-fire-accent');
+    } else {
+      transcriptStatusBadge.classList.add('bg-tertiary/20', 'text-tertiary');
+    }
   }
 }
 
@@ -2539,10 +2574,12 @@ function setupEventListeners() {
 // ===== INITIALIZATION =====
 function initializeApp() {
   loadState();
+  CALL.isActive = false;
+  CALL.isOnHold = false;
+  CALL.duration = 0;
   registerKeyboardShortcuts();
   setupEventListeners();
   
-  startCallTimer();
   updateTimerDisplay();
   
   startAICoachRotation();
@@ -3154,7 +3191,9 @@ window.addEventListener('beforeunload', function() {
     }
     
     // Initialize call timer using existing helper function
-CALL.duration = 0; // Reset duration to zero
+    CALL.isActive = true;
+    CALL.isOnHold = false;
+    CALL.duration = 0; // Reset duration to zero
     startCallTimer(); // Start the timer — single source of truth
 
     // Update Large Avatar section
@@ -3183,9 +3222,9 @@ CALL.duration = 0; // Reset duration to zero
   // ========== MAIN: END CALL COMPLETION WORKFLOW ==========
   // This function handles call completion cleanup and post-call summary synchronization
   // when called by external workflows (e.g., after incoming-call-and-timer's endCall)
-  function end() {
+  function end(options = {}) {
     // Get the current contact data (CALL.contact is kept in sync via callStarted event)
-    const currentContact = CALL.contact || {};
+    const currentContact = options.contact || CALL.contact || {};
     
     // ---- CRITICAL: Stop active call timer and display final value
     stopCallTimer();
@@ -3262,7 +3301,9 @@ CALL.duration = 0; // Reset duration to zero
     }
 
     // ---- STEP 5: Preserve final call duration using CALL.duration as single source of truth
-    const durationSeconds = CALL.duration || 0;
+    const durationSeconds = Number.isFinite(Number(options.durationSeconds))
+      ? Number(options.durationSeconds)
+      : (CALL.duration || CALL.elapsedSeconds || 0);
     const durationMinutes = Math.floor(durationSeconds / 60);
     const durationSecs = durationSeconds % 60;
     const durationFormatted = `${String(durationMinutes).padStart(2, '0')}:${String(durationSecs).padStart(2, '0')}`;
@@ -3294,12 +3335,19 @@ CALL.duration = 0; // Reset duration to zero
     }
 
     // ---- STEP 8: Update status badges and save application state
+    CALL.isActive = false;
+    CALL.isOnHold = false;
+    CALL.duration = 0;
+    updateTimerDisplay();
     updateStatusBadges();
     saveState();
 
     // ---- STEP 9: Dispatch custom event for Post-Call Summary synchronization
     window.dispatchEvent(new CustomEvent('callCompleted', {
       detail: {
+        source: options.source || 'active_call_page',
+        sessionId: options.sessionId || CALL.runtimeSessionId || null,
+        displayName: options.displayName || currentContact.name || '',
         contact: completedCallData.contact,
         callData: completedCallData.callData
       }
@@ -3414,24 +3462,9 @@ CALL.duration = 0; // Reset duration to zero
       }
     }
 
-    // ========== END CALL COMPLETION WORKFLOW ==========
-    // Wire the End Call button to execute the existing end() function
-    // before navigating to the Post-Call Summary page
-    const endCall = document.getElementById('endCall');
-    if (endCall) {
-      endCall.addEventListener('click', function(event) {
-        event.preventDefault(); // Prevent any default behavior
-        
-        // Execute the existing end() function to save call data and dispatch event
-        end();
-        
-        // After end() completes, navigate to Post-Call Summary
-        setTimeout(() => {
-          window.location.href = './postCallSummary.html';
-        }, 100); // Small delay to ensure localStorage is written
-      });
-    }
-  });
+	    // ========== END CALL COMPLETION WORKFLOW ==========
+	    // The runtime-aware End Call handler is wired in the incoming-call-and-timer module.
+	  });
 </script>
 
 <script data-purpose="interface-interactivity">
@@ -3503,45 +3536,6 @@ if (transcriptFeed) {
   transcriptFeed.scrollTop = transcriptFeed.scrollHeight;
 }
 
-// ==================== SIMULATE LIVE TRANSCRIPT ====================
-const transcriptMessages = [
-  "Let me explain how our deduplication works...",
-  "We use machine learning to identify duplicates across your data sources.",
-  "That's a great question about integration complexity.",
-  "Our integration team handles the implementation for you."
-];
-
-let messageIndex = 0;
-
-function appendTranscriptMessage(isUser = false) {
-  if (messageIndex >= transcriptMessages.length) {
-    messageIndex = 0;
-  }
-  
-  const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-  const speaker = isUser ? 'You' : 'Sarah';
-  const message = transcriptMessages[messageIndex % transcriptMessages.length];
-  
-  const messageEl = document.createElement('div');
-  messageEl.className = 'space-y-2';
-  messageEl.innerHTML = `
-    <div class="flex ${isUser ? 'justify-end' : 'justify-between'} items-center px-1">
-      <span class="text-[10px] text-${isUser ? 'fire-accent/60' : 'gray-500'} font-bold uppercase">${time} • ${speaker}</span>
-    </div>
-    <div class="bg-${isUser ? 'fire-accent/5' : 'white/5'} p-4 rounded-2xl rounded-${isUser ? 'tr' : 'tl'}-none border border-${isUser ? 'fire-accent/10' : 'white/10'} text-sm leading-relaxed">
-      "${message}"
-    </div>
-  `;
-  
-  transcriptFeed?.appendChild(messageEl);
-  transcriptFeed?.scrollTo({ top: transcriptFeed.scrollHeight, behavior: 'smooth' });
-  messageIndex++;
-}
-
-// Simulate messages every 8-12 seconds
-setInterval(() => {
-  appendTranscriptMessage(Math.random() > 0.6);
-}, Math.random() * 4000 + 8000);
 </script>
 
 <script data-purpose="incoming-call-and-timer">
@@ -3556,7 +3550,9 @@ setInterval(() => {
       contact: null,          // { name, company, number, avatar }
       elapsedSeconds: 0,      // accumulated *active* talk time (hold time excluded)
       tickHandle: null,      // setInterval handle — guarded so we never duplicate it
-    direction: 'inbound',   // inbound | outbound
+      direction: 'inbound',   // inbound | outbound
+      runtimeSessionId: null,
+      runtimeStartedAtMs: null,
     // Single source of truth for starting a call with a contact
       start: function(contact) {
         if (!contact) return;
@@ -3572,6 +3568,16 @@ setInterval(() => {
       }
     };
     window.CALL = CALL; // exposed for debugging / future screens
+    const runtimePageLoadedAtMs = Date.now();
+    const ACCEPTED_RUNTIME_SESSION_KEY = 'dialforgeAcceptedRuntimeSessionId';
+    let acceptedRuntimeSessionId = null;
+    try {
+      acceptedRuntimeSessionId = sessionStorage.getItem(ACCEPTED_RUNTIME_SESSION_KEY);
+    } catch (error) {
+      acceptedRuntimeSessionId = null;
+    }
+    let dismissedRuntimeSessionId = null;
+    const completedRuntimeSessionIds = new Set();
 
     const SAMPLE_CALLERS = [
       { name: 'Jordan Blake', company: 'Meridian Capital Partners', number: '+1 (415) 555-0148', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC_DdAsNbclbtQivfDDS1oGl1ujagTG3xDVXbbI_qwrNWnOrs7-Fnc0eShFfysAH2Od0Z8NsUdwmWCUbew9sayCtd1vN4M3WdbktIbrfzqqxMRHbtHy-Lpr4O7HqgwyKM9zydmudASEz5OFnc6pevFhd3QTVaY3prWde8rgO8FWT8w8aJ6GrLn2FoY-RvjhI6IVOjVwRGRkoL8tFXqnpMFYLqGBeclrDUtk18smquV7rVQC0-yrNwJ6qPKARRTOgW3ojtGKGjkZHxE', location: 'Meridian Capital • San Francisco, CA' },
@@ -3586,18 +3592,12 @@ setInterval(() => {
     const companyEl = document.getElementById('incomingCallCompany');
     const numberEl = document.getElementById('incomingCallNumber');
 
-    const acceptBtn = document.getElementById('acceptCallBtn');
-    const declineBtn = document.getElementById('declineCallBtn');
-    const voicemailBtn = document.getElementById('voicemailCallBtn');
-    const testInboundBtn = document.getElementById('testInboundBtn');
+	    const acceptBtn = document.getElementById('acceptCallBtn');
+	    const declineBtn = document.getElementById('declineCallBtn');
+	    const voicemailBtn = document.getElementById('voicemailCallBtn');
 
- const activeBar = document.getElementById('activeCallBar');
-    const activeName = document.getElementById('activeCallName');
-    const activeCompany = document.getElementById('activeCallCompany');
-    const activeStatusLabel = document.getElementById('activeCallStatusLabel');
-    const activeDuration = document.getElementById('activeCallDuration');
-    const holdBtn = document.getElementById('holdCallBtn');
-    const endBtn = document.getElementById('endCallBtn');
+	    const holdBtn = document.getElementById('btn-hold');
+    const endBtn = document.getElementById('endCall');
 
     const timerDot = document.getElementById('callTimerDot');
     const timerText = document.getElementById('callTimerText');
@@ -3623,9 +3623,178 @@ setInterval(() => {
       return `${m}:${s}`;
     }
 
-    function randomCaller() {
-      return SAMPLE_CALLERS[Math.floor(Math.random() * SAMPLE_CALLERS.length)];
+	    function runtimeCallerFromRoom(room) {
+      const context = room?.initial_context || {};
+      const extension = context.dialed_extension || 'SIP';
+      const displayName = room?.display_name || 'DialForge';
+      return {
+        name: `${displayName} live call`,
+        company: `${room?.direction || 'inbound'} runtime session`,
+        number: `Extension ${extension}`,
+        avatar: '',
+        location: `session ${room?.call_session_id || '-'}`
+      };
     }
+
+    function runtimeElapsedSeconds(startedAtMs) {
+      const started = Number(startedAtMs);
+      if (!Number.isFinite(started) || started <= 0) return 0;
+      return Math.max(0, Math.floor((Date.now() - started) / 1000));
+    }
+
+    function rememberAcceptedRuntimeSession(sessionId) {
+      if (!sessionId) return;
+      acceptedRuntimeSessionId = sessionId;
+      try {
+        sessionStorage.setItem(ACCEPTED_RUNTIME_SESSION_KEY, sessionId);
+      } catch (error) {
+        // Session storage can be unavailable in restricted browser contexts.
+      }
+    }
+
+    function clearAcceptedRuntimeSession(sessionId = null) {
+      if (sessionId && acceptedRuntimeSessionId && acceptedRuntimeSessionId !== sessionId) return;
+      acceptedRuntimeSessionId = null;
+      try {
+        sessionStorage.removeItem(ACCEPTED_RUNTIME_SESSION_KEY);
+      } catch (error) {
+        // Ignore storage cleanup failures; runtime polling remains authoritative.
+      }
+    }
+
+    function shouldResumeRuntimeSession(sessionId, startedAtMs) {
+      if (!sessionId) return false;
+      if (acceptedRuntimeSessionId === sessionId) return true;
+
+      const loadedRecently = Date.now() - runtimePageLoadedAtMs < 5000;
+      if (loadedRecently && CALL.status === 'idle') return true;
+
+      const started = Number(startedAtMs);
+      return Number.isFinite(started) && started > 0 && started < runtimePageLoadedAtMs - 2000;
+    }
+
+    function activateRuntimeSession(contact, startedAtMs) {
+      hideIncomingCall();
+      CALL.caller = contact;
+      CALL.contact = contact;
+      CALL.status = 'active';
+      CALL.elapsedSeconds = runtimeElapsedSeconds(startedAtMs);
+      updateUIFromContact();
+      renderTimer();
+      ensureTicking();
+      window.dispatchEvent(new CustomEvent('callStarted', {
+        detail: { contact }
+      }));
+    }
+
+    function renderCallMotionState() {
+      const isConnected = CALL.status === 'active';
+      document.querySelectorAll('[data-call-motion]').forEach((element) => {
+        element.classList.toggle('is-call-active', isConnected);
+        element.setAttribute('aria-hidden', isConnected ? 'false' : 'true');
+      });
+    }
+
+    function completeRuntimeCallFromExternalHangup(sessionId, previousRoom, startedAtMs) {
+      if (!sessionId || completedRuntimeSessionIds.has(sessionId)) return false;
+      completedRuntimeSessionIds.add(sessionId);
+
+      const contact = CALL.contact || runtimeCallerFromRoom(previousRoom);
+      const durationSeconds = CALL.elapsedSeconds || runtimeElapsedSeconds(startedAtMs);
+      const displayName = previousRoom?.display_name || contact?.name || 'Runtime call';
+
+      endCall({
+        requestBridgeHangup: false,
+        completeWorkflow: false,
+        source: 'runtime_external_hangup',
+      });
+
+      if (typeof end === 'function') {
+        end({
+          source: 'runtime_external_hangup',
+          sessionId,
+          displayName,
+          contact,
+          durationSeconds,
+        });
+      } else {
+        window.dispatchEvent(new CustomEvent('callCompleted', {
+          detail: {
+            source: 'runtime_external_hangup',
+            sessionId,
+            displayName,
+            contact,
+            callData: {
+              duration: durationSeconds,
+              durationFormatted: formatTime(durationSeconds),
+              timestamp: new Date().toISOString(),
+            },
+          }
+        }));
+      }
+
+      return true;
+    }
+
+    function syncRuntimeCallSession(room, startedAtMs = null) {
+      const active = Boolean(room?.active && room.call_session_id);
+      if (!active) {
+        const previousRuntimeSessionId = CALL.runtimeSessionId;
+        if (CALL.runtimeSessionId && CALL.status !== 'idle') {
+          stopTicking();
+          CALL.status = 'idle';
+          CALL.runtimeSessionId = null;
+          CALL.runtimeStartedAtMs = null;
+          hideIncomingCall();
+          renderTimer();
+        }
+        clearAcceptedRuntimeSession(previousRuntimeSessionId);
+        return;
+      }
+
+      const sessionId = room.call_session_id;
+      const started = startedAtMs || CALL.runtimeStartedAtMs;
+      const contact = runtimeCallerFromRoom(room);
+
+      CALL.runtimeSessionId = sessionId;
+      CALL.runtimeStartedAtMs = started;
+      CALL.direction = room.direction || 'inbound';
+
+      if (CALL.status === 'active') {
+        CALL.contact = contact;
+        CALL.elapsedSeconds = runtimeElapsedSeconds(CALL.runtimeStartedAtMs);
+        updateUIFromContact();
+        renderTimer();
+        ensureTicking();
+        return;
+      }
+
+      if (dismissedRuntimeSessionId === sessionId) return;
+
+      if (shouldResumeRuntimeSession(sessionId, started)) {
+        rememberAcceptedRuntimeSession(sessionId);
+        activateRuntimeSession(contact, started);
+        return;
+      }
+
+      CALL.caller = contact;
+      CALL.status = 'ringing';
+      CALL.elapsedSeconds = runtimeElapsedSeconds(started);
+
+      if (avatarEl) avatarEl.classList.add('hidden');
+      if (nameEl) nameEl.textContent = contact.name;
+      if (companyEl) companyEl.textContent = contact.company;
+      if (numberEl) numberEl.textContent = contact.number;
+      const title = overlay?.querySelector('h2');
+      if (title) title.textContent = 'Live SIP Call';
+      if (typeof renderHeaderCallStatus === 'function') {
+        renderHeaderCallStatus(true, formatTime(CALL.elapsedSeconds), 'Incoming Call');
+      }
+      overlay?.classList.remove('hidden');
+    }
+
+    window.syncRuntimeCallSession = syncRuntimeCallSession;
+    window.completeRuntimeCallFromExternalHangup = completeRuntimeCallFromExternalHangup;
 
 // =====================================================================
     // UPDATE UI FROM CALL.contact
@@ -3666,17 +3835,11 @@ setInterval(() => {
       
       avatarImage.alt = CALL.contact.name || 'Contact';
 
-      // Update Active Call Bar
-      if (activeName) activeName.textContent = CALL.contact.name || 'Caller';
-      if (activeCompany) activeCompany.textContent = CALL.contact.company || 'Company';
     }
 
     // Listen for call starts and update UI automatically
     window.addEventListener('callStarted', (event) => {
       updateUIFromContact();
-      activeBar.classList.remove('hidden');
-      activeStatusLabel.textContent = 'Active Call';
-      holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">pause</span>Hold';
       renderTimer();
       ensureTicking();
     });
@@ -3686,8 +3849,16 @@ setInterval(() => {
     // touches those DOM nodes, so there is exactly one render path.
     
     function renderTimer() {
-         timerText.textContent = formatTime(CALL.elapsedSeconds);
-      activeDuration.textContent = formatTime(CALL.elapsedSeconds);
+      const timeStr = formatTime(CALL.elapsedSeconds);
+      renderCallMotionState();
+      timerText.textContent = timeStr;
+      if (typeof renderHeaderCallStatus === 'function') {
+        renderHeaderCallStatus(
+          CALL.status === 'active' || CALL.status === 'hold',
+          timeStr,
+          CALL.status === 'hold' ? 'On Hold' : 'Live Call'
+        );
+      }
 
 
       timerDot.classList.remove('bg-white/20', 'bg-tertiary', 'active-orb', 'bg-fire-accent');
@@ -3760,43 +3931,27 @@ setInterval(() => {
       historyBody.insertBefore(row, historyBody.firstChild);
     }
 
-    // ---- Incoming call widget --------------------------------------------
-    function showIncomingCall() {
-      const caller = randomCaller();
-      CALL.caller = caller;
-      CALL.status = 'ringing';
-
-      avatarEl.src = caller.avatar;
-      avatarEl.alt = caller.name;
-      nameEl.textContent = caller.name;
-      companyEl.textContent = caller.company;
-      numberEl.textContent = caller.number;
-
-      overlay.classList.remove('hidden');
-    }
-
-    function hideIncomingCall() {
-      overlay.classList.add('hidden');
-    }
+	    function hideIncomingCall() {
+	      overlay.classList.add('hidden');
+	    }
 
     function acceptCall() {
       hideIncomingCall();
       CALL.status = 'active';
       CALL.direction = 'inbound';
       CALL.contact = CALL.caller || CALL.contact; // Use the current caller or existing contact
-      CALL.elapsedSeconds = 0; // fresh timer for the new call
-
-      activeName.textContent = CALL.contact.name;
-      activeCompany.textContent = CALL.contact.company;
-      activeStatusLabel.textContent = 'Active Call';
-      holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">pause</span>Hold';
-      activeBar.classList.remove('hidden');
+      rememberAcceptedRuntimeSession(CALL.runtimeSessionId);
+      CALL.elapsedSeconds = CALL.runtimeStartedAtMs
+        ? runtimeElapsedSeconds(CALL.runtimeStartedAtMs)
+        : 0; // fresh timer for the new call
 
       renderTimer();
       ensureTicking(); // starts the live, once-only interval
     }
 
     function declineCall() {
+      if (CALL.runtimeSessionId) dismissedRuntimeSessionId = CALL.runtimeSessionId;
+      clearAcceptedRuntimeSession(CALL.runtimeSessionId);
       hideIncomingCall();
       CALL.status = 'idle';
       CALL.contact = null;
@@ -3841,24 +3996,39 @@ setInterval(() => {
     function toggleHold() {
       if (CALL.status === 'active') {
         CALL.status = 'hold';
-        activeStatusLabel.textContent = 'On Hold';
-        holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">play_arrow</span>Resume';
       } else if (CALL.status === 'hold') {
         CALL.status = 'active';
-        activeStatusLabel.textContent = 'Active Call';
-        holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">pause</span>Hold';
       }
       renderTimer();
     }
 
-    function endCall() {
+    async function endCall(options = {}) {
       if (CALL.status === 'idle' || CALL.status === 'ended') return;
 
+      const requestBridgeHangup = options.requestBridgeHangup !== false;
+      const completeWorkflow = options.completeWorkflow !== false;
       const contact = CALL.contact;
       const finalDuration = formatTime(CALL.elapsedSeconds);
+      const finalDurationSeconds = CALL.elapsedSeconds;
       const isOutbound = CALL.direction === 'outbound';
+      const runtimeSessionId = CALL.runtimeSessionId;
+
+      if (runtimeSessionId && requestBridgeHangup && window.activeCallAPI?.hangupSipCall) {
+        try {
+          await window.activeCallAPI.hangupSipCall({
+            call_session_id: runtimeSessionId,
+          });
+        } catch (error) {
+          console.warn('Runtime hangup request failed; completing local call state anyway.', error);
+        }
+      }
+
+      if (runtimeSessionId && completeWorkflow && completedRuntimeSessionIds.has(runtimeSessionId)) return;
+      if (runtimeSessionId && completeWorkflow) completedRuntimeSessionIds.add(runtimeSessionId);
 
       stopTicking();
+      if (runtimeSessionId) dismissedRuntimeSessionId = runtimeSessionId;
+      clearAcceptedRuntimeSession(runtimeSessionId);
 
       if (contact) {
         addHistoryRow({
@@ -3880,9 +4050,19 @@ setInterval(() => {
       CALL.contact = null;
       CALL.elapsedSeconds = 0;
       CALL.direction = 'inbound';
+      CALL.runtimeSessionId = null;
+      CALL.runtimeStartedAtMs = null;
 
-      activeBar.classList.add('hidden');
       renderTimer();
+      if (completeWorkflow && typeof end === 'function') {
+        end({
+          source: options.source || 'active_call_end_button',
+          sessionId: runtimeSessionId,
+          displayName: contact?.name || 'Completed call',
+          contact,
+          durationSeconds: finalDurationSeconds,
+        });
+      }
     }
 
     function openNewCallModal() {
@@ -3931,23 +4111,19 @@ setInterval(() => {
       CALL.elapsedSeconds = 0;
       CALL.contact = contact;
 
-      activeName.textContent = contact.name;
-      activeCompany.textContent = contact.company;
-      activeStatusLabel.textContent = 'Active Call';
-      holdBtn.innerHTML = '<span class="material-symbols-outlined text-sm">pause</span>Hold';
-      activeBar.classList.remove('hidden');
-
       renderTimer();
       ensureTicking();
-    }
+	    }
 
-    // ---- Wire up events -----------------------------------------------
-    testInboundBtn.addEventListener('click', showIncomingCall);
-    acceptBtn.addEventListener('click', acceptCall);
+	    // ---- Wire up events -----------------------------------------------
+	    acceptBtn.addEventListener('click', acceptCall);
     declineBtn.addEventListener('click', declineCall);
     voicemailBtn.addEventListener('click', sendToVoicemail);
     holdBtn.addEventListener('click', toggleHold);
-    endBtn.addEventListener('click', endCall);
+    endBtn.addEventListener('click', (event) => {
+      event.preventDefault();
+      endCall();
+    });
     newCallBtn?.addEventListener('click', () => DialPad.open());
     cancelCallBtn?.addEventListener('click', closeNewCallModal);
     cancelCallSecondaryBtn?.addEventListener('click', closeNewCallModal);
@@ -4364,7 +4540,14 @@ setInterval(() => {
 (function () {
   const POLL_MS = 2500;
   let sipRoomPollHandle = null;
-  let lastSipRoom = null;
+	  let lastSipRoom = null;
+	  let runtimeLastSequence = 0;
+	  let runtimeStartedAtMs = null;
+	  let runtimeEvents = [];
+	  let completedSummaryCall = null;
+	  let transcriptSyncInFlight = false;
+	  let lastRenderedTranscriptKey = null;
+	  const renderedRuntimeSequences = new Set();
 
   function byId(id) {
     return document.getElementById(id);
@@ -4391,32 +4574,395 @@ setInterval(() => {
     btn.classList.toggle('cursor-not-allowed', Boolean(disabled));
   }
 
+	  function escapeRuntimeText(value) {
+	    const div = document.createElement('div');
+	    div.textContent = value == null ? '' : String(value);
+	    return div.innerHTML;
+	  }
+
+	  function transcriptTime(row) {
+	    const created = Date.parse(row?.created_at || '');
+	    if (Number.isFinite(created)) {
+	      return new Date(created).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+	    }
+	    return '--:--';
+	  }
+
+	  function transcriptSpeaker(row) {
+	    const speaker = row?.speaker_name || row?.speaker || row?.speaker_role || 'Speaker';
+	    if (String(speaker).toLowerCase() === 'ai') return 'You';
+	    return speaker;
+	  }
+
+	  function isAgentTranscriptRow(row) {
+	    const speaker = String(row?.speaker || row?.speaker_name || row?.speaker_role || '').toLowerCase();
+	    return ['ai', 'assistant', 'agent', 'human agent'].includes(speaker);
+	  }
+
+	  function transcriptText(row) {
+	    return row?.content_clean || row?.content_raw || '';
+	  }
+
+	  function renderDatabaseTranscript(rows, { active = false, source = 'database' } = {}) {
+	    const transcriptFeed = byId('transcript-feed');
+	    const rightTranscript = byId('right-transcript');
+	    const safeRows = Array.isArray(rows) ? rows.filter((row) => transcriptText(row)) : [];
+	    const key = safeRows.map((row) => `${row.id || row.sequence_index}:${transcriptText(row)}`).join('|');
+	    if (key === lastRenderedTranscriptKey) {
+	      return;
+	    }
+	    lastRenderedTranscriptKey = key;
+
+	    if (!safeRows.length) {
+	      if (transcriptFeed) {
+	        transcriptFeed.innerHTML = '<p class="text-xs text-gray-600">Database transcript will appear when final turns are persisted.</p>';
+	      }
+	      if (rightTranscript) {
+	        rightTranscript.innerHTML = '<p class="text-gray-600">Database transcript rows will appear here.</p>';
+	      }
+	      return;
+	    }
+
+	    if (transcriptFeed) {
+	      transcriptFeed.innerHTML = safeRows.map((row) => {
+	        const isAgent = isAgentTranscriptRow(row);
+	        return `
+	          <div class="space-y-2">
+	            <div class="flex ${isAgent ? 'justify-end' : 'justify-between'} items-center px-1">
+	              <span class="text-[10px] ${isAgent ? 'text-fire-accent/60' : 'text-gray-500'} font-bold uppercase">${escapeRuntimeText(transcriptTime(row))} • ${escapeRuntimeText(transcriptSpeaker(row))}</span>
+	            </div>
+	            <div class="${isAgent ? 'bg-fire-accent/5 rounded-tr-none border-fire-accent/10' : 'bg-white/5 rounded-tl-none border-white/10'} p-4 rounded-2xl border text-sm leading-relaxed">
+	              "${escapeRuntimeText(transcriptText(row))}"
+	            </div>
+	          </div>
+	        `;
+	      }).join('');
+	      transcriptFeed.scrollTo({ top: transcriptFeed.scrollHeight, behavior: 'smooth' });
+	    }
+
+	    if (rightTranscript) {
+	      rightTranscript.innerHTML = safeRows.slice(-6).map((row) => `
+	        <div class="space-y-1">
+	          <span class="text-[9px] text-gray-600">${escapeRuntimeText(transcriptTime(row))} • ${escapeRuntimeText(transcriptSpeaker(row))}</span>
+	          <p class="${isAgentTranscriptRow(row) ? 'text-fire-accent/80' : 'text-gray-300'}">${escapeRuntimeText(transcriptText(row))}</p>
+	        </div>
+	      `).join('');
+	      rightTranscript.scrollTo({ top: rightTranscript.scrollHeight, behavior: 'smooth' });
+	    }
+	  }
+
+	  async function refreshDatabaseTranscript(room = lastSipRoom) {
+	    if (!room?.call_session_id || transcriptSyncInFlight || !window.activeCallAPI?.syncCallTranscript) return null;
+	    transcriptSyncInFlight = true;
+	    try {
+	      const result = await window.activeCallAPI.syncCallTranscript({
+	        call_session_id: room.call_session_id,
+	        status: room.active ? 'active' : 'completed',
+	        contact: window.CALL?.contact || null,
+	        display_name: room.display_name || '',
+	        room,
+	        source: 'active_call_transcript_component',
+	      });
+	      if (result?.ok) {
+	        renderDatabaseTranscript(result.rows || [], {
+	          active: Boolean(room.active),
+	          source: result.source || 'database',
+	        });
+	      }
+	      return result;
+	    } finally {
+	      transcriptSyncInFlight = false;
+	    }
+	  }
+
+	  function rememberRuntimeEvent(event) {
+	    if (!event) return;
+	    const sequence = event.sequence == null ? null : String(event.sequence);
+	    if (sequence && runtimeEvents.some((seen) => String(seen.sequence) === sequence)) return;
+	    runtimeEvents.push(event);
+	    if (runtimeEvents.length > 300) runtimeEvents = runtimeEvents.slice(-300);
+	  }
+
+	  function eventBelongsToSession(event, sessionId) {
+	    if (!sessionId) return true;
+	    return event?.call_session_id === sessionId || event?.payload?.call_session_id === sessionId;
+	  }
+
+	  function eventTimestampMs(event) {
+	    const numeric = Number(event?.timestamp_ms);
+	    if (Number.isFinite(numeric) && numeric > 0) return numeric;
+	    const parsed = Date.parse(event?.timestamp || '');
+	    return Number.isFinite(parsed) ? parsed : null;
+	  }
+
+	  function formatDurationFromMs(startedAtMs, endedAtMs) {
+	    const started = Number(startedAtMs);
+	    const ended = Number(endedAtMs);
+	    if (!Number.isFinite(started) || !Number.isFinite(ended) || ended < started) return null;
+	    const totalSeconds = Math.floor((ended - started) / 1000);
+	    const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+	    const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+	    return `${minutes}:${seconds}`;
+	  }
+
+	  function resetPostCallSummaryAction() {
+	    completedSummaryCall = null;
+	    byId('postCallSummaryAction')?.classList.add('hidden');
+	    byId('runtimeSummaryPanel')?.classList.add('hidden');
+	    const list = byId('runtimeSummaryList');
+	    if (list) list.innerHTML = '';
+	  }
+
+	  function showPostCallSummaryButton(call) {
+	    completedSummaryCall = call;
+	    const wrapper = byId('postCallSummaryAction');
+	    const panel = byId('runtimeSummaryPanel');
+	    const hint = byId('postCallSummaryHint');
+	    if (!wrapper) return;
+	    wrapper.classList.remove('hidden');
+	    panel?.classList.add('hidden');
+	    if (hint) {
+	      const name = call?.contact?.name || call?.displayName || 'Latest call';
+	      const duration = call?.durationFormatted ? ` · ${call.durationFormatted}` : '';
+	      hint.textContent = `${name} ended${duration}. Generate a summary when you are ready.`;
+	    }
+	  }
+
+	  function runtimeTurnLabel(event) {
+	    const speaker = String(event?.payload?.speaker || '').toLowerCase();
+	    if (speaker === 'caller' || speaker === 'customer' || speaker === 'user') return 'Caller';
+	    if (speaker === 'assistant' || speaker === 'ai') return 'AI';
+	    if (event?.owner === 'human') return 'Human agent';
+	    if (event?.owner === 'ai') return 'AI';
+	    return 'Speaker';
+	  }
+
+	  function compactTranscript(text, maxLength = 150) {
+	    const normalized = String(text || '').replace(/\s+/g, ' ').trim();
+	    if (!normalized) return '';
+	    return normalized.length > maxLength ? `${normalized.slice(0, maxLength - 3)}...` : normalized;
+	  }
+
+	  function runtimeTranscriptTurns(call) {
+	    const sessionId = call?.sessionId;
+	    return runtimeEvents
+	      .filter((event) => eventBelongsToSession(event, sessionId))
+	      .filter((event) => event?.payload?.transcript)
+	      .map((event) => ({
+	        speaker: runtimeTurnLabel(event),
+	        transcript: compactTranscript(event.payload.transcript),
+	        timestampMs: eventTimestampMs(event),
+	      }))
+	      .filter((turn) => turn.transcript);
+	  }
+
+	  function durationSecondsForCall(call) {
+	    const started = Number(call?.startedAtMs);
+	    const ended = Number(call?.endedAtMs);
+	    if (Number.isFinite(started) && Number.isFinite(ended) && ended >= started) {
+	      return Math.floor((ended - started) / 1000);
+	    }
+	    const duration = String(call?.durationFormatted || '');
+	    const match = duration.match(/^(\d+):(\d+)$/);
+	    if (!match) return null;
+	    return Number(match[1]) * 60 + Number(match[2]);
+	  }
+
+	  function summaryItemsFromResponse(result) {
+	    if (Array.isArray(result?.summary_items) && result.summary_items.length) {
+	      return result.summary_items.map((item) => String(item));
+	    }
+	    if (result?.summary) {
+	      return String(result.summary).split('\n').map((line) => line.trim()).filter(Boolean);
+	    }
+	    return ['No AI summary was returned for this call.'];
+	  }
+
+	  async function generatePersistedSummary() {
+	    if (!completedSummaryCall?.sessionId || !window.activeCallAPI?.generateCallSummary) {
+	      return { ok: false, persisted: false, error: 'No call session id is available for summary generation.' };
+	    }
+	    return window.activeCallAPI.generateCallSummary({
+	      call_session_id: completedSummaryCall.sessionId,
+	      client_transcript_turns: runtimeTranscriptTurns(completedSummaryCall),
+	      contact: completedSummaryCall.contact || null,
+	      display_name: completedSummaryCall.displayName || '',
+	      duration_seconds: durationSecondsForCall(completedSummaryCall),
+	      duration_formatted: completedSummaryCall.durationFormatted || '',
+	      room: lastSipRoom || null,
+	      source: 'active_call_generate_button',
+	    });
+	  }
+
+	  async function renderGeneratedSummary() {
+	    if (!completedSummaryCall) return;
+	    const panel = byId('runtimeSummaryPanel');
+	    const list = byId('runtimeSummaryList');
+	    if (!panel || !list) return;
+	    const hint = byId('postCallSummaryHint');
+	    const button = byId('generateRuntimeSummaryBtn');
+	    if (hint) hint.textContent = 'Generating AI summary on the backend...';
+	    if (button) button.disabled = true;
+	    const result = await generatePersistedSummary();
+	    const items = summaryItemsFromResponse(result);
+	    list.innerHTML = items.map((item) => `
+	      <li class="flex items-start gap-2">
+	        <span class="material-symbols-outlined mt-0.5 text-sm text-fire-accent" aria-hidden="true">check_circle</span>
+	        <span>${escapeRuntimeText(item)}</span>
+	      </li>
+	    `).join('');
+	    panel.classList.remove('hidden');
+	    if (button) button.disabled = false;
+	    if (result?.persisted) {
+	      if (hint) hint.textContent = `AI summary saved to database for session ${completedSummaryCall.sessionId}.`;
+	      toast('AI call summary saved to database.', 'success');
+	    } else {
+	      const error = result?.error || 'backend summary generation failed';
+	      if (hint) hint.textContent = `Summary was not saved: ${error}`;
+	      toast(`AI summary was not saved: ${error}`, 'error');
+	    }
+	  }
+
+  function runtimeSummary(event) {
+    const payload = event?.payload || {};
+    const parts = [];
+    if (payload.direction) parts.push(payload.direction);
+    if (payload.report_type) parts.push(`report=${payload.report_type}`);
+    if (payload.speaker) parts.push(payload.speaker);
+    if (payload.source) parts.push(`src=${payload.source}`);
+    if (payload.reason) parts.push(payload.reason);
+    if (payload.playback_id) parts.push(`playback=${String(payload.playback_id).slice(0, 10)}`);
+    if (payload.transcript) {
+      const text = String(payload.transcript);
+      parts.push(`"${text.slice(0, 72)}${text.length > 72 ? '...' : ''}"`);
+    }
+    if (payload.error) parts.push(String(payload.error).slice(0, 96));
+    return parts.join(' · ');
+  }
+
+  function appendRuntimeEvent(event) {
+    const container = byId('sipRuntimeTimeline');
+    if (!container || !event) return;
+    if (container.children.length === 1 && container.textContent.includes('Runtime events will appear')) {
+      container.innerHTML = '';
+    }
+    const row = document.createElement('div');
+    row.className = 'rounded-lg border border-white/5 bg-white/[0.03] px-2 py-2';
+    row.innerHTML = `
+      <div class="flex items-center justify-between gap-2">
+        <span class="font-mono-data text-[9px] text-fire-accent">#${escapeRuntimeText(event.sequence)}</span>
+        <span class="truncate text-[10px] font-bold text-gray-300">${escapeRuntimeText(event.type || 'event')}</span>
+        <span class="font-mono-data text-[9px] text-gray-500">${escapeRuntimeText(event.owner || '-')}${event.epoch != null ? ` · e${escapeRuntimeText(event.epoch)}` : ''}</span>
+      </div>
+      <p class="mt-1 break-words text-[10px] leading-snug text-gray-500">${escapeRuntimeText(runtimeSummary(event) || '-')}</p>
+    `;
+    container.appendChild(row);
+    while (container.children.length > 80) container.firstElementChild.remove();
+    container.scrollTop = container.scrollHeight;
+  }
+
+  async function refreshRuntimeTimeline() {
+    if (!window.activeCallAPI?.getSipRuntimeTimeline) return null;
+    const status = byId('sipRuntimeStatus');
+    const meta = byId('sipRuntimeSessionMeta');
+    const result = await window.activeCallAPI.getSipRuntimeTimeline({
+      sinceSequence: runtimeLastSequence || null,
+    });
+    if (!result || result.ok === false || result.error) {
+      if (status) {
+        status.textContent = 'Offline';
+        status.classList.remove('text-tertiary', 'text-fire-accent');
+        status.classList.add('text-on-surface-variant');
+      }
+      if (meta && result?.error) meta.textContent = result.error;
+      return result;
+    }
+    if (status) {
+      status.textContent = result.active_call_session_id ? 'Live' : 'Ready';
+      status.classList.remove('text-on-surface-variant');
+      status.classList.add(result.active_call_session_id ? 'text-tertiary' : 'text-fire-accent');
+    }
+    if (meta) {
+      meta.textContent = result.active_call_session_id
+        ? `session ${result.active_call_session_id}`
+        : 'No active runtime session';
+    }
+	    (result.events || []).forEach((event) => {
+	      rememberRuntimeEvent(event);
+	      runtimeLastSequence = Math.max(runtimeLastSequence, Number(event.sequence) || 0);
+	      if (event.type === 'session.started' && !runtimeStartedAtMs) {
+	        runtimeStartedAtMs = Number(event.timestamp_ms) || null;
+      }
+      if (renderedRuntimeSequences.has(event.sequence)) return;
+      renderedRuntimeSequences.add(event.sequence);
+      appendRuntimeEvent(event);
+    });
+	    if (lastSipRoom && window.syncRuntimeCallSession) {
+	      window.syncRuntimeCallSession(lastSipRoom, runtimeStartedAtMs);
+	    }
+	    if (lastSipRoom?.active) {
+	      refreshDatabaseTranscript(lastSipRoom);
+	    }
+	    return result;
+	  }
+
   function updateOwnerBadge(owner, active) {
     const label = !active ? 'Offline' : owner === 'human' ? 'Human' : 'AI';
     const panelBadge = byId('sipHandoffOwnerBadge');
-    const centerBadge = byId('sipOwnerCenterBadge');
-    [panelBadge, centerBadge].forEach((badge) => {
-      if (!badge) return;
-      badge.textContent = active ? `${label}-Active` : label;
-      badge.classList.remove('text-ai-purple', 'text-tertiary', 'text-on-surface-variant');
-      if (!active) {
-        badge.classList.add('text-on-surface-variant');
-      } else if (owner === 'human') {
-        badge.classList.add('text-tertiary');
-      } else {
-        badge.classList.add('text-ai-purple');
-      }
-    });
+    if (!panelBadge) return;
+    panelBadge.textContent = active ? `${label}-Active` : label;
+    panelBadge.classList.remove('text-ai-purple', 'text-tertiary', 'text-on-surface-variant');
+    if (!active) {
+      panelBadge.classList.add('text-on-surface-variant');
+    } else if (owner === 'human') {
+      panelBadge.classList.add('text-tertiary');
+    } else {
+      panelBadge.classList.add('text-ai-purple');
+    }
   }
 
-  function renderSipRoom(room) {
-    lastSipRoom = room || { active: false };
-    const active = Boolean(lastSipRoom.active);
-    const owner = lastSipRoom.owner || 'ai';
-    const handoff = lastSipRoom.handoff || {};
-    const asteriskRoom = lastSipRoom.room || {};
+	  function renderSipRoom(room) {
+	    const previousRoom = lastSipRoom;
+	    const previousSessionId = previousRoom?.call_session_id || null;
+	    const previousStartedAtMs = runtimeStartedAtMs;
+	    const wasActive = Boolean(previousRoom?.active && previousSessionId);
+	    lastSipRoom = room || { active: false };
+	    if (!lastSipRoom.active || lastSipRoom.call_session_id !== previousSessionId) {
+	      runtimeStartedAtMs = null;
+	    }
+	    const active = Boolean(lastSipRoom.active);
+	    const sessionChanged = Boolean(active && lastSipRoom.call_session_id !== previousSessionId);
+	    const owner = lastSipRoom.owner || 'ai';
+	    const handoff = lastSipRoom.handoff || {};
+	    const asteriskRoom = lastSipRoom.room || {};
 
-    updateOwnerBadge(owner, active);
+	    if (sessionChanged) {
+	      resetPostCallSummaryAction();
+	    } else if (wasActive && !active) {
+	      const endedAtMs = Date.now();
+	      const handledAsEndCall = typeof window.completeRuntimeCallFromExternalHangup === 'function'
+	        ? window.completeRuntimeCallFromExternalHangup(previousSessionId, previousRoom, previousStartedAtMs)
+	        : false;
+	      if (!handledAsEndCall) {
+	        showPostCallSummaryButton({
+	          source: 'runtime',
+	          sessionId: previousSessionId,
+	          displayName: previousRoom?.display_name || 'Runtime call',
+	          contact: previousRoom ? {
+	            name: previousRoom.display_name || 'Runtime call',
+	            company: `${previousRoom.direction || 'inbound'} runtime session`,
+	            number: previousRoom.initial_context?.dialed_extension
+	              ? `Extension ${previousRoom.initial_context.dialed_extension}`
+	              : '',
+	          } : null,
+	          startedAtMs: previousStartedAtMs,
+	          endedAtMs,
+	          durationFormatted: formatDurationFromMs(previousStartedAtMs, endedAtMs),
+	        });
+	      }
+	    }
+
+	    updateOwnerBadge(owner, active);
     setText(
       'sipHandoffStatusText',
       active
@@ -4431,12 +4977,21 @@ setInterval(() => {
     setButtonState('sipAcceptHandoffBtn', !active || owner === 'human' || !humanJoined);
     setButtonState('sipResumeAiBtn', !active || owner !== 'human');
     setButtonState('sipDeclineHandoffBtn', !active || owner === 'human');
-  }
+	    if (window.syncRuntimeCallSession) {
+	      window.syncRuntimeCallSession(lastSipRoom, runtimeStartedAtMs);
+	    }
+	    if (active) {
+	      refreshDatabaseTranscript(lastSipRoom);
+	    } else if (!wasActive) {
+	      renderDatabaseTranscript([], { active: false });
+	    }
+	  }
 
   async function refreshSipRoom({ silent = false } = {}) {
     if (!window.activeCallAPI?.getSipCallRoom) return null;
     const room = await window.activeCallAPI.getSipCallRoom();
     renderSipRoom(room);
+    refreshRuntimeTimeline();
     if (!silent && room?.active) toast('SIP room state refreshed.', 'success');
     return room;
   }
@@ -4474,13 +5029,49 @@ setInterval(() => {
     }
   }
 
-  function bindSipHandoffControls() {
-    byId('sipAcceptHandoffBtn')?.addEventListener('click', acceptHandoffFromUI);
-    byId('sipResumeAiBtn')?.addEventListener('click', () => resumeAIFromUI());
-    byId('sipDeclineHandoffBtn')?.addEventListener('click', declineHandoffFromUI);
-    byId('sipRefreshRoomBtn')?.addEventListener('click', () => refreshSipRoom());
+	  function bindSipHandoffControls() {
+	    byId('sipAcceptHandoffBtn')?.addEventListener('click', acceptHandoffFromUI);
+	    byId('sipResumeAiBtn')?.addEventListener('click', () => resumeAIFromUI());
+	    byId('sipDeclineHandoffBtn')?.addEventListener('click', declineHandoffFromUI);
+	    byId('sipRefreshRoomBtn')?.addEventListener('click', () => refreshSipRoom());
+	    byId('generateRuntimeSummaryBtn')?.addEventListener('click', renderGeneratedSummary);
+	    let postCallNavigationStarted = false;
 
-    const originalExecAITransfer = window.execAITransfer;
+	    window.addEventListener('callCompleted', (event) => {
+	      const detail = event.detail || {};
+	      const activeSessionId = detail.sessionId || window.CALL?.runtimeSessionId || lastSipRoom?.call_session_id || null;
+	      const displayName = detail.displayName || detail.contact?.name || lastSipRoom?.display_name || 'Completed call';
+	      showPostCallSummaryButton({
+	        source: detail.source || 'local',
+	        sessionId: activeSessionId,
+	        displayName,
+	        contact: detail.contact || null,
+	        endedAtMs: Date.now(),
+	        durationFormatted: detail.callData?.durationFormatted || null,
+	      });
+	      if (postCallNavigationStarted) return;
+	      postCallNavigationStarted = true;
+	      try {
+	        localStorage.setItem('dialforgeLastCompletedRuntimeCall', JSON.stringify({
+	          source: detail.source || 'local',
+	          sessionId: activeSessionId,
+	          displayName,
+	          contact: detail.contact || null,
+	          callData: detail.callData || null,
+	          endedAt: new Date().toISOString(),
+	        }));
+	      } catch (error) {
+	        console.warn('Could not save completed runtime call context.', error);
+	      }
+	      const query = activeSessionId
+	        ? `?call_session_id=${encodeURIComponent(activeSessionId)}`
+	        : '';
+	      setTimeout(() => {
+	        window.location.href = `./postCallSummary.html${query}`;
+	      }, 250);
+	    });
+
+	    const originalExecAITransfer = window.execAITransfer;
     window.execAITransfer = async function () {
       if (lastSipRoom?.active) {
         await resumeAIFromUI('Returned through the Transfer to AI control.');
@@ -4496,6 +5087,7 @@ setInterval(() => {
   function startSipHandoffIntegration() {
     bindSipHandoffControls();
     refreshSipRoom({ silent: true });
+    refreshRuntimeTimeline();
     sipRoomPollHandle = setInterval(() => refreshSipRoom({ silent: true }), POLL_MS);
   }
 
@@ -4511,6 +5103,7 @@ setInterval(() => {
 
   window.sipHandoffIntegration = {
     refresh: refreshSipRoom,
+    refreshRuntime: refreshRuntimeTimeline,
     accept: acceptHandoffFromUI,
     resumeAI: resumeAIFromUI,
     decline: declineHandoffFromUI,
