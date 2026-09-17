@@ -750,24 +750,18 @@
 <!-- END: Contact Card -->
 <!-- BEGIN: AI Summary Section -->
 <section class="glass-panel rounded-2xl p-6 md:p-8 overflow-hidden">
-<div class="flex items-center mb-6">
+<div class="flex items-center justify-between gap-4 mb-6">
+<div class="flex items-center">
 <span class="material-symbols-outlined text-fire-amber mr-3" style="font-variation-settings: 'FILL' 1">auto_awesome</span>
 <h3 class="font-mono text-sm uppercase tracking-widest text-white">AI Call Summary</h3>
 </div>
-<ul class="space-y-4">
-<li class="flex items-start">
-<span class="material-symbols-outlined text-fire-amber text-xl mr-4 mt-0.5" style="font-variation-settings: 'FILL' 1">check_circle</span>
-<p class="text-lg text-text-primary leading-relaxed">Sarah confirmed <span class="text-white font-semibold">Q3 budget is approved</span> for the expansion project.</p>
-</li>
-<li class="flex items-start">
-<span class="material-symbols-outlined text-fire-amber text-xl mr-4 mt-0.5" style="font-variation-settings: 'FILL' 1">check_circle</span>
-<p class="text-lg text-text-primary leading-relaxed">Main concern: <span class="text-white font-semibold">Integration timeline</span> with their existing legacy CRM.</p>
-</li>
-<li class="flex items-start">
-<span class="material-symbols-outlined text-fire-amber text-xl mr-4 mt-0.5" style="font-variation-settings: 'FILL' 1">check_circle</span>
-<p class="text-lg text-text-primary leading-relaxed">Agreed to a <span class="text-white font-semibold">technical deep-dive demonstration</span> next Tuesday.</p>
-</li>
-</ul>
+<button id="postCallGenerateSummaryBtn" type="button" class="inline-flex items-center gap-2 rounded-xl bg-fire-primary/15 border border-fire-primary/30 px-4 py-2 text-xs font-bold uppercase tracking-wide text-fire-amber hover:bg-fire-primary/25 transition-all">
+<span class="material-symbols-outlined text-base" aria-hidden="true">summarize</span>
+<span>Generate</span>
+</button>
+</div>
+<p id="postCallAISummaryEmpty" class="text-sm text-text-muted">Generate the AI summary after the call is complete.</p>
+<ul id="postCallAISummaryList" class="hidden space-y-4"></ul>
 </section>
 <!-- END: AI Summary Section -->
 <!-- BEGIN: Rep Notes -->
@@ -2773,8 +2767,8 @@ Best regards,`;
 <script data-purpose="post-call-summary-sync">
 (function() {
   // Load completed call data from localStorage (set by activeCall.html endCall() function)
-  function syncCompletedCallData() {
-    const completedCallJSON = localStorage.getItem('dialforgeLastCompletedCall');
+	  function syncCompletedCallData() {
+	    const completedCallJSON = localStorage.getItem('dialforgeLastCompletedCall');
     
     if (!completedCallJSON) {
       // No call data available, use defaults
@@ -2889,12 +2883,66 @@ Best regards,`;
       };
       
     } catch (e) {
-      console.error('Error syncing completed call data:', e);
-    }
-  }
-  
-  // ---- DRAFT RESTORATION FUNCTION ----
-  // Restore previously saved draft when page loads
+	      console.error('Error syncing completed call data:', e);
+	    }
+	  }
+
+	  function escapeSummaryText(value) {
+	    const div = document.createElement('div');
+	    div.textContent = value == null ? '' : String(value);
+	    return div.innerHTML;
+	  }
+
+	  function readCompletedCallData() {
+	    try {
+	      const completedCallJSON = localStorage.getItem('dialforgeLastCompletedCall');
+	      return completedCallJSON ? JSON.parse(completedCallJSON) : null;
+	    } catch (e) {
+	      console.error('Error reading completed call data:', e);
+	      return null;
+	    }
+	  }
+
+	  function buildPostCallSummaryItems(completedCall) {
+	    const contact = completedCall?.contact || {};
+	    const callData = completedCall?.callData || {};
+	    const name = contact.name || 'This contact';
+	    const company = contact.company || 'their account';
+	    const duration = callData.durationFormatted || 'unknown duration';
+	    const items = [];
+
+	    items.push(`${name} completed a ${duration} call with ${company}.`);
+	    if (contact.pipelineStage) items.push(`Pipeline stage at call end: ${contact.pipelineStage}.`);
+	    if (contact.dealValue) items.push(`Opportunity value attached to this call: ${contact.dealValue}.`);
+	    items.push('No backend AI summary has been attached yet. Connect this button to the runtime transcript summarizer for production output.');
+	    return items;
+	  }
+
+	  function renderPostCallAISummary() {
+	    const list = document.getElementById('postCallAISummaryList');
+	    const empty = document.getElementById('postCallAISummaryEmpty');
+	    if (!list) return;
+	    const completedCall = readCompletedCallData();
+	    const items = buildPostCallSummaryItems(completedCall);
+	    list.innerHTML = items.map((item) => `
+	      <li class="flex items-start">
+	        <span class="material-symbols-outlined text-fire-amber text-xl mr-4 mt-0.5" style="font-variation-settings: 'FILL' 1">check_circle</span>
+	        <p class="text-lg text-text-primary leading-relaxed">${escapeSummaryText(item)}</p>
+	      </li>
+	    `).join('');
+	    list.classList.remove('hidden');
+	    empty?.classList.add('hidden');
+	  }
+
+	  function setupPostCallAISummaryButton() {
+	    const button = document.getElementById('postCallGenerateSummaryBtn');
+	    if (!button || button.dataset.summaryBound === 'true') return;
+	    button.dataset.summaryBound = 'true';
+	    button?.addEventListener('click', renderPostCallAISummary);
+	  }
+	  
+	  // ---- DRAFT RESTORATION FUNCTION ----
+	  // Restore previously saved draft when page loads
   function restoreDraft() {
     try {
       const draftJSON = localStorage.getItem('dialforgeCallDraft');
@@ -2949,21 +2997,24 @@ Best regards,`;
   });
   
   // Sync and restore on page load
-  document.addEventListener('DOMContentLoaded', function() {
-    syncCompletedCallData();
-    restoreDraft();
-  });
+	  document.addEventListener('DOMContentLoaded', function() {
+	    syncCompletedCallData();
+	    restoreDraft();
+	    setupPostCallAISummaryButton();
+	  });
   
   // Also attempt sync immediately if DOM is already loaded
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
-      syncCompletedCallData();
-      restoreDraft();
-    });
-  } else {
-    syncCompletedCallData();
-    restoreDraft();
-  }
+	    document.addEventListener('DOMContentLoaded', function() {
+	      syncCompletedCallData();
+	      restoreDraft();
+	      setupPostCallAISummaryButton();
+	    });
+	  } else {
+	    syncCompletedCallData();
+	    restoreDraft();
+	    setupPostCallAISummaryButton();
+	  }
 })();
 </script>
 <!-- END: Post-Call Summary Synchronization Script -->

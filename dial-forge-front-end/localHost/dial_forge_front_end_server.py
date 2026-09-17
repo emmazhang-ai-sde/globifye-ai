@@ -8,12 +8,14 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import uuid
 from pathlib import Path
 
 PORT = 8000
 BIND_ADDRESS = '0.0.0.0'
 SIP_DEMO_PREFIX = '/sip-demo'
 SIP_DEMO_BASE_URL = 'http://127.0.0.1:8400'
+BRIDGE_CONTROL_URL = 'http://127.0.0.1:8500'
 FRONTEND_PROXY_HEADER = 'X-DialForge-Frontend-Proxy'
 DEMO_USERS_PATH = Path(__file__).with_name('product_demo_users.json')
 DEMO_CONTACTS_PATH = Path(__file__).with_name('product_demo_contacts.json')
@@ -57,6 +59,8 @@ SUPABASE_SERVICE_ROLE_KEY = (
     or _file_env.get('SUPABASE_SERVICE_ROLE_KEY')
     or ''
 )
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY') or _file_env.get('GROQ_API_KEY') or ''
+GROQ_SUMMARY_MODEL = os.environ.get('DIALFORGE_SUMMARY_MODEL') or 'llama-3.3-70b-versatile'
 ALLOW_LOCAL_AUTH_FALLBACK = os.environ.get('DIALFORGE_ALLOW_LOCAL_AUTH_FALLBACK', '1') != '0'
 
 class DialForgeHandler(http.server.SimpleHTTPRequestHandler):
@@ -152,6 +156,56 @@ class DialForgeHandler(http.server.SimpleHTTPRequestHandler):
                 })
             return
 
+        if path in ('/api/runtime/session', '/api/runtime/timeline'):
+            user = self._user_from_request(allow_local_fallback=True)
+            if not user:
+                self._send_json({'error': 'not authenticated'}, status=401)
+                return
+            self._proxy_bridge_runtime(path)
+            return
+
+        if path.startswith('/api/call-summaries/'):
+            user = self._user_from_request(allow_local_fallback=True)
+            if not user:
+                self._send_json({'error': 'not authenticated'}, status=401)
+                return
+
+            call_session_id = urllib.parse.unquote(path[len('/api/call-summaries/'):].strip('/'))
+            if not call_session_id:
+                self._send_json({'error': 'call_session_id is required'}, status=400)
+                return
+            try:
+                self._send_json(self._call_summary_payload(user, call_session_id))
+            except PermissionError:
+                self._send_json({'error': 'call summary not found'}, status=404)
+            except (urllib.error.HTTPError, urllib.error.URLError) as error:
+                self._send_json(
+                    {'error': 'call summary lookup failed', 'detail': str(error)},
+                    status=502,
+                )
+            return
+
+        if path.startswith('/api/call-transcripts/'):
+            user = self._user_from_request(allow_local_fallback=True)
+            if not user:
+                self._send_json({'error': 'not authenticated'}, status=401)
+                return
+
+            call_session_id = urllib.parse.unquote(path[len('/api/call-transcripts/'):].strip('/'))
+            if not call_session_id:
+                self._send_json({'error': 'call_session_id is required'}, status=400)
+                return
+            try:
+                self._send_json(self._call_transcript_payload(user, call_session_id))
+            except PermissionError:
+                self._send_json({'error': 'call transcript not found'}, status=404)
+            except (urllib.error.HTTPError, urllib.error.URLError) as error:
+                self._send_json(
+                    {'error': 'call transcript lookup failed', 'detail': str(error)},
+                    status=502,
+                )
+            return
+
         self._send_json({'error': 'not found'}, status=404)
 
     def _handle_api_patch(self):
@@ -216,6 +270,84 @@ class DialForgeHandler(http.server.SimpleHTTPRequestHandler):
             self._send_json({'ok': True})
             return
 
+        if path in ('/api/handoff/accept', '/api/handoff/resume-ai', '/api/handoff/failure'):
+            user = self._user_from_request(allow_local_fallback=True)
+            if not user:
+                self._send_json({'error': 'not authenticated'}, status=401)
+                return
+            self._proxy_bridge_control(path, method='POST', body=self._read_json_body())
+            return
+
+        if path == '/api/hangup':
+            user = self._user_from_request(allow_local_fallback=True)
+            if not user:
+                self._send_json({'error': 'not authenticated'}, status=401)
+                return
+            body = self._read_json_body()
+            body.setdefault('source', 'active_call_frontend')
+            body.setdefault('requested_by', 'product front-end')
+            self._proxy_bridge_control(
+                '/internal/runtime/hangup',
+                method='POST',
+                body=body,
+                internal_path=True,
+            )
+            return
+
+        if path == '/api/call-summaries/generate':
+            user = self._user_from_request(allow_local_fallback=True)
+            if not user:
+                self._send_json({'error': 'not authenticated'}, status=401)
+                return
+            try:
+                self._send_json(self._generate_and_save_call_summary(user, self._read_json_body()))
+            except ValueError as error:
+                self._send_json({'error': str(error)}, status=400)
+            except PermissionError:
+                self._send_json({'error': 'call summary is outside this organization'}, status=403)
+            except (urllib.error.HTTPError, urllib.error.URLError) as error:
+                self._send_json(
+                    {'error': 'call summary generation failed', 'detail': str(error)},
+                    status=502,
+                )
+            return
+
+        if path == '/api/call-transcripts/sync':
+            user = self._user_from_request(allow_local_fallback=True)
+            if not user:
+                self._send_json({'error': 'not authenticated'}, status=401)
+                return
+            try:
+                self._send_json(self._sync_call_transcript(user, self._read_json_body()))
+            except ValueError as error:
+                self._send_json({'error': str(error)}, status=400)
+            except PermissionError:
+                self._send_json({'error': 'call transcript is outside this organization'}, status=403)
+            except (urllib.error.HTTPError, urllib.error.URLError) as error:
+                self._send_json(
+                    {'error': 'call transcript sync failed', 'detail': str(error)},
+                    status=502,
+                )
+            return
+
+        if path == '/api/call-summaries':
+            user = self._user_from_request(allow_local_fallback=True)
+            if not user:
+                self._send_json({'error': 'not authenticated'}, status=401)
+                return
+            try:
+                self._send_json(self._save_call_summary(user, self._read_json_body()))
+            except ValueError as error:
+                self._send_json({'error': str(error)}, status=400)
+            except PermissionError:
+                self._send_json({'error': 'call summary is outside this organization'}, status=403)
+            except (urllib.error.HTTPError, urllib.error.URLError) as error:
+                self._send_json(
+                    {'error': 'call summary persistence failed', 'detail': str(error)},
+                    status=502,
+                )
+            return
+
         self._send_json({'error': 'not found'}, status=404)
 
     def _read_json_body(self):
@@ -237,6 +369,50 @@ class DialForgeHandler(http.server.SimpleHTTPRequestHandler):
         self.send_header('Content-Length', str(len(response_body)))
         self.end_headers()
         self.wfile.write(response_body)
+
+    def _proxy_bridge_runtime(self, path):
+        query = ''
+        if '?' in self.path:
+            query = '?' + self.path.split('?', 1)[1]
+        bridge_path = path.replace('/api/runtime', '/internal/runtime', 1)
+        self._proxy_bridge_control(bridge_path + query, method='GET', internal_path=True)
+
+    def _proxy_bridge_control(self, path, *, method='GET', body=None, internal_path=False):
+        bridge_path = path if internal_path else path.replace('/api/handoff', '/internal/handoff', 1)
+        data = None
+        headers = {}
+        if body is not None:
+            data = json.dumps(body).encode()
+            headers['Content-Type'] = 'application/json'
+        request = urllib.request.Request(
+            f'{BRIDGE_CONTROL_URL}{bridge_path}',
+            data=data,
+            headers=headers,
+            method=method,
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=2) as response:
+                raw = response.read()
+                try:
+                    body = json.loads(raw.decode('utf-8'))
+                except (UnicodeDecodeError, json.JSONDecodeError):
+                    body = {'error': raw.decode('utf-8', errors='replace') or 'Bridge control failed'}
+                self._send_json(body, status=response.status)
+        except urllib.error.HTTPError as error:
+            raw = error.read()
+            try:
+                body = json.loads(raw.decode('utf-8'))
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                body = {'error': raw.decode('utf-8', errors='replace') or str(error)}
+            self._send_json(body, status=error.code)
+        except urllib.error.URLError as error:
+            self._send_json(
+                {
+                    'error': 'Bridge runtime debug API is not reachable',
+                    'detail': str(error),
+                },
+                status=502,
+            )
 
     def _load_demo_users(self):
         try:
@@ -264,17 +440,32 @@ class DialForgeHandler(http.server.SimpleHTTPRequestHandler):
         email = str(user.get('email') or '').lower()
         return f'local-demo:{email}'
 
-    def _user_from_request(self):
+    def _user_from_request(self, *, allow_local_fallback=False):
         auth_header = self.headers.get('Authorization', '')
         bearer_prefix = 'Bearer '
         local_prefix = 'Bearer local-demo:'
         if auth_header.startswith(local_prefix):
             email = auth_header[len(local_prefix):].strip().lower()
-            return self._find_demo_user(email)
+            user = self._find_demo_user(email)
+            if user:
+                return user
+            if allow_local_fallback and ALLOW_LOCAL_AUTH_FALLBACK:
+                users = self._load_demo_users()
+                return users[0] if users else None
+            return None
         if not auth_header.startswith(bearer_prefix):
+            if allow_local_fallback and ALLOW_LOCAL_AUTH_FALLBACK:
+                users = self._load_demo_users()
+                return users[0] if users else None
             return None
         token = auth_header[len(bearer_prefix):].strip()
-        return self._supabase_user_from_token(token)
+        user = self._supabase_user_from_token(token)
+        if user:
+            return user
+        if allow_local_fallback and ALLOW_LOCAL_AUTH_FALLBACK:
+            users = self._load_demo_users()
+            return users[0] if users else None
+        return None
 
     def _public_user_payload(self, user):
         organization = user.get('organization') or {}
@@ -540,6 +731,514 @@ class DialForgeHandler(http.server.SimpleHTTPRequestHandler):
             'generated_at': time.time(),
         }
 
+    def _call_summary_payload(self, user_context, call_session_id):
+        organization_id = self._organization_id_from_user_context(user_context)
+        if not organization_id:
+            raise PermissionError()
+
+        recording = self._recording_for_call_session(call_session_id)
+        if not recording or recording.get('organization_id') != organization_id:
+            raise PermissionError()
+
+        analysis = self._latest_analysis_for_recording(recording.get('id'))
+        return {
+            'ok': True,
+            'persisted': Boolean(analysis),
+            'call_session_id': call_session_id,
+            'recording': recording,
+            'analysis': analysis,
+            'summary': analysis.get('summary') if analysis else '',
+            'source': 'supabase_analysis',
+            'generated_at': time.time(),
+        }
+
+    def _call_transcript_payload(self, user_context, call_session_id):
+        organization_id = self._organization_id_from_user_context(user_context)
+        if not organization_id:
+            raise PermissionError()
+
+        recording = self._recording_for_call_session(call_session_id)
+        if not recording:
+            return {
+                'ok': True,
+                'persisted': False,
+                'call_session_id': call_session_id,
+                'recording': None,
+                'rows': [],
+                'source': 'supabase_transcript',
+                'generated_at': time.time(),
+            }
+        if recording.get('organization_id') != organization_id:
+            raise PermissionError()
+
+        return {
+            'ok': True,
+            'persisted': True,
+            'call_session_id': call_session_id,
+            'recording': recording,
+            'rows': self._transcript_rows_for_recording(recording.get('id')),
+            'source': 'supabase_transcript',
+            'generated_at': time.time(),
+        }
+
+    def _sync_call_transcript(self, user_context, body):
+        call_session_id = str(body.get('call_session_id') or body.get('session_id') or '').strip()
+        if not call_session_id:
+            raise ValueError('call_session_id is required')
+        if not SUPABASE_URL or not SUPABASE_SERVICE_ROLE_KEY:
+            return {
+                'ok': False,
+                'persisted': False,
+                'call_session_id': call_session_id,
+                'rows': [],
+                'error': 'Supabase is not configured for the local front-end server',
+            }
+
+        recording = self._ensure_recording_for_call_session(
+            user_context,
+            call_session_id,
+            body,
+            status=str(body.get('status') or 'active'),
+        )
+        inserted_count = self._sync_runtime_transcript_to_db(call_session_id, recording)
+        return {
+            'ok': True,
+            'persisted': True,
+            'call_session_id': call_session_id,
+            'recording': recording,
+            'rows': self._transcript_rows_for_recording(recording.get('id')),
+            'inserted_count': inserted_count,
+            'source': 'supabase_transcript_sync',
+            'generated_at': time.time(),
+        }
+
+    def _generate_and_save_call_summary(self, user_context, body):
+        call_session_id = str(body.get('call_session_id') or body.get('session_id') or '').strip()
+        if not call_session_id:
+            raise ValueError('call_session_id is required')
+
+        runtime_events = self._runtime_events_for_call_session(call_session_id)
+        transcript_turns = self._transcript_turns_from_events(runtime_events)
+        if not transcript_turns:
+            transcript_turns = self._client_transcript_turns(body)
+
+        summary_result = self._generate_summary_from_transcript(
+            call_session_id=call_session_id,
+            transcript_turns=transcript_turns,
+            contact=body.get('contact') if isinstance(body.get('contact'), dict) else {},
+            display_name=str(body.get('display_name') or ''),
+        )
+        save_body = {
+            **body,
+            'call_session_id': call_session_id,
+            'summary': summary_result.get('summary') or '',
+            'summary_items': summary_result.get('summary_items') or [],
+            'key_topics': summary_result.get('key_topics') or [],
+            'objection_analysis': summary_result.get('objection_analysis') or [],
+            'what_went_well': summary_result.get('what_went_well') or [],
+            'transcript_turns': transcript_turns,
+            'generation': {
+                'source': summary_result.get('source'),
+                'model': summary_result.get('model'),
+                'event_count': len(runtime_events),
+                'turn_count': len(transcript_turns),
+            },
+        }
+        saved = self._save_call_summary(user_context, save_body)
+        saved['summary_items'] = summary_result.get('summary_items') or []
+        saved['key_topics'] = summary_result.get('key_topics') or []
+        saved['objection_analysis'] = summary_result.get('objection_analysis') or []
+        saved['what_went_well'] = summary_result.get('what_went_well') or []
+        saved['generation'] = save_body['generation']
+        return saved
+
+    def _save_call_summary(self, user_context, body):
+        if not SUPABASE_URL or not SUPABASE_SERVICE_ROLE_KEY:
+            return {
+                'ok': False,
+                'persisted': False,
+                'error': 'Supabase is not configured for the local front-end server',
+            }
+
+        call_session_id = str(body.get('call_session_id') or body.get('session_id') or '').strip()
+        summary = str(body.get('summary') or '').strip()
+        if not call_session_id:
+            raise ValueError('call_session_id is required')
+        if not summary:
+            raise ValueError('summary is required')
+
+        recording = self._ensure_recording_for_call_session(
+            user_context,
+            call_session_id,
+            body,
+            status='completed',
+        )
+        recording_id = recording.get('id')
+        existing_analysis = self._latest_analysis_for_recording(recording_id)
+        analysis_payload = self._analysis_payload_for_summary(recording_id, body, summary)
+
+        if existing_analysis:
+            rows = self._supabase_rest_request(
+                f'/analysis?id=eq.{urllib.parse.quote(str(existing_analysis.get("id")), safe="")}',
+                method='PATCH',
+                body=analysis_payload,
+                extra_headers={'Prefer': 'return=representation'},
+            )
+            analysis = rows[0] if rows else {**existing_analysis, **analysis_payload}
+        else:
+            rows = self._supabase_rest_request(
+                '/analysis',
+                method='POST',
+                body=analysis_payload,
+                extra_headers={'Prefer': 'return=representation'},
+            )
+            analysis = rows[0] if rows else analysis_payload
+
+        return {
+            'ok': True,
+            'persisted': True,
+            'call_session_id': call_session_id,
+            'recording': recording,
+            'analysis': analysis,
+            'summary': analysis.get('summary') or summary,
+            'source': 'supabase_analysis',
+            'generated_at': time.time(),
+        }
+
+    def _recording_for_call_session(self, call_session_id):
+        if not call_session_id or not SUPABASE_URL or not SUPABASE_SERVICE_ROLE_KEY:
+            return None
+        rows = self._supabase_rest_request(
+            '/recordings?select=*&'
+            f'sip_session_id=eq.{urllib.parse.quote(str(call_session_id), safe="")}'
+            '&limit=1',
+            method='GET',
+        )
+        return rows[0] if rows else None
+
+    def _ensure_recording_for_call_session(self, user_context, call_session_id, body, *, status):
+        organization_id = self._organization_id_from_user_context(user_context)
+        if not organization_id:
+            raise PermissionError()
+
+        existing = self._recording_for_call_session(call_session_id)
+        if existing:
+            if existing.get('organization_id') != organization_id:
+                raise PermissionError()
+            update_payload = {
+                'status': status or existing.get('status') or 'active',
+            }
+            duration_seconds = self._numeric_or_none(body.get('duration_seconds'))
+            if duration_seconds is not None:
+                update_payload['duration_seconds'] = duration_seconds
+            rows = self._supabase_rest_request(
+                f'/recordings?id=eq.{urllib.parse.quote(str(existing.get("id")), safe="")}',
+                method='PATCH',
+                body=update_payload,
+                extra_headers={'Prefer': 'return=representation'},
+            )
+            return rows[0] if rows else {**existing, **update_payload}
+
+        contact = body.get('contact') if isinstance(body.get('contact'), dict) else {}
+        room = body.get('room') if isinstance(body.get('room'), dict) else {}
+        recording_payload = {
+            'organization_id': organization_id,
+            'recorded_by': self._actor_user_id_from_context(user_context),
+            'did_number': body.get('did_number') or contact.get('number') or None,
+            'caller_number': body.get('caller_number') or contact.get('number') or None,
+            'status': status or 'active',
+            'duration_seconds': self._numeric_or_none(body.get('duration_seconds')),
+            'sip_provider': body.get('sip_provider') or 'asterisk-local',
+            'sip_session_id': call_session_id,
+            'call_mode': body.get('call_mode') or room.get('direction') or body.get('direction') or 'sip_runtime',
+        }
+        rows = self._supabase_rest_request(
+            '/recordings',
+            method='POST',
+            body=recording_payload,
+            extra_headers={'Prefer': 'return=representation'},
+        )
+        return rows[0] if rows else recording_payload
+
+    def _sync_runtime_transcript_to_db(self, call_session_id, recording):
+        recording_id = recording.get('id')
+        organization_id = recording.get('organization_id')
+        if not recording_id:
+            return 0
+        existing_sequences = self._existing_transcript_sequences(recording_id)
+        runtime_events = self._runtime_events_for_call_session(call_session_id)
+        rows = []
+        for index, turn in enumerate(self._transcript_turns_from_events(runtime_events), start=1):
+            sequence = self._integer_or_none(turn.get('sequence')) or index
+            if sequence in existing_sequences:
+                continue
+            speaker = turn.get('speaker') or 'Speaker'
+            transcript = turn.get('transcript') or ''
+            if not transcript.strip():
+                continue
+            rows.append({
+                'recording_id': recording_id,
+                'organization_id': organization_id,
+                'speaker': speaker,
+                'speaker_role': self._speaker_role_for_label(speaker),
+                'speaker_name': speaker,
+                'content_raw': transcript,
+                'content_clean': transcript,
+                'sequence_index': sequence,
+            })
+        if not rows:
+            return 0
+        self._supabase_rest_request(
+            '/transcript',
+            method='POST',
+            body=rows,
+            extra_headers={'Prefer': 'return=minimal'},
+        )
+        return len(rows)
+
+    def _transcript_rows_for_recording(self, recording_id):
+        if not recording_id:
+            return []
+        return self._supabase_rest_request(
+            '/transcript?select=*&'
+            f'recording_id=eq.{urllib.parse.quote(str(recording_id), safe="")}'
+            '&order=sequence_index.asc,created_at.asc',
+            method='GET',
+        )
+
+    def _existing_transcript_sequences(self, recording_id):
+        rows = self._supabase_rest_request(
+            '/transcript?select=sequence_index&'
+            f'recording_id=eq.{urllib.parse.quote(str(recording_id), safe="")}',
+            method='GET',
+        )
+        sequences = set()
+        for row in rows:
+            value = self._integer_or_none(row.get('sequence_index'))
+            if value is not None:
+                sequences.add(value)
+        return sequences
+
+    def _speaker_role_for_label(self, speaker):
+        value = str(speaker or '').lower()
+        if value in ('caller', 'customer'):
+            return 'customer'
+        if value in ('ai', 'assistant', 'human agent', 'agent'):
+            return 'agent'
+        return 'unknown'
+
+    def _latest_analysis_for_recording(self, recording_id):
+        if not recording_id:
+            return None
+        rows = self._supabase_rest_request(
+            '/analysis?select=*&'
+            f'recording_id=eq.{urllib.parse.quote(str(recording_id), safe="")}'
+            '&order=created_at.desc&limit=1',
+            method='GET',
+        )
+        return rows[0] if rows else None
+
+    def _analysis_payload_for_summary(self, recording_id, body, summary):
+        summary_items = body.get('summary_items') if isinstance(body.get('summary_items'), list) else []
+        transcript_turns = body.get('transcript_turns') if isinstance(body.get('transcript_turns'), list) else []
+        what_went_well = body.get('what_went_well') if isinstance(body.get('what_went_well'), list) else None
+        return {
+            'recording_id': recording_id,
+            'summary': summary,
+            'key_topics': body.get('key_topics') if isinstance(body.get('key_topics'), list) else [],
+            'objection_analysis': body.get('objection_analysis') if isinstance(body.get('objection_analysis'), list) else [],
+            'what_went_well': what_went_well if what_went_well is not None else [
+                {
+                    'text': str(item),
+                    'source': 'runtime_summary_item',
+                }
+                for item in summary_items
+                if str(item).strip()
+            ],
+        }
+
+    def _runtime_events_for_call_session(self, call_session_id):
+        query = urllib.parse.urlencode({'call_session_id': call_session_id})
+        request = urllib.request.Request(
+            f'{BRIDGE_CONTROL_URL}/internal/runtime/timeline?{query}',
+            method='GET',
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=3) as response:
+                raw = response.read().decode('utf-8')
+                payload = json.loads(raw) if raw else {}
+        except (urllib.error.HTTPError, urllib.error.URLError, json.JSONDecodeError):
+            return []
+        events = payload.get('events') if isinstance(payload, dict) else []
+        return events if isinstance(events, list) else []
+
+    def _transcript_turns_from_events(self, events):
+        turns = []
+        for event in events:
+            if not isinstance(event, dict):
+                continue
+            payload = event.get('payload') if isinstance(event.get('payload'), dict) else {}
+            transcript = str(payload.get('transcript') or '').strip()
+            if not transcript:
+                continue
+            turns.append({
+                'speaker': self._speaker_label_for_event(event),
+                'transcript': transcript,
+                'timestamp_ms': event.get('timestamp_ms'),
+                'sequence': event.get('sequence'),
+            })
+        return turns
+
+    def _client_transcript_turns(self, body):
+        turns = body.get('client_transcript_turns') or body.get('transcript_turns')
+        if not isinstance(turns, list):
+            return []
+        normalized = []
+        for turn in turns:
+            if not isinstance(turn, dict):
+                continue
+            transcript = str(turn.get('transcript') or '').strip()
+            if not transcript:
+                continue
+            normalized.append({
+                'speaker': str(turn.get('speaker') or 'Speaker'),
+                'transcript': transcript,
+                'timestamp_ms': turn.get('timestampMs') or turn.get('timestamp_ms'),
+            })
+        return normalized
+
+    def _speaker_label_for_event(self, event):
+        payload = event.get('payload') if isinstance(event.get('payload'), dict) else {}
+        speaker = str(payload.get('speaker') or '').lower()
+        if speaker in ('caller', 'customer', 'user'):
+            return 'Caller'
+        if speaker in ('assistant', 'ai'):
+            return 'AI'
+        owner = str(event.get('owner') or '').lower()
+        if owner == 'human':
+            return 'Human agent'
+        if owner == 'ai':
+            return 'AI'
+        return 'Speaker'
+
+    def _generate_summary_from_transcript(self, *, call_session_id, transcript_turns, contact, display_name):
+        if transcript_turns and GROQ_API_KEY:
+            llm_result = self._groq_summary(
+                call_session_id=call_session_id,
+                transcript_turns=transcript_turns,
+                contact=contact,
+                display_name=display_name,
+            )
+            if llm_result:
+                return llm_result
+        return self._deterministic_summary(
+            call_session_id=call_session_id,
+            transcript_turns=transcript_turns,
+            contact=contact,
+            display_name=display_name,
+        )
+
+    def _groq_summary(self, *, call_session_id, transcript_turns, contact, display_name):
+        transcript_text = '\n'.join(
+            f'{turn.get("speaker") or "Speaker"}: {turn.get("transcript") or ""}'
+            for turn in transcript_turns[:80]
+        )
+        system_prompt = (
+            'You generate concise post-call summaries for a sales/support voice AI product. '
+            'Return only valid JSON with keys: summary, summary_items, key_topics, '
+            'objection_analysis, what_went_well. summary_items must be 3-5 short bullets.'
+        )
+        user_prompt = (
+            f'Call session id: {call_session_id}\n'
+            f'Contact: {json.dumps(contact or {}, ensure_ascii=False)}\n'
+            f'Display name: {display_name or ""}\n\n'
+            f'Transcript:\n{transcript_text}'
+        )
+        request = urllib.request.Request(
+            'https://api.groq.com/openai/v1/chat/completions',
+            data=json.dumps({
+                'model': GROQ_SUMMARY_MODEL,
+                'temperature': 0.2,
+                'messages': [
+                    {'role': 'system', 'content': system_prompt},
+                    {'role': 'user', 'content': user_prompt},
+                ],
+                'response_format': {'type': 'json_object'},
+            }).encode(),
+            headers={
+                'Authorization': f'Bearer {GROQ_API_KEY}',
+                'Content-Type': 'application/json',
+            },
+            method='POST',
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=20) as response:
+                payload = json.loads(response.read().decode('utf-8'))
+            content = payload['choices'][0]['message']['content']
+            parsed = json.loads(content)
+        except (KeyError, IndexError, json.JSONDecodeError, urllib.error.HTTPError, urllib.error.URLError):
+            return None
+        return self._normalize_summary_result(parsed, source='groq', model=GROQ_SUMMARY_MODEL)
+
+    def _normalize_summary_result(self, parsed, *, source, model):
+        summary = str(parsed.get('summary') or '').strip()
+        summary_items = parsed.get('summary_items') if isinstance(parsed.get('summary_items'), list) else []
+        if not summary and summary_items:
+            summary = '\n'.join(str(item) for item in summary_items if str(item).strip())
+        if not summary:
+            return None
+        return {
+            'summary': summary,
+            'summary_items': [str(item) for item in summary_items if str(item).strip()],
+            'key_topics': parsed.get('key_topics') if isinstance(parsed.get('key_topics'), list) else [],
+            'objection_analysis': parsed.get('objection_analysis') if isinstance(parsed.get('objection_analysis'), list) else [],
+            'what_went_well': parsed.get('what_went_well') if isinstance(parsed.get('what_went_well'), list) else [],
+            'source': source,
+            'model': model,
+        }
+
+    def _deterministic_summary(self, *, call_session_id, transcript_turns, contact, display_name):
+        name = contact.get('name') or display_name or 'The caller'
+        if not transcript_turns:
+            items = [
+                f'{name} completed a call, but no final transcript turns were available.',
+                'The call record was persisted so the summary can be regenerated once transcript data is available.',
+                'Recommended next step: review runtime logs and confirm STT final events are being captured.',
+            ]
+        else:
+            caller_turns = [
+                turn for turn in transcript_turns
+                if str(turn.get('speaker') or '').lower() in ('caller', 'human agent')
+            ]
+            ai_turns = [
+                turn for turn in transcript_turns
+                if str(turn.get('speaker') or '').lower() == 'ai'
+            ]
+            latest_caller = caller_turns[-1].get('transcript') if caller_turns else transcript_turns[-1].get('transcript')
+            latest_ai = ai_turns[-1].get('transcript') if ai_turns else ''
+            items = [
+                f'{name} completed a call with {len(transcript_turns)} captured transcript turn{"s" if len(transcript_turns) != 1 else ""}.',
+                f'Latest caller signal: "{self._compact_text(latest_caller)}"',
+            ]
+            if latest_ai:
+                items.append(f'Latest AI response: "{self._compact_text(latest_ai)}"')
+            items.append('Recommended next step: review the transcript and save final CRM notes.')
+        return {
+            'summary': '\n'.join(items),
+            'summary_items': items,
+            'key_topics': [],
+            'objection_analysis': [],
+            'what_went_well': [{'text': item, 'source': 'deterministic_summary'} for item in items],
+            'source': 'deterministic',
+            'model': '',
+        }
+
+    def _compact_text(self, value, max_length=180):
+        text = ' '.join(str(value or '').split())
+        if len(text) <= max_length:
+            return text
+        return text[:max_length - 3] + '...'
+
     def _record_call_queue_event(self, user_context, previous_row, updated_row, ui_status, body):
         payload = self._call_queue_event_payload(
             user_context=user_context,
@@ -559,7 +1258,7 @@ class DialForgeHandler(http.server.SimpleHTTPRequestHandler):
             return {
                 'persisted': False,
                 'reason': 'call_queue_events table is not available yet',
-                'pending_migration': 'dial-forge-ai/ai-pipeline/supabase/migrations/002_call_queue_events.sql',
+                'pending_migration': 'dial-forge-ai/db/migrations/002_call_queue_events.sql',
                 'payload': payload,
             }
         return {
@@ -605,13 +1304,26 @@ class DialForgeHandler(http.server.SimpleHTTPRequestHandler):
     def _actor_user_id_from_context(self, user_context):
         user = user_context.get('user') or {}
         user_id = user.get('id') or user_context.get('id')
-        return user_id if user_id and not str(user_id).startswith('usr_demo_') else None
+        return user_id if self._is_uuid(user_id) else None
 
     def _integer_or_none(self, value):
         try:
             return int(value)
         except (TypeError, ValueError):
             return None
+
+    def _numeric_or_none(self, value):
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+
+    def _is_uuid(self, value):
+        try:
+            uuid.UUID(str(value))
+            return True
+        except (TypeError, ValueError):
+            return False
 
     def _metadata_for_contact(self, contact, demo_metadata):
         keys = [
